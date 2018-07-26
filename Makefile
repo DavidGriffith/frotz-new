@@ -194,7 +194,9 @@ $(COMMON_DEFINES):
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
 	@echo "Generating $@"
-	@echo "#define CONFIG_DIR \"$(SYSCONFDIR)\"" > $@
+	@echo "#ifndef CURSES_DEFINES_H" > $@
+	@echo "#define CURSES_DEFINES_H" >> $@
+	@echo "#define CONFIG_DIR \"$(SYSCONFDIR)\"" >> $@
 	@echo "#define SOUND \"$(SOUND)\"" >> $@
 	@echo "#define SAMPLERATE $(SAMPLERATE)" >> $@
 	@echo "#define BUFFSIZE $(BUFFSIZE)" >> $@
@@ -215,6 +217,9 @@ endif
 ifdef NO_MEMMOVE
 	@echo "#define NO_MEMMOVE" >> $@
 endif
+
+	@echo "#endif /* CURSES_DEFINES_H */" >> $@
+
 
 hash: $(HASH)
 $(HASH):
