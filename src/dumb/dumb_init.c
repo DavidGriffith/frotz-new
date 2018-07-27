@@ -25,7 +25,6 @@
 
 f_setup_t f_setup;
 
-static char *my_strdup(char *);
 static void print_version(void);
 
 #define INFORMATION "\
@@ -296,7 +295,6 @@ char *my_strdup(char *src)
 	*p = '\0';
 	return str;
 }
-
 
 static void print_version(void)
 {

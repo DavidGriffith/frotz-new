@@ -14,6 +14,8 @@
 #include <ctype.h>
 #include <time.h>
 
+extern char *my_strdup(char *);
+
 /* from ../common/setup.h */
 extern f_setup_t f_setup;
 

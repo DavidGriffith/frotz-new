@@ -435,7 +435,7 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
         break;
       }
     }
-    tempname = strdup(file_name + i);
+    tempname = my_strdup(file_name + i);
     strcpy(file_name, f_setup.restricted_path);
     if (file_name[strlen(file_name)-1] != PATH_SEPARATOR) {
       strcat(file_name, "/");
