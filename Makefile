@@ -112,7 +112,8 @@ SRCDIR = src
 
 COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
-COMMON_DEFINES = $(COMMON_DIR)/version.c
+COMMON_STRINGS = $(COMMON_DIR)/version.c
+COMMON_DEFINES = $(COMMON_DIR)/defines.h
 HASH = $(COMMON_DIR)/git_hash.h
 
 CURSES_DIR = $(SRCDIR)/curses
@@ -180,16 +181,26 @@ dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 
 
-# Defines
+# Compile-time generated defines and strings
 
-common_defines:	$(COMMON_DEFINES)
-$(COMMON_DEFINES):
+common_strings:	$(COMMON_STRINGS)
+$(COMMON_STRINGS):
 	@echo "Generating $@"
 	@echo "#include \"frotz.h\"" > $@
 	@echo "const char frotz_version[] = \"$(VERSION)\";" >> $@
 	@echo "const char frotz_v_major[] = \"$(MAJOR)\";" >> $@
 	@echo "const char frotz_v_minor[] = \"$(MINOR)\";" >> $@
 	@echo "const char frotz_v_build[] = \"$(BUILD_DATE_TIME)\";" >> $@
+
+common_defines: $(COMMON_DEFINES)
+$(COMMON_DEFINES):
+	@echo "Generating $@"
+	@echo "#ifndef COMMON_DEFINES_H" > $@
+	@echo "#define COMMON_DEFINES_H" >> $@
+ifdef NO_MEMMOVE
+	@echo "#define NO_MEMMOVE" >> $@
+endif
+	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
@@ -212,10 +223,6 @@ endif
 
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
-endif
-
-ifdef NO_MEMMOVE
-	@echo "#define NO_MEMMOVE" >> $@
 endif
 
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
@@ -278,4 +285,4 @@ help:
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_dumb \
 	uninstall uninstall_dfrotz uninstall_dumb $(SUBDIRS) $(SUB_CLEAN) \
-	$(COMMON_DIR)/version.c $(CURSES_DIR)/defines.h
+	$(COMMON_DIR)/defines.h $(COMMON_DIR)/version.c $(CURSES_DIR)/defines.h

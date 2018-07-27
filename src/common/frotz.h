@@ -125,6 +125,8 @@ typedef struct {
 
 
 #include "setup.h"
+#include "defines.h"
+#include "missing.h"
 #include "unused.h"
 
 /*** Constants that may be set at compile time ***/

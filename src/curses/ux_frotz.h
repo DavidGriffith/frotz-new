@@ -5,6 +5,9 @@
  *
  */
 
+#ifndef UX_FROTZ_H
+#define UX_FROTZ_H
+
 #include <signal.h>
 
 #include "defines.h"
@@ -96,6 +99,4 @@ void unix_get_terminal_size(void);      /* ux_init.c */
 char *strrchr(const char *, int);
 #endif
 
-#ifdef NO_MEMMOVE
-void *memmove(void *, void *);
-#endif
+#endif /* UX_FROTZ_H */

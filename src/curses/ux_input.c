@@ -806,31 +806,6 @@ zword os_read_mouse (void)
  */
 
 
-#ifdef NO_MEMMOVE
-/*
- * This is for operating systems based on 4.2BSD or older or SYSVR3 or
- * older.  Since they lack the memmove(3) system call, it is provided
- * here.  Because I don't have a machine like this to play with, this code
- * is untested.  If you happen to have a spare SunOS 4.1.x install CD
- * lying around, please consider sending it my way.  Dave.
- *
- */
-void *memmove(void *s, void *t, size_t n)
-{
-	char *p = s; char *q = t;
-
-	if (p < q) {
-		while (n--) *p++ = *q++;
-	} else {
-		p += n; q += n;
-		while (n--) *--p = *--q;
-	}
-	return;
-}
-
-#endif /* NO_MEMMOVE */
-
-
 /*
  * Search for start of preceding word
  * param currpos marker position
