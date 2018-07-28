@@ -266,6 +266,9 @@ clean: $(SUB_CLEAN)
 		$(COMMON_DIR)/git_hash.h $(CURSES_DEFINES) \
 		$(OBJECTS) frotz*.tar.gz
 
+distclean: clean
+	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
+
 help:
 	@echo "Targets:"
 	@echo "    frotz: the standard edition"
