@@ -290,6 +290,8 @@ distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
 
 help:
+	@echo "Default target is \"all\""
+	@echo ""
 	@echo "Targets:"
 	@echo "    frotz: the standard edition"
 	@echo "    dfrotz: for dumb terminals and wrapper scripts"
@@ -305,6 +307,7 @@ help:
 	@echo "    clean: clean up files created by compilation"
 	@echo "    distclean: like clean, but also delete executables"
 	@echo "    dist: create a source tarball of the latest tagged release"
+	@echo ""
 
 .SUFFIXES:
 .SUFFIXES: .c .o .h
