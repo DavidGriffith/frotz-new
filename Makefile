@@ -135,7 +135,13 @@ SDL_LDFLAGS = `pkg-config $(SDL_PKGS) --libs` -lm
 SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
-all: frotz dfrotz sfrotz
+
+FROTZ_BIN = frotz$(EXTENSION)
+DFROTZ_BIN = dfrotz$(EXTENSION)
+SFROTZ_BIN = sfrotz$(EXTENSION)
+
+
+all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(HASH) $(COMMON_DIR);
 $(CURSES_LIB): $(CURSES_DEFINES) $(CURSES_DIR);
@@ -152,14 +158,16 @@ $(SUB_CLEAN):
 
 # Main programs
 
-frotz: $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
+$(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(CURSES) $(LDFLAGS) \
 		$(CURSES_LDFLAGS)
 
-dfrotz: $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
+dumb: $(DFROTZ_BIN)
+$(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION)
 
-sfrotz: $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
+sdl: $(SFROTZ_BIN)
+$(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 
 
@@ -239,23 +247,35 @@ $(HASH):
 
 # Administrative stuff
 
-install: frotz
+install: install_frotz
+install_frotz: $(FROTZ_BIN)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
 	install "frotz$(EXTENSION)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/frotz.6 "$(DESTDIR)$(MANDIR)/man6/"
 
-uninstall:
+install: install_frotz
+uninstall_frotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/frotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/frotz.6"
 
-install_dfrotz install_dumb: dfrotz
+install_dfrotz: $(DFROTZ_BIN)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
-	install "dfrotz$(EXTENSION)" "$(DESTDIR)$(PREFIX)/bin/"
+	install "$(DFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/dfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
 
-uninstall_dfrotz uninstall_dumb:
+uninstall_dfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
+
+install_sfrotz: $(SFROTZ_BIN)
+	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
+	install "$(DFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
+	install -m 644 doc/sfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
+
+uninstall_sfrotz:
+	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
+	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
+
 
 dist: frotz-$(GIT_TAG).tar.gz
 frotz-$(GIT_TAG).tar.gz:
@@ -273,19 +293,25 @@ help:
 	@echo "Targets:"
 	@echo "    frotz: the standard edition"
 	@echo "    dfrotz: for dumb terminals and wrapper scripts"
+	@echo "    sfrotz: for SDL graphics and sound"
 	@echo "    install"
 	@echo "    uninstall"
 	@echo "    install_dfrotz"
 	@echo "    uninstall_dfrotz"
-	@echo "    clean"
+	@echo "    install_sfrotz"
+	@echo "    uninstall_sfrotz"
+	@echo "    install_all"
+	@echo "    uninstall_all"
+	@echo "    clean: clean up files created by compilation"
+	@echo "    distclean: like clean, but also delete executables"
 	@echo "    dist: create a source tarball of the latest tagged release"
 
 .SUFFIXES:
 .SUFFIXES: .c .o .h
 
-.PHONY: all clean dist dumb hash help \
-	curses_defines \
+.PHONY: all clean dist dumb sdl hash help \
+	common_defines curses_defines \
 	blorb_lib common_lib curses_lib dumb_lib \
-	install install_dfrotz install_dumb \
-	uninstall uninstall_dfrotz uninstall_dumb $(SUBDIRS) $(SUB_CLEAN) \
+	install install_dfrotz install_sfrotz \
+	$(SUBDIRS) $(SUB_CLEAN) \
 	$(COMMON_DIR)/defines.h $(COMMON_DIR)/version.c $(CURSES_DIR)/defines.h
