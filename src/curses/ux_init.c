@@ -1133,20 +1133,21 @@ error:
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\t", frotz_version);
+    printf("FROTZ V%s\t   ", frotz_version);
 #ifndef NO_SOUND
         printf("Audio output enabled.");
 #else
 	printf("Audio output disabled.");
 #endif
-    printf("\nGit commit:\t%s\n", GIT_HASH);
-    printf("Git tag:\t%s\n", GIT_TAG);
-    printf("Git branch:\t%s\n", GIT_BRANCH);
-    printf("Build:\t\t%s\n", frotz_v_build);
+    printf("\nBuild:\t\t   %s\n", frotz_v_build);
+    printf("Git commit:\t   %s\n", GIT_HASH);
+    printf("Git commit short:  %s\n", GIT_HASH_SHORT);
+    printf("Git tag:\t   %s\n", GIT_TAG);
+    printf("Git branch:\t   %s\n", GIT_BRANCH);
     printf("  Frotz was originally written by Stefan Jokisch.\n");
     printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
     printf("  It was ported to Unix by Galen Hazelwood.\n");
     printf("  The core and Unix port are currently maintained by David Griffith.\n");
-    printf("  See https://github.com/DavidGriffith/frotz for Frotz's homepage.\n\n");
+    printf("  See https://661.org/proj/if/frotz for Frotz's homepage.\n\n");
     return;
 }
