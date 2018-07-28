@@ -113,12 +113,12 @@ SRCDIR = src
 COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
 COMMON_STRINGS = $(COMMON_DIR)/version.c
-COMMON_DEFINES = $(COMMON_DIR)/defines.h
+COMMON_DEFINES = $(COMMON_DIR)/defs.h
 HASH = $(COMMON_DIR)/git_hash.h
 
 CURSES_DIR = $(SRCDIR)/curses
 CURSES_LIB = $(CURSES_DIR)/frotz_curses.a
-CURSES_DEFINES = $(CURSES_DIR)/defines.h
+CURSES_DEFINES = $(CURSES_DIR)/ux_defines.h
 
 DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a

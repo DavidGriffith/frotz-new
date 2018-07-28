@@ -125,7 +125,7 @@ typedef struct {
 
 
 #include "setup.h"
-#include "defines.h"
+#include "defs.h"
 #include "missing.h"
 #include "unused.h"
 
