@@ -1,31 +1,9 @@
-# Versioning
-
-MAJOR=2
-MINOR=44
-VERSION = $(MAJOR).$(MINOR)
-
-# If we're working from git, we have access to proper variables. If
-# not, make it clear that we're working from a release.
-GIT_DIR ?= .git
-ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
-	GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
-	GIT_HASH = $(shell git rev-parse HEAD)
-	GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
-	GIT_TAG = $(shell git describe --abbrev=0 --tags)
-else
-	GIT_BRANCH = none
-	GIT_HASH = none
-	GIT_HASH_SHORT = none
-	GIT_TAG = $(VERSION)
-endif
-
-
-BUILD_DATE_TIME = $(shell date +%Y%m%d.%k%M%S | sed s/\ //g)
-
-export CFLAGS
+# Your C compiler
+#CC=gcc
+#CC=clang
 
 # Enable compiler warnings. This is an absolute minimum.
-CFLAGS += -Wall -std=c99 #-Wextra 
+CFLAGS += -Wall -std=c99 #-Wextra
 
 # strdup, strndup
 CFLAGS += -D_POSIX_C_SOURCE=200809L
@@ -70,10 +48,6 @@ BUFFSIZE ?= 4096
 # Default sample rate converter type
 DEFAULT_CONVERTER ?= SRC_SINC_MEDIUM_QUALITY
 
-ifeq ($(SOUND), ao)
-  CURSES_LDFLAGS = -lao -ldl -lpthread -lm \
-	-lsndfile -lvorbisfile -lmodplug -lsamplerate
-endif
 
 ##########################################################################
 # The configuration options below are intended mainly for older flavors
@@ -105,11 +79,41 @@ CURSES ?= -lncurses
 # Under normal circumstances, nothing in this section should be changed.
 #########################################################################
 
+# Versioning
+MAJOR=2
+MINOR=44
+VERSION = $(MAJOR).$(MINOR)
+
+
+# If we're working from git, we have access to proper variables. If
+# not, make it clear that we're working from a release.
+GIT_DIR ?= .git
+ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
+	GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+	GIT_HASH = $(shell git rev-parse HEAD)
+	GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+	GIT_TAG = $(shell git describe --abbrev=0 --tags)
+else
+	GIT_BRANCH = none
+	GIT_HASH = none
+	GIT_HASH_SHORT = none
+	GIT_TAG = $(VERSION)
+endif
+BUILD_DATE_TIME = $(shell date +%Y%m%d.%k%M%S | sed s/\ //g)
+export CFLAGS
+
+
+# Compile time options handling
+
+ifeq ($(SOUND), ao)
+  CURSES_LDFLAGS = -lao -ldl -lpthread -lm \
+	-lsndfile -lvorbisfile -lmodplug -lsamplerate
+endif
+
 
 # Source locations
 
 SRCDIR = src
-
 COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
 COMMON_STRINGS = $(COMMON_DIR)/version.c
