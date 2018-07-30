@@ -28,7 +28,7 @@ endif
 
 $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
-	ranlib $@
+	$(RANLIB) $@
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)

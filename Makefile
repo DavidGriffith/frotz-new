@@ -1,5 +1,5 @@
 # Your C compiler
-#CC=gcc
+CC=gcc
 #CC=clang
 
 # Enable compiler warnings. This is an absolute minimum.
@@ -31,10 +31,11 @@ CFLAGS += -I$(INCLUDEDIR)
 LDFLAGS += -L$(LIBDIR)
 
 RANLIB ?= $(shell which ranlib)
+AR ?= $(shell which ar)
 
 # Choose your sound support
 # OPTIONS: ao, none
-export SOUND ?= ao
+SOUND ?= ao
 
 # Default sample rate for sound effects.
 # All modern sound interfaces can be expected to support 44100 Hz sample
@@ -78,6 +79,23 @@ CURSES ?= -lncurses
 # This section is where Frotz is actually built.
 # Under normal circumstances, nothing in this section should be changed.
 #########################################################################
+
+export CC
+export CFLAGS
+export AR
+export RANLIB
+export PREFIX
+export MANDIR
+export SYSCONFDIR
+export INCLUDEDIR
+export LIBDIR
+export SOUND
+export SAMPLERATE
+export BUFFSIZE
+export DEFAULT_CONVERTER
+export COLOR
+export STRRCHR_DEF
+
 
 # Versioning
 MAJOR=2

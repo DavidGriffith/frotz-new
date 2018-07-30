@@ -23,7 +23,7 @@ TARGET = frotz_sdl.a
 
 $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
-	ranlib $@
+	$(RANLIB) $@
 
 clean:
 	-rm -f $(TARGET) $(OBJECTS) $(DEPS)
