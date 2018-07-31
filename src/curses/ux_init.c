@@ -296,7 +296,7 @@ void os_process_arguments (int argc, char *argv[])
     } while (c != EOF);
 
     if (zoptind != argc - 1) {
-	printf("FROTZ V%s\t", GIT_TAG);
+	printf("FROTZ V%s\tCurses interface.  ", GIT_TAG);
 
 #ifndef NO_SOUND
 	printf("Audio output enabled.");
