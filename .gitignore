@@ -1,6 +1,7 @@
 frotz
 dfrotz
 sfrotz
+frotz-*
 *.d
 *.o
 *.O
