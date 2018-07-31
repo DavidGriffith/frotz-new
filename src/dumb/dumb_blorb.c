@@ -34,7 +34,7 @@ f_setup_t f_setup;
 
 FILE *blorb_fp;
 bb_result_t blorb_res;
-bb_map_t *blorb_map;
+/* bb_map_t *blorb_map; */	/* Used only locally */
 
 static int isblorb(FILE *);
 
@@ -62,7 +62,7 @@ bb_err_t dumb_blorb_init(char *filename)
 
     bb_err_t blorb_err;
 
-    blorb_map = NULL;
+    bb_map_t *blorb_map = NULL;
 
     if ((fp = fopen(filename, "rb")) == NULL)
 	return bb_err_Read;

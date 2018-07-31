@@ -25,10 +25,13 @@ typedef struct {
     FILE *fp;
 } myresource;
 
-extern bb_err_t         blorb_err;
-extern bb_map_t         *blorb_map;
-extern bb_result_t      blorb_res;
-extern FILE *blorb_fp;
+/* These are used only locally */
+/*
+extern bb_err_t		blorb_err;
+extern bb_map_t		*blorb_map;
+extern FILE		*blorb_fp;
+*/
+extern bb_result_t	blorb_res;
 
 bb_err_t dumb_blorb_init(char *);
 void dumb_blorb_stop(void);
