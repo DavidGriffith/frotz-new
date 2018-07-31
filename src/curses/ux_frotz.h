@@ -96,7 +96,8 @@ void unix_get_terminal_size(void);      /* ux_init.c */
 
 
 #ifdef NO_STRRCHR
-char *strrchr(const char *, int);
+char *my_strrchr(const char *, int);
+#define strrchr my_strrchr
 #endif
 
 #endif /* UX_FROTZ_H */

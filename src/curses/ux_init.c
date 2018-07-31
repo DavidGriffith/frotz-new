@@ -1079,7 +1079,7 @@ void os_init_setup(void)
  * This is for operating systems that lack strrchr(3).
  *
  */
-char *strrchr(const char *s, int c)
+char *my_strrchr(const char *s, int c)
 {
     const char *save;
 
