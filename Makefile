@@ -295,7 +295,7 @@ uninstall_sfrotz:
 
 dist: frotz-$(GIT_TAG).tar.gz
 frotz-$(GIT_TAG).tar.gz:
-	git archive --format=tar.gz -o "frotz-$(GIT_TAG).tar.gz" "$(GIT_TAG)"
+	git archive --format=tar.gz --prefix frotz-$(GIT_TAG)/ -o "frotz-$(GIT_TAG).tar.gz" HEAD
 
 clean: $(SUB_CLEAN)
 	rm -f $(SRCDIR)/*.h \
