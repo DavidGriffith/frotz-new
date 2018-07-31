@@ -18,7 +18,7 @@ ARFLAGS = rc
 
 $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
-	ranlib $@
+	$(RANLIB) $@
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)
