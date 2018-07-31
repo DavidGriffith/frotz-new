@@ -3,9 +3,11 @@
 .SH NAME
 frotz \- interpreter for Infocom and other Z-Machine games
 
+
 .SH SYNOPSIS
 .B frotz
 .RI [ options "] " file
+
 
 .SH DESCRIPTION
 .B Frotz
@@ -211,6 +213,7 @@ Error checking mode.
 .br
 Default is 1 (report first instance of an error).
 
+
 .SH INTERPRETER NUMBER
 The interpreter number is a setting in the Z-machine header which is
 used to tell the game on what sort of machine the interpreter is
@@ -276,11 +279,12 @@ Infocom used the following interpreter numbers:
 .BR 11
 .BR \ \ Tandy\ Color
 
+
 .SH CONFIGURATION FILES
 On startup,
 .B frotz
 will first check the system's frotz.conf then $HOME/.frotzrc for
-configuration information.  The configuration file uses a simple syntax 
+configuration information.  The configuration file uses a simple syntax
 of
 .br
 <variable> <whitespace> <value>
@@ -405,7 +409,6 @@ environmental variable except that you can't put environmental variables
 in the path or use other shortcuts.  For example, "$HOME/games/zcode" is
 illegal because the shell can't interpret that $HOME variable.
 
-
 .P
 The following options are really only useful for weird terminals, weird
 curses libraries or if you want to force a certain look (like play in
@@ -459,7 +462,6 @@ the current screen width.  This switch allows you to change this setting.
 You may set this to "0" to deactivate automatic line-splitting in
 transcript files.
 
-
 .P
 The following options are mainly useful for debugging or cheating.
 
@@ -492,6 +494,7 @@ Watch object movement.  This option enables debugging messages from the
 interpreter which describe the movement of objects in the object tree.
 Default is "off".
 
+
 .SH ENVIRONMENT
 If the ZCODE_PATH environmental variable is defined, frotz will search
 that path for game files.  If that doesn't exist, INFOCOM_PATH will be
@@ -502,12 +505,12 @@ searched.
 .PP
 A
 .BR git(1)
-repository of all versions of Unix Frotz back to 2.32 is available 
+repository of all versions of Unix Frotz back to 2.32 is available
 for public perusal here:
 .br
-https://github.com/DavidGriffith/frotz/. 
+https://github.com/DavidGriffith/frotz/.
 .PP
-The bleeding edge of Frotz development may be followed there.  A wiki 
+The bleeding edge of Frotz development may be followed there.  A wiki
 summarising Frotz is also there at this URL:
 .br
 https://github.com/DavidGriffith/frotz/wiki/
@@ -518,8 +521,9 @@ Here is its URL:
 .br
 http://www.ifarchive.org/
 .PP
-Most distributions of Linux and BSD include Frotz in their package 
+Most distributions of Linux and BSD include Frotz in their package
 repositories.
+
 
 .SH CAVEATS
 .PP
@@ -581,5 +585,3 @@ The Unix port is currently maintained by David Griffith <dave@661.org>.
 .BR jzip (6)
 .BR xzip (6)
 .BR inform (1)
-
-

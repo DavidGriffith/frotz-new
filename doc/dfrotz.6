@@ -3,9 +3,11 @@
 .SH NAME
 dfrotz \- interpreter for Infocom and other Z-Machine games (dumb interface)
 
+
 .SH SYNOPSIS
 .B dfrotz
 .RI [ options "] " file
+
 
 .SH DESCRIPTION
 .B Frotz
@@ -22,8 +24,8 @@ outlines of V6 graphics with the picture number in the bottom-right
 corner.
 
 .P
-This manpage is for Frotz with the dumb interface.  Dumb Frotz 
-does not support sound-effects, graphics, or colors.
+This manpage is for Frotz with the dumb interface.  Dumb Frotz does not
+support sound-effects, graphics, or colors.
 
 
 .SH OPTIONS
@@ -39,7 +41,7 @@ value, the test and the result will be reported.
 
 .TP
 .B \-h N
-Screen height.  Every N lines, a MORE prompt will be printed.  Use of 
+Screen height.  Every N lines, a MORE prompt will be printed.  Use of
 the
 .B \-m
 option renders this option moot.
@@ -67,7 +69,7 @@ When the game starts, load this saved game file.
 
 .TP
 .B \-m
-Turn off MORE prompts.  This can be desirable when using a printing 
+Turn off MORE prompts.  This can be desirable when using a printing
 terminal.
 
 .TP
@@ -115,8 +117,9 @@ and need not worry about someone scribbling or snooping who-knows-where.
 
 .TP
 .B \-s N
-Set the random number seed value.  The given seed value is used as the initial
-seed value on every restart. This is helpful for testing games like
+Set the random number seed value.  The given seed value is used as the
+initial seed value on every restart. This is helpful for testing games
+like
 .B Curses
 which make random decisions before the first input (such that the hot
 key Alt\-S does not really help).
@@ -272,7 +275,6 @@ the current speed factor).
 Advance clock just enough to timeout the current input
 
 .SS Reverse-Video Display Method Settings
-
 .TP
 .B \ern
 none
@@ -287,7 +289,6 @@ doublestrike
 underline
 
 .SS Output Compression Settings
-
 .TP
 .B \ecn
 none: show whole screen before every input.
@@ -303,7 +304,6 @@ shown.
 Hide top N lines (orthogonal to above modes).
 
 .SS Misc Settings
-
 .TP
 .B \esfX
 Set speed factor to X.  (0 = never timeout automatically).
@@ -360,7 +360,6 @@ Standard Frotz hotkeys.
 use \eH (help) to see the list of hotkeys.
 
 .SS Line Type Identification Characters
-
 .SS Input lines (untimed)
 .TP
 .B >
@@ -403,22 +402,22 @@ does not search any path for game files.
 .PP
 A
 .BR git(1)
-repository of all versions of Unix Frotz back to 2.32 is available 
+repository of all versions of Unix Frotz back to 2.32 is available
 for public perusal here:
 .br
-https://github.com/DavidGriffith/frotz/. 
+https://github.com/DavidGriffith/frotz/.
 .PP
-The bleeding edge of Frotz development may be followed there.  A wiki 
+The bleeding edge of Frotz development may be followed there.  A wiki
 summarising Frotz is also there at this URL:
 .br
 https://github.com/DavidGriffith/frotz/wiki/
 .PP
-Source tarballs are available at the IF Archive or any of its many 
+Source tarballs are available at the IF Archive or any of its many
 mirrors:
 .br
 http://www.ifarchive.org/
 .PP
-Most distributions of Linux and BSD include Frotz in their package 
+Most distributions of Linux and BSD include Frotz in their package
 repositories.
 
 
@@ -453,7 +452,7 @@ http://inform-fiction.org/I7Downloads/Examples/dm/IntroductionToIF.pdf
 
 
 .SH BUGS
-This program has no bugs.  no bugs.  no bugs.  no *WHAP* thank you. If 
+This program has no bugs.  no bugs.  no bugs.  no *WHAP* thank you. If
 you find one, please report it to the Github site referenced above in
 .B
 FURTHER INFORMATION.
@@ -475,5 +474,3 @@ The Unix port is currently maintained by David Griffith <dave@661.org>.
 .BR jzip (6)
 .BR xzip (6)
 .BR inform (1)
-
-
