@@ -89,10 +89,6 @@ export MANDIR
 export SYSCONFDIR
 export INCLUDEDIR
 export LIBDIR
-export SOUND
-export SAMPLERATE
-export BUFFSIZE
-export DEFAULT_CONVERTER
 export COLOR
 export STRRCHR_DEF
 
