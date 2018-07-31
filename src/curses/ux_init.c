@@ -296,7 +296,7 @@ void os_process_arguments (int argc, char *argv[])
     } while (c != EOF);
 
     if (zoptind != argc - 1) {
-	printf("FROTZ V%s\t", frotz_version);
+	printf("FROTZ V%s\t", GIT_TAG);
 
 #ifndef NO_SOUND
 	printf("Audio output enabled.");
@@ -1133,13 +1133,13 @@ error:
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\t   ", frotz_version);
+    printf("FROTZ V%s\t   ", GIT_TAG);
 #ifndef NO_SOUND
         printf("Audio output enabled.");
 #else
 	printf("Audio output disabled.");
 #endif
-    printf("\nBuild:\t\t   %s\n", frotz_v_build);
+    printf("\nBuild:\t\t   %s\n", build_timestamp);
     printf("Git commit:\t   %s\n", GIT_HASH);
     printf("Git commit short:  %s\n", GIT_HASH_SHORT);
     printf("Git tag:\t   %s\n", GIT_TAG);

@@ -127,7 +127,7 @@ void os_process_arguments(int argc, char *argv[])
     } while (c != EOF);
 
     if (((argc - zoptind) != 1) && ((argc - zoptind) != 2)) {
-	printf("FROTZ V%s\tDumb interface.\n", frotz_version);
+	printf("FROTZ V%s\tDumb interface.\n", GIT_TAG);
 	puts(INFORMATION);
 	printf("\t-Z # error checking mode (default = %d)\n"
 	    "\t     %d = don't report errors   %d = report first error\n"
@@ -298,7 +298,7 @@ char *my_strdup(char *src)
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\t", frotz_version);
+    printf("FROTZ V%s\t", GIT_TAG);
     printf("Dumb interface.\n");
     printf("Git commit:\t%s\n", GIT_HASH);
     printf("Git tag:\t%s\n", GIT_TAG);

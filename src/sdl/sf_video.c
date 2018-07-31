@@ -428,7 +428,7 @@ void sf_initvideo( int W, int H, int full)
     Uint32 initflags = SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO;
 
     sprintf(banner, "SDL Frotz v%s - %s (z%d)",
-            frotz_version, f_setup.story_name, h_version);
+            GIT_TAG, f_setup.story_name, h_version);
 
     if ( SDL_Init(initflags) < 0 ) {
         os_fatal("Couldn't initialize SDL: %s", SDL_GetError());

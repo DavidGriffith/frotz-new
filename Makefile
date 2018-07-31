@@ -98,12 +98,6 @@ export LIBDIR
 export COLOR
 
 
-# Versioning
-MAJOR=2
-MINOR=44
-VERSION = $(MAJOR).$(MINOR)
-
-
 # If we're working from git, we have access to proper variables. If
 # not, make it clear that we're working from a release.
 GIT_DIR ?= .git
@@ -208,10 +202,7 @@ common_strings:	$(COMMON_STRINGS)
 $(COMMON_STRINGS):
 	@echo "** Generating $@"
 	@echo "#include \"frotz.h\"" > $@
-	@echo "const char frotz_version[] = \"$(VERSION)\";" >> $@
-	@echo "const char frotz_v_major[] = \"$(MAJOR)\";" >> $@
-	@echo "const char frotz_v_minor[] = \"$(MINOR)\";" >> $@
-	@echo "const char frotz_v_build[] = \"$(BUILD_DATE_TIME)\";" >> $@
+	@echo "const char build_timestamp[] = \"$(BUILD_DATE_TIME)\";" >> $@
 
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):

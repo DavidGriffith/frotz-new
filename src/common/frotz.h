@@ -147,8 +147,7 @@ typedef struct {
 #define STACK_SIZE 1024
 #endif
 
-extern const char
-    frotz_version[], frotz_v_major[], frotz_v_minor[], frotz_v_build[];
+extern const char build_timestamp[];
 
 /* Assorted filename extensions */
 
