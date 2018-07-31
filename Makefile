@@ -15,6 +15,11 @@ CFLAGS += -D_POSIX_C_SOURCE=200809L
 # These are handy for debugging.
 CFLAGS += -g
 
+# This keeps make(1) output understandable when using -j for parallel
+# building If your version of make(1) can't do parallel builds, comment
+# this out.
+MAKEFLAGS += -Orecurse
+
 # Define where you want Frotz installed
 PREFIX ?= /usr/local
 MANDIR ?= $(PREFIX)/share/man
@@ -82,6 +87,7 @@ CURSES ?= -lncurses
 
 export CC
 export CFLAGS
+export MAKEFLAGS
 export AR
 export RANLIB
 export PREFIX
