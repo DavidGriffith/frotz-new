@@ -20,6 +20,9 @@ typedef void (*CLEANFUNC)();
 
 typedef struct cfstruct cfrec;
 
+static void print_version(void);
+
+
 struct cfstruct {
   CLEANFUNC func;
   cfrec *next;
@@ -134,6 +137,7 @@ static char *infos[] = {
 	"-u # slots for multiple undo",
 	"-w # screen width",
 	"-x   expand abbreviations g/x/z",
+	"-v   show version information",
 	"-V   force VGA fonts",
 	"-Z # error checking (see below)",
 	NULL};
@@ -182,7 +186,7 @@ extern char *optarg;
 extern int optind;
 extern int m_timerinterval;
 
-static char *options = "@:aAb:B:c:f:Fh:iI:l:Lm:N:oOpqr:Rs:S:tTu:Vw:xZ:";
+static char *options = "@:aAb:B:c:f:Fh:iI:l:Lm:N:oOpqr:Rs:S:tTu:vVw:xZ:";
 
 static int limit( int v, int m, int M)
   {
@@ -257,6 +261,8 @@ static void parse_options (int argc, char **argv)
 	    sf_osdialog = NULL;
 	if (c == 'u')
 	    f_setup.undo_slots = num;
+	if (c == 'v')
+	    print_version();
 	if (c == 'V')
 	    m_vga_fonts = 1;
 	if (c == 'w')
@@ -272,7 +278,20 @@ static void parse_options (int argc, char **argv)
 
   }/* parse_options */
 
-
+static void print_version(void)
+{
+    printf("FROTZ V%s\tSDL interface.\n", GIT_TAG);
+    printf("Build:\t\t%s\n", build_timestamp);
+    printf("Git commit:\t%s\n", GIT_HASH);
+    printf("Git tag:\t%s\n", GIT_TAG);
+    printf("Git branch:\t%s\n", GIT_BRANCH);
+    printf("  Frotz was originally written by Stefan Jokisch.\n");
+    printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+    printf("  It was ported to Unix by Galen Hazelwood.\n");
+    printf("  The core and Unix port are currently maintained by David Griffith.\n");
+    printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
+    exit(2);
+}
 
 /*
  * os_process_arguments
