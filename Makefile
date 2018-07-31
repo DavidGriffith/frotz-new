@@ -67,7 +67,7 @@ CURSES ?= -lncurses
 # the strrchr() libc library call.  If you don't know what this means,
 # leave it alone.
 #
-#STRRCHR_DEF = -DNO_STRRCHR
+#NO_STRRCHR = yes
 
 # Uncomment this if you're compiling Unix Frotz on a machine that lacks
 # the memmove(3) system call.  If you don't know what this means, leave it
@@ -90,7 +90,6 @@ export SYSCONFDIR
 export INCLUDEDIR
 export LIBDIR
 export COLOR
-export STRRCHR_DEF
 
 
 # Versioning
@@ -213,6 +212,9 @@ $(COMMON_DEFINES):
 	@echo "Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
+ifdef NO_STRRCHR
+	@echo "#define NO_STRRCHR" >> $@
+endif
 ifdef NO_MEMMOVE
 	@echo "#define NO_MEMMOVE" >> $@
 endif
