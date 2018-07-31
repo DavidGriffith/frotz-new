@@ -7,10 +7,13 @@ sfrotz
 *.OBJ
 *.BAK
 *.SWP
+*.swp
 *.DSK
 *.EXE
 *.LIB
 *.a
+*.tar
+*.gz
 src/common/version.c
 src/*/defines.h
 src/common/git_hash.h
