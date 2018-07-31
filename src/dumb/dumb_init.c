@@ -300,6 +300,7 @@ static void print_version(void)
 {
     printf("FROTZ V%s\t", GIT_TAG);
     printf("Dumb interface.\n");
+    printf("Build:\t\t%s\n", build_timestamp);
     printf("Git commit:\t%s\n", GIT_HASH);
     printf("Git tag:\t%s\n", GIT_TAG);
     printf("Git branch:\t%s\n", GIT_BRANCH);
