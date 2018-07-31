@@ -304,10 +304,13 @@ frotz-$(GIT_TAG).tar.gz:
 	git archive --format=tar.gz -o "frotz-$(GIT_TAG).tar.gz" "$(GIT_TAG)"
 
 clean: $(SUB_CLEAN)
-	rm -f $(SRCDIR)/*.h $(SRCDIR)/*.a $(COMMON_DEFINES) \
+	rm -f $(SRCDIR)/*.h \
+		$(SRCDIR)/*.a \
+		$(COMMON_DEFINES) \
 		$(COMMON_STRINGS) \
-		$(COMMON_DIR)/git_hash.h $(CURSES_DEFINES) \
-		$(OBJECTS) frotz*.tar.gz
+		$(HASH) \
+		$(CURSES_DEFINES) \
+		frotz*.tar.gz
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
