@@ -1133,7 +1133,7 @@ error:
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\t", GIT_TAG);
+    printf("FROTZ V%s\tCurses interface.  ", GIT_TAG);
 #ifndef NO_SOUND
         printf("Audio output enabled.");
 #else
