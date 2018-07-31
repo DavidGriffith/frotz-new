@@ -200,7 +200,7 @@ blorb_lib:	$(BLORB_LIB)
 
 common_strings:	$(COMMON_STRINGS)
 $(COMMON_STRINGS):
-	@echo "Generating $@"
+	@echo "** Generating $@"
 	@echo "#include \"frotz.h\"" > $@
 	@echo "const char frotz_version[] = \"$(VERSION)\";" >> $@
 	@echo "const char frotz_v_major[] = \"$(MAJOR)\";" >> $@
@@ -209,7 +209,7 @@ $(COMMON_STRINGS):
 
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
-	@echo "Generating $@"
+	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
 ifdef NO_STRRCHR
@@ -222,7 +222,7 @@ endif
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
-	@echo "Generating $@"
+	@echo "** Generating $@"
 	@echo "#ifndef CURSES_DEFINES_H" > $@
 	@echo "#define CURSES_DEFINES_H" >> $@
 	@echo "#define CONFIG_DIR \"$(SYSCONFDIR)\"" >> $@
@@ -248,7 +248,7 @@ endif
 
 hash: $(HASH)
 $(HASH):
-	@echo "Creating $@"
+	@echo "** Generating $@"
 	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" > $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
