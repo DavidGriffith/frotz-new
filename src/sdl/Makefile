@@ -18,6 +18,8 @@ DEPS = $(SOURCES:.c=.d)
 
 TARGET = frotz_sdl.a
 
+ARFLAGS = rc
+
 .PHONY: clean
 .DELETE_ON_ERROR:
 
