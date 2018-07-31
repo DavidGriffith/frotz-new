@@ -62,9 +62,17 @@ Syntax: frotz [options] story-file\n\
   -F   Force color mode           \t -S # transcript width\n\
   -h # screen height              \t -t   set Tandy bit\n\
   -i   ignore fatal errors        \t -u # slots for multiple undo\n\
-  -l # left margin                \t -v   show version information\n\
-  -L <file> load this save file   \t -w # screen width\n\
-  -o   watch object movement      \t -x   expand abbreviations g/x/z\n"
+  -I # interpreter number         \t -v   show version information\n\
+  -l # left margin                \t -w # screen width\n\
+  -L <file> load this save file   \t -x   expand abbreviations g/x/z\n\
+  -o   watch object movement      \t -Z # error checking (see below)\n"
+
+#define INFO2 "\
+Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
+For more options and explanations, please read the manual page.\n"
+
+
+static bool interpreter_number_override = FALSE;
 
 /*
 char stripped_story_name[FILENAME_MAX+1];
@@ -241,7 +249,7 @@ void os_process_arguments (int argc, char *argv[])
 
     /* Parse the options */
     do {
-	c = zgetopt(argc, argv, "-aAb:c:def:Fh:il:oOpPqrR:s:S:tu:vw:W:xZ:");
+	c = zgetopt(argc, argv, "-aAb:c:def:Fh:iI:l:oOpPqrR:s:S:tu:vw:W:xZ:");
 	switch(c) {
 	  case 'a': f_setup.attribute_assignment = 1; break;
 	  case 'A': f_setup.attribute_testing = 1; break;
@@ -267,6 +275,9 @@ void os_process_arguments (int argc, char *argv[])
 		    break;
           case 'h': u_setup.screen_height = atoi(zoptarg); break;
 	  case 'i': f_setup.ignore_errors = 1; break;
+	  case 'I': f_setup.interpreter_number = atoi(zoptarg);
+		    interpreter_number_override = TRUE;
+		    break;
 	  case 'l': f_setup.left_margin = atoi(zoptarg); break;
 	  case 'L': f_setup.restore_mode = 1;
 		    f_setup.tmp_save_name = malloc(FILENAME_MAX * sizeof(char) + 1);
@@ -306,12 +317,7 @@ void os_process_arguments (int argc, char *argv[])
 	putchar('\n');
 
 	puts (INFORMATION);
-	printf ("\t-Z # error checking mode (default = %d)\n"
-	    "\t     %d = don't report errors   %d = report first error\n"
-	    "\t     %d = report all errors     %d = exit after any error\n\n",
-	    ERR_DEFAULT_REPORT_MODE, ERR_REPORT_NEVER,
-	    ERR_REPORT_ONCE, ERR_REPORT_ALWAYS,
-	    ERR_REPORT_FATAL);
+	puts (INFO2);
 	exit (1);
     }
 
@@ -492,7 +498,11 @@ void os_init_screen (void)
 
     /* Use the ms-dos interpreter number for v6, because that's the
      * kind of graphics files we understand.  Otherwise, use DEC.  */
-    h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
+    if (!interpreter_number_override || (f_setup.interpreter_number == 0))
+	h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
+    else
+	h_interpreter_number = f_setup.interpreter_number;
+
     h_interpreter_version = 'F';
 
 #ifdef COLOR_SUPPORT
@@ -1040,6 +1050,7 @@ void os_init_setup(void)
 	f_setup.left_margin = 0;
 	f_setup.right_margin = 0;
 	f_setup.ignore_errors = 0;
+	f_setup.interpreter_number = INTERP_DEC_20;
 	f_setup.piracy = 0;		/* enable the piracy opcode */
 	f_setup.undo_slots = MAX_UNDO_SLOTS;
 	f_setup.expand_abbreviations = 0;

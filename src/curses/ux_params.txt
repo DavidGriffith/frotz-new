@@ -8,6 +8,7 @@
 -F   Force color mode
 -h # screen height
 -i   ignore fatal errors
+-I # interpreter number
 -l # left margin
 -L <file> load this save file
 -o   watch object movement
@@ -24,3 +25,4 @@
 -v   show version information
 -w # screen width
 -x   expand abbreviations g/x/z
+-Z # error checking (see below)
