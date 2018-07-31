@@ -116,7 +116,7 @@ else
 	GIT_BRANCH = none
 	GIT_HASH = none
 	GIT_HASH_SHORT = none
-	GIT_TAG = $(VERSION)
+	GIT_TAG = none
 endif
 BUILD_DATE_TIME = $(shell date +%Y%m%d.%k%M%S | sed s/\ //g)
 export CFLAGS
