@@ -265,7 +265,7 @@ install_frotz: $(FROTZ_BIN)
 	install "frotz$(EXTENSION)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/frotz.6 "$(DESTDIR)$(MANDIR)/man6/"
 
-install: install_frotz
+uninstall: uninstall_frotz
 uninstall_frotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/frotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/frotz.6"
