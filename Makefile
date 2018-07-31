@@ -165,7 +165,7 @@ SFROTZ_BIN = sfrotz$(EXTENSION)
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
-$(COMMON_LIB): $(COMMON_DEFINES) $(HASH) $(COMMON_DIR);
+$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
 $(CURSES_LIB): $(CURSES_DEFINES) $(CURSES_DIR);
 $(SDL_LIB): $(SDL_DIR);
 $(DUMB_LIB): $(DUMB_DIR);
@@ -305,6 +305,7 @@ frotz-$(GIT_TAG).tar.gz:
 
 clean: $(SUB_CLEAN)
 	rm -f $(SRCDIR)/*.h $(SRCDIR)/*.a $(COMMON_DEFINES) \
+		$(COMMON_STRINGS) \
 		$(COMMON_DIR)/git_hash.h $(CURSES_DEFINES) \
 		$(OBJECTS) frotz*.tar.gz
 
@@ -335,7 +336,7 @@ help:
 .SUFFIXES: .c .o .h
 
 .PHONY: all clean dist dumb sdl hash help \
-	common_defines curses_defines \
+	common_defines common_strings curses_defines \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz \
 	$(SUBDIRS) $(SUB_CLEAN) \
