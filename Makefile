@@ -192,16 +192,6 @@ sdl: $(SFROTZ_BIN)
 $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 
-
-# Libs
-
-%.a:
-	$(AR) rc $@ $^
-	$(RANLIB) $@
-
-%.o: %.c
-	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<
-
 common_lib:	$(COMMON_LIB)
 
 curses_lib:	$(CURSES_LIB)
