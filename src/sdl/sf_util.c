@@ -108,12 +108,9 @@ extern char *m_reslist_file;
 extern int option_scrollback_buffer;
 
 static char *info1 =
-	"\n"
-	"SDL Frotz V%s build %s - interpreter for z-code games.\n"
-	"Complies with Standard 1.0; supports Blorb resources and Quetzal save files.\n"
-	"Based on Frotz 2.40 by Stefan Jokisch and WindowsFrotz2000 by David Kinder.\n"
-	"\n"
-	"Syntax: sfrotz [options] story-file\n\n";
+	"FROTZ V%s\tSDL graphics and audio interface.\n"
+	"An interpreter for all Infocom and other Z-Machine games.\n\n"
+	"Syntax: sfrotz [options] story-file\n";
 
 static char *infos[] = {
 	"-a   watch attribute setting",
@@ -150,7 +147,7 @@ static char *info2 =
 static void usage()
   {
   char **p = infos; int i=0,len=0;
-  printf(info1, GIT_TAG, build_timestamp);
+  printf(info1, GIT_TAG);
   while (*p)
 	{
 	if (i)
