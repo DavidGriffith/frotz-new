@@ -56,6 +56,12 @@ intended to get around such bugs, but be warned that Strange Things may
 happen if fatal errors are not caught.
 
 .TP
+.B \-I N
+Set the interpreter number.  Infocom designed the Z-machine such that a
+game could tell on what kind of machine the interpreter was running.
+See INTERPRETER NUMBER below.
+
+.TP
 .B \-L <filename>
 When the game starts, load this saved game file.
 
@@ -162,6 +168,72 @@ Error checking mode.
 3 = exit after any error.
 .br
 Default is 1 (report first instance of an error).
+
+
+.SH INTERPRETER NUMBER
+The interpreter number is a setting in the Z-machine header which is
+used to tell the game on what sort of machine the interpreter is
+running. Frotz will automatically choose the most appropriate number for
+a given Infocom-produced game.  Should you want to override the number,
+the
+.B \-I
+option is available.
+
+An interpreter should choose the interpreter number most suitable for
+the machine it will run on.  In Versions up to 5, the main consideration
+is that the behaviour of 'Beyond Zork' depends on the interpreter
+number (in terms of its usage of the character graphics font). In
+Version 6, the decision is more serious, as existing Infocom story files
+depend on interpreter number in many ways: moreover, some story files
+expect to be run only on the interpreters for a particular machine.
+There are, for instance, specifically Amiga versions.  The DECSystem-20
+was Infocom's own in-house mainframe.
+
+Infocom used the following interpreter numbers:
+
+.PP
+.BR 1
+.BR \ \ DECSystem\ 20
+
+.PP
+.BR 2
+.BR \ \ Apple\ IIe
+
+.PP
+.BR 3
+.BR \ \ Macintosh
+
+.PP
+.BR 4
+.BR \ \ Amiga
+
+.PP
+.BR 5
+.BR \ \ Atari\ ST
+
+.PP
+.BR 6
+.BR \ \ IBM\ PC
+
+.PP
+.BR 7
+.BR \ \ Commodore 128
+
+.PP
+.BR 8
+.BR \ \ Commodore 64
+
+.PP
+.BR 9
+.BR \ \ Apple\ IIc
+
+.PP
+.BR 10
+.BR \ \ Apple\ IIgs
+
+.PP
+.BR 11
+.BR \ \ Tandy\ Color
 
 
 .SH CONFIGURATION
