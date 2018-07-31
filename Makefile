@@ -329,8 +329,8 @@ help:
 .SUFFIXES: .c .o .h
 
 .PHONY: all clean dist dumb sdl hash help \
-	common_defines common_strings curses_defines \
+	common_defines curses_defines \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz \
 	$(SUBDIRS) $(SUB_CLEAN) \
-	$(COMMON_DIR)/defines.h $(COMMON_DIR)/version.c $(CURSES_DIR)/defines.h
+	$(COMMON_DIR)/defines.h $(CURSES_DIR)/defines.h
