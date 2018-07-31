@@ -293,11 +293,18 @@ uninstall_sfrotz:
 	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
 
 
-dist: frotz-$(GIT_TAG).tar.gz
-frotz-$(GIT_TAG).tar.gz:
-	git archive --format=tar.gz --prefix frotz-$(GIT_TAG)/ -o "frotz-$(GIT_TAG).tar.gz" HEAD
+dist: clean hash frotz-$(GIT_TAG).tar
+frotz-$(GIT_TAG).tar:
+	git archive --format=tar --prefix frotz-$(GIT_TAG)/ HEAD | tar xf -
+	sed s"/GIT_BRANCH = none/GIT_BRANCH = \"$(GIT_BRANCH)\"/" -i frotz-$(GIT_TAG)/Makefile
+	sed s"/GIT_HASH = none/GIT_HASH = \"$(GIT_HASH)\"/" -i frotz-$(GIT_TAG)/Makefile
+	sed s"/GIT_HASH_SHORT = none/GIT_HASH_SHORT = \"$(GIT_HASH_SHORT)\"/" -i frotz-$(GIT_TAG)/Makefile
+	sed s"/GIT_TAG = none/GIT_TAG = \"$(GIT_TAG)\"/" -i frotz-$(GIT_TAG)/Makefile
+	tar zcf frotz-$(GIT_TAG).tar.gz frotz-$(GIT_TAG)
+	rm -rf frotz-$(GIT_TAG)
 
 clean: $(SUB_CLEAN)
+	rm -rf frotz-$(GIT_TAG)
 	rm -f $(SRCDIR)/*.h \
 		$(SRCDIR)/*.a \
 		$(COMMON_DEFINES) \
