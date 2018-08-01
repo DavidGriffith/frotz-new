@@ -449,7 +449,11 @@ void sf_readsettings(void)
   ResSnd = sf_GetProfileString("Resources","Snd",ResSnd);
 
 //printf("sf_readsettings\n");
-  h_interpreter_number = sf_GetProfileInt("Interpreter","Number",INTERP_AMIGA);
+  if (f_setup.interpreter_number == 0)
+    h_interpreter_number = sf_GetProfileInt("Interpreter","Number",INTERP_AMIGA);
+  else
+    h_interpreter_number = f_setup.interpreter_number;
+
   f_setup.err_report_mode = sf_GetProfileInt("Interpreter","Error Reporting",ERR_REPORT_ONCE);
   f_setup.ignore_errors = sf_GetProfileInt("Interpreter","Ignore Errors",0);
   f_setup.expand_abbreviations = sf_GetProfileInt("Interpreter","Expand Abbreviations",0);
@@ -1031,6 +1035,7 @@ void os_init_setup(void)
     f_setup.left_margin = 0;
     f_setup.right_margin = 0;
     f_setup.ignore_errors = 0;
+    f_setup.interpreter_number = 0;
     f_setup.piracy = 0;             /* enable the piracy opcode */
     f_setup.undo_slots = MAX_UNDO_SLOTS;
     f_setup.expand_abbreviations = 0;

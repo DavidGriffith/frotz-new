@@ -121,6 +121,7 @@ static char *infos[] = {
 	"-F   fullscreen mode",
 	"-h # screen height",
 	"-i   ignore runtime errors",
+	"-I # interpreter number",
 	"-l # left margin",
 	"-L   use local resources",
 	"-o   watch object movement",
@@ -234,6 +235,8 @@ static void parse_options (int argc, char **argv)
 	    user_screen_height = num;
 	if (c == 'i')
 	    f_setup.ignore_errors = 1;
+	if (c == 'I')
+	    f_setup.interpreter_number = num;
 	if (c == 'l')
 	    f_setup.left_margin = num;
 	if (c == 'L')
