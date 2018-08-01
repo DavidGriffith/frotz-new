@@ -289,7 +289,7 @@ uninstall_sfrotz:
 	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
 
 
-dist: clean hash frotz-$(GIT_TAG).tar
+dist: frotz-$(GIT_TAG).tar
 frotz-$(GIT_TAG).tar:
 	git archive --format=tar --prefix frotz-$(GIT_TAG)/ HEAD | tar xf -
 	sed s"/GIT_BRANCH = none/GIT_BRANCH = \"$(GIT_BRANCH)\"/" -i frotz-$(GIT_TAG)/Makefile
