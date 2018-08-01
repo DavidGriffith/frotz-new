@@ -175,6 +175,8 @@ $(SUB_CLEAN):
 
 # Main programs
 
+curses: $(FROTZ_BIN)
+ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(CURSES) $(LDFLAGS) \
 		$(CURSES_LDFLAGS)
@@ -333,7 +335,7 @@ help:
 .SUFFIXES:
 .SUFFIXES: .c .o .h
 
-.PHONY: all clean dist dumb sdl hash help \
+.PHONY: all clean dist curses ncurses dumb sdl hash help \
 	common_defines curses_defines \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz \
