@@ -26,6 +26,7 @@ ARFLAGS = rc
 $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
+	@echo "** Done with SDL interface."
 
 clean:
 	-rm -f $(TARGET) $(OBJECTS) $(DEPS)

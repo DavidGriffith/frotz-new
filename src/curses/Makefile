@@ -29,6 +29,7 @@ endif
 $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
+	@echo "** Done with curses interface."
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)

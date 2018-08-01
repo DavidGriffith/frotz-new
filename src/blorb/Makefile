@@ -16,6 +16,7 @@ ARFLAGS = rc
 $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
+	@echo "** Done with Blorb library."
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)

@@ -178,14 +178,17 @@ $(SUB_CLEAN):
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(CURSES) $(LDFLAGS) \
 		$(CURSES_LDFLAGS)
+	@echo "** Done building Frotz with curses interface"
 
 dumb: $(DFROTZ_BIN)
 $(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION)
+	@echo "** Done building Frotz with dumb interface."
 
 sdl: $(SFROTZ_BIN)
 $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
+	@echo "** Done building Frotz with SDL interface."
 
 common_lib:	$(COMMON_LIB)
 

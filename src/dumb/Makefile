@@ -14,6 +14,7 @@ ARFLAGS = rc
 $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
+	@echo "** Done with dumb interface."
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)
