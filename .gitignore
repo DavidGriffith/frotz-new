@@ -16,8 +16,9 @@ frotz-*
 *.tar
 *.gz
 src/common/version.c
-src/*/defines.h
 src/common/git_hash.h
+src/common/defs.h
+src/curses/ux_defines.h
 *.z?
 src/test/*mem
 src/test/*rec
