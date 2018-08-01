@@ -42,6 +42,12 @@ Syntax: dfrotz [options] story-file\n\
   -m   turn off MORE prompts      \t -x   expand abbreviations g/x/z\n\
   -p   plain ASCII output only\n"
 
+#define INFO2 "\
+Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
+For more options and explanations, please read the manual page.\n\n\
+While running, enter \"\\help\" to list the runtime escape sequences.\n"
+
+
 /* A unix-like getopt, but with the names changed to avoid any problems.  */
 static int zoptind = 1;
 static int zoptopt = 0;
@@ -129,12 +135,7 @@ void os_process_arguments(int argc, char *argv[])
     if (((argc - zoptind) != 1) && ((argc - zoptind) != 2)) {
 	printf("FROTZ V%s\tDumb interface.\n", GIT_TAG);
 	puts(INFORMATION);
-	printf("\t-Z # error checking mode (default = %d)\n"
-	    "\t     %d = don't report errors   %d = report first error\n"
-	    "\t     %d = report all errors     %d = exit after any error\n\n",
-	    ERR_DEFAULT_REPORT_MODE, ERR_REPORT_NEVER,
-	    ERR_REPORT_ONCE, ERR_REPORT_ALWAYS, ERR_REPORT_FATAL);
-	printf("While running, enter \"\\help\" to list the runtime escape sequences\n\n");
+	puts(INFO2);
 	exit(1);
     }
 
