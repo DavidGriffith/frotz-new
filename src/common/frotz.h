@@ -548,6 +548,7 @@ extern bool enable_scripting;
 extern bool enable_scrolling;
 extern bool enable_buffering;
 
+extern bool need_newline_at_exit;
 
 extern char *option_zcode_path;	/* dg */
 

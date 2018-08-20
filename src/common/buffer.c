@@ -75,6 +75,7 @@ void flush_buffer (void)
 void print_char (zchar c)
 {
     static bool flag = FALSE;
+    need_newline_at_exit = TRUE;
 
     if (message || ostream_memory || enable_buffering) {
 
@@ -123,7 +124,7 @@ void print_char (zchar c)
  */
 void new_line (void)
 {
-    flush_buffer (); stream_new_line ();
+    flush_buffer (); stream_new_line (); need_newline_at_exit = FALSE;
 
 }/* new_line */
 

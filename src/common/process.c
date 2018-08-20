@@ -313,6 +313,9 @@ void interpret (void)
         os_tick();
     } while (finished == 0);
 
+    if (need_newline_at_exit)
+	new_line();
+
     finished--;
 
 }/* interpret */
