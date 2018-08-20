@@ -297,8 +297,12 @@ static bool will_print_blank(cell c)
 
 static void show_line_prefix(int row, char c)
 {
-    if (show_line_numbers)
-	printf((row == -1) ? ".." : "%02d", (row + 1) % 100);
+    if (show_line_numbers) {
+	if (row == -1)
+	    printf("..");
+	else
+	    printf("%02d", (row + 1) % 100);
+    }
     if (show_line_types)
 	putchar(c);
     /* Add a separator char (unless there's nothing to separate).  */
