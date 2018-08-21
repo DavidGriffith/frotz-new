@@ -309,7 +309,7 @@ static void print_version(void)
     printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
     printf("  It was ported to Unix by Galen Hazelwood.\n");
     printf("  The core and dumb port are currently maintained by David Griffith.\n");
-    printf("  See https://github.com/DavidGriffith/frotz for Frotz's homepage.\n\n");
+    printf(" See https://661.org/proj/if/frotz for Frotz's homepage.\n\n");
     return;
 }
 
