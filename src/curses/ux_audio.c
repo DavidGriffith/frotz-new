@@ -602,7 +602,7 @@ void *playaiff(EFFECT *raw_effect)
             stereoize(bleep_buffer.samples, floatbuffer2, src_data.output_frames_gen);
         } else {
             /* It's already stereo.  Just copy the buffer. */
-            memcpy(bleep_buffer.samples, floatbuffer2, sizeof(float) * src_data.output_frames_gen * 2);
+            memmove(bleep_buffer.samples, floatbuffer2, sizeof(float) * src_data.output_frames_gen * 2);
         }
 
         /* Adjust volume. */

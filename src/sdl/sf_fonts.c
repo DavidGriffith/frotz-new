@@ -165,7 +165,7 @@ static SF_bdffont *sBDXload( FILE *f, int *err, int *size, int MAXCHAR){
   font = calloc(1,totb);
   if (!font) ERRET(-3)	// errorexit(99,"malloc()\n");
 //printf("allocated: %p-%p\n",font,((byte *)font)+totb);
-//  memcpy(&(font->magic[0]),"gBDX",4);
+//  memmove(&(font->magic[0]),"gBDX",4);
   font->minchar = minch;
   font->maxchar = maxch;
   font->defchar = defchar;
@@ -174,9 +174,9 @@ static SF_bdffont *sBDXload( FILE *f, int *err, int *size, int MAXCHAR){
   pbeg = (byte *)font;
   po = (byte *)(&(font->glyphs[maxch-minch+1]));
   k = strlen(fontname)+1;
-  memcpy(po,fontname,k); po += k; if (fngot) free(fontname);
+  memmove(po,fontname,k); po += k; if (fngot) free(fontname);
   k = strlen(copyright)+1;
-  memcpy(po,copyright,k); po += k; if (cpgot) free(copyright);
+  memmove(po,copyright,k); po += k; if (cpgot) free(copyright);
   for (i=minch;i<=maxch;i++) font->glyphs[i-minch] = 0;
 
 	// second pass
@@ -758,7 +758,7 @@ void sf_initfonts()
   if (!emph) os_fatal("malloc() failure in initfonts()");
   Emph = makefont(emph);
   if (!Emph) os_fatal("malloc() failure in initfonts()");
-  memcpy (emph, norm, size);
+  memmove (emph, norm, size);
 	// emphasize (underline)...
   cfont = (byte *)emph;
   for (i = norm->minchar;i <= norm->maxchar;i++){
@@ -773,7 +773,7 @@ void sf_initfonts()
   if (!bold) os_fatal("malloc() failure in initfonts()");
   Bold = makefont(bold);
   if (!Bold) os_fatal("malloc() failure in initfonts()");
-  memcpy (bold, norm, size);
+  memmove (bold, norm, size);
 	// boldify...
   cfont = (byte *)bold;
   for (i = norm->minchar;i <= norm->maxchar;i++){
@@ -792,7 +792,7 @@ void sf_initfonts()
   if (!bemp) os_fatal("malloc() failure in initfonts()");
   Bemp = makefont(bemp);
   if (!Bemp) os_fatal("malloc() failure in initfonts()");
-  memcpy (bemp, bold, size);
+  memmove (bemp, bold, size);
 	// emphasize (underline)...
   cfont = (byte *)bemp;
   for (i = norm->minchar;i <= norm->maxchar;i++){

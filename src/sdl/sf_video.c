@@ -334,7 +334,7 @@ static void scroll( int x, int y, int w, int h, int n)
     {
     while (nmove--)
 	{
-	memcpy(dst,src,w*sizeof(ulong));
+	memmove(dst,src,w*sizeof(ulong));
 	dst += step;
 	src += step;
 	}
@@ -1102,7 +1102,7 @@ ulong * sf_savearea( int x, int y, int w, int h)
   s = sbuffer+x+y*sbpitch;
   for (i=0;i<h;i++)
 	{
-	memcpy(p,s,w*sizeof(ulong));
+	memmove(p,s,w*sizeof(ulong));
 	p += w;
 	s += sbpitch;
 	}
@@ -1125,7 +1125,7 @@ void sf_restoreareaandfree( ulong *s)
   d = sbuffer+x+y*sbpitch;
   for (i=0;i<h;i++)
 	{
-	memcpy(d,p,w*sizeof(ulong));
+	memmove(d,p,w*sizeof(ulong));
 	p += w;
 	d += sbpitch;
 	}

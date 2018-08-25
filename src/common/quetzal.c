@@ -29,7 +29,6 @@
 #define malloc(size)	farmalloc (size)
 #define realloc(size,p)	farrealloc (size,p)
 #define free(size)	farfree (size)
-#define memcpy(d,s,n)	_fmemcpy (d,s,n)
 
 #else
 

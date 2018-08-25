@@ -33,7 +33,6 @@
 #define malloc(size)	farmalloc (size)
 #define realloc(size,p)	farrealloc (size,p)
 #define free(size)	farfree (size)
-#define memcpy(d,s,n)	_fmemcpy (d,s,n)
 
 #else
 
@@ -476,7 +475,7 @@ void init_undo (void)
     if (undo_mem != NULL) {
 	prev_zmp = undo_mem;
 	undo_diff = undo_mem + h_dynamic_size;
-	memcpy (prev_zmp, zmp, h_dynamic_size);
+	memmove (prev_zmp, zmp, h_dynamic_size);
     } else
 	f_setup.undo_slots = 0;
 
@@ -877,13 +876,13 @@ int restore_undo (void)
 
     /* undo possible */
 
-    memcpy (zmp, prev_zmp, h_dynamic_size);
+    memmove (zmp, prev_zmp, h_dynamic_size);
     SET_PC (curr_undo->pc);
     sp = stack + STACK_SIZE - curr_undo->stack_size;
     fp = stack + curr_undo->frame_offset;
     frame_count = curr_undo->frame_count;
     mem_undiff ((zbyte *) (curr_undo + 1), curr_undo->diff_size, prev_zmp);
-    memcpy (sp, (zbyte *)(curr_undo + 1) + curr_undo->diff_size,
+    memmove (sp, (zbyte *)(curr_undo + 1) + curr_undo->diff_size,
 	    curr_undo->stack_size * sizeof (*sp));
 
     curr_undo = curr_undo->prev;
@@ -1040,8 +1039,8 @@ int save_undo (void)
     p->diff_size = diff_size;
     p->stack_size = stack_size;
     p->frame_offset = fp - stack;
-    memcpy (p + 1, undo_diff, diff_size);
-    memcpy ((zbyte *)(p + 1) + diff_size, sp, stack_size * sizeof (*sp));
+    memmove (p + 1, undo_diff, diff_size);
+    memmove ((zbyte *)(p + 1) + diff_size, sp, stack_size * sizeof (*sp));
 
     if (!first_undo) {
 	p->prev = NULL;

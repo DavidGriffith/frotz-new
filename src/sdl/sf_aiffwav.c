@@ -292,11 +292,11 @@ static void writeRIFFheader( unsigned char *f, int freq, int numsamples, int num
 	int bytespersample){
 	// write header
 	// offset 0
-  memcpy(f,"RIFF",4); f += 4;
+  memmove(f,"RIFF",4); f += 4;
 	// offset 4
   PCwrite4(f,(36+numsamples*numchannels*bytespersample));
 	// offset 8
-  memcpy(f,"WAVEfmt ",8); f += 8;
+  memmove(f,"WAVEfmt ",8); f += 8;
 	// offset 16
   PCwrite4(f,16);
 	// offset 20
@@ -312,7 +312,7 @@ static void writeRIFFheader( unsigned char *f, int freq, int numsamples, int num
 	// offset 34
   PCwrite2(f,(8*bytespersample));
 	// offset 36
-  memcpy(f,"data",4); f += 4;
+  memmove(f,"data",4); f += 4;
 	// offset 40
   PCwrite4(f,(numsamples*numchannels*bytespersample));
 	// offset 44

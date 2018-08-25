@@ -125,7 +125,7 @@ static SF_glyph * mygetglyph(SFONT *s, word c, int allowdef)
     c = 32;
     }
   src = Zfont3+8*(c-32);
-  memcpy(&(myglyph.bitmap[0]),src,8);
+  memmove(&(myglyph.bitmap[0]),src,8);
   myglyph.h = 8;
   return (SF_glyph *)&myglyph;
   }

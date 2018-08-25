@@ -892,7 +892,7 @@ static int myunzip( int csize, byte *cdata, byte *udata)
   unsigned myin( void *d, byte **b){return 0;}
   int myout( void *d, byte *b, unsigned n)
 	{
-	memcpy(udata,b,n); udata += n;
+	memmove(udata,b,n); udata += n;
 	return 0;
 	}
 

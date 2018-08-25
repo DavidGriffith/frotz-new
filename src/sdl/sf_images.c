@@ -53,7 +53,7 @@ static void readPNGData(
 	png_structp png_ptr, png_bytep data, png_size_t length)
   {
   PNGData* pngData = (PNGData*)png_get_io_ptr(png_ptr);
-  memcpy(data,pngData->gfxData+pngData->offset,length);
+  memmove(data,pngData->gfxData+pngData->offset,length);
   pngData->offset += length;
   }
 
