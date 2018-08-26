@@ -126,7 +126,7 @@ static char *infos[] = {
 	"-L   use local resources",
 	"-o   watch object movement",
 	"-O   watch object locating",
-	"-p   alter piracy opcode",
+	"-P   alter piracy opcode",
 	"-q   quiet (disable sound)",
 	"-r # right margin",
 	"-s # random number seed value",
@@ -184,7 +184,7 @@ extern char *optarg;
 extern int optind;
 extern int m_timerinterval;
 
-static char *options = "@:aAb:B:c:f:Fh:iI:l:Lm:N:oOpqr:Rs:S:tTu:vVw:xZ:";
+static char *options = "@:aAb:B:c:f:Fh:iI:l:Lm:N:oOPqr:Rs:S:tTu:vVw:xZ:";
 
 static int limit( int v, int m, int M)
   {
@@ -247,7 +247,7 @@ static void parse_options (int argc, char **argv)
 	    f_setup.object_movement = 1;
 	if (c == 'O')
 	    f_setup.object_locating = 1;
-	if (c == 'p')
+	if (c == 'P')
 	    f_setup.piracy = 1;
 	if (c == 'r')
 	    f_setup.right_margin = num;
