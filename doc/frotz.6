@@ -214,6 +214,45 @@ Error checking mode.
 Default is 1 (report first instance of an error).
 
 
+.SH HOT KEYS
+These hot keys are enabled only when the Z-machine is waiting for line
+input (for Z-machine experts: the @read opcode).
+
+.TP
+.B Alt-D
+Set debugging options.
+
+.TP
+.B Alt-H
+Help (print the list of hot keys).
+
+.TP
+.B Alt-N
+New game (restart).
+
+.TP
+.B Alt-P
+Playback on.
+
+.TP
+.B Alt-R
+Recording on/off.
+
+.TP
+.B Alt-S
+Set random number seed.
+
+.TP
+.B Alt-U
+Undo one turn.
+
+.TP
+.B Alt-X
+Exit game (after confirmation).
+
+
+
+
 .SH INTERPRETER NUMBER
 The interpreter number is a setting in the Z-machine header which is
 used to tell the game on what sort of machine the interpreter is
@@ -581,6 +620,7 @@ The Unix port is currently maintained by David Griffith <dave@661.org>.
 
 
 .SH "SEE ALSO"
+.BR sfrotz (6)
 .BR dfrotz (6)
 .BR nitfol (6)
 .BR rezrov (6)
