@@ -288,6 +288,11 @@ uninstall_sfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
 
+install_all:	install_frotz install_dfrotz install_sfrotz
+
+uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz
+
+
 
 dist: frotz-$(GIT_TAG).tar
 frotz-$(GIT_TAG).tar:
