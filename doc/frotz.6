@@ -251,8 +251,6 @@ Undo one turn.
 Exit game (after confirmation).
 
 
-
-
 .SH INTERPRETER NUMBER
 The interpreter number is a setting in the Z-machine header which is
 used to tell the game on what sort of machine the interpreter is
@@ -538,6 +536,13 @@ Default is "off".
 If the ZCODE_PATH environmental variable is defined, frotz will search
 that path for game files.  If that doesn't exist, INFOCOM_PATH will be
 searched.
+
+For the Alt key to be read correctly in an Xterm, the following lines
+should be in your .Xresources file:
+
+XTerm*metaSendsEscape: true
+.br
+XTerm*eightBitInput: false
 
 
 .SH FURTHER INFORMATION
