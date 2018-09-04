@@ -330,31 +330,11 @@ void os_process_arguments (int argc, char *argv[])
     f_setup.story_file = strdup(argv[zoptind]);
     f_setup.story_name = strdup(basename(argv[zoptind]));
 
-    /* Now strip off the extension. */
+    /* Now strip off the extension */
     p = strrchr(f_setup.story_name, '.');
-    if ((p != NULL) &&
-        ((strcmp(p,EXT_BLORB2) == 0) ||
-         (strcmp(p,EXT_BLORB3) == 0) ||
-         (strcmp(p,EXT_BLORB4) == 0) ) ) {
-//        blorb_ext = strdup(p);
-    }
-    else
-//	blorb_ext = strdup(EXT_BLORB);
+    *p = '\0';  /* extension removed */
 
-
-    /* Get rid of extensions with 1 to 6 character extensions. */
-    /* This will take care of an extension like ".zblorb". */
-    /* More than that, there might be something weird going on */
-    /* which is not our concern. */
-    if (p != NULL) {
-	if (strlen(p) >= 2 && strlen(p) <= 7) {
-	    *p = '\0';      /* extension removed */
-	}
-    }
-
-    f_setup.story_path = strdup(dirname(argv[zoptind]));
-
-   /* Create nice default file names */
+    /* Create nice default file names */
 
     f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
     strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
