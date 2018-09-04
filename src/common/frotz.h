@@ -352,6 +352,16 @@ extern const char build_timestamp[];
 #define ZC_FKEY_F12 0x90
 #define ZC_FKEY_MAX 0x90
 #define ZC_NUMPAD_MIN 0x91
+#define ZC_NUMPAD_0 0x91
+#define ZC_NUMPAD_1 0x92
+#define ZC_NUMPAD_2 0x93
+#define ZC_NUMPAD_3 0x94
+#define ZC_NUMPAD_4 0x95
+#define ZC_NUMPAD_5 0x96
+#define ZC_NUMPAD_6 0x97
+#define ZC_NUMPAD_7 0x98
+#define ZC_NUMPAD_8 0x99
+#define ZC_NUMPAD_9 0x9a
 #define ZC_NUMPAD_MAX 0x9a
 #define ZC_SINGLE_CLICK 0x9b
 #define ZC_DOUBLE_CLICK 0x9c
