@@ -1,3 +1,9 @@
+/*
+ * dumb_blorb.h
+ *
+ * Blorb related functions specific to the Dumb interface.
+ *
+ */
 
 #include "../blorb/blorb.h"
 #include "../blorb/blorblow.h"

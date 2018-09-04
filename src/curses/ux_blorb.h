@@ -1,3 +1,9 @@
+/*
+ * ux_blorb.h
+ *
+ * Blorb related functions specific to the Curses interface.
+ *
+ */
 
 #include "../blorb/blorb.h"
 #include "../blorb/blorblow.h"

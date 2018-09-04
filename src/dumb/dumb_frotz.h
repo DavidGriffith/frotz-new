@@ -1,4 +1,5 @@
-/* dumb-frotz.h
+/*
+ * dumb_frotz.h
  *
  * Frotz os functions for a standard C library and a dumb terminal.
  * Now you can finally play Zork Zero on your Teletype.
@@ -6,6 +7,7 @@
  * Copyright 1997, 1998 Alembic Petrofsky <alembic@petrofsky.berkeley.ca.us>.
  * Any use permitted provided this notice stays intact.
  */
+
 #include "../common/frotz.h"
 #include <stdio.h>
 #include <stdlib.h>
