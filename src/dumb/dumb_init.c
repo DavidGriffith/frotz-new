@@ -139,18 +139,24 @@ void os_process_arguments(int argc, char *argv[])
 	exit(1);
     }
 
-    /* Create nice default file names */
+    /* Save the story file name */
 
-    f_setup.story_file = my_strdup(argv[zoptind++]);
-    if (zoptind < argc)
-	graphics_filename = my_strdup(argv[zoptind++]);
-
-    f_setup.story_name = my_strdup(basename(f_setup.story_file));
+    f_setup.story_file = my_strdup(argv[zoptind]);
+    f_setup.story_name = my_strdup(basename(argv[zoptind]));
 
     /* Now strip off the extension */
     p = strrchr(f_setup.story_name, '.');
     *p = '\0';	/* extension removed */
 
+    /* Create nice default file names */
+
+    f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
+    strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+    strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT));
+
+    f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
+    strncpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+    strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND));
 
     if (!f_setup.restore_mode) {
       f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
@@ -162,13 +168,10 @@ void os_process_arguments(int argc, char *argv[])
       free(f_setup.tmp_save_name);
     }
 
-    f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
-    strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT));
+    f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
+    strncpy(f_setup.aux_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+    strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX));
 
-    f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
-    strncpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND));
 }
 
 void os_init_screen(void)
