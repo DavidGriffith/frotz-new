@@ -671,18 +671,18 @@ static zword goodzkey( SDL_Event *e, int allowed)
 	case SDLK_KP_7:		return ZC_NUMPAD_MIN+7;
 	case SDLK_KP_8:		return ZC_NUMPAD_MIN+8;
 	case SDLK_KP_9:		return ZC_NUMPAD_MIN+9;
-	case SDLK_F1:		return ZC_FKEY_MIN+0;
-	case SDLK_F2:		return ZC_FKEY_MIN+1;
-	case SDLK_F3:		return ZC_FKEY_MIN+2;
-	case SDLK_F4:		return ZC_FKEY_MIN+3;
-	case SDLK_F5:		return ZC_FKEY_MIN+4;
-	case SDLK_F6:		return ZC_FKEY_MIN+5;
-	case SDLK_F7:		return ZC_FKEY_MIN+6;
-	case SDLK_F8:		return ZC_FKEY_MIN+7;
-	case SDLK_F9:		return ZC_FKEY_MIN+8;
-	case SDLK_F10:		return ZC_FKEY_MIN+9;
-	case SDLK_F11:		return ZC_FKEY_MIN+10;
-	case SDLK_F12:		return ZC_FKEY_MIN+11;
+	case SDLK_F1:		return ZC_FKEY_F1;
+	case SDLK_F2:		return ZC_FKEY_F2;
+	case SDLK_F3:		return ZC_FKEY_F3;
+	case SDLK_F4:		return ZC_FKEY_F4;
+	case SDLK_F5:		return ZC_FKEY_F5;
+	case SDLK_F6:		return ZC_FKEY_F6;
+	case SDLK_F7:		return ZC_FKEY_F7;
+	case SDLK_F8:		return ZC_FKEY_F8;
+	case SDLK_F9:		return ZC_FKEY_F9;
+	case SDLK_F10:		return ZC_FKEY_F10;
+	case SDLK_F11:		return ZC_FKEY_F11;
+	case SDLK_F12:		return ZC_FKEY_F12;
 	}
         //XXX Maybe we should just always have text input on.
         if (!SDL_IsTextInputActive()) {
