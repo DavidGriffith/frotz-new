@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <libgen.h>
 
 #include <errno.h>
 #include <sys/time.h>
@@ -744,16 +745,42 @@ int os_read_file_name (char *file_name, const char *default_name, int UNUSED(fla
 	file_name[0]=0;
     } else {
 	print_string ("Enter a file name.\nDefault is \"");
-	print_string (default_name);
+
+	/* After successfully reading or writing a file, the default
+	 * name gets saved and used again the next time something is
+	 * to be read or written.  In restricted mode, we don't want
+	 * to show any path prepended to the actual file name.  Here,
+	 * we strip out that path and display only the filename.
+	 */
+	if (f_setup.restricted_path) {
+	    tempname = basename((char *)default_name);
+	    print_string(tempname);
+	} else
+	   print_string (default_name);
 	print_string ("\": ");
 	read_string (FILENAME_MAX, (zchar *)file_name);
+    }
+
+    /* Return failure if path provided when in restricted mode.
+     * I think this is better than accepting a path/filename
+     * and stripping off the path.
+     */
+    if (f_setup.restricted_path) {
+	tempname = dirname(file_name);
+	if (strlen(tempname) > 1)
+	    return 0;
     }
 
     /* Use the default name if nothing was typed */
     if (file_name[0] == 0)
         strcpy (file_name, default_name);
 
-    /* Check if we're restricted to one directory. */
+    /* If we're restricted to one directory, strip any leading path left
+     * over from a previous call to os_read_file_name(), then prepend
+     * the prescribed path to the filename.  Hostile leading paths won't
+     * get this far.  Instead we return failure a few lines above here if
+     * someone tries it.
+     */
     if (f_setup.restricted_path != NULL) {
 	for (i = strlen(file_name); i > 0; i--) {
 	    if (file_name[i] == PATH_SEPARATOR) {
