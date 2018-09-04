@@ -423,7 +423,17 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
     strcpy(file_name, default_name);
     return TRUE;
   } else {
-    sprintf(prompt, "Please enter a filename [%s]: ", default_name);
+    if (f_setup.restricted_path) {
+      for (i = strlen(default_name); i > 0; i--) {
+	if (default_name[i] == PATH_SEPARATOR) {
+	  i++;
+	  break;
+	}
+      }
+      tempname = strdup(default_name + i);
+      sprintf(prompt, "Please enter a filename [%s]: ", tempname);
+    } else
+      sprintf(prompt, "Please enter a filename [%s]: ", default_name);
     dumb_read_misc_line(buf, prompt);
     if (strlen(buf) > MAX_FILE_NAME) {
       printf("Filename too long\n");
