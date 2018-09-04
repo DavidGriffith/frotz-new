@@ -5,6 +5,8 @@
  *
  */
 
+#ifndef NO_BLORB
+
 #include "../blorb/blorb.h"
 #include "../blorb/blorblow.h"
 
@@ -41,3 +43,5 @@ extern bb_result_t	blorb_res;
 
 bb_err_t dumb_blorb_init(char *);
 void dumb_blorb_stop(void);
+
+#endif /* NO_BLORB */

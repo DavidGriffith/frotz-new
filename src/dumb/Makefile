@@ -12,12 +12,16 @@ ARFLAGS = rc
 .DELETE_ON_ERROR:
 
 $(TARGET): $(OBJECTS)
+ifndef NO_BLORB
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 	@echo "** Done with dumb interface."
+endif
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)
 
 %.o: %.c
+ifndef NO_BLORB
 	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<
+endif

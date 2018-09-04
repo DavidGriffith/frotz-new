@@ -217,6 +217,7 @@ FILE *os_load_story(void)
 {
     FILE *fp;
 
+#ifndef NO_BLORB
     switch (dumb_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
 //	  printf("No blorb file found.\n\n");
@@ -237,6 +238,9 @@ FILE *os_load_story(void)
     /* Is this a Blorb file containing Zcode? */
     if (f_setup.exec_in_blorb)
 	 fseek(fp, blorb_res.data.startpos, SEEK_SET);
+#else
+    fp = fopen(f_setup.story_file, "rb");
+#endif /* NO_BLORB */
 
     return fp;
 }

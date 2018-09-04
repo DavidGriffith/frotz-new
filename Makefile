@@ -80,6 +80,10 @@ CURSES ?= -lncurses
 #
 #NO_MEMMOVE = yes
 
+# Uncomment this if you want to disable the compilation of Blorb support.
+#
+#NO_BLORB = yes
+
 #########################################################################
 # This section is where Frotz is actually built.
 # Under normal circumstances, nothing in this section should be changed.
@@ -140,8 +144,10 @@ CURSES_DEFINES = $(CURSES_DIR)/ux_defines.h
 DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 
+ifndef NO_BLORB
 BLORB_DIR = $(SRCDIR)/blorb
 BLORB_LIB = $(BLORB_DIR)/blorblib.a
+endif
 
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
@@ -220,7 +226,11 @@ endif
 ifdef NO_MEMMOVE
 	@echo "#define NO_MEMMOVE" >> $@
 endif
+ifdef NO_BLORB
+	@echo "#define NO_BLORB" >> $@
+endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
+
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
