@@ -27,6 +27,7 @@
 #include <string.h>
 #include <limits.h>
 #include <libgen.h>
+#include <ctype.h>
 
 #include <errno.h>
 #include <sys/time.h>
@@ -727,12 +728,14 @@ zchar os_read_key (int timeout, int cursor)
  *
  */
 
-int os_read_file_name (char *file_name, const char *default_name, int UNUSED(flag))
+int os_read_file_name (char *file_name, const char *default_name, int flag)
 {
+    FILE *fp;
     int saved_replay = istream_replay;
     int saved_record = ostream_record;
     int i;
     char *tempname;
+    zchar answer[4];
 
     /* Turn off playback and recording temporarily */
     istream_replay = 0;
@@ -794,6 +797,15 @@ int os_read_file_name (char *file_name, const char *default_name, int UNUSED(fla
 	    strcat(file_name, "/");
 	}
 	strcat(file_name, tempname);
+    }
+
+    /* Warn if overwriting a file. */
+    if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX || flag == FILE_RECORD)
+	&& ((fp = fopen(file_name, "rb")) != NULL)) {
+	fclose (fp);
+	print_string("Overwrite existing file? ");
+	read_string(4, answer);
+	return(tolower(answer[0]) == 'y');
     }
 
     /* Restore state of playback and recording */
