@@ -153,17 +153,17 @@ void os_process_arguments(int argc, char *argv[])
 
 
     if (!f_setup.restore_mode) {
-      f_setup.save_name = malloc(strlen(f_setup.story_name) * sizeof(char) + 5);
-      strncpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name));
+      f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
+      strncpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
       strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE));
     } else { /* Set our auto load save as the name save */
-      f_setup.save_name = malloc(strlen(f_setup.tmp_save_name) * sizeof(char) + 5);
-      strncpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name));
+      f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
+      strncpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) + 1);
       free(f_setup.tmp_save_name);
     }
 
-    f_setup.script_name = malloc(strlen(f_setup.story_name) * sizeof(char) + 5);
-    strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name));
+    f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
+    strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
     strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT));
 
     f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
