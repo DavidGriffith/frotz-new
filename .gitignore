@@ -22,3 +22,6 @@ src/curses/ux_defines.h
 *.z?
 src/test/*mem
 src/test/*rec
+*.qzl
+*.scr
+*.rec
