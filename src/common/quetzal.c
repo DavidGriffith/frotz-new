@@ -51,8 +51,6 @@
  * externs
  */
 
-extern int os_storyfile_seek(FILE * fp, long offset, int whence);
-
 typedef unsigned long zlong;
 
 /*

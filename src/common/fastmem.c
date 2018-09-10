@@ -56,9 +56,6 @@ extern void split_window (zword);
 extern void script_open (void);
 extern void script_close (void);
 
-extern FILE *os_load_story (void);
-extern int os_storyfile_seek (FILE * fp, long offset, int whence);
-extern int os_storyfile_tell (FILE * fp);
 
 extern zword save_quetzal (FILE *, FILE *);
 extern zword restore_quetzal (FILE *, FILE *);
