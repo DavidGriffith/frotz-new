@@ -9,7 +9,6 @@
 #include "../blorb/blorblow.h"
 
 #define bb_ID_ZCOD	(bb_make_id('Z','C','O','D'))
-#define bb_ID_FORM	(bb_make_id('F','O','R','M'))
 #define bb_ID_MOD	(bb_make_id('M','O','D',' '))
 #define bb_ID_OGGV	(bb_make_id('O','G','G','V'))
 
