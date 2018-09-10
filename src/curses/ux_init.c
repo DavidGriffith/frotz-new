@@ -622,7 +622,7 @@ FILE *os_load_story(void)
 	  printf("Blorb file loaded, but unable to build map.\n\n");
 	  break;
 	case bb_err_NotFound:
-	  printf("Blorb file loaded, but lacks executable chunk.\n\n");
+	  printf("Blorb file loaded, but lacks ZCOD executable chunk.\n\n");
 	  break;
 	case bb_err_None:
 //	  printf("No blorb errors.\n\n");

@@ -128,7 +128,13 @@ bb_err_t ux_blorb_init(char *filename)
      */
     if (f_setup.exec_in_blorb) {
 	blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
-		&blorb_res, bb_make_id('Z','C','O','D'), 0);
+		 &blorb_res, bb_ID_Exec, 0);
+
+	printf("blorb_err %d\n", blorb_err);
+	exit(2);
+
+	blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
+		&blorb_res, bb_ID_ZCOD, 0);
 	f_setup.exec_in_blorb = 1;
     }
 
