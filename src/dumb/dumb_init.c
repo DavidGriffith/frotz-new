@@ -116,7 +116,7 @@ void os_process_arguments(int argc, char *argv[])
 	  case 'P': f_setup.piracy = 1; break;
 	case 'p': plain_ascii = 1; break;
 	case 'r': dumb_handle_setting(zoptarg, FALSE, TRUE); break;
-	case 'R': f_setup.restricted_path = strndup(zoptarg, PATH_MAX); break;
+	case 'R': f_setup.restricted_path =  my_strndup(zoptarg, PATH_MAX); break;
 	case 's': user_random_seed = atoi(zoptarg); break;
 	  case 'S': f_setup.script_cols = atoi(zoptarg); break;
 	case 't': user_tandy_bit = 1; break;
@@ -300,6 +300,24 @@ char *my_strdup(char *src)
 	p = str;
 	while (*src)
         *p++ = *src++;
+	*p = '\0';
+	return str;
+}
+
+char *my_strndup(char *src, size_t n)
+{
+	char *str;
+	char *p;
+	int len = 0;
+
+	while (src[len] && len < n)
+		len++;
+	str = malloc(len + 1);
+	p = str;
+	while (len--)
+	{
+		*p++ = *src++;
+	}
 	*p = '\0';
 	return str;
 }
