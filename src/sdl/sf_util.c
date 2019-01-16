@@ -883,18 +883,18 @@ char * sf_GetProfileString( const char *sect, const char *id, char * def)
 
 #define pshort( b) (((int)((b)[1]) << 8) + (int)((b)[0]))
 
+static unsigned myin( void *d, byte **b){return 0;}
+static int myout( void *udata, byte *b, unsigned n)
+  {
+  memmove(udata,b,n); udata += n;
+  return 0;
+  }
+
 static int myunzip( int csize, byte *cdata, byte *udata)
   {
   byte window[32768];
   z_stream z;
   int st;
-
-  unsigned myin( void *d, byte **b){return 0;}
-  int myout( void *d, byte *b, unsigned n)
-	{
-	memmove(udata,b,n); udata += n;
-	return 0;
-	}
 
   memset(&z,0,sizeof(z));
 
@@ -905,7 +905,7 @@ static int myunzip( int csize, byte *cdata, byte *udata)
   z.avail_in = csize;
 
   for (;;){
-	st = inflateBack( &z, myin, NULL, myout, NULL);
+	st = inflateBack( &z, myin, NULL, myout, udata);
 	if (st == Z_STREAM_END) break;
 	if (st) return st;
 	}
