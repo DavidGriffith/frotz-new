@@ -332,7 +332,10 @@ void os_process_arguments (int argc, char *argv[])
 
     /* Now strip off the extension */
     p = strrchr(f_setup.story_name, '.');
-    *p = '\0';  /* extension removed */
+    if ( p != NULL )
+    {
+	*p = '\0';  /* extension removed */
+    }
 
     /* Create nice default file names */
 
