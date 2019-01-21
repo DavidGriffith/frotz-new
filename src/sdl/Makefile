@@ -2,8 +2,10 @@
 
 SDL_PKGS ?= libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 
-# Dependency generation requires GCC.
+# Dependency generation requires GCC or clang.
 CC = gcc
+#CC = clang
+
 CFLAGS += `pkg-config $(SDL_PKGS) --cflags`
 
 SOURCES = sf_fonts.c sf_msg_en.c sf_resource.c sf_util.c \
@@ -33,7 +35,7 @@ clean:
 
 %.o: %.c
 %.o: %.c %.d
-	$(CC) -MMD -MP $(CFLAGS) -c $<
+	$(CC) -MMD -MP $(CFLAGS) -fPIC -fpic -c $<
 
 $(DEPS):;
 
