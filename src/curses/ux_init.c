@@ -96,7 +96,7 @@ static int	getconfig(char *);
 static int	getbool(char *);
 static int	getcolor(char *);
 static int	geterrmode(char *);
-/* static FILE	*pathopen(const char *, const char *, const char *, char *); */
+static FILE	*pathopen(const char *, const char *, const char *);
 
 
 /*
@@ -600,6 +600,46 @@ int os_random_seed (void)
 
 }/* os_random_seed */
 
+/*
+ * os_path_open
+ *
+ * Open a file in the current directory.  If this fails, then search the
+ * directories in the ZCODE_PATH environmental variable.  If that's not
+ * defined, search INFOCOM_PATH.
+ *
+ */
+
+FILE *os_path_open(const char *name, const char *mode)
+{
+        FILE *fp;
+        char buf[FILENAME_MAX + 1];
+        char *p;
+
+        /* Let's see if the file is in the currect directory */
+        /* or if the user gave us a full path. */
+        if ((fp = fopen(name, mode))) {
+                return fp;
+        }
+
+        /* If zcodepath is defined in a config file, check that path. */
+        /* If we find the file a match in that path, great. */
+        /* Otherwise, check some environmental variables. */
+        if (f_setup.zcode_path != NULL) {
+                if ((fp = pathopen(name, f_setup.zcode_path, mode)) != NULL) {
+                        return fp;
+                }
+        }
+
+        if ( (p = getenv(PATH1) ) == NULL)
+                p = getenv(PATH2);
+
+        if (p != NULL) {
+                fp = pathopen(name, p, mode);
+                return fp;
+        }
+        return NULL;    /* give up */
+} /* os_path_open() */
+
 
 /*
  * os_load_story
@@ -632,7 +672,7 @@ FILE *os_load_story(void)
 	  break;
     }
 
-    fp = fopen(f_setup.story_file, "rb");
+    fp = os_path_open(f_setup.story_file, "rb");
 
     /* Is this a Blorb file containing Zcode? */
     if (f_setup.exec_in_blorb)
@@ -698,16 +738,14 @@ int os_storyfile_tell(FILE * fp)
 }
 
 
-#ifdef CRAP
 /*
  * pathopen
  *
  * Given a standard Unix-style path and a filename, search the path for
- * that file.  If found, return a pointer to that file and put the full
- * path where the file was found in fullname.
+ * that file.  If found, return a pointer to that file
  *
  */
-static FILE *pathopen(const char *name, const char *p, const char *mode, char *fullname)
+static FILE *pathopen(const char *name, const char *p, const char *mode)
 {
 	FILE *fp;
 	char buf[FILENAME_MAX + 1];
@@ -723,7 +761,6 @@ static FILE *pathopen(const char *name, const char *p, const char *mode, char *f
 			*bp++ = DIRSEP;
 		strcpy(bp, name);
 		if ((fp = fopen(buf, mode)) != NULL) {
-			strncpy(fullname, buf, FILENAME_MAX);
 			return fp;
 		}
 		if (*p)
@@ -731,7 +768,6 @@ static FILE *pathopen(const char *name, const char *p, const char *mode, char *f
 	}
 	return NULL;
 } /* FILE *pathopen() */
-#endif
 
 
 /*
