@@ -39,6 +39,19 @@ platform-specific info below.
 It's always a good idea to have the GNU version of make(1) around.
 
 
+============
+SDL Frotz ||
+============
+
+SDL Frotz (aka sfrotz) started off as a port of Frotz 2.32.  After 
+languishing for several years, it is now incorporated into the Unix 
+Frotz codebase as a one of the available interfaces.
+
+Prerequisite packages for sfrotz:
+  * libsdl2-dev
+  * libsdl2-mixer-dev
+
+
 =======================
 Editing the Makefile ||
 =======================
