@@ -501,6 +501,16 @@ STATIC char *resolvedir( char *dir, char *res, int size)
   return p;
   }
 
+static void exhaust( ENTRY *e, ENTRY **resp, int *n)
+    {
+    if (!e) return;
+    exhaust(e->left, resp, n);
+    e->left = *resp;
+    *resp = e;
+    (*n)++;
+    exhaust(e->right, resp, n);
+    }
+
 STATIC ENTRY * dodir(
 	char *dirname, char *pattern, char *resdir, int size, int *ndirs, int *ntot)
   {
@@ -511,16 +521,6 @@ STATIC ENTRY * dodir(
   char *p, *resdend;
   struct stat fst;
   int n;
-
-  void exhaust( ENTRY *e)
-    {
-    if (!e) return;
-    exhaust(e->left);
-    e->left = res;
-    res = e;
-    n++;
-    exhaust(e->right);
-    }
 
 //printf("\ndodir\n");
   if (!resolvedir(dirname,resdir,size)) return NULL;
@@ -564,9 +564,9 @@ STATIC ENTRY * dodir(
   *resdend = 0;
 
   n = 0;
-  exhaust(dirs);
+  exhaust(dirs, &res, &n);
   *ndirs = n;
-  exhaust(files);
+  exhaust(files, &res, &n);
   *ntot = n;
 
   if (res)
