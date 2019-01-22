@@ -89,7 +89,7 @@ resulting executable somewhere like $HOME/bin and add that directory to
 your $PATH.
 
 For compiling, installing, and uninstalling dumb frotz, use "make dumb",
-"make install_dumb", and "make uninstall_dumb".  The process is exactly 
+"make install_dfrotz", and "make uninstall_dfrotz".  The process is exactly 
 the same as above except you won't be depending on any external 
 libraries; not even curses.
 
