@@ -219,12 +219,12 @@ void os_process_arguments (int argc, char *argv[])
     /* $HOME/.frotzrc overrides CONFIG_DIR/frotz.conf */
 
     strncpy(configfile, home, FILENAME_MAX);
-    strncat(configfile, "/", 1);
+    strncat(configfile, "/", 2);
 
-    strncat(configfile, USER_CONFIG, strlen(USER_CONFIG));
+    strncat(configfile, USER_CONFIG, strlen(USER_CONFIG) + 1);
     if (!getconfig(configfile)) {
         strncpy(configfile, CONFIG_DIR, FILENAME_MAX);
-        strncat(configfile, "/", 1);    /* added by DJP */
+        strncat(configfile, "/", 2);    /* added by DJP */
         strncat(configfile, MASTER_CONFIG, FILENAME_MAX-10);
         getconfig(configfile);  /* we're not concerned if this fails */
     }
@@ -321,16 +321,16 @@ void os_process_arguments (int argc, char *argv[])
 
     f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
     strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT));
+    strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
 
     f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
     strncpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND));
+    strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
     if (!f_setup.restore_mode) {
 	f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
 	strncpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-	strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE));
+	strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
     } else {  /*Set our auto load save as the name_save*/
 	f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
 	strncpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) + 1);
@@ -339,7 +339,7 @@ void os_process_arguments (int argc, char *argv[])
 
     f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
     strncpy(f_setup.aux_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX));
+    strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
 
 }/* os_process_arguments */
 
