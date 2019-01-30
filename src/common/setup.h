@@ -12,7 +12,7 @@ typedef struct frotz_setup_struct {
 	int left_margin;		/* done */
 	int right_margin;		/* done */
 	int ignore_errors;		/* done */
-	int interpreter_number;		/* Just dumb frotz now */
+	int interpreter_number;		/* done */
 	int piracy;			/* done */
 	int undo_slots;			/* done */
 	int expand_abbreviations;	/* done */
