@@ -5,6 +5,9 @@ CC=gcc
 # Enable compiler warnings. This is an absolute minimum.
 CFLAGS += -Wall -std=c99 #-Wextra
 
+# If compiling on OS/X add the following
+# CFLAGS += -D_DARWIN_C_SOURCE -_XOPEN_SOURCE=600
+
 # strdup, strndup
 CFLAGS += -D_POSIX_C_SOURCE=200809L
 
