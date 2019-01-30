@@ -72,8 +72,6 @@ Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n
 For more options and explanations, please read the manual page.\n"
 
 
-static bool interpreter_number_override = FALSE;
-
 /*
 char stripped_story_name[FILENAME_MAX+1];
 char semi_stripped_story_name[FILENAME_MAX+1];
@@ -275,9 +273,7 @@ void os_process_arguments (int argc, char *argv[])
 		    break;
           case 'h': u_setup.screen_height = atoi(zoptarg); break;
 	  case 'i': f_setup.ignore_errors = 1; break;
-	  case 'I': f_setup.interpreter_number = atoi(zoptarg);
-		    interpreter_number_override = TRUE;
-		    break;
+	  case 'I': f_setup.interpreter_number = atoi(zoptarg); break;
 	  case 'l': f_setup.left_margin = atoi(zoptarg); break;
 	  case 'L': f_setup.restore_mode = 1;
 		    f_setup.tmp_save_name = malloc(FILENAME_MAX * sizeof(char) + 1);
@@ -483,7 +479,7 @@ void os_init_screen (void)
 
     /* Use the ms-dos interpreter number for v6, because that's the
      * kind of graphics files we understand.  Otherwise, use DEC.  */
-    if (!interpreter_number_override || (f_setup.interpreter_number == 0))
+    if (f_setup.interpreter_number == INTERP_DEFAULT)
 	h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
     else
 	h_interpreter_number = f_setup.interpreter_number;

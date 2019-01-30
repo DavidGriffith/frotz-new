@@ -187,14 +187,13 @@ void os_init_screen(void)
     h_screen_rows = user_screen_height;
     h_screen_cols = user_screen_width;
 
-    if (f_setup.interpreter_number > 0)
-	h_interpreter_number = f_setup.interpreter_number;
-    else {
-	/* Use ms-dos for v6 (because that's what most people have the
-	* graphics files for), but don't use it for v5 (or Beyond Zork
-	* will try to use funky characters).  */
+    /* Use the ms-dos interpreter number for v6, because that's the
+     * kind of graphics files we understand.  Otherwise, use DEC.  */
+    if (f_setup.interpreter_number == INTERP_DEFAULT)
 	h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
-    }
+    else
+ 	h_interpreter_number = f_setup.interpreter_number;
+
     h_interpreter_version = 'F';
 
     dumb_init_input();
