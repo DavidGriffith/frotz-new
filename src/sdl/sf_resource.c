@@ -18,7 +18,6 @@ zword hx_back_colour;
 // various data
 
 bool 	m_tandy = 0;
-bool	m_quetzal = 1;
 //	CRect m_wndSize;
 //	CString m_propFontName;
 //	CString m_fixedFontName;
@@ -458,7 +457,6 @@ void sf_readsettings(void)
   f_setup.ignore_errors = sf_GetProfileInt("Interpreter","Ignore Errors",0);
   f_setup.expand_abbreviations = sf_GetProfileInt("Interpreter","Expand Abbreviations",0);
   m_tandy = sf_GetProfileInt("Interpreter","Tandy Bit",0) ? true : false;
-  m_quetzal = sf_GetProfileInt("Interpreter","Quetzal Format",1) ? true : false;
   f_setup.script_cols = sf_GetProfileInt("Interpreter","Wrap Script Lines",1) ? 80 : 0;
 
   if ((p = sf_GetProfileString("Interpreter","SaveNames",NULL)))

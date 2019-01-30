@@ -55,7 +55,6 @@ int colour_in_use(zword colour);
 // various data
 
 extern bool 	m_tandy;
-extern bool	m_quetzal;
 //	CRect m_wndSize;
 //	CString m_propFontName;
 //	CString m_fixedFontName;
