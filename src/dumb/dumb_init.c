@@ -86,7 +86,6 @@ error:
 
 static int user_screen_width = 75;
 static int user_screen_height = 24;
-static int user_interpreter_number = -1;
 static int user_random_seed = -1;
 static int user_tandy_bit = 0;
 static char *graphics_filename = NULL;
@@ -188,8 +187,8 @@ void os_init_screen(void)
     h_screen_rows = user_screen_height;
     h_screen_cols = user_screen_width;
 
-    if (user_interpreter_number > 0)
-	h_interpreter_number = user_interpreter_number;
+    if (f_setup.interpreter_number > 0)
+	h_interpreter_number = f_setup.interpreter_number;
     else {
 	/* Use ms-dos for v6 (because that's what most people have the
 	* graphics files for), but don't use it for v5 (or Beyond Zork
