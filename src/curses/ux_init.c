@@ -592,7 +592,6 @@ int os_random_seed (void)
 FILE *os_path_open(const char *name, const char *mode)
 {
         FILE *fp;
-        char buf[FILENAME_MAX + 1];
         char *p;
 
         /* Let's see if the file is in the currect directory */
