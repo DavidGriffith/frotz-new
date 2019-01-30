@@ -94,6 +94,7 @@ void unix_resize_display(void);		/* ux_screen.c */
 void unix_suspend_program(void);        /* ux_screen.c */
 void unix_get_terminal_size(void);      /* ux_init.c */
 
+FILE *os_path_open(const char *, const char *);
 
 #ifdef NO_STRRCHR
 char *my_strrchr(const char *, int);

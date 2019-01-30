@@ -73,7 +73,7 @@ bb_err_t ux_blorb_init(char *filename)
 
     blorb_map = NULL;
 
-    if ((fp = fopen(filename, "rb")) == NULL)
+    if ((fp = os_path_open(filename, "rb")) == NULL)
 	return bb_err_Read;
 
     /* Is this really a Blorb file?  If not, maybe we're loading a naked
@@ -96,12 +96,12 @@ bb_err_t ux_blorb_init(char *filename)
         strncat(mystring, EXT_BLORB, len1 * sizeof(char));
 
 	/* Check if foo.blb is there. */
-        if ((fp = fopen(mystring, "rb")) == NULL) {
+        if ((fp = os_path_open(mystring, "rb")) == NULL) {
 	    p = strrchr(mystring, '.');
 	    if (p != NULL)
 		*p = '\0';
             strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
-	    if (!(fp = fopen(mystring, "rb")))
+	    if (!(fp = os_path_open(mystring, "rb")))
 	        return bb_err_NoBlorb;
 	}
 	if (!isblorb(fp)) {
@@ -127,12 +127,6 @@ bb_err_t ux_blorb_init(char *filename)
      * location so os_load_story() can find it.
      */
     if (f_setup.exec_in_blorb) {
-	blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
-		 &blorb_res, bb_ID_Exec, 0);
-
-	printf("blorb_err %d\n", blorb_err);
-	exit(2);
-
 	blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
 		&blorb_res, bb_ID_ZCOD, 0);
 	f_setup.exec_in_blorb = 1;
