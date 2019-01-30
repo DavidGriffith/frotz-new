@@ -91,6 +91,13 @@ static int user_tandy_bit = 0;
 static char *graphics_filename = NULL;
 static bool plain_ascii = FALSE;
 
+/*
+ * os_process_arguments
+ *
+ * Handle command line switches.
+ * Some variables may be set to activate special features of Frotz.
+ *
+ */
 void os_process_arguments(int argc, char *argv[])
 {
     int c;

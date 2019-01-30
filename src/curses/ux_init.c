@@ -157,24 +157,8 @@ void os_fatal (const char *s, ...)
 /*
  * os_process_arguments
  *
- * Handle command line switches. Some variables may be set to activate
- * special features of Frotz:
- *
- *     option_attribute_assignment
- *     option_attribute_testing
- *     option_context_lines
- *     option_object_locating
- *     option_object_movement
- *     option_left_margin
- *     option_right_margin
- *     option_ignore_errors
- *     option_piracy
- *     option_undo_slots
- *     option_expand_abbreviations
- *     option_script_cols
- *
- * The global pointer "story_name" is set to the story file name.
- *
+ * Handle command line switches.
+ * Some variables may be set to activate special features of Frotz.
  *
  */
 void os_process_arguments (int argc, char *argv[])
