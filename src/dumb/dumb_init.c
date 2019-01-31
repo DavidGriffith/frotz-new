@@ -114,7 +114,7 @@ void os_process_arguments(int argc, char *argv[])
 	  case 'i': f_setup.ignore_errors = 1; break;
 	  case 'I': f_setup.interpreter_number = atoi(zoptarg); break;
 	case 'L': f_setup.restore_mode = 1;
-		  f_setup.tmp_save_name = my_strdup(zoptarg);
+		  f_setup.tmp_save_name = strdup(zoptarg);
 		  break;
 	  case 'm': do_more_prompts = FALSE; break;
 	  case 'o': f_setup.object_movement = 1; break;
@@ -122,7 +122,7 @@ void os_process_arguments(int argc, char *argv[])
 	  case 'P': f_setup.piracy = 1; break;
 	case 'p': plain_ascii = 1; break;
 	case 'r': dumb_handle_setting(zoptarg, FALSE, TRUE); break;
-	case 'R': f_setup.restricted_path =  my_strndup(zoptarg, PATH_MAX); break;
+	case 'R': f_setup.restricted_path = strndup(zoptarg, PATH_MAX); break;
 	case 's': user_random_seed = atoi(zoptarg); break;
 	  case 'S': f_setup.script_cols = atoi(zoptarg); break;
 	case 't': user_tandy_bit = 1; break;
@@ -147,8 +147,8 @@ void os_process_arguments(int argc, char *argv[])
 
     /* Save the story file name */
 
-    f_setup.story_file = my_strdup(argv[zoptind]);
-    f_setup.story_name = my_strdup(basename(argv[zoptind]));
+    f_setup.story_file = strdup(argv[zoptind]);
+    f_setup.story_name = strdup(basename(argv[zoptind]));
 
     /* Now strip off the extension */
     p = strrchr(f_setup.story_name, '.');
@@ -293,41 +293,6 @@ void os_init_setup(void)
 	f_setup.sound = 1;
 	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
 	f_setup.restore_mode = 0;
-
-}
-
-char *my_strdup(char *src)
-{
-	char *str;
-	char *p;
-	int len = 0;
-
-	while (src[len])
-		len++;
-	str = malloc(len + 1);
-	p = str;
-	while (*src)
-        *p++ = *src++;
-	*p = '\0';
-	return str;
-}
-
-char *my_strndup(char *src, size_t n)
-{
-	char *str;
-	char *p;
-	int len = 0;
-
-	while (src[len] && len < n)
-		len++;
-	str = malloc(len + 1);
-	p = str;
-	while (len--)
-	{
-		*p++ = *src++;
-	}
-	*p = '\0';
-	return str;
 }
 
 static void print_version(void)

@@ -71,21 +71,28 @@ COLOR ?= yes
 # If this matters, you can choose -lcurses or -lncurses
 CURSES ?= -lncurses
 
-# Uncomment this if you're compiling Unix Frotz on a machine that lacks
-# the strrchr() libc library call.  If you don't know what this means,
-# leave it alone.
-#
-#NO_STRRCHR = yes
-
-# Uncomment this if you're compiling Unix Frotz on a machine that lacks
-# the memmove(3) system call.  If you don't know what this means, leave it
-# alone.
-#
-#NO_MEMMOVE = yes
-
 # Uncomment this if you want to disable the compilation of Blorb support.
 #
 #NO_BLORB = yes
+
+
+# These are for enabling local version of certain functions which may be
+# missing or behave differently from what's expected in modern system.
+# If you're running on a system made in the past 20 years, you should be
+# safe leaving these alone.  If not or you're using something modern,
+# but very strange intended for very limited machines, you probably know
+# what you're doing.  Therefore further commentary on what these
+# functions do is probably not necessary.
+
+# For missing memmove()
+#NO_MEMMOVE = yes
+
+# For missing strdup() and strndup()
+NO_STRDUP = yes
+
+# For missing strrchr()
+#NO_STRRCHR = yes
+
 
 #########################################################################
 # This section is where Frotz is actually built.
@@ -223,14 +230,17 @@ $(COMMON_DEFINES):
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
+ifdef NO_BLORB
+	@echo "#define NO_BLORB" >> $@
+endif
 ifdef NO_STRRCHR
 	@echo "#define NO_STRRCHR" >> $@
 endif
 ifdef NO_MEMMOVE
 	@echo "#define NO_MEMMOVE" >> $@
 endif
-ifdef NO_BLORB
-	@echo "#define NO_BLORB" >> $@
+ifdef NO_STRDUP
+	@echo "#define NO_STRDUP" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 
