@@ -178,8 +178,6 @@ static void usage()
 
 static const char *progname = NULL;
 
-char stripped_story_name[100];
-
 extern char *optarg;
 extern int optind;
 extern int m_timerinterval;
@@ -367,7 +365,6 @@ void os_process_arguments (int argc, char *argv[])
   f_setup.story_path = new_dirname(argv[optind]);
 
   /* Create nice default file names */
-
   f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
   strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
   strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
@@ -467,8 +464,6 @@ unsigned long sf_ticks (void) {
  *
  */
 
-extern char stripped_story_name[];
-
 static char *getextension( int flag)
   {
   char *ext = EXT_AUX;
@@ -495,7 +490,7 @@ static char buf[FILENAME_MAX];
 static const char *getnumbername( const char *def, char *ext)
   {
   int len, number = 0;
-  strcpy(buf,stripped_story_name);
+  strcpy(buf,f_setup.story_name);
   len = strlen(buf);
   for (;;){
 	sprintf(buf+len,"%03d%s",number++,ext);
@@ -512,7 +507,7 @@ static const char *getdatename( const char *def, char *ext)
   time(&t);
   tm = localtime(&t);
 
-  strcpy(buf,stripped_story_name);
+  strcpy(buf,f_setup.story_name);
   p = buf + 1;
   if (*p) p++;
   sprintf(p,"%04d%02d%02d%02d%02d%s",
