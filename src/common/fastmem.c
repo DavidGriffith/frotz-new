@@ -691,7 +691,8 @@ void z_restore (void)
 	if (os_read_file_name (new_name, default_name, FILE_LOAD_AUX) == 0)
 	    goto finished;
 
-	strcpy (f_setup.aux_name, default_name);
+	free(f_setup.aux_name);
+	f_setup.aux_name = strdup(default_name);
 
 	/* Open auxilary file */
 
@@ -718,7 +719,8 @@ void z_restore (void)
 	if (os_read_file_name (new_name, f_setup.save_name, FILE_RESTORE) == 0)
 	    goto finished;
 
-	strcpy (f_setup.save_name, new_name);
+	free(f_setup.save_name);
+	f_setup.save_name = strdup(new_name);
 
 	/* Open game file */
 
@@ -929,7 +931,8 @@ void z_save (void)
 	if (os_read_file_name (new_name, default_name, FILE_SAVE_AUX) == 0)
 	    goto finished;
 
-	strcpy (f_setup.aux_name, default_name);
+	free(f_setup.aux_name);
+	f_setup.aux_name = strdup(default_name);
 
 	/* Open auxilary file */
 
@@ -957,7 +960,8 @@ void z_save (void)
 	if (os_read_file_name (new_name, f_setup.save_name, FILE_SAVE) == 0)
 	    goto finished;
 
-	strcpy (f_setup.save_name, new_name);
+	free(f_setup.save_name);
+	f_setup.save_name = strdup(new_name);
 
 	/* Open game file */
 
