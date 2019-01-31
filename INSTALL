@@ -36,6 +36,9 @@ curses.  You can download ncurses from ftp://ftp.gnu/org/gnu/ncurses/.
 If you insist on using the vendor-supplied curses library, see the
 platform-specific info below.
 
+For MAC OS/X users, check the Makefile, and uncomment the line that
+adds the "-D_DARWIN_SOURCE" and "-D_XOPEN_SOURCE=600" CFLAGS.
+
 It's always a good idea to have the GNU version of make(1) around.
 
 
