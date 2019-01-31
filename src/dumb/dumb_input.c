@@ -430,7 +430,7 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
 	  break;
 	}
       }
-      tempname = strdup(default_name + i);
+      tempname = my_strdup(default_name + i);
       sprintf(prompt, "Please enter a filename [%s]: ", tempname);
     } else
       sprintf(prompt, "Please enter a filename [%s]: ", default_name);
