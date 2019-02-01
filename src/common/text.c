@@ -20,14 +20,11 @@
 
 #include "frotz.h"
 
-enum string_type {
-    LOW_STRING, ABBREVIATION, HIGH_STRING, EMBEDDED_STRING, VOCABULARY
-};
-
 extern zword object_name (zword);
 
 static zchar decoded[10];
 static zword encoded[3];
+extern zchar *filename_decoded;
 
 /*
  * According to Matteo De Luigi <matteo.de.luigi@libero.it>,
@@ -369,12 +366,14 @@ void z_encode_text (void)
  *    HIGH_STRING - from the end of the memory map (packed address)
  *    EMBEDDED_STRING - from the instruction stream (at PC)
  *    VOCABULARY - from the dictionary (byte address)
+ *    FIlENAME - high string used as a filename, to be decoded instead of
+ *               printed out
  *
- * The last type is only used for word completion.
+ * The VOCABULARY type is only used for word completion.
  *
  */
-#define outchar(c)	if (st==VOCABULARY) *ptr++=c; else print_char(c)
-static void decode_text (enum string_type st, zword addr)
+#define outchar(c)	if (st==VOCABULARY||st==FILENAME) *ptr++=c; else print_char(c)
+void decode_text (enum string_type st, zword addr)
 {
     zchar *ptr;
     long byte_addr;
@@ -394,7 +393,7 @@ static void decode_text (enum string_type st, zword addr)
 
 	byte_addr = (long) addr << 1;
 
-    else if (st == HIGH_STRING) {
+    else if (st == HIGH_STRING || st == FILENAME) {
 
 	if (h_version <= V3)
 	    byte_addr = (long) addr << 1;
@@ -415,6 +414,9 @@ static void decode_text (enum string_type st, zword addr)
     if (st == VOCABULARY)
 	ptr = decoded;
 
+    else if (st == FILENAME)
+        ptr = filename_decoded;
+
     do {
 
 	int i;
@@ -424,7 +426,7 @@ static void decode_text (enum string_type st, zword addr)
 	if (st == LOW_STRING || st == VOCABULARY) {
 	    LOW_WORD (addr, code)
 	    addr += 2;
-	} else if (st == HIGH_STRING || st == ABBREVIATION) {
+	} else if (st == HIGH_STRING || st == ABBREVIATION || st == FILENAME) {
 	    HIGH_WORD (byte_addr, code)
 	    byte_addr += 2;
 	} else
@@ -510,7 +512,7 @@ static void decode_text (enum string_type st, zword addr)
 
     } while (!(code & 0x8000));
 
-    if (st == VOCABULARY)
+    if (st == VOCABULARY || st == FILENAME)
 	*ptr = 0;
 
 }/* decode_text */

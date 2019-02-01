@@ -632,34 +632,20 @@ void z_restart (void)
  * copy it to a string.
  *
  */
+char *filename_decoded = 0;
+
 static void get_default_name (char *default_name, zword addr)
 {
+    int i;
+
     if (addr != 0) {
-
-	zbyte len;
-	int i;
-
-	LOW_BYTE (addr, len);
-	addr++;
-
-	for (i = 0; i < len; i++) {
-
-	    zbyte c;
-
-	    LOW_BYTE (addr, c);
-	    addr++;
-
-	    if (c >= 'A' && c <= 'Z')
-		c += 'a' - 'A';
-
-	    default_name[i] = c;
-
-	}
-
-	default_name[i] = 0;
+        memset (default_name, 0, MAX_FILE_NAME + 1);
+        filename_decoded = default_name;
+        decode_text (FILENAME, addr);
+        filename_decoded = 0;
 
 	if (strchr (default_name, '.') == NULL)
-	    strcpy (default_name + i, ".AUX");
+	    strcpy (strchr (default_name, '\0'), EXT_AUX);
 
     } else strcpy (default_name, f_setup.aux_name);
 
@@ -671,7 +657,7 @@ static void get_default_name (char *default_name, zword addr)
  *
  *	zargs[0] = address of area to restore (optional)
  *	zargs[1] = number of bytes to restore
- *	zargs[2] = address of suggested file name
+ *	zargs[2] = packed address of suggested file name
  *
  */
 void z_restore (void)
@@ -911,7 +897,7 @@ void z_restore_undo (void)
  *
  *	zargs[0] = address of memory area to save (optional)
  *	zargs[1] = number of bytes to save
- *	zargs[2] = address of suggested file name
+ *	zargs[2] = packed address of suggested file name
  *
  */
 void z_save (void)
