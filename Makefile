@@ -66,7 +66,8 @@ DEFAULT_CONVERTER ?= SRC_SINC_MEDIUM_QUALITY
 COLOR ?= yes
 
 # If this matters, you can choose -lcurses or -lncurses
-CURSES ?= -lncurses
+# For UTF-8 support -lncursesw needs to be used
+CURSES ?= -lncursesw
 
 # Uncomment this if you're compiling Unix Frotz on a machine that lacks
 # the strrchr() libc library call.  If you don't know what this means,
