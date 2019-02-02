@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "frotz.h"
 
 #ifndef SEEK_SET
@@ -74,8 +75,8 @@ void script_open (void)
 	if (!os_read_file_name (new_name, f_setup.script_name, FILE_SCRIPT))
 	    goto done;
 
-	strcpy (f_setup.script_name, new_name);
-
+	free(f_setup.script_name);
+	f_setup.script_name = strdup(new_name);
     }
 
     /* Opening in "at" mode doesn't work for script_erase_input... */
@@ -294,7 +295,8 @@ void record_open (void)
 
     if (os_read_file_name (new_name, f_setup.command_name, FILE_RECORD)) {
 
-	strcpy (f_setup.command_name, new_name);
+	free(f_setup.command_name);
+	f_setup.command_name = strdup(new_name);
 
 	if ((rfp = fopen (new_name, "wt")) != NULL)
 	    ostream_record = TRUE;
@@ -418,7 +420,8 @@ void replay_open (void)
 
     if (os_read_file_name (new_name, f_setup.command_name, FILE_PLAYBACK)) {
 
-	strcpy (f_setup.command_name, new_name);
+	free(f_setup.command_name);
+	f_setup.command_name = strdup(new_name);
 
 	if ((pfp = fopen (new_name, "rt")) != NULL) {
 
