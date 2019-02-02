@@ -636,8 +636,6 @@ char *filename_decoded = 0;
 
 static void get_default_name (char *default_name, zword addr)
 {
-    int i;
-
     if (addr != 0) {
         memset (default_name, 0, MAX_FILE_NAME + 1);
         filename_decoded = default_name;
@@ -645,9 +643,12 @@ static void get_default_name (char *default_name, zword addr)
         filename_decoded = 0;
 
 	if (strchr (default_name, '.') == NULL)
-	    strcpy (strchr (default_name, '\0'), EXT_AUX);
+	    strncat(default_name, EXT_AUX, strlen(default_name) - strlen(EXT_AUX));
 
-    } else strcpy (default_name, f_setup.aux_name);
+    } else {
+	free(default_name);
+	default_name = strdup(f_setup.aux_name);
+    }
 
 }/* get_default_name */
 
