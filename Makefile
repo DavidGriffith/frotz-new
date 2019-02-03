@@ -88,7 +88,7 @@ CURSES ?= -lncurses
 #NO_MEMMOVE = yes
 
 # For missing strdup() and strndup()
-NO_STRDUP = yes
+#NO_STRDUP = yes
 
 # For missing strrchr()
 #NO_STRRCHR = yes
