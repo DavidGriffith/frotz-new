@@ -330,7 +330,7 @@ static void unix_add_to_history(zchar *str)
     if (*history_next != NULL)
 	free( *history_next);
     *history_next = (char *)malloc(strlen((char *)str) + 1);
-    strcpy( *history_next, (char *)str);
+    strncpy( *history_next, (char *)str, strlen((char*)str) + 1);
     RING_INC( history_next, history_buffer, history_end);
     history_view = history_next; /* Reset user frame after each line */
 
