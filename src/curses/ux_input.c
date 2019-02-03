@@ -736,6 +736,7 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
     int i;
     char *tempname;
     zchar answer[4];
+    char path_separator[2];
 
     /* Turn off playback and recording temporarily */
     istream_replay = 0;
@@ -785,6 +786,9 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
      * someone tries it.
      */
     if (f_setup.restricted_path != NULL) {
+	path_separator[0] = PATH_SEPARATOR;
+	path_separator[1] = 0;
+
 	for (i = strlen(file_name); i > 0; i--) {
 	    if (file_name[i] == PATH_SEPARATOR) {
 		i++;
@@ -793,10 +797,12 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
 	}
 	tempname = strdup(file_name + i);
 	strcpy(file_name, f_setup.restricted_path);
+
+	/* Make sure the final character is the path separator. */
 	if (file_name[strlen(file_name)-1] != PATH_SEPARATOR) {
-	    strcat(file_name, "/");
+	    strncat(file_name, path_separator, strlen(file_name) - 2);
 	}
-	strcat(file_name, tempname);
+	strncat(file_name, tempname, strlen(file_name) - strlen(tempname) - 1);
     }
 
     /* Warn if overwriting a file. */
