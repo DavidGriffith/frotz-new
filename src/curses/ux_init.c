@@ -724,26 +724,28 @@ int os_storyfile_tell(FILE * fp)
  * that file.  If found, return a pointer to that file
  *
  */
-static FILE *pathopen(const char *name, const char *p, const char *mode)
+static FILE *pathopen(const char *name, const char *path, const char *mode)
 {
 	FILE *fp;
-	char buf[FILENAME_MAX + 1];
+	char *buf;
 	char *bp, lastch;
 
 	lastch = 'a';	/* makes compiler shut up */
 
-	while (*p) {
+	buf = malloc(strlen(path) + strlen(name) + 1);
+
+	while (*path) {
 		bp = buf;
-		while (*p && *p != PATHSEP)
-			lastch = *bp++ = *p++;
+		while (*path && *path != PATHSEP)
+			lastch = *bp++ = *path++;
 		if (lastch != DIRSEP)
 			*bp++ = DIRSEP;
-		strcpy(bp, name);
+		strncpy(bp, name, strlen(path) + strlen(name) + 1);
 		if ((fp = fopen(buf, mode)) != NULL) {
 			return fp;
 		}
-		if (*p)
-			p++;
+		if (*path)
+			path++;
 	}
 	return NULL;
 } /* FILE *pathopen() */
