@@ -35,15 +35,16 @@ LIBDIR ?= $(PREFIX)/lib
 ## LIBDIR path for Apple MacOS Sierra 10.12 plus MacPorts
 #LIBDIR ?= /opt/local/lib
 
-CFLAGS += -I$(INCLUDEDIR)
-LDFLAGS += -L$(LIBDIR)
-
-RANLIB ?= $(shell which ranlib)
-AR ?= $(shell which ar)
-
 # Choose your sound support
 # OPTIONS: ao, none
 SOUND ?= ao
+
+
+##########################################################################
+# The configuration options below are intended mainly for older flavors
+# of Unix.  For Linux, BSD, and Solaris released since 2003, you can
+# ignore this section.
+##########################################################################
 
 # Default sample rate for sound effects.
 # All modern sound interfaces can be expected to support 44100 Hz sample
@@ -57,24 +58,17 @@ BUFFSIZE ?= 4096
 # Default sample rate converter type
 DEFAULT_CONVERTER ?= SRC_SINC_MEDIUM_QUALITY
 
-
-##########################################################################
-# The configuration options below are intended mainly for older flavors
-# of Unix.  For Linux, BSD, and Solaris released since 2003, you can
-# ignore this section.
-##########################################################################
-
-# If your machine's version of curses doesn't support color...
+# Comment this out if your machine's version of curses doesn't support color.
 #
 COLOR ?= yes
 
 # If this matters, you can choose -lcurses or -lncurses
 CURSES ?= -lncurses
+#CURSES ?= -lcurses
 
 # Uncomment this if you want to disable the compilation of Blorb support.
 #
 #NO_BLORB = yes
-
 
 # These are for enabling local version of certain functions which may be
 # missing or behave differently from what's expected in modern system.
@@ -99,6 +93,12 @@ CURSES ?= -lncurses
 # Under normal circumstances, nothing in this section should be changed.
 #########################################################################
 
+CFLAGS += -I$(INCLUDEDIR)
+LDFLAGS += -L$(LIBDIR)
+
+RANLIB ?= $(shell which ranlib)
+AR ?= $(shell which ar)
+
 export CC
 export CFLAGS
 export MAKEFLAGS
@@ -111,6 +111,7 @@ export INCLUDEDIR
 export LIBDIR
 export COLOR
 
+NAME = frotz
 
 # If we're working from git, we have access to proper variables. If
 # not, make it clear that we're working from a release.
@@ -293,11 +294,13 @@ uninstall_frotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/frotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/frotz.6"
 
+install_dumb: install_dfrotz
 install_dfrotz: $(DFROTZ_BIN)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
 	install "$(DFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/dfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
 
+uninstall_dumb: uninstall_dfrotz
 uninstall_dfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
@@ -317,25 +320,25 @@ uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz
 
 
 
-dist: frotz-$(GIT_TAG).tar
+dist: $(NAME)-$(GIT_TAG).tar
 frotz-$(GIT_TAG).tar:
-	git archive --format=tar --prefix frotz-$(GIT_TAG)/ HEAD | tar xf -
-	sed s"/GIT_BRANCH = none/GIT_BRANCH = \"$(GIT_BRANCH)\"/" -i frotz-$(GIT_TAG)/Makefile
-	sed s"/GIT_HASH = none/GIT_HASH = \"$(GIT_HASH)\"/" -i frotz-$(GIT_TAG)/Makefile
-	sed s"/GIT_HASH_SHORT = none/GIT_HASH_SHORT = \"$(GIT_HASH_SHORT)\"/" -i frotz-$(GIT_TAG)/Makefile
-	sed s"/GIT_TAG = none/GIT_TAG = \"$(GIT_TAG)\"/" -i frotz-$(GIT_TAG)/Makefile
-	tar zcf frotz-$(GIT_TAG).tar.gz frotz-$(GIT_TAG)
-	rm -rf frotz-$(GIT_TAG)
+	git archive --format=tar --prefix $(NAME)-$(GIT_TAG)/ HEAD | tar xf -
+	sed s"/GIT_BRANCH = none/GIT_BRANCH = \"$(GIT_BRANCH)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
+	sed s"/GIT_HASH = none/GIT_HASH = \"$(GIT_HASH)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
+	sed s"/GIT_HASH_SHORT = none/GIT_HASH_SHORT = \"$(GIT_HASH_SHORT)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
+	sed s"/GIT_TAG = none/GIT_TAG = \"$(GIT_TAG)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
+	tar zcf $(NAME)-$(GIT_TAG).tar.gz $(NAME)-$(GIT_TAG)
+	rm -rf $(NAME)-$(GIT_TAG)
 
 clean: $(SUB_CLEAN)
-	rm -rf frotz-$(GIT_TAG)
+	rm -rf $(NAME)-$(GIT_TAG)
 	rm -f $(SRCDIR)/*.h \
 		$(SRCDIR)/*.a \
 		$(COMMON_DEFINES) \
 		$(COMMON_STRINGS) \
 		$(HASH) \
 		$(CURSES_DEFINES) \
-		frotz*.tar.gz
+		$(NAME)*.tar.gz
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
@@ -345,14 +348,14 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "    frotz: the standard edition"
-	@echo "    dfrotz: for dumb terminals and wrapper scripts"
-	@echo "    sfrotz: for SDL graphics and sound"
+	@echo "    dumb: for dumb terminals and wrapper scripts"
+	@echo "    sdl: for SDL graphics and sound"
 	@echo "    install"
 	@echo "    uninstall"
-	@echo "    install_dfrotz"
-	@echo "    uninstall_dfrotz"
-	@echo "    install_sfrotz"
-	@echo "    uninstall_sfrotz"
+	@echo "    install_dumb"
+	@echo "    uninstall_dumb"
+	@echo "    install_sdl"
+	@echo "    uninstall_sdl"
 	@echo "    install_all"
 	@echo "    uninstall_all"
 	@echo "    clean: clean up files created by compilation"
