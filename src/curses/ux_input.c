@@ -182,7 +182,7 @@ static int unix_read_char(int extkeys)
         }
 
         timeout(0);
-	c = getch();
+	get_wch(&c);
 
 	/* Catch 98% of all input right here... */
 	if ((c >= ZC_ASCII_MIN && c <= ZC_ASCII_MAX)
@@ -222,7 +222,7 @@ static int unix_read_char(int extkeys)
 	   value of the letter.  We have to decide here whether to
 	   return a single escape or a frotz hot key. */
 	case ZC_ESCAPE:
-	    nodelay(stdscr, TRUE); c = getch(); nodelay(stdscr, FALSE);
+	    nodelay(stdscr, TRUE); get_wch(&c); nodelay(stdscr, FALSE);
 	    switch(c) {
 	    case ERR: return ZC_ESCAPE;
 	    case 'p': return ZC_HKEY_PLAYBACK;
@@ -434,7 +434,26 @@ static void scrnset(int start, int c, int n)
     return;
 }
 
+static void utf8_mvaddstr(int y, int x, char * buf)
+{
+    unsigned char *bp = (unsigned char *)buf;
 
+    move(y,x);
+    while(*bp) {
+	if(*bp < ZC_LATIN1_MIN) {
+	    addch(*bp);
+	} else {
+	    if(*bp < 0xc0) {
+		addch(0xc2);
+		addch(*bp);
+	    } else {
+		addch(0xc3);
+		addch(*bp - 0x40);
+	    }
+	}
+	bp++;
+    }
+}
 /*
  * os_read_line
  *
@@ -611,7 +630,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 	    if ((ch == ZC_ARROW_UP ? unix_history_back : unix_history_forward)
 		(buf, searchpos, max)) {
 		scrnset(x, ' ', len);
-		mvaddstr(y, x, (char *) buf);
+		utf8_mvaddstr(y, x, (char *) buf);
 		scrpos = len = strlen((char *) buf);
             }
 	    continue;
@@ -666,7 +685,15 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		}
 		if (insert_flag || scrpos == len)
 		    len++;
-		mvaddch(y, x + scrpos, ch);
+		if (ch < ZC_LATIN1_MIN) {
+		    mvaddch(y, x + scrpos, ch);
+		} else if (ch < 0xc0) {
+		    mvaddch(y, x + scrpos, 0xc2);
+		    addch(ch);
+		} else {
+		    mvaddch(y, x + scrpos, 0xc3);
+		    addch(ch - 0x40);
+		}
 		buf[scrpos++] = ch;
 		continue;
 	    }
