@@ -121,13 +121,9 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	GIT_HASH = $(shell git rev-parse HEAD)
 	GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 	GIT_TAG = $(shell git describe --abbrev=0 --tags)
-else
-	GIT_BRANCH = none
-	GIT_HASH = none
-	GIT_HASH_SHORT = none
-	GIT_TAG = none
+	GIT_DATE = $(shell git show -s --format=%ci)
 endif
-BUILD_DATE_TIME = $(shell date +%Y%m%d.%k%M%S | sed s/\ //g)
+BUILD_DATE_TIME = $(shell date --rfc-3339 seconds)
 export CFLAGS
 
 
@@ -268,17 +264,23 @@ endif
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
 endif
-
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
 
 
 hash: $(HASH)
-$(HASH):
+ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
+	@echo "** Generating $@"
+	
+
+
+
+$(HASH_OLD):
 	@echo "** Generating $@"
 	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" > $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_TAG \"$(GIT_TAG)\"" >> $@
+	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
 
 
 # Administrative stuff
@@ -336,7 +338,7 @@ clean: $(SUB_CLEAN)
 		$(SRCDIR)/*.a \
 		$(COMMON_DEFINES) \
 		$(COMMON_STRINGS) \
-		$(HASH) \
+#		$(HASH) \
 		$(CURSES_DEFINES) \
 		$(NAME)*.tar.gz
 
