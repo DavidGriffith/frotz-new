@@ -744,6 +744,9 @@ char *os_read_file_name (const char *default_name, int flag)
     char path_separator[2];
     char file_name[FILENAME_MAX + 1];
 
+    path_separator[0] = PATH_SEPARATOR;
+    path_separator[1] = 0;
+
     /* Turn off playback and recording temporarily */
     istream_replay = 0;
     ostream_record = 0;
@@ -792,9 +795,6 @@ char *os_read_file_name (const char *default_name, int flag)
      * someone tries it.
      */
     if (f_setup.restricted_path != NULL) {
-	path_separator[0] = PATH_SEPARATOR;
-	path_separator[1] = 0;
-
 	for (i = strlen(file_name); i > 0; i--) {
 	    if (file_name[i] == PATH_SEPARATOR) {
 		i++;
