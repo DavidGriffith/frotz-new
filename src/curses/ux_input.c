@@ -608,12 +608,14 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 	case ZC_ARROW_UP: case ZC_ARROW_DOWN:
 	    if (searchpos < 0)
 		searchpos = len;
-	    if ((ch == ZC_ARROW_UP ? unix_history_back : unix_history_forward)
-		(buf, searchpos, max)) {
-		scrnset(x, ' ', len);
-		mvaddstr(y, x, (char *) buf);
-		scrpos = len = strlen((char *) buf);
-            }
+	    if (ch == ZC_ARROW_UP)
+		unix_history_back(buf, searchpos, max);
+            else
+		unix_history_forward(buf, searchpos, max);
+
+	    scrnset(x, ' ', len);
+	    mvaddstr(y, x, (char *) buf);
+	    scrpos = len = strlen((char *) buf);
 	    continue;
 
 	/* Passthrough as up/down arrows for Beyond Zork. */
