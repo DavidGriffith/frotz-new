@@ -121,13 +121,15 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	GIT_HASH = $(shell git rev-parse HEAD)
 	GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 	GIT_TAG = $(shell git describe --abbrev=0 --tags)
+	GIT_DATE = $(shell git show -s --format=%ci)
 else
-	GIT_BRANCH = none
-	GIT_HASH = none
-	GIT_HASH_SHORT = none
+	GIT_BRANCH = "$Format:%D$"
+	GIT_HASH = "$Format:%H$"
+	GIT_HASH_SHORT = "$Format:%h$"
 	GIT_TAG = none
+	GIT_DATE = "$Format:%ci$"
 endif
-BUILD_DATE_TIME = $(shell date +%Y%m%d.%k%M%S | sed s/\ //g)
+BUILD_DATE = $(shell date --rfc-3339 seconds)
 export CFLAGS
 
 
@@ -222,7 +224,7 @@ common_strings:	$(COMMON_STRINGS)
 $(COMMON_STRINGS):
 	@echo "** Generating $@"
 	@echo "#include \"frotz.h\"" > $@
-	@echo "const char build_timestamp[] = \"$(BUILD_DATE_TIME)\";" >> $@
+	@echo "const char build_timestamp[] = \"$(BUILD_DATE)\";" >> $@
 
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
@@ -266,17 +268,16 @@ endif
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
 endif
-
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
 
 
 hash: $(HASH)
-$(HASH):
 	@echo "** Generating $@"
 	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" > $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_TAG \"$(GIT_TAG)\"" >> $@
+	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
 
 
 # Administrative stuff
@@ -321,9 +322,6 @@ uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz
 dist: $(NAME)-$(GIT_TAG).tar
 frotz-$(GIT_TAG).tar:
 	git archive --format=tar --prefix $(NAME)-$(GIT_TAG)/ HEAD | tar xf -
-	sed s"/GIT_BRANCH = none/GIT_BRANCH = \"$(GIT_BRANCH)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
-	sed s"/GIT_HASH = none/GIT_HASH = \"$(GIT_HASH)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
-	sed s"/GIT_HASH_SHORT = none/GIT_HASH_SHORT = \"$(GIT_HASH_SHORT)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
 	sed s"/GIT_TAG = none/GIT_TAG = \"$(GIT_TAG)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
 	tar zcf $(NAME)-$(GIT_TAG).tar.gz $(NAME)-$(GIT_TAG)
 	rm -rf $(NAME)-$(GIT_TAG)
