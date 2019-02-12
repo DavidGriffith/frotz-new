@@ -456,10 +456,12 @@ char *os_read_file_name (const char *default_name, int flag)
     }
     tempname = strdup(file_name + i);
     strncpy(file_name, f_setup.restricted_path, FILENAME_MAX);
+
+    /* Make sure the final character is the path separator. */
     if (file_name[strlen(file_name)-1] != PATH_SEPARATOR) {
-      strcat(file_name, "/");
+      strncat(file_name, "/", FILENAME_MAX - strlen(file_name) - 2);
     }
-    strcat(file_name, tempname);
+    strncat(file_name, tempname, strlen(file_name) - strlen(tempname) - 1);
   }
 
   /* Warn if overwriting a file.  */
