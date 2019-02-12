@@ -359,7 +359,8 @@ static int unix_history_back(zchar *str, int searchlen, int maxlen)
 	}
     } while (strlen( *history_view) > (size_t) maxlen
 	     || (searchlen != 0 && strncmp( (char *)str, *history_view, searchlen)));
-    strcpy((char *)str + searchlen, *history_view + searchlen);
+    strncpy((char *)str + searchlen, *history_view + searchlen,
+		(size_t) maxlen - (strlen((char *)str) + searchlen));
     return 1;
 }
 
@@ -384,7 +385,8 @@ static int unix_history_forward(zchar *str, int searchlen, int maxlen)
 	}
     } while (strlen( *history_view) > (size_t) maxlen
 	     || (searchlen != 0 && strncmp( (char *)str, *history_view, searchlen)));
-    strcpy((char *)str + searchlen, *history_view + searchlen);
+    strncpy((char *)str + searchlen, *history_view + searchlen,
+		(size_t) maxlen - (strlen((char *)str) + searchlen));
     return 1;
 }
 
