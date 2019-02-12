@@ -415,7 +415,11 @@ char *os_read_file_name (const char *default_name, int flag)
   char buf[INPUT_BUFFER_SIZE], prompt[INPUT_BUFFER_SIZE];
   FILE *fp;
   char *tempname;
+  char path_separator[2];
   int i;
+
+  path_separator[0] = PATH_SEPARATOR;
+  path_separator[1] = 0;
 
   /* If we're restoring a game before the interpreter starts,
    * our filename is already provided.  Just go ahead silently.
@@ -459,7 +463,7 @@ char *os_read_file_name (const char *default_name, int flag)
 
     /* Make sure the final character is the path separator. */
     if (file_name[strlen(file_name)-1] != PATH_SEPARATOR) {
-      strncat(file_name, "/", FILENAME_MAX - strlen(file_name) - 2);
+      strncat(file_name, path_separator, FILENAME_MAX - strlen(file_name) - 2);
     }
     strncat(file_name, tempname, strlen(file_name) - strlen(tempname) - 1);
   }
