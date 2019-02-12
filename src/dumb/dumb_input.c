@@ -441,7 +441,10 @@ char *os_read_file_name (const char *default_name, int flag)
     }
   }
 
-  strcpy (file_name, buf[0] ? buf : default_name);
+  if (buf[0])
+    strncpy(file_name, buf, FILENAME_MAX);
+  else
+    strncpy(file_name, default_name, FILENAME_MAX);
 
   /* Check if we're restricted to one directory. */
   if (f_setup.restricted_path != NULL) {
@@ -452,7 +455,7 @@ char *os_read_file_name (const char *default_name, int flag)
       }
     }
     tempname = strdup(file_name + i);
-    strcpy(file_name, f_setup.restricted_path);
+    strncpy(file_name, f_setup.restricted_path, FILENAME_MAX);
     if (file_name[strlen(file_name)-1] != PATH_SEPARATOR) {
       strcat(file_name, "/");
     }
