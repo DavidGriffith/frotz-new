@@ -175,20 +175,7 @@ DFROTZ_BIN = dfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 
 
-all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
-
-$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
-$(CURSES_LIB): $(CURSES_DEFINES) $(CURSES_DIR);
-$(SDL_LIB): $(SDL_DIR);
-$(DUMB_LIB): $(DUMB_DIR);
-$(BLORB_LIB): $(BLORB_DIR);
-
-$(SUBDIRS):
-	$(MAKE) -C $@
-
-$(SUB_CLEAN):
-	-$(MAKE) -C $(@:%-clean=%) clean
-
+#all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
 # Main programs
 
@@ -217,6 +204,17 @@ dumb_lib:	$(DUMB_LIB)
 
 blorb_lib:	$(BLORB_LIB)
 
+$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
+$(CURSES_LIB): $(CURSES_DEFINES) $(CURSES_DIR);
+$(SDL_LIB): $(SDL_DIR);
+$(DUMB_LIB): $(DUMB_DIR);
+$(BLORB_LIB): $(BLORB_DIR);
+
+$(SUBDIRS):
+	$(MAKE) -C $@
+
+$(SUB_CLEAN):
+	-$(MAKE) -C $(@:%-clean=%) clean
 
 # Compile-time generated defines and strings
 
