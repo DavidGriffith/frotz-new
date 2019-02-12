@@ -66,13 +66,14 @@ void script_open (void)
 {
     static bool script_valid = FALSE;
 
-    char new_name[MAX_FILE_NAME + 1];
+    char *new_name;
 
     h_flags &= ~SCRIPTING_FLAG;
 
     if (h_version >= V5 || !script_valid) {
 
-	if (!os_read_file_name (new_name, f_setup.script_name, FILE_SCRIPT))
+	new_name = os_read_file_name(f_setup.script_name, FILE_SCRIPT);
+	if (new_name == NULL)
 	    goto done;
 
 	free(f_setup.script_name);
@@ -291,9 +292,10 @@ void script_mssg_off (void)
 
 void record_open (void)
 {
-    char new_name[MAX_FILE_NAME + 1];
+    char *new_name;
 
-    if (os_read_file_name (new_name, f_setup.command_name, FILE_RECORD)) {
+    new_name = os_read_file_name(f_setup.command_name, FILE_RECORD);
+    if (new_name != NULL) {
 
 	free(f_setup.command_name);
 	f_setup.command_name = strdup(new_name);
@@ -416,9 +418,10 @@ void record_write_input (const zchar *buf, zchar key)
 
 void replay_open (void)
 {
-    char new_name[MAX_FILE_NAME + 1];
+    char *new_name;
 
-    if (os_read_file_name (new_name, f_setup.command_name, FILE_PLAYBACK)) {
+    new_name = os_read_file_name(f_setup.command_name, FILE_PLAYBACK);
+    if (new_name != NULL) {
 
 	free(f_setup.command_name);
 	f_setup.command_name = strdup(new_name);

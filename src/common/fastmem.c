@@ -663,7 +663,7 @@ static void get_default_name (char *default_name, zword addr)
  */
 void z_restore (void)
 {
-    char new_name[MAX_FILE_NAME + 1];
+    char *new_name;
     char default_name[MAX_FILE_NAME + 1];
     FILE *gfp = NULL;
 
@@ -675,7 +675,8 @@ void z_restore (void)
 
 	get_default_name (default_name, (zargc >= 3) ? zargs[2] : 0);
 
-	if (os_read_file_name (new_name, default_name, FILE_LOAD_AUX) == 0)
+	new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
+	if (new_name == NULL)
 	    goto finished;
 
 	free(f_setup.aux_name);
@@ -703,7 +704,8 @@ void z_restore (void)
 
 	/* Get the file name */
 
-	if (os_read_file_name (new_name, f_setup.save_name, FILE_RESTORE) == 0)
+	new_name = os_read_file_name(f_setup.save_name, FILE_RESTORE);
+	if (new_name == NULL)
 	    goto finished;
 
 	free(f_setup.save_name);
@@ -903,7 +905,7 @@ void z_restore_undo (void)
  */
 void z_save (void)
 {
-    char new_name[MAX_FILE_NAME + 1];
+    char *new_name;
     char default_name[MAX_FILE_NAME + 1];
     FILE *gfp;
 
@@ -915,7 +917,8 @@ void z_save (void)
 
 	get_default_name (default_name, (zargc >= 3) ? zargs[2] : 0);
 
-	if (os_read_file_name (new_name, default_name, FILE_SAVE_AUX) == 0)
+	new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
+	if (new_name == NULL)
 	    goto finished;
 
 	free(f_setup.aux_name);
@@ -944,7 +947,8 @@ void z_save (void)
 
 	/* Get the file name */
 
-	if (os_read_file_name (new_name, f_setup.save_name, FILE_SAVE) == 0)
+	new_name = os_read_file_name(f_setup.save_name, FILE_SAVE);
+	if (new_name == NULL)
 	    goto finished;
 
 	free(f_setup.save_name);

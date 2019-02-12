@@ -444,25 +444,6 @@ unsigned long sf_ticks (void) {
 
 #endif
 
-/*
- * os_read_file_name
- *
- * Return the name of a file. Flag can be one of:
- *
- *    FILE_SAVE     - Save game file
- *    FILE_RESTORE  - Restore game file
- *    FILE_SCRIPT   - Transscript file
- *    FILE_RECORD   - Command file for recording
- *    FILE_PLAYBACK - Command file for playback
- *    FILE_SAVE_AUX - Save auxilary ("preferred settings") file
- *    FILE_LOAD_AUX - Load auxilary ("preferred settings") file
- *
- * The length of the file name is limited by MAX_FILE_NAME. Ideally
- * an interpreter should open a file requester to ask for the file
- * name. If it is unable to do that then this function should call
- * print_string and read_string to ask for a file name.
- *
- */
 
 static char *getextension( int flag)
   {
@@ -520,10 +501,33 @@ static const char *getdatename( const char *def, char *ext)
 static int ingame_read_file_name (char *file_name, const char *default_name, int flag);
 static int dialog_read_file_name (char *file_name, const char *default_name, int flag);
 
-int os_read_file_name (char *file_name, const char *default_name, int flag)
+
+/*
+ * os_read_file_name
+ *
+ * Return the name of a file. Flag can be one of:
+ *
+ *    FILE_SAVE     - Save game file
+ *    FILE_RESTORE  - Restore game file
+ *    FILE_SCRIPT   - Transscript file
+ *    FILE_RECORD   - Command file for recording
+ *    FILE_PLAYBACK - Command file for playback
+ *    FILE_SAVE_AUX - Save auxilary ("preferred settings") file
+ *    FILE_LOAD_AUX - Load auxilary ("preferred settings") file
+ *
+ * The length of the file name is limited by MAX_FILE_NAME. Ideally
+ * an interpreter should open a file requester to ask for the file
+ * name. If it is unable to do that then this function should call
+ * print_string and read_string to ask for a file name.
+ *
+ * Return value is NULL is there was a problem
+ */
+
+char *os_read_file_name (const char *default_name, int flag)
   {
   int st;
   const char *initname = default_name;
+  char file_name[FILENAME_MAX + 1];
 
   if (newfile(flag))
     {
@@ -533,8 +537,12 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
     }
 
   st = dialog_read_file_name( file_name, initname, flag);
-  if (st == SF_NOTIMP) st = ingame_read_file_name( file_name, initname, flag);
-  return st;
+  if (st == SF_NOTIMP)
+    st = ingame_read_file_name( file_name, initname, flag);
+
+  if (!st) return NULL;
+
+  return strdup(file_name);
   }
 
 static int ingame_read_file_name (char *file_name, const char *default_name, int flag)

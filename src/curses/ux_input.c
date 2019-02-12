@@ -711,7 +711,7 @@ zchar os_read_key (int timeout, int cursor)
 /*
  * os_read_file_name
  *
- * Return the name of a file. Flag can be one of:
+ * Return the name of a file.  Flag can be one of:
  *
  *    FILE_SAVE     - Save game file
  *    FILE_RESTORE  - Restore game file
@@ -726,9 +726,10 @@ zchar os_read_key (int timeout, int cursor)
  * name. If it is unable to do that then this function should call
  * print_string and read_string to ask for a file name.
  *
+ * Return value is NULL if there was a problem.
  */
 
-int os_read_file_name (char *file_name, const char *default_name, int flag)
+char *os_read_file_name (const char *default_name, int flag)
 {
     FILE *fp;
     int saved_replay = istream_replay;
@@ -737,6 +738,7 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
     char *tempname;
     zchar answer[4];
     char path_separator[2];
+    char file_name[FILENAME_MAX + 1];
 
     /* Turn off playback and recording temporarily */
     istream_replay = 0;
@@ -772,12 +774,12 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
     if (f_setup.restricted_path) {
 	tempname = dirname(file_name);
 	if (strlen(tempname) > 1)
-	    return 0;
+	    return NULL;
     }
 
     /* Use the default name if nothing was typed */
     if (file_name[0] == 0)
-        strcpy (file_name, default_name);
+        strncpy (file_name, default_name, FILENAME_MAX);
 
     /* If we're restricted to one directory, strip any leading path left
      * over from a previous call to os_read_file_name(), then prepend
@@ -796,11 +798,11 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
 	    }
 	}
 	tempname = strdup(file_name + i);
-	strcpy(file_name, f_setup.restricted_path);
+	strncpy(file_name, f_setup.restricted_path, FILENAME_MAX);
 
 	/* Make sure the final character is the path separator. */
 	if (file_name[strlen(file_name)-1] != PATH_SEPARATOR) {
-	    strncat(file_name, path_separator, strlen(file_name) - 2);
+	    strncat(file_name, path_separator, FILENAME_MAX - strlen(file_name) - 2);
 	}
 	strncat(file_name, tempname, strlen(file_name) - strlen(tempname) - 1);
     }
@@ -811,14 +813,15 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
 	fclose (fp);
 	print_string("Overwrite existing file? ");
 	read_string(4, answer);
-	return(tolower(answer[0]) == 'y');
+	if (tolower(answer[0] != 'y'))
+	    return NULL;
     }
 
     /* Restore state of playback and recording */
     istream_replay = saved_replay;
     ostream_record = saved_record;
 
-    return 1;
+    return strdup(file_name);
 
 } /* os_read_file_name */
 
