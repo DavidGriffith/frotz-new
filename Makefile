@@ -218,6 +218,7 @@ $(SUBDIRS):
 $(SUB_CLEAN):
 	-$(MAKE) -C $(@:%-clean=%) clean
 
+
 # Compile-time generated defines and strings
 
 common_strings:	$(COMMON_STRINGS)
@@ -245,7 +246,6 @@ ifdef NO_STRDUP
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 
-
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
 	@echo "** Generating $@"
@@ -256,22 +256,19 @@ $(CURSES_DEFINES):
 	@echo "#define SAMPLERATE $(SAMPLERATE)" >> $@
 	@echo "#define BUFFSIZE $(BUFFSIZE)" >> $@
 	@echo "#define DEFAULT_CONVERTER $(DEFAULT_CONVERTER)" >> $@
-
 ifeq ($(SOUND), none)
 	@echo "#define NO_SOUND" >> $@
 endif
-
 ifndef SOUND
 	@echo "#define NO_SOUND" >> $@
 endif
-
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
 endif
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
 
-
 hash: $(HASH)
+$(HASH):
 	@echo "** Generating $@"
 	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" > $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
