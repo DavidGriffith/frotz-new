@@ -196,6 +196,8 @@ $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
+all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
+
 common_lib:	$(COMMON_LIB)
 
 curses_lib:	$(CURSES_LIB)
@@ -331,12 +333,11 @@ distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
 
 help:
-	@echo "Default target is \"all\""
-	@echo ""
 	@echo "Targets:"
-	@echo "    frotz: the standard edition"
+	@echo "    frotz: (default target) the standard curses edition"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
+	@echo "    all: build curses, dumb, and SDL versions"
 	@echo "    install"
 	@echo "    uninstall"
 	@echo "    install_dumb"
@@ -347,7 +348,7 @@ help:
 	@echo "    uninstall_all"
 	@echo "    clean: clean up files created by compilation"
 	@echo "    distclean: like clean, but also delete executables"
-	@echo "    dist: create a source tarball of the latest tagged release"
+	@echo "    dist: create a source tarball"
 	@echo ""
 
 .SUFFIXES:
