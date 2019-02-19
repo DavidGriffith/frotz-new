@@ -33,7 +33,7 @@ will be noted in debugging messages.
 
 .TP
 .B \-A
-Watch attribute testing.  Every time the z-machine tests an attribute
+Watch attribute testing.  Every time the Z-machine tests an attribute
 value, the test and the result will be reported.
 
 .TP
@@ -146,7 +146,7 @@ to deactivate automatic line splitting in transscript files.
 
 .TP
 .B \-t
-Sets the z-machine's
+Sets the Z-machine's
 .I Tandy bit,
 which may affect the behavior of certain Infocom games.  For example,
 Zork I pretends not to have sequels, and Witness has its language
@@ -220,8 +220,8 @@ Force the use of default monospaced VGA font.
 .SH HOT KEYS
 Sfrotz supports the same hot keys as standard Frotz, plus the Ctl-Alt-X
 combination for immediate exit, which may be used in case of emergency.
-Note that these hot keys are enabled only when the z-machine is waiting
-for line input (for z-machine experts: @read opcode), with the
+Note that these hot keys are enabled only when the Z-machine is waiting
+for line input (for Z-machine experts: @read opcode), with the
 exception of Ctl-Alt-X which also works in single character input mode
 (@read_char opcode).
 
@@ -273,7 +273,7 @@ the PC screen resolution (taking into account also window decorations,
 taskbars etc.) For fullscreen usage, the size should preferably be one
 of those supported by the PC video driver; otherwise, SDL shall try to
 use the next higher available resolution, with black borders around the
-z-machine screen. In fullscreen mode, however, it may happen that for
+Z-machine screen. In fullscreen mode, however, it may happen that for
 some strange resolutions SDL accepts the request, but the screen goes
 blank... In such a case, you may shut down the program by pressing
 Ctrl-Alt-X.
@@ -541,7 +541,7 @@ will be noted in debugging messages.  Default is "off"
 .BR attrib_test
 \ \ on\ |\ off
 .br
-Watch attribute testing.  Every time the z-machine tests an attribute
+Watch attribute testing.  Every time the Z-machine tests an attribute
 value, the test and the result will be reported.  Default is "off".
 
 .PP
