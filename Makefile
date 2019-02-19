@@ -67,7 +67,6 @@ CURSES ?= -lncurses
 #CURSES ?= -lcurses
 
 # Uncomment this if you want to disable the compilation of Blorb support.
-#
 #NO_BLORB = yes
 
 # These are for enabling local version of certain functions which may be
@@ -112,29 +111,30 @@ export LIBDIR
 export COLOR
 
 NAME = frotz
+VERSION = 2.45pre
+
 
 # If we're working from git, we have access to proper variables. If
 # not, make it clear that we're working from a release.
+#
 GIT_DIR ?= .git
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 	GIT_HASH = $(shell git rev-parse HEAD)
 	GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
-	GIT_TAG = $(shell git describe --abbrev=0 --tags)
 	GIT_DATE = $(shell git show -s --format=%ci)
 else
-	GIT_BRANCH = "$Format:%D$"
+	IT_BRANCH = $(shell echo "$Format:%D$" | sed s/^.*\>\\s*//)
 	GIT_HASH = "$Format:%H$"
 	GIT_HASH_SHORT = "$Format:%h$"
-	GIT_TAG = none
 	GIT_DATE = "$Format:%ci$"
 endif
-BUILD_DATE = $(shell date --rfc-3339 seconds)
+BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
 export CFLAGS
 
 
 # Compile time options handling
-
+#
 ifeq ($(SOUND), ao)
   CURSES_LDFLAGS = -lao -ldl -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
@@ -142,7 +142,7 @@ endif
 
 
 # Source locations
-
+#
 SRCDIR = src
 COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
@@ -177,10 +177,8 @@ DFROTZ_BIN = dfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 
 
-#all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
-
-# Main programs
-
+# Build recipes
+#
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
@@ -220,7 +218,7 @@ $(SUB_CLEAN):
 
 
 # Compile-time generated defines and strings
-
+#
 common_strings:	$(COMMON_STRINGS)
 $(COMMON_STRINGS):
 	@echo "** Generating $@"
@@ -270,15 +268,15 @@ endif
 hash: $(HASH)
 $(HASH):
 	@echo "** Generating $@"
-	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" > $@
+	@echo "#define VERSION \"$(VERSION)\"" > $@
+	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" >> $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
-	@echo "#define GIT_TAG \"$(GIT_TAG)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
 
 
 # Administrative stuff
-
+#
 install: install_frotz
 install_frotz: $(FROTZ_BIN)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
@@ -315,16 +313,12 @@ install_all:	install_frotz install_dfrotz install_sfrotz
 uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz
 
 
-
-dist: $(NAME)-$(GIT_TAG).tar
-frotz-$(GIT_TAG).tar:
-	git archive --format=tar --prefix $(NAME)-$(GIT_TAG)/ HEAD | tar xf -
-	sed s"/GIT_TAG = none/GIT_TAG = \"$(GIT_TAG)\"/" -i $(NAME)-$(GIT_TAG)/Makefile
-	tar zcf $(NAME)-$(GIT_TAG).tar.gz $(NAME)-$(GIT_TAG)
-	rm -rf $(NAME)-$(GIT_TAG)
+dist: $(NAME)-$(VERSION).tar.gz
+frotz-$(VERSION).tar.gz:
+	git archive --format=tgz --prefix $(NAME)-$(VERSION)/ HEAD -o $(NAME)-$(VERSION).tar.gz
 
 clean: $(SUB_CLEAN)
-	rm -rf $(NAME)-$(GIT_TAG)
+	rm -rf $(NAME)-$(VERSION)
 	rm -f $(SRCDIR)/*.h \
 		$(SRCDIR)/*.a \
 		$(COMMON_DEFINES) \

@@ -139,7 +139,7 @@ void os_process_arguments(int argc, char *argv[])
     } while (c != EOF);
 
     if (((argc - zoptind) != 1) && ((argc - zoptind) != 2)) {
-	printf("FROTZ V%s\tDumb interface.\n", GIT_TAG);
+	printf("FROTZ V%s\tDumb interface.\n", VERSION);
 	puts(INFORMATION);
 	puts(INFO2);
 	exit(1);
@@ -297,17 +297,17 @@ void os_init_setup(void)
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\t", GIT_TAG);
+    printf("FROTZ V%s\t", VERSION);
     printf("Dumb interface.\n");
-    printf("Build:\t\t%s\n", build_timestamp);
+    printf("Build date:\t%s\n", build_timestamp);
+    printf("Commit date:\t%s\n", GIT_DATE);
     printf("Git commit:\t%s\n", GIT_HASH);
-    printf("Git tag:\t%s\n", GIT_TAG);
     printf("Git branch:\t%s\n", GIT_BRANCH);
     printf("  Frotz was originally written by Stefan Jokisch.\n");
     printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
     printf("  It was ported to Unix by Galen Hazelwood.\n");
     printf("  The core and dumb port are currently maintained by David Griffith.\n");
-    printf(" See https://661.org/proj/if/frotz for Frotz's homepage.\n\n");
+    printf("  Frotz's homepage is https://661.org/proj/if/frotz.\n\n");
     return;
 }
 

@@ -287,7 +287,7 @@ void os_process_arguments (int argc, char *argv[])
     } while (c != EOF);
 
     if (zoptind != argc - 1) {
-	printf("FROTZ V%s\tCurses interface.  ", GIT_TAG);
+	printf("FROTZ V%s\tCurses interface.  ", VERSION);
 
 #ifndef NO_SOUND
 	printf("Audio output enabled.");
@@ -1146,15 +1146,15 @@ error:
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\tCurses interface.  ", GIT_TAG);
+    printf("FROTZ V%s\tCurses interface.  ", VERSION);
 #ifndef NO_SOUND
         printf("Audio output enabled.");
 #else
 	printf("Audio output disabled.");
 #endif
-    printf("\nBuild:\t\t%s\n", build_timestamp);
+    printf("\nBuild date:\t%s\n", build_timestamp);
+    printf("Commit date:\t%s\n", GIT_DATE);
     printf("Git commit:\t%s\n", GIT_HASH);
-    printf("Git tag:\t%s\n", GIT_TAG);
     printf("Git branch:\t%s\n", GIT_BRANCH);
     printf("  Frotz was originally written by Stefan Jokisch.\n");
     printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");

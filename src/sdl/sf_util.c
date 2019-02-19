@@ -148,7 +148,7 @@ static char *info2 =
 static void usage()
   {
   char **p = infos; int i=0,len=0;
-  printf(info1, GIT_TAG);
+  printf(info1, VERSION);
   while (*p)
 	{
 	if (i)
@@ -278,15 +278,15 @@ static void parse_options (int argc, char **argv)
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\tSDL interface.\n", GIT_TAG);
-    printf("Build:\t\t%s\n", build_timestamp);
+    printf("FROTZ V%s\tSDL interface.\n", VERSION);
+    printf("Build date:\t%s\n", build_timestamp);
+    printf("Commit date:\t%s\n", GIT_DATE);
     printf("Git commit:\t%s\n", GIT_HASH);
-    printf("Git tag:\t%s\n", GIT_TAG);
     printf("Git branch:\t%s\n", GIT_BRANCH);
     printf("  Frotz was originally written by Stefan Jokisch.\n");
     printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
     printf("  It was ported to Unix by Galen Hazelwood.\n");
-    printf("  The core and Unix port are currently maintained by David Griffith.\n");
+    printf("  The core and SDL port are currently maintained by David Griffith.\n");
     printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
     exit(2);
 }
