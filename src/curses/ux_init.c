@@ -791,7 +791,7 @@ static int getconfig(char *configfile)
 			;
 
 		/* Remove trailing whitespace and newline */
-		for (num = strlen(varname) - 1; isspace(varname[num]); num--)
+		for (num = strlen(varname) - 1; (ssize_t) num >= 0 && isspace(varname[num]); num--)
 		;
 		varname[num+1] = 0;
 
@@ -802,7 +802,7 @@ static int getconfig(char *configfile)
 		}
 
 		/* Find end of variable name */
-		for (num = 0; !isspace(varname[num]) && num < LINELEN; num++);
+		for (num = 0; varname[num] != 0 && !isspace(varname[num]) && num < LINELEN; num++);
 
 		for (num2 = num; isspace(varname[num2]) && num2 < LINELEN; num2++);
 
