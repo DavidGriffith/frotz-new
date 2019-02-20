@@ -317,7 +317,11 @@ uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz
 
 dist: $(NAME)-$(VERSION).tar.gz
 frotz-$(VERSION).tar.gz:
+ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	git archive --format=tgz --prefix $(NAME)-$(VERSION)/ HEAD -o $(NAME)-$(VERSION).tar.gz
+else
+	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
+endif
 
 clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
