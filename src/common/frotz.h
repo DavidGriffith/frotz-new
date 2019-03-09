@@ -832,15 +832,6 @@ void	os_init_setup (void);
 void 	os_warn (const char *, ...);
 void	os_quit (void);
 
-
-/*** text decoding API ***/
-enum string_type {
-    LOW_STRING, ABBREVIATION, HIGH_STRING, EMBEDDED_STRING, VOCABULARY, FILENAME
-};
-
-void decode_text (enum string_type st, zword addr);
-
-
 /**
  * Called regularly by the interpreter, at least every few instructions
  * (only when interpreting: e.g., not when waiting for input).
