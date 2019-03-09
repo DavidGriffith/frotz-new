@@ -65,9 +65,12 @@ Frotz codebase as a one of the available interfaces.  With SDL Frotz,
 full support for V6 games is provided.
 
 Prerequisite packages for sfrotz:
-  * libsdl2-dev
-  * libsdl2-mixer-dev
-
+  * libsdl2-dev		(2.0.9 or higher)
+  * libsdl2-mixer-dev	(2.0.4 or higher)
+  * libfreetype6-dev	(2.6.x or higher)
+  * libpng-dev		(1.6.x or higher)
+  * libjpeg-dev		(1.5.x or higher)
+  * zlib1g-dev		(1.2.x or higher)
 
 =======================
 Editing the Makefile ||
