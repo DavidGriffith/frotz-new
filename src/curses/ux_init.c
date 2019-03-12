@@ -260,8 +260,7 @@ void os_process_arguments (int argc, char *argv[])
 	  case 'I': f_setup.interpreter_number = atoi(zoptarg); break;
 	  case 'l': f_setup.left_margin = atoi(zoptarg); break;
 	  case 'L': f_setup.restore_mode = 1;
-		    f_setup.tmp_save_name = malloc(FILENAME_MAX * sizeof(char) + 1);
-		    strncpy(f_setup.tmp_save_name, zoptarg, FILENAME_MAX);
+		    f_setup.tmp_save_name = strdup(zoptarg);
 		    break;
 	  case 'o': f_setup.object_movement = 1; break;
 	  case 'O': f_setup.object_locating = 1; break;
