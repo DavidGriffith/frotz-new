@@ -4,21 +4,21 @@
  */
 
 typedef struct frotz_setup_struct {
-	int attribute_assignment;	/* done */
-	int attribute_testing;		/* done */
-	int context_lines;		/* done */
-	int object_locating;		/* done */
-	int object_movement;		/* done */
-	int left_margin;		/* done */
-	int right_margin;		/* done */
-	int ignore_errors;		/* done */
-	int interpreter_number;		/* done */
-	int piracy;			/* done */
-	int undo_slots;			/* done */
-	int expand_abbreviations;	/* done */
-	int script_cols;		/* done */
-	int sound;			/* done */
-	int err_report_mode;		/* done */
+	int attribute_assignment;
+	int attribute_testing;
+	int context_lines;
+	int object_locating;
+	int object_movement;
+	int left_margin;
+	int right_margin;
+	int ignore_errors;
+	int interpreter_number;
+	int piracy;
+	int undo_slots;
+	int expand_abbreviations;
+	int script_cols;
+	int sound;
+	int err_report_mode;
 
 	char *story_file;
         char *story_name;
