@@ -142,7 +142,7 @@ static char *infos[] = {
 
 static char *info2 =
 	"\nError checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n"
-	"For more options and explanations, please read the HTML manual.\n";
+	"More options and information are in the manual page.  Type \"man sfrotz\".\n";
 
 #define WIDCOL 40
 static void usage()
