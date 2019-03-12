@@ -189,7 +189,7 @@ Default is 1 (report first instance of an error).
 
 .TP
 .B \-@ <listfile>
-Use resource files listed in <listfile>.
+Use resource files listed in <listfile> (see NON BLORB RESOURCES).
 
 .TP
 .B \-%
@@ -206,7 +206,14 @@ default 100 (1/10 sec).
 
 .TP
 .B \-N <mode>
-Set the mode for creating default file names for save/script etc.
+Set the mode (date or name) for creating default file names for
+save/script etc.  For
+.IR date ,
+a timestamp is prepended to the filename extension.  For
+.IR name ,
+a four-digit number beginning with
+.I 0000
+is prepended to the filename extension.
 
 .TP
 .B \-T
@@ -560,10 +567,359 @@ interpreter which describe the movement of objects in the object tree.
 Default is "off".
 
 
+.SH NON BLORB RESOURCES
+Besides Blorb-packaged resources, Sfrotz can also render graphics and
+sound from individual files, provided the latter are either suitably
+named (e.g a common root with a numeric field specifying the resource
+number), or listed in a suitably formatted text file.
+
+Note that this feature is not automatic, but must be enabled by the -%
+or -@ command line options. When the feature is enabled, resources found
+this way override those in the Blorb file, if present.
+
+This feature can be useful to game designers, as it eases changing and
+adding resources without having to re-compile the Blorb file each time.
+The format of the list file used with the -@ option (see EXAMPLE BLC
+FILE) is identical to that of the BLC control file used by L. Ross
+Raszewski's iblorb package, so one can use the same list for compiling
+the final Blorb file for distribution.
+
+
+.SH TRUETYPE FONTS
+Sfrotz can display text with Truetype or Type1 fonts, using the
+FreeType2 rendering library. The location of the necessary font files
+must be specified in the setup file. Also, antialiased rendering of
+Truetype fonts can be specified. Please note that this feature in Sfrotz
+is still
+.B experimental,
+so don't expect too much (e.g., kerning is not supported).
+
+
+.SH DEFAULT FONTS
+Sfrotz needs not Truetype fonts for working; in fact it has a default
+monospaced font, based on an 8x16 VGA font, which can be used for both
+the TEXT_FONT and the FIXED_FONT of the z-machine, with suitable (though
+not very nice) modifications for the various styles. Even if Truetype
+fonts are specified in the setup file, Sfrotz can be forced to use the
+VGA font by the -V command line switch.
+
 .SH ENVIRONMENT
 If the ZCODE_PATH environmental variable is defined, frotz will search
 that path for game files.  If that doesn't exist, INFOCOM_PATH will be
 searched.
+
+
+.SH SETUP FILE DESCRIPTION
+There are four sections: Interpreter, Display, Fonts, and Resources.
+
+The
+.B Interpreter
+section deals with options having to do with how the Frotz core works.
+
+The
+.B Window
+section deals with screen display.  Sfrotz has a hardwired default
+screen size of 640x400. The screen size can be changed by the values in
+this section, by the values found in the Reso chunck of a Blorb file,
+and finally by the -w and -h command line options (in that order). Note
+however that Sfrotz shall refuse to set a screen width less than 640
+and/or a height less than 400.
+
+.BR NOTE :
+for normal (windowed) usage, the screen size should obviously be less
+than the PC screen resolution (taking into account also window
+decorations, taskbars etc.) For fullscreen usage, the size should
+preferably be one of those supported by the PC video driver; otherwise,
+SDL shall try to use the next higher available resolution, with black
+borders around the z-machine screen. In fullscreen mode, however, it may
+happen that for some strange resolutions SDL accepts the request, but
+the screen goes blank... In such a case, you may shut down the program
+by pressing Ctrl-Alt-X.
+
+The
+.B Display
+section is reserved for future developments.
+
+The
+.B Fonts
+section is for defining the font directory, font files, and if
+antialiasing is enabled (which is currently not supported).
+
+The following eight statements: textroman, textbold, textitalic,
+textbolditalic, fixedroman, fixedbold, fixeditalic, and fixedbolditalic;
+specify the eight font faces used by the z-machine (not counting the
+so-called graphics font used in Beyond Zork, which is hardwired in the
+program), that is the normal TEXT_FONT and the monospaced FIXED_FONT,
+each in four styles (roman, bold, italic and bold+italic). A single face
+is specified by the file name (with its suffix!), optionally followed by
+an @ sign and a number, indicating the font size in pixels (default is
+14). Multiple face files can be specified, separated by pipe (|)
+characters; Sfrotz shall use the first one it finds (see the example in
+EXAMPLE SETUP FILE). This feature allows e.g. to use the same setup file
+on different systems.
+
+The
+.B Resources
+section is for configuring graphics and sound resources.  Each template
+must contain exactly one C-style decimal format specifier (e.g. Pict%d)
+to be substituted by the resource number.
+
+
+.SH SETUP FILE GRAMMAR
+.B [Interpreter]
+.HP 2
+Number =
+.I number
+.br
+Set the interpreter number (default is 4, i.e. Amiga Interpreter)
+
+.HP 2
+Error Reporting =
+.I level
+.br
+Set the error reporting level (same as the -Z option)
+
+.HP 2
+Ignore Errors =
+.I 0/1
+.br
+Ignore (1) or not (0) non-fatal runtime errors.
+
+.HP 2
+Expand Abbreviations =
+.I 0/1
+.br
+Set/reset expansion of g/x/z abbreviations. Expansion is useful for old
+v1 games which do not understand such abbreviations. Default: 0 (the
+-xoption can set this switch.)
+
+.HP 2
+Tandy Bit =
+.I 0/1
+.br
+Set/reset the Tandy bit. Default: 0 (the -t option can set this switch.)
+
+.HP 2
+Wrap Script Lines =
+.I nc
+.br
+Set the width (number of columns) of the transcript to nc. Same as -S option.
+
+.HP 2
+SaveNames =
+.I date/name
+.br
+Set the mode (date or name) for creating default file names for
+save/script etc.  For
+.IR date ,
+a timestamp is prepended to the filename extension.  For
+.IR name ,
+a four-digit number beginning with
+.I 0000
+is prepended to the filename extension.
+
+.P
+.B [Window]
+.HP 2
+AcWidth =
+.I width
+.br
+Set the screen width in pixels (default: 640)
+
+.HP 2
+AcHeight =
+.I height
+.br
+Set the screen height in pixels (default: 400)
+
+.P
+.B [Display]
+.HP 2
+(This section reserved for future developments)
+
+.P
+.B [Fonts]
+.HP 2
+antialias =
+.I 0/1
+.br
+Set antialiased rendering of Truetype fonts off (0) or on (nonzero).
+Note that this option cannot be overridden by a command line switch.
+
+.HP 2
+fontdir =
+.I folder
+.br
+Specify the directory containing the Truetype fonts.
+
+.HP 2
+textroman =
+.I fontspec
+.br
+Set the font file for TEXT_FONT, roman style.
+
+.HP 2
+textbold =
+.I fontspec
+.br
+Set the font file for TEXT_FONT, bold style.
+
+.HP 2
+textitalic =
+.I fontspec
+.br
+Set the font file for TEXT_FONT, italic style.
+
+.HP 2
+textbolditalic =
+.I fontspec
+.br Set the font file for TEXT_FONT, bold and italic style.
+
+.HP 2
+fixedroman =
+.I fontspec
+.br
+Set the font file for FIXED_FONT, roman style.
+
+.HP 2
+fixedbold =
+.I fontspec
+.br
+Set the font file for FIXED_FONT, bold style.
+
+.HP 2
+fixeditalic =
+.I fontspec
+.br
+Set the font file for FIXED_FONT, italic style.
+
+.HP 2
+fixedbolditalic =
+.I fontspec
+.br
+Set the font file for FIXED_FONT, bold and italic style
+
+.P
+.B [Resources]
+
+.HP 2
+Dir =
+.I folder
+.br
+Specify the folder for individual graphics/sound resource files.
+
+.HP 2
+Pict =
+.I template
+.br
+Template for picture resource files.
+
+.HP 2
+Snd =
+.I template
+.br
+Template for sound resource files.
+
+
+.SH EXAMPLE SETUP FILE
+
+# The # denotes the start of a comment
+.br
+# Everything after the # is ignored, up to the end of the line
+
+[Interpreter]
+.br
+SaveNames=date
+
+[Window]
+.br
+# The following entries are commented out
+.br
+# but they are the same as the hardwired defaults, anyway
+.br
+#AcWidth = 640
+.br
+#AcHeight = 400
+
+[Display]
+
+[Fonts]
+.br
+antialias=1
+.br
+fontdir=/usr/share/fonts/truetype/freefont
+.br
+textroman=arial.ttf@16|FreeSans.ttf@16
+.br
+textbold=arialbd.ttf@16|FreeSansBold.ttf@16
+.br
+textitalic=ariali.ttf@16|FreeSansOblique.ttf@16
+.br
+textbolditalic=arialbi.ttf@16|FreeSansBoldOblique.ttf@16
+.br
+fixedroman=cour.ttf@16|FreeMono.ttf@16
+.br
+fixedbold=courbd.ttf@16|FreeMonoBold.ttf@16
+.br
+fixeditalic=couri.ttf@16|FreeMonoOblique.ttf@16
+.br
+fixedbolditalic=courbi.ttf@16|FreeMonoBoldOblique.ttf@16
+
+[Resources]
+.br
+Dir=./        # the current dir
+.br
+Pict=PIC%d    # i.e. PIC1, PIC2, ...
+.br
+Snd=SND%d     # i.e. SND3, SND4, ...
+
+
+.SH EXAMPLE BLC FILE
+Exec 0 ZCOD ani.z6
+
+Snd 13 FORM busyalone.au.aiff
+.br
+Snd 12 FORM s0020.au.aiff
+.br
+Snd 11 FORM s0154.au.aiff
+.br
+Snd 10 FORM s1484.au.aiff
+
+Pict 10 PNG edleft.png0.png
+.br
+Pict 11 PNG edleft.png1.png
+.br
+Pict 12 PNG edleft.png2.png
+.br
+Pict 13 PNG edleft.png3.png
+.br
+Pict 14 PNG edleft.png4.png
+.br
+Pict 15 PNG edleft.png5.png
+
+Pict 16 PNG lauhoh.png0.png
+.br
+Pict 17 PNG lauhoh.png1.png
+.br
+Pict 18 PNG lauhoh.png2.png
+
+Pict 19 PNG edfront.png0.png
+.br
+Pict 20 PNG edfront.png1.png
+.br
+Pict 21 PNG edfront.png2.png
+.br
+Pict 22 PNG edfront.png3.png
+.br
+Pict 23 PNG edfront.png4.png
+.br
+Pict 24 PNG edfront.png5.png
+
+Pict 25 PNG hoagie.png0.png
+.br
+Pict 26 PNG hoagie.png1.png
+
+Pict 30 PNG dott0.png
 
 
 .SH FURTHER INFORMATION
