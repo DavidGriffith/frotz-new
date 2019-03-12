@@ -182,7 +182,7 @@ extern char *optarg;
 extern int optind;
 extern int m_timerinterval;
 
-static char *options = "@:aAb:B:c:f:Fh:iI:l:Lm:N:oOPqr:Rs:S:tTu:vVw:xZ:";
+static char *options = "@:%aAb:B:c:f:Fh:iI:l:L:m:N:oOPqr:Rs:S:tTu:vVw:xZ:";
 
 static int limit( int v, int m, int M)
   {
@@ -207,6 +207,8 @@ static void parse_options (int argc, char **argv)
 	    copt = optarg[0];
 	    }
 
+	if (c == '%')
+	    m_localfiles = true;
 	if (c == 'a')
 	    f_setup.attribute_assignment = 1;
 	if (c == 'A')
@@ -237,8 +239,10 @@ static void parse_options (int argc, char **argv)
 	    f_setup.interpreter_number = num;
 	if (c == 'l')
 	    f_setup.left_margin = num;
-	if (c == 'L')
-	    m_localfiles = true;
+	if (c == 'L') {
+	    f_setup.restore_mode = TRUE;
+	    f_setup.tmp_save_name = strdup(optarg);
+	}
 	if (c == 'q')
 	    m_no_sound = 1;
 	if (c == 'o')
@@ -536,11 +540,18 @@ char *os_read_file_name (const char *default_name, int flag)
     else if (m_names_format == 'n') initname = getnumbername(initname,ext);
     }
 
-  st = dialog_read_file_name( file_name, initname, flag);
-  if (st == SF_NOTIMP)
-    st = ingame_read_file_name( file_name, initname, flag);
+  /* If we're restoring a game before the interpreter starts, and our
+   * filename is already provided with the -L flag, just go ahead silently.
+   */
+  if (f_setup.restore_mode) {
+    strncpy(file_name, f_setup.save_name, FILENAME_MAX);
+  } else {
+    st = dialog_read_file_name( file_name, initname, flag);
+    if (st == SF_NOTIMP)
+      st = ingame_read_file_name( file_name, initname, flag);
 
-  if (!st) return NULL;
+    if (!st) return NULL;
+  }
 
   return strdup(file_name);
   }
