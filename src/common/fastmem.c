@@ -659,7 +659,7 @@ static void get_default_name (char *default_name, zword addr)
 	default_name[i] = 0;
 
 	if (strchr (default_name, '.') == NULL)
-	    strncat(default_name, EXT_AUX, strlen(default_name) - strlen(EXT_AUX));
+	    strncat(default_name, EXT_AUX, strlen(default_name) - strlen(EXT_AUX) + 1);
     } else {
 	free(default_name);
 	default_name = strdup(f_setup.aux_name);
