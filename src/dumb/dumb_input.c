@@ -409,19 +409,23 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
   return terminator;
 }
 
-int os_read_file_name (char *file_name, const char *default_name, int flag)
+char *os_read_file_name (const char *default_name, int flag)
 {
+  char file_name[FILENAME_MAX + 1];
   char buf[INPUT_BUFFER_SIZE], prompt[INPUT_BUFFER_SIZE];
   FILE *fp;
   char *tempname;
+  char path_separator[2];
   int i;
+
+  path_separator[0] = PATH_SEPARATOR;
+  path_separator[1] = 0;
 
   /* If we're restoring a game before the interpreter starts,
    * our filename is already provided.  Just go ahead silently.
    */
   if (f_setup.restore_mode) {
-    strcpy(file_name, default_name);
-    return TRUE;
+    return strdup(default_name);
   } else {
     if (f_setup.restricted_path) {
       for (i = strlen(default_name); i > 0; i--) {
@@ -437,11 +441,14 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
     dumb_read_misc_line(buf, prompt);
     if (strlen(buf) > MAX_FILE_NAME) {
       printf("Filename too long\n");
-      return FALSE;
+      return NULL;
     }
   }
 
-  strcpy (file_name, buf[0] ? buf : default_name);
+  if (buf[0])
+    strncpy(file_name, buf, FILENAME_MAX);
+  else
+    strncpy(file_name, default_name, FILENAME_MAX);
 
   /* Check if we're restricted to one directory. */
   if (f_setup.restricted_path != NULL) {
@@ -451,12 +458,14 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
         break;
       }
     }
-    tempname = my_strdup(file_name + i);
-    strcpy(file_name, f_setup.restricted_path);
+    tempname = strdup(file_name + i);
+    strncpy(file_name, f_setup.restricted_path, FILENAME_MAX);
+
+    /* Make sure the final character is the path separator. */
     if (file_name[strlen(file_name)-1] != PATH_SEPARATOR) {
-      strcat(file_name, "/");
+      strncat(file_name, path_separator, FILENAME_MAX - strlen(file_name) - 2);
     }
-    strcat(file_name, tempname);
+    strncat(file_name, tempname, strlen(file_name) - strlen(tempname) - 1);
   }
 
   /* Warn if overwriting a file.  */
@@ -464,9 +473,10 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
       && ((fp = fopen(file_name, "rb")) != NULL)) {
     fclose (fp);
     dumb_read_misc_line(buf, "Overwrite existing file? ");
-    return(tolower(buf[0]) == 'y');
+    if (tolower(buf[0]) != 'y')
+	return NULL;
   }
-  return TRUE;
+  return strdup(file_name);
 }
 
 void os_more_prompt (void)

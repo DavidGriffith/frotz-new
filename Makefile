@@ -35,15 +35,16 @@ LIBDIR ?= $(PREFIX)/lib
 ## LIBDIR path for Apple MacOS Sierra 10.12 plus MacPorts
 #LIBDIR ?= /opt/local/lib
 
-CFLAGS += -I$(INCLUDEDIR)
-LDFLAGS += -L$(LIBDIR)
-
-RANLIB ?= $(shell which ranlib)
-AR ?= $(shell which ar)
-
 # Choose your sound support
 # OPTIONS: ao, none
 SOUND ?= ao
+
+
+##########################################################################
+# The configuration options below are intended mainly for older flavors
+# of Unix.  For Linux, BSD, and Solaris released since 2003, you can
+# ignore this section.
+##########################################################################
 
 # Default sample rate for sound effects.
 # All modern sound interfaces can be expected to support 44100 Hz sample
@@ -57,41 +58,45 @@ BUFFSIZE ?= 4096
 # Default sample rate converter type
 DEFAULT_CONVERTER ?= SRC_SINC_MEDIUM_QUALITY
 
-
-##########################################################################
-# The configuration options below are intended mainly for older flavors
-# of Unix.  For Linux, BSD, and Solaris released since 2003, you can
-# ignore this section.
-##########################################################################
-
-# If your machine's version of curses doesn't support color...
+# Comment this out if your machine's version of curses doesn't support color.
 #
 COLOR ?= yes
 
 # If this matters, you can choose -lcurses or -lncurses
 # For UTF-8 support -lncursesw needs to be used
-CURSES ?= -lncursesw
-
-# Uncomment this if you're compiling Unix Frotz on a machine that lacks
-# the strrchr() libc library call.  If you don't know what this means,
-# leave it alone.
-#
-#NO_STRRCHR = yes
-
-# Uncomment this if you're compiling Unix Frotz on a machine that lacks
-# the memmove(3) system call.  If you don't know what this means, leave it
-# alone.
-#
-#NO_MEMMOVE = yes
+#CURSES ?= -lcurses
 
 # Uncomment this if you want to disable the compilation of Blorb support.
-#
 #NO_BLORB = yes
+
+# These are for enabling local version of certain functions which may be
+# missing or behave differently from what's expected in modern system.
+# If you're running on a system made in the past 20 years, you should be
+# safe leaving these alone.  If not or you're using something modern,
+# but very strange intended for very limited machines, you probably know
+# what you're doing.  Therefore further commentary on what these
+# functions do is probably not necessary.
+
+# For missing memmove()
+#NO_MEMMOVE = yes
+
+# For missing strdup() and strndup()
+#NO_STRDUP = yes
+
+# For missing strrchr()
+#NO_STRRCHR = yes
+
 
 #########################################################################
 # This section is where Frotz is actually built.
 # Under normal circumstances, nothing in this section should be changed.
 #########################################################################
+
+CFLAGS += -I$(INCLUDEDIR)
+LDFLAGS += -L$(LIBDIR)
+
+RANLIB ?= $(shell which ranlib)
+AR ?= $(shell which ar)
 
 export CC
 export CFLAGS
@@ -105,27 +110,31 @@ export INCLUDEDIR
 export LIBDIR
 export COLOR
 
+NAME = frotz
+VERSION = 2.45pre
+
 
 # If we're working from git, we have access to proper variables. If
 # not, make it clear that we're working from a release.
+#
 GIT_DIR ?= .git
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 	GIT_HASH = $(shell git rev-parse HEAD)
 	GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
-	GIT_TAG = $(shell git describe --abbrev=0 --tags)
+	GIT_DATE = $(shell git show -s --format=%ci)
 else
-	GIT_BRANCH = none
-	GIT_HASH = none
-	GIT_HASH_SHORT = none
-	GIT_TAG = none
+	GIT_BRANCH = $(shell echo "$Format:%D$" | sed s/^.*\>\\s*//)
+	GIT_HASH = "$Format:%H$"
+	GIT_HASH_SHORT = "$Format:%h$"
+	GIT_DATE = "$Format:%ci$"
 endif
-BUILD_DATE_TIME = $(shell date +%Y%m%d.%k%M%S | sed s/\ //g)
+BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
 export CFLAGS
 
 
 # Compile time options handling
-
+#
 ifeq ($(SOUND), ao)
   CURSES_LDFLAGS = -lao -ldl -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
@@ -133,7 +142,7 @@ endif
 
 
 # Source locations
-
+#
 SRCDIR = src
 COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
@@ -168,23 +177,8 @@ DFROTZ_BIN = dfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 
 
-all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
-
-$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
-$(CURSES_LIB): $(CURSES_DEFINES) $(CURSES_DIR);
-$(SDL_LIB): $(SDL_DIR);
-$(DUMB_LIB): $(DUMB_DIR);
-$(BLORB_LIB): $(BLORB_DIR);
-
-$(SUBDIRS):
-	$(MAKE) -C $@
-
-$(SUB_CLEAN):
-	-$(MAKE) -C $(@:%-clean=%) clean
-
-
-# Main programs
-
+# Build recipes
+#
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
@@ -202,6 +196,8 @@ $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
+all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
+
 common_lib:	$(COMMON_LIB)
 
 curses_lib:	$(CURSES_LIB)
@@ -210,31 +206,45 @@ dumb_lib:	$(DUMB_LIB)
 
 blorb_lib:	$(BLORB_LIB)
 
+$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
+$(CURSES_LIB): $(CURSES_DEFINES) $(CURSES_DIR);
+$(SDL_LIB): $(SDL_DIR);
+$(DUMB_LIB): $(DUMB_DIR);
+$(BLORB_LIB): $(BLORB_DIR);
+
+$(SUBDIRS):
+	$(MAKE) -C $@
+
+$(SUB_CLEAN):
+	-$(MAKE) -C $(@:%-clean=%) clean
+
 
 # Compile-time generated defines and strings
-
+#
 common_strings:	$(COMMON_STRINGS)
 $(COMMON_STRINGS):
 	@echo "** Generating $@"
 	@echo "#include \"frotz.h\"" > $@
-	@echo "const char build_timestamp[] = \"$(BUILD_DATE_TIME)\";" >> $@
+	@echo "const char build_timestamp[] = \"$(BUILD_DATE)\";" >> $@
 
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
+ifdef NO_BLORB
+	@echo "#define NO_BLORB" >> $@
+endif
 ifdef NO_STRRCHR
 	@echo "#define NO_STRRCHR" >> $@
 endif
 ifdef NO_MEMMOVE
 	@echo "#define NO_MEMMOVE" >> $@
 endif
-ifdef NO_BLORB
-	@echo "#define NO_BLORB" >> $@
+ifdef NO_STRDUP
+	@echo "#define NO_STRDUP" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
-
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
@@ -246,33 +256,29 @@ $(CURSES_DEFINES):
 	@echo "#define SAMPLERATE $(SAMPLERATE)" >> $@
 	@echo "#define BUFFSIZE $(BUFFSIZE)" >> $@
 	@echo "#define DEFAULT_CONVERTER $(DEFAULT_CONVERTER)" >> $@
-
 ifeq ($(SOUND), none)
 	@echo "#define NO_SOUND" >> $@
 endif
-
 ifndef SOUND
 	@echo "#define NO_SOUND" >> $@
 endif
-
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
 endif
-
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
-
 
 hash: $(HASH)
 $(HASH):
 	@echo "** Generating $@"
-	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" > $@
+	@echo "#define VERSION \"$(VERSION)\"" > $@
+	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" >> $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
-	@echo "#define GIT_TAG \"$(GIT_TAG)\"" >> $@
+	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
 
 
 # Administrative stuff
-
+#
 install: install_frotz
 install_frotz: $(FROTZ_BIN)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
@@ -284,11 +290,13 @@ uninstall_frotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/frotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/frotz.6"
 
+install_dumb: install_dfrotz
 install_dfrotz: $(DFROTZ_BIN)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
 	install "$(DFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/dfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
 
+uninstall_dumb: uninstall_dfrotz
 uninstall_dfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
@@ -307,48 +315,44 @@ install_all:	install_frotz install_dfrotz install_sfrotz
 uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz
 
 
-
-dist: frotz-$(GIT_TAG).tar
-frotz-$(GIT_TAG).tar:
-	git archive --format=tar --prefix frotz-$(GIT_TAG)/ HEAD | tar xf -
-	sed s"/GIT_BRANCH = none/GIT_BRANCH = \"$(GIT_BRANCH)\"/" -i frotz-$(GIT_TAG)/Makefile
-	sed s"/GIT_HASH = none/GIT_HASH = \"$(GIT_HASH)\"/" -i frotz-$(GIT_TAG)/Makefile
-	sed s"/GIT_HASH_SHORT = none/GIT_HASH_SHORT = \"$(GIT_HASH_SHORT)\"/" -i frotz-$(GIT_TAG)/Makefile
-	sed s"/GIT_TAG = none/GIT_TAG = \"$(GIT_TAG)\"/" -i frotz-$(GIT_TAG)/Makefile
-	tar zcf frotz-$(GIT_TAG).tar.gz frotz-$(GIT_TAG)
-	rm -rf frotz-$(GIT_TAG)
+dist: $(NAME)-$(VERSION).tar.gz
+frotz-$(VERSION).tar.gz:
+ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
+	git archive --format=tgz --prefix $(NAME)-$(VERSION)/ HEAD -o $(NAME)-$(VERSION).tar.gz
+else
+	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
+endif
 
 clean: $(SUB_CLEAN)
-	rm -rf frotz-$(GIT_TAG)
+	rm -rf $(NAME)-$(VERSION)
 	rm -f $(SRCDIR)/*.h \
 		$(SRCDIR)/*.a \
 		$(COMMON_DEFINES) \
 		$(COMMON_STRINGS) \
 		$(HASH) \
 		$(CURSES_DEFINES) \
-		frotz*.tar.gz
+		$(NAME)*.tar.gz
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
 
 help:
-	@echo "Default target is \"all\""
-	@echo ""
 	@echo "Targets:"
-	@echo "    frotz: the standard edition"
-	@echo "    dfrotz: for dumb terminals and wrapper scripts"
-	@echo "    sfrotz: for SDL graphics and sound"
+	@echo "    frotz: (default target) the standard curses edition"
+	@echo "    dumb: for dumb terminals and wrapper scripts"
+	@echo "    sdl: for SDL graphics and sound"
+	@echo "    all: build curses, dumb, and SDL versions"
 	@echo "    install"
 	@echo "    uninstall"
-	@echo "    install_dfrotz"
-	@echo "    uninstall_dfrotz"
-	@echo "    install_sfrotz"
-	@echo "    uninstall_sfrotz"
+	@echo "    install_dumb"
+	@echo "    uninstall_dumb"
+	@echo "    install_sdl"
+	@echo "    uninstall_sdl"
 	@echo "    install_all"
 	@echo "    uninstall_all"
 	@echo "    clean: clean up files created by compilation"
 	@echo "    distclean: like clean, but also delete executables"
-	@echo "    dist: create a source tarball of the latest tagged release"
+	@echo "    dist: create a source tarball"
 	@echo ""
 
 .SUFFIXES:

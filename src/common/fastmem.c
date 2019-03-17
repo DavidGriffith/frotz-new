@@ -659,9 +659,11 @@ static void get_default_name (char *default_name, zword addr)
 	default_name[i] = 0;
 
 	if (strchr (default_name, '.') == NULL)
-	    strcpy (default_name + i, ".AUX");
-
-    } else strcpy (default_name, f_setup.aux_name);
+	    strncat(default_name, EXT_AUX, strlen(default_name) - strlen(EXT_AUX) + 1);
+    } else {
+	free(default_name);
+	default_name = strdup(f_setup.aux_name);
+    }
 
 }/* get_default_name */
 
@@ -676,7 +678,7 @@ static void get_default_name (char *default_name, zword addr)
  */
 void z_restore (void)
 {
-    char new_name[MAX_FILE_NAME + 1];
+    char *new_name;
     char default_name[MAX_FILE_NAME + 1];
     FILE *gfp = NULL;
 
@@ -688,10 +690,12 @@ void z_restore (void)
 
 	get_default_name (default_name, (zargc >= 3) ? zargs[2] : 0);
 
-	if (os_read_file_name (new_name, default_name, FILE_LOAD_AUX) == 0)
+	new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
+	if (new_name == NULL)
 	    goto finished;
 
-	strcpy (f_setup.aux_name, default_name);
+	free(f_setup.aux_name);
+	f_setup.aux_name = strdup(default_name);
 
 	/* Open auxilary file */
 
@@ -715,10 +719,12 @@ void z_restore (void)
 
 	/* Get the file name */
 
-	if (os_read_file_name (new_name, f_setup.save_name, FILE_RESTORE) == 0)
+	new_name = os_read_file_name(f_setup.save_name, FILE_RESTORE);
+	if (new_name == NULL)
 	    goto finished;
 
-	strcpy (f_setup.save_name, new_name);
+	free(f_setup.save_name);
+	f_setup.save_name = strdup(new_name);
 
 	/* Open game file */
 
@@ -914,7 +920,7 @@ void z_restore_undo (void)
  */
 void z_save (void)
 {
-    char new_name[MAX_FILE_NAME + 1];
+    char *new_name;
     char default_name[MAX_FILE_NAME + 1];
     FILE *gfp;
 
@@ -926,10 +932,12 @@ void z_save (void)
 
 	get_default_name (default_name, (zargc >= 3) ? zargs[2] : 0);
 
-	if (os_read_file_name (new_name, default_name, FILE_SAVE_AUX) == 0)
+	new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
+	if (new_name == NULL)
 	    goto finished;
 
-	strcpy (f_setup.aux_name, default_name);
+	free(f_setup.aux_name);
+	f_setup.aux_name = strdup(default_name);
 
 	/* Open auxilary file */
 
@@ -954,10 +962,12 @@ void z_save (void)
 
 	/* Get the file name */
 
-	if (os_read_file_name (new_name, f_setup.save_name, FILE_SAVE) == 0)
+	new_name = os_read_file_name(f_setup.save_name, FILE_SAVE);
+	if (new_name == NULL)
 	    goto finished;
 
-	strcpy (f_setup.save_name, new_name);
+	free(f_setup.save_name);
+	f_setup.save_name = strdup(new_name);
 
 	/* Open game file */
 

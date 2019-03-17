@@ -24,11 +24,6 @@ For sound support, a few more things are necessary:
   * libvorbis     (1.3.2 or higher)
 Earlier versions of these libraries might work, but are untested.
 
-Frotz can be compiled without curses, leaving you with a dumb-mode 
-interface.  This option is provided for hysterical raisins and for those 
-who find it useful for web-based front-ends, bots, and whatever else you 
-can think up.  Read the DUMB file for more information.
-
 Linux uses ncurses, so you're safe there.  The version of curses that
 comes with NetBSD 1.6.x and later is good too.  Earlier versions lacked
 certain features needed by Frotz.  I don't know about the other *BSD
@@ -42,27 +37,49 @@ adds the "-D_DARWIN_SOURCE" and "-D_XOPEN_SOURCE=600" CFLAGS.
 It's always a good idea to have the GNU version of make(1) around.
 
 
+=============
+Dumb Frotz ||
+=============
+
+Frotz can be compiled without curses, leaving you with a dumb-mode 
+interface with no dependencies whatsoever besides a functioning C 
+library.  This interface is provided for having fun on extremely old 
+computers and for those who find it useful for web-based front-ends, 
+bots, and whatever else you can think up.  Read the DUMB file for more 
+information.
+
+Unless the machine on which you're trying to build Dumb Frotz is missing 
+some vital functions, no editing of the Makefile should be necessary.  
+Check to see if that OS provides memmove(), strdup(), strndup(), or 
+strrchr() functions.  If not, there are some options in the Makefile 
+that cause Frotz to use its own versions of these functions.
+
+
 ============
 SDL Frotz ||
 ============
 
 SDL Frotz (aka sfrotz) started off as a port of Frotz 2.32.  After 
 languishing for several years, it is now incorporated into the Unix 
-Frotz codebase as a one of the available interfaces.
+Frotz codebase as a one of the available interfaces.  With SDL Frotz, 
+full support for V6 games is provided.
 
 Prerequisite packages for sfrotz:
-  * libsdl2-dev
-  * libsdl2-mixer-dev
-
+  * libsdl2-dev		(2.0.9 or higher)
+  * libsdl2-mixer-dev	(2.0.4 or higher)
+  * libfreetype6-dev	(2.6.x or higher)
+  * libpng-dev		(1.6.x or higher)
+  * libjpeg-dev		(1.5.x or higher)
+  * zlib1g-dev		(1.2.x or higher)
 
 =======================
 Editing the Makefile ||
 =======================
 
-You should take a look at the Makefile, which is found in the src/ 
-subdirectory.  Read the comments.  It's pretty self-explanatory.  This 
-is where you define your compiler, where Frotz will be installed, what 
-libraries you're using, if you want sound support, and so on.
+You should take a look at the Makefile.  Read the comments.  It's pretty 
+self-explanatory.  This is where you define your compiler, where Frotz 
+will be installed, what libraries you're using, if you want sound 
+support, and so on.
 
 If this is too much for you, try using your operating systems's 
 packaging scheme to install Frotz for you.  If the latest version of 
@@ -82,17 +99,23 @@ ncurses.  For older systems, this isn't always true.  Figure out where
 the necessary header files and libraries live and edit the Makefile 
 accordingly.
 
-Once the compile is complete, make sure you have the correct permissions
-to write where you want Frotz installed, then type "make install".
-
-To uninstall Frotz, type "make uninstall".
+Once the compile is complete, make sure you have the correct permissions 
+to write where you want Frotz installed, then type "make install".  To 
+uninstall Frotz, type "make uninstall".
 
 If you don't have permission to install Frotz, you can just put the
 resulting executable somewhere like $HOME/bin and add that directory to
 your $PATH.
 
-For compiling, installing, and uninstalling dumb frotz, use "make dfrotz",
-"make install_dfrotz", and "make uninstall_dfrotz".  The process is exactly 
+For compiling, installing, and uninstalling Frotz using the dumb or SDL 
+interfaces, type "make dumb" or "make sdl".  You will get an executable 
+file named "dfrotz" for Dumb Frotz and "sfrotz" for SDL Frotz. To 
+install these, type "make install_dumb" or "make install_sdl".  to 
+uninstall these, type "make uninstall_dumb" or "make uninstall_sdl".  
+Substituting "dfrotz" for "dumb" and "sfrotz" for "sdl" will also work.
+
+For compiling, installing, and uninstalling dumb frotz, use "make dumb",
+"make install_dumb", and "make uninstall_dumb".  The process is exactly 
 the same as above except you won't be depending on any external 
 libraries; not even curses.
 

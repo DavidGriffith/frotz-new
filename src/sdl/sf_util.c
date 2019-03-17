@@ -142,13 +142,13 @@ static char *infos[] = {
 
 static char *info2 =
 	"\nError checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n"
-	"For more options and explanations, please read the HTML manual.\n";
+	"More options and information are in the manual page.  Type \"man sfrotz\".\n";
 
 #define WIDCOL 40
 static void usage()
   {
   char **p = infos; int i=0,len=0;
-  printf(info1, GIT_TAG);
+  printf(info1, VERSION);
   while (*p)
 	{
 	if (i)
@@ -178,13 +178,11 @@ static void usage()
 
 static const char *progname = NULL;
 
-char stripped_story_name[100];
-
 extern char *optarg;
 extern int optind;
 extern int m_timerinterval;
 
-static char *options = "@:aAb:B:c:f:Fh:iI:l:Lm:N:oOPqr:Rs:S:tTu:vVw:xZ:";
+static char *options = "@:%aAb:B:c:f:Fh:iI:l:L:m:N:oOPqr:Rs:S:tTu:vVw:xZ:";
 
 static int limit( int v, int m, int M)
   {
@@ -209,6 +207,8 @@ static void parse_options (int argc, char **argv)
 	    copt = optarg[0];
 	    }
 
+	if (c == '%')
+	    m_localfiles = true;
 	if (c == 'a')
 	    f_setup.attribute_assignment = 1;
 	if (c == 'A')
@@ -239,8 +239,10 @@ static void parse_options (int argc, char **argv)
 	    f_setup.interpreter_number = num;
 	if (c == 'l')
 	    f_setup.left_margin = num;
-	if (c == 'L')
-	    m_localfiles = true;
+	if (c == 'L') {
+	    f_setup.restore_mode = TRUE;
+	    f_setup.tmp_save_name = strdup(optarg);
+	}
 	if (c == 'q')
 	    m_no_sound = 1;
 	if (c == 'o')
@@ -280,15 +282,15 @@ static void parse_options (int argc, char **argv)
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\tSDL interface.\n", GIT_TAG);
-    printf("Build:\t\t%s\n", build_timestamp);
+    printf("FROTZ V%s\tSDL interface.\n", VERSION);
+    printf("Build date:\t%s\n", build_timestamp);
+    printf("Commit date:\t%s\n", GIT_DATE);
     printf("Git commit:\t%s\n", GIT_HASH);
-    printf("Git tag:\t%s\n", GIT_TAG);
     printf("Git branch:\t%s\n", GIT_BRANCH);
     printf("  Frotz was originally written by Stefan Jokisch.\n");
     printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
     printf("  It was ported to Unix by Galen Hazelwood.\n");
-    printf("  The core and Unix port are currently maintained by David Griffith.\n");
+    printf("  The core and SDL port are currently maintained by David Griffith.\n");
     printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
     exit(2);
 }
@@ -367,7 +369,6 @@ void os_process_arguments (int argc, char *argv[])
   f_setup.story_path = new_dirname(argv[optind]);
 
   /* Create nice default file names */
-
   f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
   strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
   strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
@@ -447,27 +448,6 @@ unsigned long sf_ticks (void) {
 
 #endif
 
-/*
- * os_read_file_name
- *
- * Return the name of a file. Flag can be one of:
- *
- *    FILE_SAVE     - Save game file
- *    FILE_RESTORE  - Restore game file
- *    FILE_SCRIPT   - Transscript file
- *    FILE_RECORD   - Command file for recording
- *    FILE_PLAYBACK - Command file for playback
- *    FILE_SAVE_AUX - Save auxilary ("preferred settings") file
- *    FILE_LOAD_AUX - Load auxilary ("preferred settings") file
- *
- * The length of the file name is limited by MAX_FILE_NAME. Ideally
- * an interpreter should open a file requester to ask for the file
- * name. If it is unable to do that then this function should call
- * print_string and read_string to ask for a file name.
- *
- */
-
-extern char stripped_story_name[];
 
 static char *getextension( int flag)
   {
@@ -495,7 +475,7 @@ static char buf[FILENAME_MAX];
 static const char *getnumbername( const char *def, char *ext)
   {
   int len, number = 0;
-  strcpy(buf,stripped_story_name);
+  strcpy(buf,f_setup.story_name);
   len = strlen(buf);
   for (;;){
 	sprintf(buf+len,"%03d%s",number++,ext);
@@ -512,7 +492,7 @@ static const char *getdatename( const char *def, char *ext)
   time(&t);
   tm = localtime(&t);
 
-  strcpy(buf,stripped_story_name);
+  strcpy(buf,f_setup.story_name);
   p = buf + 1;
   if (*p) p++;
   sprintf(p,"%04d%02d%02d%02d%02d%s",
@@ -525,10 +505,33 @@ static const char *getdatename( const char *def, char *ext)
 static int ingame_read_file_name (char *file_name, const char *default_name, int flag);
 static int dialog_read_file_name (char *file_name, const char *default_name, int flag);
 
-int os_read_file_name (char *file_name, const char *default_name, int flag)
+
+/*
+ * os_read_file_name
+ *
+ * Return the name of a file. Flag can be one of:
+ *
+ *    FILE_SAVE     - Save game file
+ *    FILE_RESTORE  - Restore game file
+ *    FILE_SCRIPT   - Transscript file
+ *    FILE_RECORD   - Command file for recording
+ *    FILE_PLAYBACK - Command file for playback
+ *    FILE_SAVE_AUX - Save auxilary ("preferred settings") file
+ *    FILE_LOAD_AUX - Load auxilary ("preferred settings") file
+ *
+ * The length of the file name is limited by MAX_FILE_NAME. Ideally
+ * an interpreter should open a file requester to ask for the file
+ * name. If it is unable to do that then this function should call
+ * print_string and read_string to ask for a file name.
+ *
+ * Return value is NULL is there was a problem
+ */
+
+char *os_read_file_name (const char *default_name, int flag)
   {
   int st;
   const char *initname = default_name;
+  char file_name[FILENAME_MAX + 1];
 
   if (newfile(flag))
     {
@@ -537,9 +540,20 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
     else if (m_names_format == 'n') initname = getnumbername(initname,ext);
     }
 
-  st = dialog_read_file_name( file_name, initname, flag);
-  if (st == SF_NOTIMP) st = ingame_read_file_name( file_name, initname, flag);
-  return st;
+  /* If we're restoring a game before the interpreter starts, and our
+   * filename is already provided with the -L flag, just go ahead silently.
+   */
+  if (f_setup.restore_mode) {
+    strncpy(file_name, f_setup.save_name, FILENAME_MAX);
+  } else {
+    st = dialog_read_file_name( file_name, initname, flag);
+    if (st == SF_NOTIMP)
+      st = ingame_read_file_name( file_name, initname, flag);
+
+    if (!st) return NULL;
+  }
+
+  return strdup(file_name);
   }
 
 static int ingame_read_file_name (char *file_name, const char *default_name, int flag)

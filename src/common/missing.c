@@ -19,12 +19,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <stdlib.h>
 #include "frotz.h"
 
 #ifdef NO_MEMMOVE
 /*
  * Unix-ish operating systems based on 4.2BSD or older or SYSVR3 or older
- * lack the memmove(3) system call.
+ * lack memmove(3).
  *
  */
 void *my_memmove(void *dest, const void *src, size_t n)
@@ -44,3 +45,44 @@ void *my_memmove(void *dest, const void *src, size_t n)
 	return dest;
 }
 #endif /* NO_MEMMOVE */
+
+
+#ifdef NO_STRDUP
+/*
+ * Unix-ish operating systems based on 4.2BSD or older or SYSVR3 or older
+ * lack strdup(3) and strndup(3).
+ *
+ */
+char *my_strdup(const char *src)
+{
+	char *str;
+	char *p;
+	int len = 0;
+
+	while (src[len])
+		len++;
+	str = malloc(len + 1);
+	p = str;
+	while (*src)
+	*p++ = *src++;
+	*p = '\0';
+	return str;
+}
+
+char *my_strndup(const char *src, size_t n)
+{
+	char *str;
+	char *p;
+	int len = 0;
+
+	while (src[len] && len < n)
+		len++;
+	str = malloc(len + 1);
+	p = str;
+	while (len--) {
+		*p++ = *src++;
+	}
+	*p = '\0';
+	return str;
+}
+#endif /* NO_STRDUP */

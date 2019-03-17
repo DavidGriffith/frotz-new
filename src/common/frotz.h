@@ -813,7 +813,7 @@ int  	os_picture_data (int, int *, int *);
 void 	os_prepare_sample (int);
 void 	os_process_arguments (int, char *[]);
 int	os_random_seed (void);
-int  	os_read_file_name (char *, const char *, int);
+char  	*os_read_file_name (const char *, int);
 zchar	os_read_key (int, int);
 zchar	os_read_line (int, zchar *, int, int, int);
 void 	os_reset_screen (void);
