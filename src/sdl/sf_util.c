@@ -124,6 +124,7 @@ static char *infos[] = {
 	"-I # interpreter number",
 	"-l # left margin",
 	"-L   use local resources",
+	"-N <date|name> add date or number to save filename ",
 	"-o   watch object movement",
 	"-O   watch object locating",
 	"-P   alter piracy opcode",
@@ -486,16 +487,15 @@ static const char *getnumbername( const char *def, char *ext)
 
 static const char *getdatename( const char *def, char *ext)
   {
-  char *p;
+  int len;
 
   time_t t; struct tm *tm;
   time(&t);
   tm = localtime(&t);
 
   strcpy(buf,f_setup.story_name);
-  p = buf + 1;
-  if (*p) p++;
-  sprintf(p,"%04d%02d%02d%02d%02d%s",
+  len = strlen(buf);
+  sprintf(buf+len,"%04d%02d%02d%02d%02d%s",
  	tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 	tm->tm_hour, tm->tm_min, ext);
   return buf;
