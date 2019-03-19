@@ -260,6 +260,17 @@ CURSES_DEFINES = $(CURSES_DIR)/ux_defines.h
 DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 
+ifndef NO_BLORB
+BLORB_DIR = $(SRCDIR)/blorb
+BLORB_LIB = $(BLORB_DIR)/blorblib.a
+endif
+
+X11_DIR = $(SRCDIR)/x11
+X11_LIB = $(X11_DIR)/frotz_x11.a
+export X11_PKGS = x11
+#X11_LDFLAGS = -lSM -lICE -lX11 -lXt
+X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lXt -lm
+
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
@@ -267,11 +278,12 @@ SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
 
 DOS_DIR = $(SRCDIR)/dos
 
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
+XFROTZ_BIN = xfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
 
@@ -331,36 +343,25 @@ $(DFROTZ_BIN): $(DFROTZ_LIBS)
 	@echo "** Done building Frotz with dumb interface."
 	@echo "** Blorb support $(BLORB_SUPPORT)"
 
+x11: $(XFROTZ_BIN)
+$(XFROTZ_BIN): $(COMMON_LIB) $(X11_LIB) $(COMMON_LIB)
+	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(X11_LDFLAGS)
+	@echo "** Done building Frotz with X11 interface."
+
 sdl: $(SFROTZ_BIN)
 $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
-dos: $(DOS_BIN)
-$(DOS_BIN):
-	@echo
-	@echo "  ** Cannot cross-compile for DOS yet."
-	@echo "  ** Copy this zip file, $(NAME)src.zip, into a DOS machine and use Turbo C."
-	@echo "  ** A virtualized DOS machine will do.  This zip file will fit on a single"
-	@echo "  ** double-sided double-density 5.25-inch floppy disk.  Read the file"
-	@echo "  ** DOSBUILD.txt for more information."
-	@echo
-ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
-	@git archive --format=zip --prefix $(NAME)src/ HEAD -o $(NAME)src.zip
-	@zip -d $(NAME)src.zip $(NAME)src/src/curses/* \
-		$(NAME)src/src/dumb/* $(NAME)src/src/blorb/* \
-		$(NAME)src/src/sdl/* $(NAME)src/src/misc/* \
-		$(NAME)src/doc/*.6 $(NAME)src/doc/frotz.conf* \
-		$(NAME)src/doc/Xresources  > /dev/null
-else
-	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
-endif
-
-all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
+all: $(FROTZ_BIN) $(DFROTZ_BIN) $(XFROTZ_BIN) $(SFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
+
+x11_lib:	$(X11_LIB)
+
 sdl_lib:	$(SDL_LIB)
+
 dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
@@ -371,8 +372,8 @@ $(COMMON_LIB): $(COMMON_DEFINES) $(HASH)
 $(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
 	$(MAKE) -C $(CURSES_DIR)
 
-$(SDL_LIB): $(COMMON_DEFINES) $(HASH)
-	$(MAKE) -C $(SDL_DIR)
+$(X11_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(X11_DIR)
 
 $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(DUMB_DIR)
@@ -557,7 +558,8 @@ clean: $(SUB_CLEAN)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
 
 distclean: clean
-	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
+	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) xfrotz$(EXTENTION)
+	rm -f a.out
 	rm -rf $(NAME)src $(NAME)$(DOSVER)
 	rm -f $(NAME)*.tar.gz $(NAME)src.zip $(NAME)$(DOSVER).zip
 
@@ -567,14 +569,15 @@ help:
 	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
-	@echo "    all: build curses, dumb, and SDL versions"
-	@echo "    dos: Make a zip file containing DOS Frotz source code"
+	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    install"
 	@echo "    uninstall"
 	@echo "    install_dumb"
 	@echo "    uninstall_dumb"
 	@echo "    install_sdl"
 	@echo "    uninstall_sdl"
+	@echo "    install_x11"
+	@echo "    uninstall_x11"
 	@echo "    install_all"
 	@echo "    uninstall_all"
 	@echo "    clean: clean up files created by compilation"
@@ -589,4 +592,6 @@ help:
 	common_defines curses_defines nosound nosound_helper\
 	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
-	install install_dfrotz install_sfrotz $(SUB_CLEAN)
+	install install_dfrotz install_sfrotz install_xfrotz \
+	$(SUBDIRS) $(SUB_CLEAN) \
+	$(COMMON_DIR)/defines.h $(CURSES_DIR)/defines.h
