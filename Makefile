@@ -209,6 +209,12 @@ CURSES_DEFINES = $(CURSES_DIR)/ux_defines.h
 DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 
+X11_DIR = $(SRCDIR)/x11
+X11_LIB = $(X11_DIR)/frotz_x11.a
+export X11_PKGS = x11
+#X11_LDFLAGS = -lSM -lICE -lX11 -lXt
+X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lXt -lm
+
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
@@ -221,6 +227,7 @@ SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
+XFROTZ_BIN = xfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
 
@@ -278,6 +285,11 @@ $(DFROTZ_BIN): $(DFROTZ_LIBS)
 	@echo "** Done building Frotz with dumb interface."
 	@echo "** Blorb support $(BLORB_SUPPORT)"
 
+x11: $(XFROTZ_BIN)
+$(XFROTZ_BIN): $(COMMON_LIB) $(X11_LIB) $(COMMON_LIB)
+	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(X11_LDFLAGS)
+	@echo "** Done building Frotz with X11 interface."
+
 sdl: $(SFROTZ_BIN)
 $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
@@ -303,17 +315,21 @@ else
 	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
 endif
 
-all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
 sdl_lib:	$(SDL_LIB)
+x11_lib:	$(X11_LIB)
+
+sdl_lib:	$(SDL_LIB)
+
 dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(COMMON_DIR)
+$(X11_LIB): $(X11_DIR);
 
 $(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
 	$(MAKE) -C $(CURSES_DIR)
@@ -501,7 +517,7 @@ help:
 	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
-	@echo "    all: build curses, dumb, and SDL versions"
+	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    dos: Make a zip file containing DOS Frotz source code"
 	@echo "    install"
 	@echo "    uninstall"
@@ -509,6 +525,8 @@ help:
 	@echo "    uninstall_dumb"
 	@echo "    install_sdl"
 	@echo "    uninstall_sdl"
+	@echo "    install_x11"
+	@echo "    uninstall_x11"
 	@echo "    install_all"
 	@echo "    uninstall_all"
 	@echo "    clean: clean up files created by compilation"
