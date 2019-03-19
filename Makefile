@@ -263,16 +263,11 @@ CURSES_DEFINES = $(CURSES_DIR)/ux_defines.h
 DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 
-ifndef NO_BLORB
-BLORB_DIR = $(SRCDIR)/blorb
-BLORB_LIB = $(BLORB_DIR)/blorblib.a
-endif
-
 X11_DIR = $(SRCDIR)/x11
 X11_LIB = $(X11_DIR)/frotz_x11.a
-export X11_PKGS = x11 xt
-X11_FONTDIR = $(DESTDIR)$(PREFIX)/share/fonts/X11/zork
-X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lm
+export X11_PKGS = x11
+#X11_LDFLAGS = -lSM -lICE -lX11 -lXt
+X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lXt -lm
 
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
@@ -356,18 +351,42 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
-all: $(FROTZ_BIN) $(DFROTZ_BIN) $(XFROTZ_BIN) $(SFROTZ_BIN)
+dos: $(DOS_BIN)
+$(DOS_BIN):
+	@echo
+	@echo "  ** Cannot cross-compile for DOS yet."
+	@echo "  ** Copy this zip file, $(NAME)src.zip, into a DOS machine and use Turbo C."
+	@echo "  ** A virtualized DOS machine will do.  This zip file will fit on a single"
+	@echo "  ** double-sided double-density 5.25-inch floppy disk.  Read the file"
+	@echo "  ** DOSBUILD.txt for more information."
+	@echo
+ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
+	@git archive --format=zip --prefix $(NAME)src/ HEAD -o $(NAME)src.zip
+	@zip -d $(NAME)src.zip $(NAME)src/src/curses/* \
+		$(NAME)src/src/dumb/* $(NAME)src/src/blorb/* \
+		$(NAME)src/src/sdl/* $(NAME)src/src/misc/* \
+		$(NAME)src/doc/*.6 $(NAME)src/doc/frotz.conf* \
+		$(NAME)src/doc/Xresources  > /dev/null
+else
+	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
+endif
+
 
 common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
 x11_lib:	$(X11_LIB)
 sdl_lib:	$(SDL_LIB)
+x11_lib:	$(X11_LIB)
+
+sdl_lib:	$(SDL_LIB)
+
 dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(COMMON_DIR)
+$(X11_LIB): $(X11_DIR);
 
 $(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
 	$(MAKE) -C $(CURSES_DIR)
@@ -596,13 +615,18 @@ help:
 	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
-#	@echo "    x11: for X11 graphics"
 	@echo "    all: build curses, dumb, SDL, and x11 versions"
-	@echo "    install      / uninstall (for curses edition)"
-	@echo "    install_dumb / uninstall_dumb"
-	@echo "    install_sdl  / uninstall_sdl"
-#	@echo "    install_x11  / uninstall_x11"
-	@echo "    install_all  / uninstall_all"
+	@echo "    dos: Make a zip file containing DOS Frotz source code"
+	@echo "    install"
+	@echo "    uninstall"
+	@echo "    install_dumb"
+	@echo "    uninstall_dumb"
+	@echo "    install_sdl"
+	@echo "    uninstall_sdl"
+	@echo "    install_x11"
+	@echo "    uninstall_x11"
+	@echo "    install_all"
+	@echo "    uninstall_all"
 	@echo "    clean: clean up files created by compilation"
 	@echo "    distclean: like clean, but also delete executables"
 	@echo "    dist: create a source tarball"
