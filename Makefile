@@ -265,9 +265,9 @@ DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 
 X11_DIR = $(SRCDIR)/x11
 X11_LIB = $(X11_DIR)/frotz_x11.a
-export X11_PKGS = x11
-#X11_LDFLAGS = -lSM -lICE -lX11 -lXt
-X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lXt -lm
+export X11_PKGS = x11 xt
+X11_FONTDIR = $(DESTDIR)$(PREFIX)/share/fonts/X11/zork
+X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lm
 
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
@@ -386,7 +386,9 @@ dos_lib:	$(DOS_LIB)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(COMMON_DIR)
-$(X11_LIB): $(X11_DIR);
+$(X11_LIB): $(COMMON_DEFINES) $(HASH) $(X11_DIR);
+$(SDL_LIB): $(COMMON_DEFINES) $(HASH) $(SDL_DIR);
+$(DUMB_LIB): $(COMMON_DEFINES) $(HASH) $(DUMB_DIR);
 
 $(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
 	$(MAKE) -C $(CURSES_DIR)
@@ -615,6 +617,7 @@ help:
 	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
+	@echo "    x11: for X11 graphics"
 	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    dos: Make a zip file containing DOS Frotz source code"
 	@echo "    install"
