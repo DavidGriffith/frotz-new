@@ -3,13 +3,12 @@
  *
  * X interface, text functions
  *
- * Copyright (c) 1998-2000 Daniel Schepler
- *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <X11/Intrinsic.h>
+#include "frotz.h"
 #include "x_frotz.h"
 
 int curr_x = 0;
@@ -122,9 +121,9 @@ void x_init_colour(char *bg_name, char *fg_name) {
   }
 
   h_default_background =
-    x_bg_fg_color(&def_bg_pixel, 14, bg_name, 9);
+    x_bg_fg_color(&def_bg_pixel, 14, bg_name, use_color ? 6 : 2);
   h_default_foreground =
-    x_bg_fg_color(&def_fg_pixel, 15, fg_name, 2);
+    x_bg_fg_color(&def_fg_pixel, 15, fg_name, 9);
 }
 
 char *font_names[9] = {
@@ -213,7 +212,6 @@ void os_set_colour (int new_foreground, int new_background)
   XSetBackground(dpy, normal_gc, bg_pixel);
   XSetForeground(dpy, reversed_gc, bg_pixel);
   XSetBackground(dpy, reversed_gc, fg_pixel);
-  XSetForeground(dpy, cursor_gc, bg_pixel ^ fg_pixel);
 }/* os_set_colour */
 
 static XFontStruct * font_info_cache[9];
@@ -301,20 +299,9 @@ void os_display_char (zchar c)
     break;
   }
   XDrawImageString(dpy, main_window, current_gc,
-                   curr_x, curr_y + current_font_info->ascent, (char *) &c, 1);
+                   curr_x, curr_y + current_font_info->ascent, &c, 1);
   curr_x += os_char_width(c);
 }/* os_display_char */
-
-/* Delete the given character backwards from the current position --
-   used to implement backspace in os_read_line */
-void x_del_char(zchar c) {
-  int char_width = os_char_width(c);
-
-  curr_x -= char_width;
-  os_erase_area(curr_y + 1, curr_x + 1,
-                curr_y + current_font_info->ascent +
-                current_font_info->descent, curr_x + char_width, 0);
-}
 
 /*
  * os_display_string
@@ -350,7 +337,7 @@ static int char_width(const XFontStruct *font_info, zchar c)
   int direction, font_ascent, font_descent;
   XCharStruct size;
 
-  XTextExtents((XFontStruct *) font_info, (char *)&c, 1, &direction,
+  XTextExtents((XFontStruct *) font_info, &c, 1, &direction,
                &font_ascent, &font_descent, &size);
   return size.width;
 }
@@ -413,7 +400,7 @@ void os_more_prompt (void)
   saved_x = curr_x;
 
   /*  os_set_text_style(0); */
-  os_display_string((zchar *)"[MORE]");
+  os_display_string("[MORE]");
   os_read_key(0, TRUE);
 
   new_x = curr_x;
@@ -421,6 +408,6 @@ void os_more_prompt (void)
   os_erase_area(curr_y + 1, saved_x + 1,
                 curr_y + current_font_info->ascent +
                 current_font_info->descent,
-                new_x + 1, 0);
+                new_x + 1);
   /*  os_set_text_style(saved_style); */
 }/* os_more_prompt */

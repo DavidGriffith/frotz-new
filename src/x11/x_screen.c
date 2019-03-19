@@ -3,10 +3,9 @@
  *
  * X interface, screen manipulation
  *
- * Copyright (c) 1998-2000 Daniel Schepler
- *
  */
 
+#include "frotz.h"
 #include "x_frotz.h"
 #include <stdio.h>
 
@@ -18,7 +17,7 @@
  *
  */
 
-void os_erase_area (int top, int left, int bottom, int right, int UNUSED(win))
+void os_erase_area (int top, int left, int bottom, int right)
 {
   XFillRectangle(dpy, main_window, reversed_gc,
                  left - 1, top - 1, right - left + 1, bottom - top + 1);
@@ -56,10 +55,3 @@ void os_scroll_area (int top, int left, int bottom, int right, int units)
                    left - 1, top - 1, right - left + 1, - units);
   }
 }/* os_scroll_area */
-
-
-bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
-                       int ysize, int xsize)
-{
-    return TRUE;
-}

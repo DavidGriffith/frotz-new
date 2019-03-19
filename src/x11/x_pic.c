@@ -3,10 +3,9 @@
  *
  * X interface, stubs for picture functions
  *
- * Copyright (c) 1998-2000 Daniel Schepler
- *
  */
 
+#include "frotz.h"
 #include "x_frotz.h"
 #include <X11/Xutil.h>
 #include <stdio.h>
@@ -37,12 +36,12 @@ static int open_graphics_file(void) {
   const char *base_start, *base_end;
   int i;
 
-  base_start = strrchr(f_setup.story_name, '/');
-  if (base_start) base_start++; else base_start = f_setup.story_name;
+  base_start = strrchr(story_name, '/');
+  if (base_start) base_start++; else base_start = story_name;
   base_end = strrchr(base_start, '.');
   if (! base_end) base_end = strchr(base_start, 0);
-  graphics_name = malloc(base_end - f_setup.story_name + 5);
-  sprintf(graphics_name, "%.*s.mg1", (int)(base_end - f_setup.story_name), f_setup.story_name);
+  graphics_name = malloc(base_end - story_name + 5);
+  sprintf(graphics_name, "%.*s.mg1", base_end - story_name, story_name);
 
   if ((graphics_fp = fopen(graphics_name, "r")) == NULL)
     return 0;
@@ -296,7 +295,7 @@ int os_peek_colour (void)
 
   point = XGetImage(dpy, main_window, curr_x, curr_y, 1, 1,
                     AllPlanes, ZPixmap);
-
+  
   pixel_values[16] = XGetPixel(point, 0, 0);
   return 16;
 }/* os_peek_colour */
