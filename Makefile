@@ -207,6 +207,9 @@ CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
 CURSES_DEFINE = USE_NCURSES_H
 endif
 
+MKFONTDIR ?= $(shell which mkfontdir)
+XSET ?= $(shell which xset)
+
 export CC
 export CFLAGS
 export CURSES_CFLAGS
@@ -267,9 +270,9 @@ endif
 
 X11_DIR = $(SRCDIR)/x11
 X11_LIB = $(X11_DIR)/frotz_x11.a
-export X11_PKGS = x11
-#X11_LDFLAGS = -lSM -lICE -lX11 -lXt
-X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lXt -lm
+export X11_PKGS = x11 xt
+X11_FONTDIR = $(DESTDIR)$(PREFIX)/share/fonts/X11/zork
+X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lm
 
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
@@ -374,6 +377,9 @@ $(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
 
 $(X11_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(X11_DIR)
+
+$(SDL_LIB): $(COMMON_DEFINES) $(HASH) $(SDL_DIR)
+	$(MAKE) -C $(SDL_LIB)
 
 $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(DUMB_DIR)
@@ -507,7 +513,31 @@ uninstall_dfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/dfrotz
 	rm -f $(DESTDIR)$(MAN_PREFIX)/man/man6/dfrotz.6
 
-install_sdl: install_sfrotz
+install_x11: install_xfrotz
+install_xfrotz: $(XFROTZ_BIN)
+	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
+	install "$(XFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
+	install -m 644 doc/xfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
+	install -d "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-10.pcf" "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-11.pcf" "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-13.pcf" "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-16.pcf" "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-20.pcf" "$(X11_FONTDIR)"
+	$(MKFONTDIR) $(X11_FONTDIR)
+
+uninstall_x11: uninstall_xfrotz
+uninstall_xfrotz:
+	rm -f "$(DESTDIR)$(PREFIX)/bin/xfrotz"
+	rm -f "$(DESTDIR)$(MANDIR)/man6/xfrotz.6"
+	rm -f "$(X11_FONTDIR)/Zork_r400-10.pcf"
+	rm -f "$(X11_FONTDIR)/Zork_r400-11.pcf"
+	rm -f "$(X11_FONTDIR)/Zork_r400-13.pcf"
+	rm -f "$(X11_FONTDIR)/Zork_r400-16.pcf"
+	rm -f "$(X11_FONTDIR)/Zork_r400-20.pcf"
+	rm -f "$(X11_FONTDIR)/fonts.dir"
+	find $(X11_FONTDIR) -type d -depth -empty -exec rmdir "{}" \;
+
 install_sfrotz: $(SFROTZ_BIN)
 	install -d $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(SFROTZ_BIN) $(DESTDIR)$(BINDIR)
@@ -569,6 +599,7 @@ help:
 	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
+	@echo "    x11: for X11 graphics"
 	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    install"
 	@echo "    uninstall"
