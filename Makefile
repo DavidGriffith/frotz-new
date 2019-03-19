@@ -162,18 +162,25 @@ BLORB_DIR = $(SRCDIR)/blorb
 BLORB_LIB = $(BLORB_DIR)/blorblib.a
 endif
 
+X11_DIR = $(SRCDIR)/x11
+X11_LIB = $(X11_DIR)/frotz_x11.a
+export X11_PKGS = x11
+#X11_LDFLAGS = -lSM -lICE -lX11 -lXt
+X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lXt -lm
+
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 SDL_LDFLAGS = `pkg-config $(SDL_PKGS) --libs` -lm
 
 
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR)
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 
 FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
+XFROTZ_BIN = xfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 
 
@@ -191,16 +198,25 @@ $(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION)
 	@echo "** Done building Frotz with dumb interface."
 
+x11: $(XFROTZ_BIN)
+$(XFROTZ_BIN): $(COMMON_LIB) $(X11_LIB) $(COMMON_LIB)
+	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(X11_LDFLAGS)
+	@echo "** Done building Frotz with X11 interface."
+
 sdl: $(SFROTZ_BIN)
 $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
-all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
+all: $(FROTZ_BIN) $(DFROTZ_BIN) $(XFROTZ_BIN) $(SFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
 
 curses_lib:	$(CURSES_LIB)
+
+x11_lib:	$(X11_LIB)
+
+sdl_lib:	$(SDL_LIB)
 
 dumb_lib:	$(DUMB_LIB)
 
@@ -208,6 +224,7 @@ blorb_lib:	$(BLORB_LIB)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
 $(CURSES_LIB): $(CURSES_DEFINES) $(CURSES_DIR);
+$(X11_LIB): $(X11_DIR);
 $(SDL_LIB): $(SDL_DIR);
 $(DUMB_LIB): $(DUMB_DIR);
 $(BLORB_LIB): $(BLORB_DIR);
@@ -334,20 +351,22 @@ clean: $(SUB_CLEAN)
 		$(NAME)*.tar.gz
 
 distclean: clean
-	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
+	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) xfrotz$(EXTENTION)
 
 help:
 	@echo "Targets:"
 	@echo "    frotz: (default target) the standard curses edition"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
-	@echo "    all: build curses, dumb, and SDL versions"
+	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    install"
 	@echo "    uninstall"
 	@echo "    install_dumb"
 	@echo "    uninstall_dumb"
 	@echo "    install_sdl"
 	@echo "    uninstall_sdl"
+	@echo "    install_x11"
+	@echo "    uninstall_x11"
 	@echo "    install_all"
 	@echo "    uninstall_all"
 	@echo "    clean: clean up files created by compilation"
@@ -361,6 +380,6 @@ help:
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
 	common_defines curses_defines \
 	blorb_lib common_lib curses_lib dumb_lib \
-	install install_dfrotz install_sfrotz \
+	install install_dfrotz install_sfrotz install_xfrotz \
 	$(SUBDIRS) $(SUB_CLEAN) \
 	$(COMMON_DIR)/defines.h $(CURSES_DIR)/defines.h

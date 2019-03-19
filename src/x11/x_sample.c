@@ -3,10 +3,16 @@
  *
  * X interface, sound support
  *
+ * Copyright (c) 1998-2000 Daniel Schepler
+ *
  */
 
-#include "frotz.h"
 #include "x_frotz.h"
+
+void os_init_sound(void)
+{
+}
+
 
 /*
  * os_beep
@@ -46,6 +52,7 @@ void os_prepare_sample (int number)
 
 }/* os_prepare_sample */
 
+
 /*
  * os_start_sample
  *
@@ -58,7 +65,7 @@ void os_prepare_sample (int number)
  *
  */
 
-void os_start_sample (int number, int volume, int repeats)
+void os_start_sample (int number, int volume, int repeats, zword eos)
 {
 
     /* Not implemented */
@@ -72,7 +79,7 @@ void os_start_sample (int number, int volume, int repeats)
  *
  */
 
-void os_stop_sample (void)
+void os_stop_sample (int number)
 {
 
     /* Not implemented */
@@ -86,7 +93,7 @@ void os_stop_sample (void)
  *
  */
 
-void os_finish_with_sample (void)
+void os_finish_with_sample (int number)
 {
 
     /* Not implemented */
