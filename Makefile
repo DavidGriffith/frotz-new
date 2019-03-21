@@ -214,15 +214,10 @@ $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(XFROTZ_BIN) $(SFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
-
 curses_lib:	$(CURSES_LIB)
-
 x11_lib:	$(X11_LIB)
-
 sdl_lib:	$(SDL_LIB)
-
 dumb_lib:	$(DUMB_LIB)
-
 blorb_lib:	$(BLORB_LIB)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
@@ -386,18 +381,13 @@ help:
 	@echo "    frotz: (default target) the standard curses edition"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
-	@echo "    x11: for X11 graphics"
+#	@echo "    x11: for X11 graphics"
 	@echo "    all: build curses, dumb, SDL, and x11 versions"
-	@echo "    install"
-	@echo "    uninstall"
-	@echo "    install_dumb"
-	@echo "    uninstall_dumb"
-	@echo "    install_sdl"
-	@echo "    uninstall_sdl"
-	@echo "    install_x11"
-	@echo "    uninstall_x11"
-	@echo "    install_all"
-	@echo "    uninstall_all"
+	@echo "    install      / uninstall (for curses edition)"
+	@echo "    install_dumb / uninstall_dumb"
+	@echo "    install_sdl  / uninstall_sdl"
+#	@echo "    install_x11  / uninstall_x11"
+	@echo "    install_all  / uninstall_all"
 	@echo "    clean: clean up files created by compilation"
 	@echo "    distclean: like clean, but also delete executables"
 	@echo "    dist: create a source tarball"
@@ -409,6 +399,10 @@ help:
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
 	common_defines curses_defines \
 	blorb_lib common_lib curses_lib dumb_lib \
-	install install_dfrotz install_sfrotz install_xfrotz \
+	install uninstall \
+	install_dfrotz install_sfrotz install_xfrotz \
+	install_dumb install_sdl install_x11 \
+	uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz \
+	uninstall_dumb uninstall_sdl uninstall_x11 \
 	$(SUBDIRS) $(SUB_CLEAN) \
 	$(COMMON_DIR)/defines.h $(CURSES_DIR)/defines.h
