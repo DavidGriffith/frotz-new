@@ -371,15 +371,10 @@ else
 	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
 endif
 
-
 common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
 x11_lib:	$(X11_LIB)
 sdl_lib:	$(SDL_LIB)
-x11_lib:	$(X11_LIB)
-
-sdl_lib:	$(SDL_LIB)
-
 dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
@@ -617,19 +612,13 @@ help:
 	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
-	@echo "    x11: for X11 graphics"
+#	@echo "    x11: for X11 graphics"
 	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    dos: Make a zip file containing DOS Frotz source code"
-	@echo "    install"
-	@echo "    uninstall"
-	@echo "    install_dumb"
-	@echo "    uninstall_dumb"
-	@echo "    install_sdl"
-	@echo "    uninstall_sdl"
-	@echo "    install_x11"
-	@echo "    uninstall_x11"
-	@echo "    install_all"
-	@echo "    uninstall_all"
+	@echo "    install_dumb / uninstall_dumb"
+	@echo "    install_sdl  / uninstall_sdl"
+#	@echo "    install_x11  / uninstall_x11"
+	@echo "    install_all  / uninstall_all"
 	@echo "    clean: clean up files created by compilation"
 	@echo "    distclean: like clean, but also delete executables"
 	@echo "    dist: create a source tarball"
@@ -642,10 +631,8 @@ help:
 	common_defines curses_defines nosound nosound_helper\
 	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
-	install uninstall \
+	install install_dfrotz install_sfrotz $(SUB_CLEAN)
 	install_dfrotz install_sfrotz install_xfrotz \
 	install_dumb install_sdl install_x11 \
 	uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz \
 	uninstall_dumb uninstall_sdl uninstall_x11 \
-	$(SUBDIRS) $(SUB_CLEAN) \
-	$(COMMON_DIR)/defines.h $(CURSES_DIR)/defines.h
