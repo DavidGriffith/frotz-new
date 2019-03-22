@@ -731,7 +731,12 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 
 	lastch = 'a';	/* makes compiler shut up */
 
-	buf = malloc(strlen(path) + strlen(name) + 1);
+	/*
+	 * If the path variable doesn't end in a "/" a "/"
+	 * will be added, so the buffer needs to be long enough
+	 * for the path + / + name + \0
+	 */
+	buf = malloc(strlen(path) + strlen(name) + 2);
 
 	while (*path) {
 		bp = buf;
@@ -739,13 +744,15 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 			lastch = *bp++ = *path++;
 		if (lastch != DIRSEP)
 			*bp++ = DIRSEP;
-		strncpy(bp, name, strlen(path) + strlen(name) + 1);
+		strncpy(bp, name, strlen(name) + 1);
 		if ((fp = fopen(buf, mode)) != NULL) {
+			free(buf);
 			return fp;
 		}
 		if (*path)
 			path++;
 	}
+	free(buf);
 	return NULL;
 } /* FILE *pathopen() */
 
