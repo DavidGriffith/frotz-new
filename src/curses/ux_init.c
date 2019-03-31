@@ -262,8 +262,7 @@ void os_process_arguments (int argc, char *argv[])
 	  case 'I': f_setup.interpreter_number = atoi(zoptarg); break;
 	  case 'l': f_setup.left_margin = atoi(zoptarg); break;
 	  case 'L': f_setup.restore_mode = 1;
-		    f_setup.tmp_save_name = malloc(FILENAME_MAX * sizeof(char) + 1);
-		    strncpy(f_setup.tmp_save_name, zoptarg, FILENAME_MAX);
+		    f_setup.tmp_save_name = strdup(zoptarg);
 		    break;
 	  case 'o': f_setup.object_movement = 1; break;
 	  case 'O': f_setup.object_locating = 1; break;
@@ -289,7 +288,7 @@ void os_process_arguments (int argc, char *argv[])
     } while (c != EOF);
 
     if (zoptind != argc - 1) {
-	printf("FROTZ V%s\tCurses interface.  ", GIT_TAG);
+	printf("FROTZ V%s\tCurses interface.  ", VERSION);
 
 #ifndef NO_SOUND
 	printf("Audio output enabled.");
@@ -728,27 +727,36 @@ int os_storyfile_tell(FILE * fp)
  * that file.  If found, return a pointer to that file
  *
  */
-static FILE *pathopen(const char *name, const char *p, const char *mode)
+static FILE *pathopen(const char *name, const char *path, const char *mode)
 {
 	FILE *fp;
-	char buf[FILENAME_MAX + 1];
+	char *buf;
 	char *bp, lastch;
 
 	lastch = 'a';	/* makes compiler shut up */
 
-	while (*p) {
+	/*
+	 * If the path variable doesn't end in a "/" a "/"
+	 * will be added, so the buffer needs to be long enough
+	 * for the path + / + name + \0
+	 */
+	buf = malloc(strlen(path) + strlen(name) + 2);
+
+	while (*path) {
 		bp = buf;
-		while (*p && *p != PATHSEP)
-			lastch = *bp++ = *p++;
+		while (*path && *path != PATHSEP)
+			lastch = *bp++ = *path++;
 		if (lastch != DIRSEP)
 			*bp++ = DIRSEP;
-		strcpy(bp, name);
+		strncpy(bp, name, strlen(name) + 1);
 		if ((fp = fopen(buf, mode)) != NULL) {
+			free(buf);
 			return fp;
 		}
-		if (*p)
-			p++;
+		if (*path)
+			path++;
 	}
+	free(buf);
 	return NULL;
 } /* FILE *pathopen() */
 
@@ -793,7 +801,7 @@ static int getconfig(char *configfile)
 			;
 
 		/* Remove trailing whitespace and newline */
-		for (num = strlen(varname) - 1; isspace(varname[num]); num--)
+		for (num = strlen(varname) - 1; (ssize_t) num >= 0 && isspace(varname[num]); num--)
 		;
 		varname[num+1] = 0;
 
@@ -804,7 +812,7 @@ static int getconfig(char *configfile)
 		}
 
 		/* Find end of variable name */
-		for (num = 0; !isspace(varname[num]) && num < LINELEN; num++);
+		for (num = 0; varname[num] != 0 && !isspace(varname[num]) && num < LINELEN; num++);
 
 		for (num2 = num; isspace(varname[num2]) && num2 < LINELEN; num2++);
 
@@ -1148,15 +1156,15 @@ error:
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\tCurses interface.  ", GIT_TAG);
+    printf("FROTZ V%s\tCurses interface.  ", VERSION);
 #ifndef NO_SOUND
         printf("Audio output enabled.");
 #else
 	printf("Audio output disabled.");
 #endif
-    printf("\nBuild:\t\t%s\n", build_timestamp);
+    printf("\nBuild date:\t%s\n", build_timestamp);
+    printf("Commit date:\t%s\n", GIT_DATE);
     printf("Git commit:\t%s\n", GIT_HASH);
-    printf("Git tag:\t%s\n", GIT_TAG);
     printf("Git branch:\t%s\n", GIT_BRANCH);
     printf("  Frotz was originally written by Stefan Jokisch.\n");
     printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
