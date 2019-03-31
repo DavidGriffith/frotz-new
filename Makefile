@@ -64,7 +64,7 @@ COLOR ?= yes
 
 # If this matters, you can choose -lcurses or -lncurses
 # For UTF-8 support -lncursesw needs to be used
-#CURSES ?= -lcurses
+CURSES ?= -lncursesw
 
 # Uncomment this if you want to disable the compilation of Blorb support.
 #NO_BLORB = yes
