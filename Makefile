@@ -58,6 +58,16 @@ BUFFSIZE ?= 4096
 # Default sample rate converter type
 DEFAULT_CONVERTER ?= SRC_SINC_MEDIUM_QUALITY
 
+#
+# Comment this out if you don't want UTF-8 support
+USE_UTF8 ?= yes
+
+#
+# The OE dipthong is not a latin1 character, but it seems the zmachine
+# can handle it, and it is tested for in terpetude.  Comment this out
+# if you don't want to support the OE dipthong
+HANDLE_OE_DIPTHONG ?= yes
+
 # Comment this out if your machine's version of curses doesn't support color.
 #
 COLOR ?= yes
@@ -244,6 +254,12 @@ endif
 ifdef NO_STRDUP
 	@echo "#define NO_STRDUP" >> $@
 endif
+ifdef HANDLE_OE_DIPTHONG
+	@echo "#define HANDLE_OE_DIPTHONG" >> $@
+endif
+ifdef USE_UTF8
+	@echo "#define USE_UTF8" >> $@
+endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 
 curses_defines: $(CURSES_DEFINES)
@@ -264,6 +280,12 @@ ifndef SOUND
 endif
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
+endif
+ifdef USE_UTF8
+	@echo "#define USE_UTF8" >> $@
+endif
+ifdef HANDLE_OE_DIPTHONG
+	@echo "#define HANDLE_OE_DIPTHONG" >> $@
 endif
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
 
