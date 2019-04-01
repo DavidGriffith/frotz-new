@@ -182,7 +182,11 @@ static int unix_read_char(int extkeys)
         }
 
         timeout(0);
+#ifdef USE_UTF8
 	get_wch(&c);
+#else
+	c = getch();
+#endif
 
 	/* Catch 98% of all input right here... */
 	if ((c >= ZC_ASCII_MIN && c <= ZC_ASCII_MAX)
@@ -191,6 +195,18 @@ static int unix_read_char(int extkeys)
 	    return c;
 
 	/* ...and the other 2% makes up 98% of the code. :( */
+#ifdef HANDLE_OE_DIPTHONG
+	if (c == 0x153)
+	{
+	    /* oe dipthong */
+	    return 0xf6;
+	}
+	if (c == 0x152)
+	{
+	    /* OE dipthong */
+	    return 0xd6;
+	}
+#endif
 
 	/* On many terminals the backspace key returns DEL. */
 	if (c == erasechar()) return ZC_BACKSPACE;;
@@ -222,7 +238,11 @@ static int unix_read_char(int extkeys)
 	   value of the letter.  We have to decide here whether to
 	   return a single escape or a frotz hot key. */
 	case ZC_ESCAPE:
+#ifdef USE_UTF8
 	    nodelay(stdscr, TRUE); get_wch(&c); nodelay(stdscr, FALSE);
+#else
+	    nodelay(stdscr, TRUE); c = getch(); nodelay(stdscr, FALSE);
+#endif
 	    switch(c) {
 	    case ERR: return ZC_ESCAPE;
 	    case 'p': return ZC_HKEY_PLAYBACK;
@@ -436,6 +456,7 @@ static void scrnset(int start, int c, int n)
     return;
 }
 
+#ifdef USE_UTF8
 static void utf8_mvaddstr(int y, int x, char * buf)
 {
     unsigned char *bp = (unsigned char *)buf;
@@ -456,6 +477,7 @@ static void utf8_mvaddstr(int y, int x, char * buf)
 	bp++;
     }
 }
+#endif /* USE_UTF8 */
 /*
  * os_read_line
  *
@@ -635,7 +657,11 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		unix_history_forward(buf, searchpos, max);
 
 	    scrnset(x, ' ', len);
+#ifdef USE_UTF8
 	    utf8_mvaddstr(y, x, (char *) buf);
+#else
+	    mvaddstr(y, x, (char *) buf);
+#endif
 	    scrpos = len = strlen((char *) buf);
 	    continue;
 
@@ -689,6 +715,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		}
 		if (insert_flag || scrpos == len)
 		    len++;
+#ifdef USE_UTF8
 		if (ch < ZC_LATIN1_MIN) {
 		    mvaddch(y, x + scrpos, ch);
 		} else if (ch < 0xc0) {
@@ -698,6 +725,9 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		    mvaddch(y, x + scrpos, 0xc3);
 		    addch(ch - 0x40);
 		}
+#else
+                mvaddch(y, x + scrpos, ch);
+#endif
 		buf[scrpos++] = ch;
 		continue;
 	    }
