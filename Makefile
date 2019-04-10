@@ -209,13 +209,9 @@ $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
-
 curses_lib:	$(CURSES_LIB)
-
 sdl_lib:	$(SDL_LIB)
-
 dumb_lib:	$(DUMB_LIB)
-
 blorb_lib:	$(BLORB_LIB)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
