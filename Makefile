@@ -321,11 +321,13 @@ uninstall_dfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
 
+install_sdl: install_sfrotz
 install_sfrotz: $(SFROTZ_BIN)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
 	install "$(SFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/sfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
 
+uninstall_sdl: uninstall_sfrotz
 uninstall_sfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/sfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/sfrotz.6"
