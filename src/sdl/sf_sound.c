@@ -258,12 +258,11 @@ static EFFECT *geteffect(int num)
 	// Look for a recognized format
   id = res.type;
 
-  if (id == bb_make_id('F','O','R','M'))
+  if (id == bb_ID_FORM)
 	{
 	result = getaiff( res.file, res.bbres.data.startpos, res.bbres.length, num);
 	}
-  else if (id == bb_make_id('M','O','D',' ') ||
-		id == bb_make_id('O','G','G','V'))
+  else if (id == bb_ID_MOD || id == bb_ID_OGGV)
 	{
 	result = getmodule( res.file, res.bbres.data.startpos, res.bbres.length, num);
 	}

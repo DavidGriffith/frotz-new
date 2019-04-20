@@ -168,7 +168,7 @@ static int load_resources( char *givenfn)
 		 == bb_err_None)
 	{
 	unsigned int id = bmap->chunks[result.chunknum].type;
-	if (id == bb_make_id('Z','C','O','D'))
+	if (id == bb_ID_ZCOD)
 		{
 		// If this is a Z-code game, set the file pointer and return
 		zoffset = result.data.startpos;
@@ -176,7 +176,7 @@ static int load_resources( char *givenfn)
 		zcodeinblorb = 1;
 		return 0;
                 }
-	else if (id == bb_make_id('G','L','U','L'))
+	else if (id == bb_ID_GLUL)
                 {
 		os_fatal(sf_msgstring(IDS_BLORB_GLULX));
 		}
@@ -865,14 +865,14 @@ static int loadlocal( int num, int ispic, int method, myresource * res)
   res->type = 0;
   if (ispic)
 	{
-	if (hd[0] == 0xff && hd[1] == 0xd8) res->type = bb_make_id('J','P','E','G');
-	else if (hd[0] == 0x89 && hd[1] == 0x50) res->type = bb_make_id('P','N','G',' ');
+	if (hd[0] == 0xff && hd[1] == 0xd8) res->type = bb_ID_JPEG;
+	else if (hd[0] == 0x89 && hd[1] == 0x50) res->type = bb_ID_PNG;
 	}
   else
 	{
-	if (memcmp(hd,"FORM",4) == 0) res->type = bb_make_id('F','O','R','M');
-	else if (memcmp(hd,"OggS",4) == 0) res->type = bb_make_id('O','G','G','V');
-	else res->type = bb_make_id('M','O','D',' ');
+	if (memcmp(hd,"FORM",4) == 0) res->type = bb_ID_FORM;
+	else if (memcmp(hd,"OggS",4) == 0) res->type = bb_ID_OGGV;
+	else res->type = bb_ID_MOD;
 	}
   if (!res->type) { fclose(f); return bb_err_NotFound;}
 
