@@ -64,14 +64,20 @@ typedef int bb_err_t;
 #define bb_ID_Copyright	(bb_make_id('(','c',')',' '))
 #define bb_ID_AUTH	(bb_make_id('A','U','T','H'))
 #define bb_ID_ANNO	(bb_make_id('A','N','N','O'))
+#define bb_ID_Snam	(bb_make_id('S','n','a','m'))
+#define bb_ID_IFmd	(bb_make_id('I','F','m','d'))
+#define bb_ID_Fspc	(bb_make_id('F','s','p','c'))
 
 #define bb_ID_ZCOD	(bb_make_id('Z','C','O','D'))
 #define bb_ID_GLUL	(bb_make_id('G','L','U','L'))
 
+#define bb_ID_Loop	(bb_make_id('L','o','o','p'))
 #define bb_ID_FORM	(bb_make_id('F','O','R','M'))
 #define bb_ID_MOD	(bb_make_id('M','O','D',' '))
 #define bb_ID_OGGV	(bb_make_id('O','G','G','V'))
 
+#define bb_ID_APal	(bb_make_id('A','P','a','l'))
+#define bb_ID_RDes	(bb_make_id('R','D','e','s'))
 #define bb_ID_PNG	(bb_make_id('P','N','G',' '))
 #define bb_ID_JPEG	(bb_make_id('J','P','E','G'))
 #define bb_ID_Rect	(bb_make_id('R','e','c','t'))
