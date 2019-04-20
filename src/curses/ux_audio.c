@@ -212,11 +212,11 @@ void os_start_sample (int number, int volume, int repeats, zword eos)
 
     pthread_attr_init(&attr);
 
-    if (blorb_map->chunks[resource.chunknum].type == bb_make_id('F','O','R','M'))
+    if (blorb_map->chunks[resource.chunknum].type == bb_ID_FORM)
 	myeffect.type = FORM;
-    else if (blorb_map->chunks[resource.chunknum].type == bb_make_id('M','O','D',' '))
+    else if (blorb_map->chunks[resource.chunknum].type == bb_ID_MOD)
 	myeffect.type = MOD;
-    else if (blorb_map->chunks[resource.chunknum].type == bb_make_id('O','G','G','V'))
+    else if (blorb_map->chunks[resource.chunknum].type == bb_ID_OGGV)
 	myeffect.type = OGGV;
 
     if (myeffect.type == FORM) {

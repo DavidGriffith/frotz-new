@@ -65,6 +65,10 @@ typedef int bb_err_t;
 #define bb_ID_AUTH      (bb_make_id('A', 'U', 'T', 'H'))
 #define bb_ID_ANNO      (bb_make_id('A', 'N', 'N', 'O'))
 
+#define bb_ID_ZCOD      (bb_make_id('Z','C','O','D'))
+#define bb_ID_MOD       (bb_make_id('M','O','D',' '))
+#define bb_ID_OGGV      (bb_make_id('O','G','G','V'))
+
 /* bb_result_t: Result when you try to load a chunk. */
 typedef struct bb_result_struct {
     int chunknum; /* The chunk number (for use in bb_unload_chunk(), etc.) */
