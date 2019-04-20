@@ -58,18 +58,19 @@ typedef int bb_err_t;
     (((c1) << 24) | ((c2) << 16) | ((c3) << 8) | (c4))
 
 /* Four-byte constants */
-#define bb_ID_Snd       (bb_make_id('S', 'n', 'd', ' '))
-#define bb_ID_Exec      (bb_make_id('E', 'x', 'e', 'c'))
-#define bb_ID_Pict      (bb_make_id('P', 'i', 'c', 't'))
-#define bb_ID_Copyright (bb_make_id('(', 'c', ')', ' '))
-#define bb_ID_AUTH      (bb_make_id('A', 'U', 'T', 'H'))
-#define bb_ID_ANNO      (bb_make_id('A', 'N', 'N', 'O'))
+#define bb_ID_Snd	(bb_make_id('S','n','d',' '))
+#define bb_ID_Exec	(bb_make_id('E','x','e','c'))
+#define bb_ID_Pict	(bb_make_id('P','i','c','t'))
+#define bb_ID_Copyright	(bb_make_id('(','c',')',' '))
+#define bb_ID_AUTH	(bb_make_id('A','U','T','H'))
+#define bb_ID_ANNO	(bb_make_id('A','N','N','O'))
 
-#define bb_ID_ZCOD      (bb_make_id('Z','C','O','D'))
+#define bb_ID_ZCOD	(bb_make_id('Z','C','O','D'))
 #define bb_ID_GLUL	(bb_make_id('G','L','U','L'))
+
 #define bb_ID_FORM	(bb_make_id('F','O','R','M'))
-#define bb_ID_MOD       (bb_make_id('M','O','D',' '))
-#define bb_ID_OGGV      (bb_make_id('O','G','G','V'))
+#define bb_ID_MOD	(bb_make_id('M','O','D',' '))
+#define bb_ID_OGGV	(bb_make_id('O','G','G','V'))
 
 #define bb_ID_PNG	(bb_make_id('P','N','G',' '))
 #define bb_ID_JPEG	(bb_make_id('J','P','E','G'))
