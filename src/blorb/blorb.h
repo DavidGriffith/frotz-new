@@ -66,8 +66,13 @@ typedef int bb_err_t;
 #define bb_ID_ANNO      (bb_make_id('A', 'N', 'N', 'O'))
 
 #define bb_ID_ZCOD      (bb_make_id('Z','C','O','D'))
+#define bb_ID_GLUL	(bb_make_id('G','L','U','L'))
 #define bb_ID_MOD       (bb_make_id('M','O','D',' '))
 #define bb_ID_OGGV      (bb_make_id('O','G','G','V'))
+
+#define bb_ID_PNG	(bb_make_id('P','N','G',' '))
+#define bb_ID_JPEG	(bb_make_id('J','P','E','G'))
+#define bb_ID_Rect	(bb_make_id('R','e','c','t'))
 
 /* bb_result_t: Result when you try to load a chunk. */
 typedef struct bb_result_struct {
