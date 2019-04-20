@@ -12,17 +12,6 @@
     tool (such as blorbscan), or a transformation tool, or some such thing.
 */
 
-/* More four-byte constants. */
-
-#define bb_ID_FORM (bb_make_id('F', 'O', 'R', 'M'))
-#define bb_ID_IFRS (bb_make_id('I', 'F', 'R', 'S'))
-#define bb_ID_RIdx (bb_make_id('R', 'I', 'd', 'x'))
-#define bb_ID_IFhd (bb_make_id('I', 'F', 'h', 'd'))
-#define bb_ID_Reso (bb_make_id('R', 'e', 's', 'o'))
-#define bb_ID_Loop (bb_make_id('L', 'o', 'o', 'p'))
-#define bb_ID_RelN (bb_make_id('R', 'e', 'l', 'N'))
-#define bb_ID_Plte (bb_make_id('P', 'l', 't', 'e'))
-
 /* bb_chunkdesc_t: Describes one chunk of the Blorb file. */
 typedef struct bb_chunkdesc_struct {
     uint32 type;
