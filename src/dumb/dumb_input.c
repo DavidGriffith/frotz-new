@@ -396,7 +396,7 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
   dumb_display_user_input(read_line_buffer);
 
   /* copy to the buffer and save the rest for next time.  */
-  strcat((char*) buf, read_line_buffer);
+  strncat((char*) buf, read_line_buffer, (INPUT_BUFFER_SIZE - strlen((char *)buf)) - 2);
   p = read_line_buffer + strlen(read_line_buffer) + 1;
   memmove(read_line_buffer, p, strlen(p) + 1);
 
