@@ -17,3 +17,4 @@
 -v   show version information
 -w # screen width
 -x   expand abbreviations g/x/z
+-Z # error checking (see below)
