@@ -209,17 +209,15 @@ $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
-
 curses_lib:	$(CURSES_LIB)
-
+sdl_lib:	$(SDL_LIB)
 dumb_lib:	$(DUMB_LIB)
-
 blorb_lib:	$(BLORB_LIB)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
-$(CURSES_LIB): $(CURSES_DEFINES) $(CURSES_DIR);
-$(SDL_LIB): $(SDL_DIR);
-$(DUMB_LIB): $(DUMB_DIR);
+$(CURSES_LIB): $(HASH) $(COMMON_DEFINES) $(CURSES_DEFINES) $(CURSES_DIR);
+$(SDL_LIB): $(HASH) $(COMMON_DEFINES) $(SDL_DIR);
+$(DUMB_LIB): $(HASH) $(COMMON_DEFINES) $(DUMB_DIR);
 $(BLORB_LIB): $(BLORB_DIR);
 
 $(SUBDIRS):
@@ -323,11 +321,13 @@ uninstall_dfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
 
+install_sdl: install_sfrotz
 install_sfrotz: $(SFROTZ_BIN)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
 	install "$(SFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/sfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
 
+uninstall_sdl: uninstall_sfrotz
 uninstall_sfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/sfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/sfrotz.6"

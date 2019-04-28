@@ -350,17 +350,17 @@ static int sf_loadpic( int picture, sf_picture *graphic)
 	unsigned int id = res.type;
 
 		// Look for a recognized format
-	if (id == bb_make_id('P','N','G',' '))
+	if (id == bb_ID_PNG)
 		{
 		st = loadpng( data, length, graphic);
 		if (!st) st = loadjpeg( data, length, graphic);
 		}
-	else if (id == bb_make_id('J','P','E','G'))
+	else if (id == bb_ID_JPEG)
 		{
 		st = loadjpeg( data, length, graphic);
 		if (!st) st = loadpng( data, length, graphic);
 		}
-	else if (id == bb_make_id('R','e','c','t'))
+	else if (id == bb_ID_Rect)
 		st = loadrect( data, length, graphic);
 	sf_freeresource(&res);
 	}
