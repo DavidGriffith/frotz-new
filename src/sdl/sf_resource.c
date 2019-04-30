@@ -777,14 +777,19 @@ void os_fatal(const char *s, ...)
 //	if (theWnd != NULL)
 //		theWnd->FlushDisplay();
 
-  sf_cleanup_all();
+  if (!f_setup.ignore_errors)
+    sf_cleanup_all();
+
   fprintf(stderr,"\n%s: ",sf_msgstring(IDS_FATAL));
   va_start( m, s);
   vfprintf( stderr, s, m);
   va_end(m);
-  fprintf(stderr,"\n\n");
+  fprintf(stderr,"\n");
 
-  exit(EXIT_FAILURE);
+  if (f_setup.ignore_errors)
+    fprintf(stderr, "Continuing anyway...\n");
+  else
+    exit(EXIT_FAILURE);
 
 //	::MessageBox(AfxGetMainWnd()->GetSafeHwnd(),s,CResString(IDS_FATAL),MB_ICONERROR|MB_OK);
 //	throw FrotzApp::AbortFrotz();
