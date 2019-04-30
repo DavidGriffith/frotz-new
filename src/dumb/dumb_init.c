@@ -221,7 +221,11 @@ void os_restart_game (int UNUSED (stage)) {}
 void os_fatal (const char *s, ...)
 {
     fprintf(stderr, "\nFatal error: %s\n", s);
-    exit(1);
+    if (f_setup.ignore_errors) {
+	fprintf(stderr, "Continuing anyway...\n");
+    } else {
+	exit(1);
+    }
 }
 
 FILE *os_load_story(void)
