@@ -7,6 +7,8 @@
 
 #include <stdarg.h>
 
+#include <SDL.h>
+
 #include "sf_frotz.h"
 #include "../blorb/blorb.h"
 #include "../blorb/blorblow.h"
@@ -777,8 +779,8 @@ void os_fatal(const char *s, ...)
 //	if (theWnd != NULL)
 //		theWnd->FlushDisplay();
 
-  if (!f_setup.ignore_errors)
-    sf_cleanup_all();
+  os_set_text_style(0);
+
 
   os_display_string((zchar *)"\n\n");
   os_beep(BEEP_HIGH);
@@ -805,6 +807,9 @@ void os_fatal(const char *s, ...)
     return;
   }
 
+  os_reset_screen();
+  sf_cleanup_all();
+  SDL_Quit();
   exit(EXIT_FAILURE);
 
 //	::MessageBox(AfxGetMainWnd()->GetSafeHwnd(),s,CResString(IDS_FATAL),MB_ICONERROR|MB_OK);
