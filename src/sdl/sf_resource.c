@@ -780,16 +780,32 @@ void os_fatal(const char *s, ...)
   if (!f_setup.ignore_errors)
     sf_cleanup_all();
 
+  os_display_string((zchar *)"\n\n");
+  os_beep(BEEP_HIGH);
+  os_set_text_style(BOLDFACE_STYLE);
+
   fprintf(stderr,"\n%s: ",sf_msgstring(IDS_FATAL));
   va_start( m, s);
   vfprintf( stderr, s, m);
   va_end(m);
   fprintf(stderr,"\n");
 
-  if (f_setup.ignore_errors)
+  os_display_string((zchar *)"Fatal error: ");
+  os_set_text_style(0);
+  os_display_string((zchar *)s);
+  os_display_string((zchar *)"\n\n");
+  new_line();
+  flush_buffer();
+
+  if (f_setup.ignore_errors) {
+    os_display_string((zchar *)"Continuing anyway...");
+    new_line();
+    new_line();
     fprintf(stderr, "Continuing anyway...\n");
-  else
-    exit(EXIT_FAILURE);
+    return;
+  }
+
+  exit(EXIT_FAILURE);
 
 //	::MessageBox(AfxGetMainWnd()->GetSafeHwnd(),s,CResString(IDS_FATAL),MB_ICONERROR|MB_OK);
 //	throw FrotzApp::AbortFrotz();
