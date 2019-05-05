@@ -218,8 +218,33 @@ void os_display_char (zchar c)
 	  if (c3 != ' ')
 	    addch(c3);
 
+#ifndef USE_UTF8
 	} else
-	  addch(c);
+	    addch(c);
+#else
+	} else {
+	  // Looking at the UTF-8 table at
+	  // https://www.utf8-chartable.de/unicode-utf8-table.pl
+	  // Shows that characters from 0xa0-0xbf are encoded as
+	  // 0xc2 0xa0-0xbf, and characters from 0xc0-0xff are
+	  // encoded as 0xc3 0x80-0xbf
+	  if ( c < 0xc0) {
+	    addch(0xc2);
+	    addch(c);
+#ifdef HANDLE_OE_DIPTHONG
+	  } else if (c == 0xd6) {
+	    addch(0xc5);
+	    addch(0x92);
+	  } else if (c == 0xf6) {
+	    addch(0xc5);
+	    addch(0x93);
+#endif /* HANDLE_OE_DIPTHONG */
+	  } else {
+	    addch(0xc3);
+	    addch(c - 0x40);
+	  }
+	}
+#endif /* USE_UTF8 */
 	return;
     }
     if (c >= ZC_ASCII_MIN && c <= ZC_ASCII_MAX) {

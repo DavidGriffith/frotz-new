@@ -159,7 +159,33 @@ void script_char (zchar c)
 	c = latin1_to_ibm[c - ZC_LATIN1_MIN];
 #endif
 
-    fputc (c, sfp); script_width++;
+#ifdef USE_UTF8
+    if (c >= ZC_LATIN1_MIN)
+    {
+      if ( c < 0xc0) {
+	fputc (0xc2, sfp); 
+	fputc (c, sfp);
+#ifdef HANDLE_OE_DIPTHONG
+      } else if (c == 0xd6) {
+	fputc (0xc5, sfp);
+	fputc (0x92, sfp);
+      } else if (c == 0xf6) {
+	fputc (0xc5, sfp);
+	fputc (0x93, sfp);
+#endif /* HANDLE_OE_DIPTHONG */
+      } else {
+	fputc (0xc3, sfp);
+	fputc (c - 0x40, sfp);
+      }
+    }
+    else
+    {
+	fputc (c, sfp);
+    }
+#else
+    fputc (c, sfp);
+#endif
+    script_width++;
 
 }/* script_char */
 

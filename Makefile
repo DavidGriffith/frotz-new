@@ -58,13 +58,22 @@ BUFFSIZE ?= 4096
 # Default sample rate converter type
 DEFAULT_CONVERTER ?= SRC_SINC_MEDIUM_QUALITY
 
+# Comment this out if you don't want UTF-8 support
+USE_UTF8 ?= yes
+
+# The OE dipthong is not a latin1 character, but it seems the zmachine
+# can handle it, and it is tested for in terpetude.  Comment this out
+# if you don't want to support the OE dipthong
+HANDLE_OE_DIPTHONG ?= yes
+
 # Comment this out if your machine's version of curses doesn't support color.
-#
 COLOR ?= yes
 
-# If this matters, you can choose -lcurses or -lncurses
-CURSES ?= -lncurses
-#CURSES ?= -lcurses
+# Select your chosen version of curses.  Unless something old is going
+# on, ncursesw should be used because that's how UTF8 is supported.
+#CURSES ?= curses
+#CURSES ?= ncurses
+CURSES ?= ncursesw
 
 # Uncomment this if you want to disable the compilation of Blorb support.
 #NO_BLORB = yes
@@ -100,6 +109,7 @@ AR ?= $(shell which ar)
 
 export CC
 export CFLAGS
+export CURSES_CFLAGS
 export MAKEFLAGS
 export AR
 export RANLIB
@@ -135,8 +145,22 @@ export CFLAGS
 
 # Compile time options handling
 #
+ifeq ($(CURSES), curses)
+  CURSES_LDFLAGS += -lcurses
+  CURSES_DEFINE = USE_CURSES_H
+endif
+ifeq ($(CURSES), ncurses)
+  CURSES_LDFLAGS += -lncurses
+  CURSES_DEFINE = USE_NCURSES_H
+endif
+ifeq ($(CURSES), ncursesw)
+  CURSES_LDFLAGS += -lncursesw -ltinfo
+  CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
+  CURSES_DEFINE = USE_NCURSES_H
+endif
+
 ifeq ($(SOUND), ao)
-  CURSES_LDFLAGS = -lao -ldl -lpthread -lm \
+  CURSES_LDFLAGS += -lao -ldl -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
 endif
 
@@ -182,8 +206,7 @@ SFROTZ_BIN = sfrotz$(EXTENSION)
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
-	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(CURSES) $(LDFLAGS) \
-		$(CURSES_LDFLAGS)
+	$(CC) $(CFLAGS) $(CURSES_CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS)
 	@echo "** Done building Frotz with curses interface"
 
 dumb: $(DFROTZ_BIN)
@@ -242,6 +265,12 @@ endif
 ifdef NO_STRDUP
 	@echo "#define NO_STRDUP" >> $@
 endif
+ifdef HANDLE_OE_DIPTHONG
+	@echo "#define HANDLE_OE_DIPTHONG" >> $@
+endif
+ifdef USE_UTF8
+	@echo "#define USE_UTF8" >> $@
+endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 
 curses_defines: $(CURSES_DEFINES)
@@ -249,6 +278,7 @@ $(CURSES_DEFINES):
 	@echo "** Generating $@"
 	@echo "#ifndef CURSES_DEFINES_H" > $@
 	@echo "#define CURSES_DEFINES_H" >> $@
+	@echo "#define $(CURSES_DEFINE)" >> $@
 	@echo "#define CONFIG_DIR \"$(SYSCONFDIR)\"" >> $@
 	@echo "#define SOUND \"$(SOUND)\"" >> $@
 	@echo "#define SAMPLERATE $(SAMPLERATE)" >> $@
@@ -262,6 +292,12 @@ ifndef SOUND
 endif
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
+endif
+ifdef USE_UTF8
+	@echo "#define USE_UTF8" >> $@
+endif
+ifdef HANDLE_OE_DIPTHONG
+	@echo "#define HANDLE_OE_DIPTHONG" >> $@
 endif
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
 

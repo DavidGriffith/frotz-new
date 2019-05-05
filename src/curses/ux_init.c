@@ -45,6 +45,10 @@
 #include "ux_frotz.h"
 #include "ux_blorb.h"
 
+#ifdef USE_UTF8
+#include <locale.h>
+#endif
+
 volatile sig_atomic_t terminal_resized = 0;
 
 static void sigwinch_handler(int);
@@ -418,6 +422,10 @@ void unix_get_terminal_size()
 void os_init_screen (void)
 {
     /*trace(TRACE_CALLS);*/
+
+#ifdef USE_UTF8
+    setlocale(LC_ALL, "");
+#endif
 
     if (initscr() == NULL) {    /* Set up curses */
 	os_fatal("Unable to initialize curses. Maybe your $TERM setting is bad.");
