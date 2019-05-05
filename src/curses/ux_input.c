@@ -66,6 +66,10 @@ extern bool is_terminator (zchar);
 extern void read_string (int, zchar *);
 extern int completion (const zchar *, zchar *);
 
+#ifndef wint_t
+typedef unsigned int wint_t;
+#endif
+
 /*
  * unix_set_global_timeout
  *
@@ -158,7 +162,8 @@ void os_tick()
  */
 static int unix_read_char(int extkeys)
 {
-    int c, sel, fd = fileno(stdin);
+    wint_t c;
+    int sel, fd = fileno(stdin);
     fd_set rsel;
     struct timeval tval, *t_left;
 
