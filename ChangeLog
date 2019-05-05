@@ -5,7 +5,11 @@ Frotz 2.45 was released on ????
 
 NEW FEATURES
 
-- Added -R option for restoring save file directly from the command line.
+- Added UTF8 input and output.  Plain ASCII is still available.
+
+- Added -L option for restoring save file directly from the command line.
+
+- Added -R option for restricted read/write path.
 
 - Sound effects in AIFF, MOD, and OGG formats supported per the Blorb specs.
 
