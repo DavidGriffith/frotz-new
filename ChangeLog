@@ -5,7 +5,7 @@ Frotz 2.45 was released on ????
 
 NEW FEATURES
 
-- Added UTF8 input and output.  Plain ASCII is still available.
+- Added UTF-8 input and output.  Plain ASCII is still available.
 
 - Added -L option for restoring save file directly from the command line.
 
