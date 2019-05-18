@@ -134,6 +134,19 @@ static void reset_cursor (zword win)
 
 
 /*
+ * reset_screen
+ *
+ * Do any interface-independent screen cleanup prior to exiting the game.
+ *
+ */
+void reset_screen (void)
+{
+    if (need_newline_at_exit)
+	new_line();
+
+}/* reset_screen */
+
+/*
  * set_more_prompts
  *
  * Turn more prompts on/off.
