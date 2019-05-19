@@ -56,8 +56,8 @@ static bb_err_t bb_initialize()
     } test;
     uint32 val;
 
-    if (sizeof(uint32) != 4 || sizeof(uint16) != 2)
-        return bb_err_CompileTime; /* Basic types are the wrong size. */
+//    if (sizeof(uint32) != 4 || sizeof(uint16) != 2)
+//        return bb_err_CompileTime; /* Basic types are the wrong size. */
 
     test.ch[0] = 0x13;
     test.ch[1] = 0x57;
