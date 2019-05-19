@@ -11,18 +11,6 @@
 #include "blorb.h"
 #include "blorblow.h"
 
-/* This endian stuff needs to be fixed with something from
- * http://www.ibm.com/developerworks/aix/library/au-endianc/index.html
- */
-
-#ifdef BLORB_BIG_ENDIAN
-static char contentsticker[] = "\nBlorb Library 1.0 (big-endian)\n";
-#define bb_native2(v) (v)
-#define bb_native4(v) (v)
-#endif
-
-#ifdef BLORB_LITTLE_ENDIAN
-static char contentsticker[] = "\nBlorb Library 1.0 (little-endian)\n";
 #define bb_native2(v)   \
     ( (((uint16)(v) >> 8) & 0x00ff)    \
     | (((uint16)(v) << 8) & 0xff00))
@@ -31,15 +19,6 @@ static char contentsticker[] = "\nBlorb Library 1.0 (little-endian)\n";
     | (((uint32)(v) >>  8) & 0x0000ff00)    \
     | (((uint32)(v) <<  8) & 0x00ff0000)   \
     | (((uint32)(v) << 24) & 0xff000000))
-#endif
-
-#ifdef CRAPOLA
-#ifndef bb_native4
-#error "You must define either BLORB_BIG_ENDIAN"
-#error "or BLORB_LITTLE_ENDIAN in blorb.h in order"
-#error "to compile this library."
-#endif
-#endif /* CRAPOLA */
 
 static int lib_inited = FALSE;
 
