@@ -14,10 +14,11 @@ RENAME = ren
 BINNAME = frotz.exe
 LIBRARY = frotz.lib
 
-SOUND_DEF = -DSOUND_SUPPORT
-DOS_DEF = -DMSDOS_16BIT
+VERSION = "2.45pre"
 
-DEFS = $(SOUND_DEF) $(DOS_DEF)
+VER = -DVERSION=$(VERSION)
+
+DEFS = src\common\defs.h
 
 DOS_DIR = src\dos
 DOS_OBJECTS =   $(DOS_DIR)\bcinit.o \
@@ -53,15 +54,25 @@ CORE_OBJECTS =  $(CORE_DIR)\buffer.o \
 
 .SUFFIXES: .c .o .h
 
-.c.o:
-	$(CC) $(CFLAGS) $(DEFS) -I$(DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
-	$(TLIB) $(LIBRARY) +-$@
+all:	defs frotz
 
-all:	frotz
+defs: $(DEFS)
+$(DEFS):
+	@echo "** Generating $@"
+	@echo "#ifndef COMMON_DEFINES_H" > $@
+	@echo "#define COMMON_DEFINES_H" >> $@
+	@echo "#define MSDOS_16BIT" >> $@
+	@echo "#define SOUND_SUPPORT" >> $@
+	@echo "#endif /* COMMON_DEFINES_H */" >> $@
+
+.c.o:
+	$(CC) $(CFLAGS) $(VER) -I$(DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
+	$(TLIB) $(LIBRARY) +-$@
 
 clean:
 	$(RM) $(CORE_DIR)\*.o
 	$(RM) $(DOS_DIR)\*.o
+	$(RM) $(DEFS)
 	$(RM) *.lib
 	$(RM) *.exe
 	$(RM) *.bak

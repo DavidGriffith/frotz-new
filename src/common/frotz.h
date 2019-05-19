@@ -8,11 +8,15 @@
 #ifndef FROTZ_H_
 #define FROTZ_H_
 
+#include "defs.h"
+
 /* Unfortunately, frotz's bool definition conflicts with that of curses.
    But since no os_* function uses it, it's safe to let the frotz core see
    this definition, but have the unix port see the curses version. */
 
+#ifndef MSDOS_16BIT
 #include "git_hash.h"
+#endif
 
 #ifndef __UNIX_PORT_FILE
 #include <signal.h>
@@ -125,7 +129,6 @@ typedef struct {
 
 
 #include "setup.h"
-#include "defs.h"
 #include "missing.h"
 #include "unused.h"
 
