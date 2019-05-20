@@ -57,9 +57,9 @@ static struct timeval global_timeout;
 #define RING_INC( ptr, beg, end) (ptr < (end) ? ++ptr : (ptr = (beg)))
 
 #define MAX_HISTORY 20
-static zword *history_buffer[MAX_HISTORY];
-static zword **history_next = history_buffer; /* Next available slot. */
-static zword **history_view = history_buffer; /* What the user is looking at. */
+static zchar *history_buffer[MAX_HISTORY];
+static zchar **history_next = history_buffer; /* Next available slot. */
+static zchar **history_view = history_buffer; /* What the user is looking at. */
 #define history_end (history_buffer + MAX_HISTORY - 1)
 
 extern bool is_terminator (zchar);
@@ -160,6 +160,7 @@ void os_tick()
  * If unix_set_global_timeout has been used to set a global timeout
  * this routine may also return ZC_TIME_OUT if input times out.
  */
+
 static int unix_read_char(int extkeys)
 {
     wint_t c;
@@ -188,7 +189,7 @@ static int unix_read_char(int extkeys)
 
         timeout(0);
 #ifdef USE_UTF8
-	get_wch(&c);
+	sel = get_wch(&c);
 #else
 	c = getch();
 #endif
@@ -211,6 +212,11 @@ static int unix_read_char(int extkeys)
 	    /* OE dipthong */
 	    return 0xd6;
 	}
+#endif
+
+#ifdef USE_UTF8
+    if (sel != KEY_CODE_YES && c >= ZC_LATIN1_MIN)
+        return c;
 #endif
 
 	/* On many terminals the backspace key returns DEL. */
@@ -433,7 +439,7 @@ static int unix_history_back(zchar *str, int searchlen, int maxlen)
  */
 static int unix_history_forward(zchar *str, int searchlen, int maxlen)
 {
-    zword **prev = history_view;
+    zchar **prev = history_view;
 
     do {
 	RING_INC( history_view, history_buffer, history_end);
@@ -570,7 +576,7 @@ static void utf8_mvaddstr(int y, int x, zchar * buf)
 zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
                     int continued)
 {
-    int ch, y, x, len = strlen( (char *)buf);
+    int ch, y, x, len = zwordstrlen(buf);
     const int margin = MAX(h_screen_width - width, 0);
 
     /* These are static to allow input continuation to work smoothly. */
@@ -618,7 +624,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		len--; scrpos--; searchpos = -1;
 		scrnmove(x + scrpos, x + scrpos + 1, len - scrpos);
 		mvaddch(y, x + len, ' ');
-		memmove(buf + scrpos, buf + scrpos + 1, len - scrpos);
+		memmove(buf + scrpos, buf + scrpos + 1, (len - scrpos)*sizeof(zchar));
 	    }
 	    break;
 	case ZC_DEL_WORD:
@@ -631,7 +637,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 			len -= delta;
 			scrpos -= delta;
 			scrnmove(x + scrpos, x + oldscrpos, len - scrpos);
-			memmove(buf + scrpos, buf + oldscrpos, len - scrpos);
+			memmove(buf + scrpos, buf + oldscrpos, (len - scrpos)*sizeof(zchar));
 			int i = newoffset;
 			for (i = len; i <= oldlen ; i++) {
 				mvaddch(y, x + i, ' ');
@@ -643,7 +649,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 			searchpos = -1;
 			len -= scrpos;
 			scrnmove(x, x + scrpos, len);
-			memmove(buf, buf + scrpos, len);
+			memmove(buf, buf + scrpos, len*sizeof(zchar));
 			for (int i = len; i <= len + scrpos; i++) {
 				mvaddch(y, x + i, ' ');
 			}
@@ -656,7 +662,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		len--; searchpos = -1;
 		scrnmove(x + scrpos, x + scrpos + 1, len - scrpos);
 		mvaddch(y, x + len, ' ');
-		memmove(buf + scrpos, buf + scrpos + 1, len - scrpos);
+		memmove(buf + scrpos, buf + scrpos + 1, (len - scrpos)*sizeof(zchar));
 	    }
 	    continue;		/* Don't feed is_terminator bad zchars. */
 
@@ -704,7 +710,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 #else
 	    mvaddstr(y, x, buf);
 #endif
-	    scrpos = len = strlen((char *) buf);
+	    scrpos = len = zwordstrlen(buf);
 	    continue;
 
 	/* Passthrough as up/down arrows for Beyond Zork. */
@@ -730,8 +736,8 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 			status = 1;
 		    }
 		    memmove(buf + scrpos + ext_len, buf + scrpos,
-			len - scrpos);
-		    memmove(buf + scrpos, extension, ext_len);
+			(len - scrpos)*sizeof(zchar));
+		    memmove(buf + scrpos, extension, ext_len*sizeof(zchar));
 		    scrnmove(x + scrpos + ext_len, x + scrpos, len - scrpos);
 		    mvaddnstr(y, x + scrpos, (char *) extension, ext_len);
 		    scrpos += ext_len;
@@ -754,7 +760,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		if (insert_flag && (scrpos < len)) {
 		    /* move what's there to the right */
 		    scrnmove(x + scrpos + 1, x + scrpos, len - scrpos);
-		    memmove(buf + scrpos + 1, buf + scrpos, len - scrpos);
+		    memmove(buf + scrpos + 1, buf + scrpos, (len - scrpos)*sizeof(zchar));
 		}
 		if (insert_flag || scrpos == len)
 		    len++;
@@ -766,7 +772,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		    addch(0x80 | ((ch >> 6) & 0x3f));
 		    addch(0x80 | (ch & 0x3f));
 		} else {
-		    addch(0xc0 | ((ch >> 6) & 0x1f));
+		    mvaddch(y, x + scrpos, 0xc0 | ((ch >> 6) & 0x1f));
 		    addch(0x80 | (ch & 0x3f));
 		}
 #else
@@ -843,7 +849,7 @@ char *os_read_file_name (const char *default_name, int flag)
     char *tempname;
     zchar answer[4];
     char path_separator[2];
-    zchar file_name[FILENAME_MAX + 1];
+    char file_name[FILENAME_MAX + 1];
 
     path_separator[0] = PATH_SEPARATOR;
     path_separator[1] = 0;
@@ -872,7 +878,8 @@ char *os_read_file_name (const char *default_name, int flag)
 	} else
 	   print_string (default_name);
 	print_string ("\": ");
-	read_string (FILENAME_MAX, file_name);
+print_string ("\n");
+//	read_string (FILENAME_MAX, (zchar *)file_name);
     }
 
     /* Return failure if path provided when in restricted mode.
