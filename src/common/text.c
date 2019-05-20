@@ -26,7 +26,7 @@ enum string_type {
 
 extern zword object_name (zword);
 
-static zword decoded[10];
+static zchar decoded[10];
 static zword encoded[3];
 
 /*
@@ -53,8 +53,7 @@ static zword zscii_to_latin1[] = {
  * Map a ZSCII character into Unicode.
  *
  */
-
-zword translate_from_zscii (zbyte c)
+zchar translate_from_zscii (zbyte c)
 {
 
     if (c == 0xfc)
@@ -95,7 +94,7 @@ zword translate_from_zscii (zbyte c)
 	    } else return '?';
     }
 
-    return (zword) c;
+    return c;
 
 }/* translate_from_zscii */
 
@@ -105,8 +104,7 @@ zword translate_from_zscii (zbyte c)
  * Convert a Unicode character to ZSCII, returning 0 on failure.
  *
  */
-
-zbyte unicode_to_zscii (zword c)
+zbyte unicode_to_zscii (zchar c)
 {
     int i;
 
@@ -155,7 +153,7 @@ zbyte unicode_to_zscii (zword c)
  *
  */
 
-zbyte translate_to_zscii (zword c)
+zbyte translate_to_zscii (zchar c)
 {
 
     if (c == ZC_SINGLE_CLICK)
@@ -181,8 +179,7 @@ zbyte translate_to_zscii (zword c)
  * Return a character from one of the three character sets.
  *
  */
-
-static zword alphabet (int set, int index)
+static zchar alphabet (int set, int index)
 {
     if (h_alphabet != 0) {	/* game uses its own alphabet */
 
@@ -249,13 +246,13 @@ static void load_string (zword addr, zword length)
  */
 static void encode_text (int padding)
 {
-    static zword again[] = { 'a', 'g', 'a', 'i', 'n', 0, 0, 0, 0 };
-    static zword examine[] = { 'e', 'x', 'a', 'm', 'i', 'n', 'e', 0, 0 };
-    static zword wait[] = { 'w', 'a', 'i', 't', 0, 0, 0, 0, 0 };
+    static zchar again[] = { 'a', 'g', 'a', 'i', 'n', 0 };
+    static zchar examine[] = { 'e', 'x', 'a', 'm', 'i', 'n', 'e', 0 };
+    static zchar wait[] = { 'w', 'a', 'i', 't', 0 };
 
     zbyte zchars[12];
-    const zword *ptr = decoded;
-    zword c;
+    const zchar *ptr = decoded;
+    zchar c;
     int resolution = (h_version <= V3) ? 2 : 3;
     int i = 0;
 
@@ -337,9 +334,9 @@ void z_check_unicode (void)
 	store (3);
     else if (c == 0xa0)
 	store (1);
-    else if (c >= 0xa1) 
-	/* being optimistic, we can print and input 
-	 * all unicode characters 
+    else if (c >= 0xa1)
+	/* being optimistic, we can print and input
+	 * all unicode characters
 	 */
 	store (3);
     else
@@ -397,9 +394,9 @@ void z_encode_text (void)
 #define outchar(c)	if (st==VOCABULARY) *ptr++=c; else print_char(c)
 static void decode_text (enum string_type st, zword addr)
 {
-    zword *ptr;
+    zchar *ptr;
     long byte_addr;
-    zword c2;
+    zchar c2;
     zword code;
     zbyte c, prev_c = 0;
     int shift_state = 0;
@@ -1060,13 +1057,12 @@ void z_tokenise (void)
  * to the last word that results in the only possible completion.
  *
  */
-
-int completion (const zword *buffer, zword *result)
+int completion (const zchar *buffer, zchar *result)
 {
     zword minaddr;
     zword maxaddr;
-    zword *ptr;
-    zword c;
+    zchar *ptr;
+    zchar c;
     int len;
     int i;
 
