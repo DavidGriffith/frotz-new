@@ -101,6 +101,16 @@ static int	geterrmode(char *);
 static FILE	*pathopen(const char *, const char *, const char *);
 
 
+static void print_c_string (const char *s)
+{
+    zchar c;
+
+    while ((c = *s++) != 0) {
+	    os_display_char (c);
+    }
+}
+
+
 /*
  * os_warn
  *
@@ -111,13 +121,13 @@ void os_warn (const char *s, ...)
 {
     if (u_setup.curses_active) {
 	/* Solaris 2.6's cc complains if the below cast is missing */
-	os_display_string((zword *)"\n\n");
+	print_c_string("\n\n");
 	os_beep(BEEP_HIGH);
 	os_set_text_style(BOLDFACE_STYLE);
-	os_display_string((zword *)"Warning: ");
+	print_c_string("Warning: ");
 	os_set_text_style(0);
-	os_display_string((zword *)s);
-	os_display_string((zword *)"\n");
+	print_c_string(s);
+	print_c_string("\n");
 	new_line();
     }
 }/* os_warn */
@@ -132,16 +142,16 @@ void os_fatal (const char *s, ...)
 {
     if (u_setup.curses_active) {
 	/* Solaris 2.6's cc complains if the below cast is missing */
-	os_display_string((zword *)"\n\n");
+	print_c_string("\n\n");
 	os_beep(BEEP_HIGH);
 	os_set_text_style(BOLDFACE_STYLE);
-	os_display_string((zword *)"Fatal error: ");
+	print_c_string("Fatal error: ");
 	os_set_text_style(0);
-	os_display_string((zword *)s);
-	os_display_string((zword *)"\n");
+	print_c_string(s);
+	print_c_string("\n");
 	new_line();
 	if (f_setup.ignore_errors) {
-	    os_display_string((zword *)"Continuing anyway...");
+	    print_c_string("Continuing anyway...");
 	    new_line();
 	    scrollok(stdscr, TRUE);
 	    scroll(stdscr);
@@ -542,7 +552,7 @@ void os_reset_screen (void)
 {
     os_stop_sample(0);
     os_set_text_style(0);
-    os_display_string((zword *)"[Hit any key to exit.]\n");
+    print_c_string("[Hit any key to exit.]\n");
     os_read_key(0, FALSE);
     os_quit();
 }/* os_reset_screen */
