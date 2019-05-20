@@ -20,8 +20,10 @@ $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 	@echo "** Done with Frotz core."
+
 clean:
 	rm -f $(TARGET) $(OBJECTS)
+	rm -f *.O DEFS.H
 
 %.o: %.c
 	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<

@@ -361,16 +361,16 @@ endif
 
 clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
-	rm -f $(SRCDIR)/*.h \
-		$(SRCDIR)/*.a \
-		$(COMMON_DEFINES) \
+	rm -rf $(COMMON_DEFINES) \
 		$(COMMON_STRINGS) \
-		$(HASH) \
 		$(CURSES_DEFINES) \
-		$(NAME)*.tar.gz
+		$(HASH)
+	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB
+
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
+	rm -f $(NAME)*.tar.gz
 
 help:
 	@echo "Targets:"

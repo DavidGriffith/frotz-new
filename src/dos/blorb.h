@@ -15,9 +15,6 @@
     and uint16 a 16-bit unsigned numeric type. You should also uncomment
     exactly one of the two ENDIAN definitions. */
 
-/* #define BLORB_BIG_ENDIAN */
-
-#define BLORB_LITTLE_ENDIAN
 typedef unsigned long uint32;
 typedef unsigned short uint16;
 
