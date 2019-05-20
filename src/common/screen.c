@@ -295,7 +295,7 @@ void screen_new_line (void)
  *
  */
 
-void screen_char (zchar c)
+void screen_char (zword c)
 {
     int width;
 
@@ -326,7 +326,8 @@ void screen_char (zchar c)
  * enable_wrapping flag.
  *
  */
-void screen_word (const zchar *s)
+
+void screen_word (const zword *s)
 {
     int width;
 
@@ -339,7 +340,7 @@ void screen_word (const zchar *s)
 
 	if (!enable_wrapping) {
 
-	    zchar c;
+	    zword c;
 
 	    while ((c = *s++) != 0)
 
@@ -380,7 +381,8 @@ void screen_word (const zchar *s)
  * Display an input line on the screen. This is required during playback.
  *
  */
-void screen_write_input (const zchar *buf, zchar key)
+
+void screen_write_input (const zword *buf, zword key)
 {
     int width;
 
@@ -403,7 +405,8 @@ void screen_write_input (const zchar *buf, zchar key)
  * playback.
  *
  */
-void screen_erase_input (const zchar *buf)
+
+void screen_erase_input (const zword *buf)
 {
     if (buf[0] != 0) {
 
@@ -432,9 +435,10 @@ void screen_erase_input (const zchar *buf)
  * Read an input line from the keyboard and return the terminating key.
  *
  */
-zchar console_read_input (int max, zchar *buf, zword timeout, bool continued)
+
+zword console_read_input (int max, zword *buf, zword timeout, bool continued)
 {
-    zchar key;
+    zword key;
     int i;
 
     /* Make sure there is some space for input */
@@ -476,9 +480,10 @@ zchar console_read_input (int max, zchar *buf, zword timeout, bool continued)
  * Read a single keystroke and return it.
  *
  */
-zchar console_read_key (zword timeout)
+
+zword console_read_key (zword timeout)
 {
-    zchar key;
+    zword key;
     int i;
 
     key = os_read_key (timeout, cursor);

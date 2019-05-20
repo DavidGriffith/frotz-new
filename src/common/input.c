@@ -22,11 +22,11 @@
 
 extern int save_undo (void);
 
-extern zchar stream_read_key (zword, zword, bool);
-extern zchar stream_read_input (int, zchar *, zword, zword, bool, bool);
+extern zword stream_read_key (zword, zword, bool);
+extern zword stream_read_input (int, zword *, zword, zword, bool, bool);
 
 extern void tokenise_line (zword, zword, zword, bool);
-
+zword unicode_tolower (zword);
 static bool truncate_question_mark(void);
 
 /*
@@ -36,7 +36,7 @@ static bool truncate_question_mark(void);
  *
  */
 
-bool is_terminator (zchar key)
+bool is_terminator (zword key)
 {
 
     if (key == ZC_TIME_OUT)
@@ -94,7 +94,7 @@ void z_make_menu (void)
 
 bool read_yes_or_no (const char *s)
 {
-    zchar key;
+    zword key;
 
     print_string (s);
     print_string ("? (y/n) >");
@@ -118,9 +118,9 @@ bool read_yes_or_no (const char *s)
  *
  */
 
-void read_string (int max, zchar *buffer)
+void read_string (int max, zword *buffer)
 {
-    zchar key;
+    zword key;
 
     buffer[0] = 0;
 
@@ -141,7 +141,7 @@ void read_string (int max, zchar *buffer)
 
 int read_number (void)
 {
-    zchar buffer[6];
+    zword buffer[6];
     int value = 0;
     int i;
 
@@ -167,9 +167,9 @@ int read_number (void)
 
 void z_read (void)
 {
-    zchar buffer[INPUT_BUFFER_SIZE];
+    zword buffer[INPUT_BUFFER_SIZE];
     zword addr;
-    zchar key;
+    zword key;
     zbyte max, size;
     zbyte c;
     int i;
@@ -235,10 +235,8 @@ void z_read (void)
     for (i = 0; buffer[i] != 0; i++) {
 
 	if (key == ZC_RETURN) {
-	    if (buffer[i] >= 'A' && buffer[i] <= 'Z')
-		buffer[i] += 'a' - 'A';
-	    if (buffer[i] >= 0xc0 && buffer[i] <= 0xde && buffer[i] != 0xd7)
-		buffer[i] += 0x20;
+
+	    buffer[i] = unicode_tolower (buffer[i]);
 
 	}
 
@@ -278,7 +276,7 @@ void z_read (void)
 
 void z_read_char (void)
 {
-    zchar key;
+    zword key;
 
     /* Supply default arguments */
 

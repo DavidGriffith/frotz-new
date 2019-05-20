@@ -104,11 +104,12 @@ void memory_new_line (void)
  * Redirect a string of characters to the memory of the Z-machine.
  *
  */
-void memory_word (const zchar *s)
+
+void memory_word (const zword *s)
 {
     zword size;
     zword addr;
-    zchar c;
+    zword c;
 
     if (h_version == V6) {
 

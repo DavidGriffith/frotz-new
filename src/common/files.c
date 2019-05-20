@@ -31,7 +31,7 @@
 
 extern void set_more_prompts (bool);
 
-extern bool is_terminator (zchar);
+extern bool is_terminator (zword);
 
 extern bool read_yes_or_no (const char *);
 
@@ -143,7 +143,7 @@ void script_new_line (void)
  *
  */
 
-void script_char (zchar c)
+void script_char (zword c)
 {
 
     if (c == ZC_INDENT && script_width != 0)
@@ -155,38 +155,38 @@ void script_char (zchar c)
 	{ script_char (' '); script_char (' '); return; }
 
 #ifdef __MSDOS__
+    if (c > 0xff)
+	c = '?';
     if (c >= ZC_LATIN1_MIN)
 	c = latin1_to_ibm[c - ZC_LATIN1_MIN];
-#endif
 
-#ifdef USE_UTF8
-    if (c >= ZC_LATIN1_MIN)
-    {
-      if ( c < 0xc0) {
-	fputc (0xc2, sfp); 
-	fputc (c, sfp);
-#ifdef HANDLE_OE_DIPTHONG
-      } else if (c == 0xd6) {
-	fputc (0xc5, sfp);
-	fputc (0x92, sfp);
-      } else if (c == 0xf6) {
-	fputc (0xc5, sfp);
-	fputc (0x93, sfp);
-#endif /* HANDLE_OE_DIPTHONG */
-      } else {
-	fputc (0xc3, sfp);
-	fputc (c - 0x40, sfp);
-      }
-    }
-    else
-    {
-	fputc (c, sfp);
-    }
-#else
     fputc (c, sfp);
-#endif
     script_width++;
 
+#else
+
+    /* Encode as UTF-8 */
+
+    if (c > 0x7ff) {
+
+	fputc (0xe0 | ((c >> 12) & 0xf), sfp);
+	fputc (0x80 | ((c >> 6) & 0x3f), sfp);
+	fputc (0x80 | (c & 0x3f), sfp);
+
+    }
+    else if (c > 0x7f) {
+
+	fputc (0xc0 | ((c >> 6) & 0x1f), sfp);
+	fputc (0x80 | (c & 0x3f), sfp);
+
+    }
+    else
+
+	fputc (c, sfp);
+
+    script_width++;
+
+#endif
 }/* script_char */
 
 /*
@@ -196,7 +196,7 @@ void script_char (zchar c)
  *
  */
 
-void script_word (const zchar *s)
+void script_word (const zword *s)
 {
     int width;
     int i;
@@ -240,7 +240,7 @@ void script_word (const zchar *s)
  *
  */
 
-void script_write_input (const zchar *buf, zchar key)
+void script_write_input (const zword *buf, zword key)
 {
     int width;
     int i;
@@ -266,7 +266,7 @@ void script_write_input (const zchar *buf, zchar key)
  *
  */
 
-void script_erase_input (const zchar *buf)
+void script_erase_input (const zword *buf)
 {
     int width;
     int i;
@@ -382,7 +382,7 @@ static void record_code (int c, bool force_encoding)
  *
  */
 
-static void record_char (zchar c)
+static void record_char (zword c)
 {
 
     if (c != ZC_RETURN) {
@@ -404,7 +404,7 @@ static void record_char (zchar c)
  *
  */
 
-void record_write_key (zchar key)
+void record_write_key (zword key)
 {
 
     record_char (key);
@@ -421,9 +421,9 @@ void record_write_key (zchar key)
  *
  */
 
-void record_write_input (const zchar *buf, zchar key)
+void record_write_input (const zword *buf, zword key)
 {
-    zchar c;
+    zword c;
 
     while ((c = *buf++) != 0)
 	record_char (c);
@@ -513,7 +513,7 @@ static int replay_code (void)
  *
  */
 
-static zchar replay_char (void)
+static zword replay_char (void)
 {
     int c;
 
@@ -550,9 +550,9 @@ static zchar replay_char (void)
  *
  */
 
-zchar replay_read_key (void)
+zword replay_read_key (void)
 {
-    zchar key;
+    zword key;
 
     key = replay_char ();
 
@@ -572,9 +572,9 @@ zchar replay_read_key (void)
  *
  */
 
-zchar replay_read_input (zchar *buf)
+zword replay_read_input (zword *buf)
 {
-    zchar c;
+    zword c;
 
     for (;;) {
 

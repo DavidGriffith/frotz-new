@@ -21,14 +21,14 @@
 #include <string.h>
 #include "frotz.h"
 
-extern void stream_char (zchar);
-extern void stream_word (const zchar *);
+extern void stream_char (zword);
+extern void stream_word (const zword *);
 extern void stream_new_line (void);
 
-static zchar buffer[TEXT_BUFFER_SIZE];
+static zword buffer[TEXT_BUFFER_SIZE];
 static int bufpos = 0;
 
-static zchar prev_c = 0;
+static zword prev_c = 0;
 
 /*
  * flush_buffer
@@ -72,7 +72,8 @@ void flush_buffer (void)
  * High level output function.
  *
  */
-void print_char (zchar c)
+
+void print_char (zword c)
 {
     static bool flag = FALSE;
     need_newline_at_exit = TRUE;
@@ -137,7 +138,7 @@ void new_line (void)
  */
 void init_buffer(void)
 {
-    memset(buffer, 0, sizeof (zchar) * TEXT_BUFFER_SIZE);
+    memset(buffer, 0, sizeof (zword) * TEXT_BUFFER_SIZE);
     bufpos = 0;
     prev_c = 0;
 }

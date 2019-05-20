@@ -759,12 +759,12 @@ void   init_sound (void);
 
 /*** Various global functions ***/
 
-zchar	translate_from_zscii (zbyte);
-zbyte	translate_to_zscii (zchar);
+zword	translate_from_zscii (zbyte);
+zbyte	translate_to_zscii (zword);
 
 void 	flush_buffer (void);
 void	new_line (void);
-void	print_char (zchar);
+void	print_char (zword);
 void	print_num (zword);
 void	print_object (zword);
 void 	print_string (const char *);
@@ -781,10 +781,10 @@ void	storew (zword, zword);
 
 void end_of_sound (void);
 
-int completion (const zchar *buffer, zchar *result);
+int completion (const zword *buffer, zword *result);
 
-bool is_terminator (zchar);
-void read_string (int max, zchar *buffer);
+bool is_terminator (zword);
+void read_string (int max, zword *buffer);
 bool read_yes_or_no (const char *);
 
 void screen_new_line (void);
@@ -796,9 +796,9 @@ Zwindow * curwinrec( void);
 /*** Interface functions ***/
 
 void 	os_beep (int);
-int  	os_char_width (zchar);
-void 	os_display_char (zchar);
-void 	os_display_string (const zchar *);
+int  	os_char_width (zword);
+void 	os_display_char (zword);
+void 	os_display_string (const zword *);
 void 	os_draw_picture (int, int, int);
 void 	os_erase_area (int, int, int, int, int);
 void 	os_fatal (const char *, ...);
@@ -814,8 +814,8 @@ void 	os_prepare_sample (int);
 void 	os_process_arguments (int, char *[]);
 int	os_random_seed (void);
 char  	*os_read_file_name (const char *, int);
-zchar	os_read_key (int, int);
-zchar	os_read_line (int, zchar *, int, int, int);
+zword	os_read_key (int, int);
+zword	os_read_line (int, zword *, int, int, int);
 void 	os_reset_screen (void);
 void 	os_restart_game (int);
 void 	os_scroll_area (int, int, int, int, int);
@@ -827,7 +827,7 @@ void 	os_start_sample (int, int, int, zword);
 void 	os_stop_sample ();
 int	os_storyfile_seek (FILE *, long, int);
 int	os_storyfile_tell (FILE *);
-int  	os_string_width (const zchar *);
+int  	os_string_width (const zword *);
 void	os_init_setup (void);
 void 	os_warn (const char *, ...);
 void	os_quit (void);
