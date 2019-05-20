@@ -41,8 +41,8 @@
 
 #include "ux_frotz.h"
 
-static int start_of_prev_word(int, const zword*);
-static int end_of_next_word(int, const zword*, int);
+static int start_of_prev_word(int, const zchar*);
+static int end_of_next_word(int, const zchar*, int);
 
 static struct timeval global_timeout;
 
@@ -62,9 +62,9 @@ static zword **history_next = history_buffer; /* Next available slot. */
 static zword **history_view = history_buffer; /* What the user is looking at. */
 #define history_end (history_buffer + MAX_HISTORY - 1)
 
-extern bool is_terminator (zword);
-extern void read_string (int, zword *);
-extern int completion (const zword *, zword *);
+extern bool is_terminator (zchar);
+extern void read_string (int, zchar *);
+extern int completion (const zchar *, zchar *);
 
 #ifndef wint_t
 typedef unsigned int wint_t;
@@ -385,12 +385,12 @@ int zwordstrncmp(zword *s1, zword *s2, size_t n)
  * Add the given string to the next available history buffer slot.
  *
  */
-static void unix_add_to_history(zword *str)
+static void unix_add_to_history(zchar *str)
 {
 
     if (*history_next != NULL)
 	free( *history_next);
-    *history_next = (zword *)malloc(zwordstrlen(str) + 1);
+    *history_next = (zchar *)malloc(zwordstrlen(str) + 1);
     zwordstrncpy( *history_next, str, zwordstrlen(str) + 1);
     RING_INC( history_next, history_buffer, history_end);
     history_view = history_next; /* Reset user frame after each line */
@@ -406,9 +406,9 @@ static void unix_add_to_history(zword *str)
  * Only lines of at most maxlen characters will be considered.  In addition
  * the first searchlen characters of the history entry must match those of str.
  */
-static int unix_history_back(zword *str, int searchlen, int maxlen)
+static int unix_history_back(zchar *str, int searchlen, int maxlen)
 {
-    zword **prev = history_view;
+    zchar **prev = history_view;
 
     do {
 	RING_DEC( history_view, history_buffer, history_end);
@@ -431,7 +431,7 @@ static int unix_history_back(zword *str, int searchlen, int maxlen)
  *
  * Opposite of unix_history_back, and works in the same way.
  */
-static int unix_history_forward(zword *str, int searchlen, int maxlen)
+static int unix_history_forward(zchar *str, int searchlen, int maxlen)
 {
     zword **prev = history_view;
 
@@ -498,9 +498,9 @@ static void scrnset(int start, int c, int n)
 }
 
 #ifdef USE_UTF8
-static void utf8_mvaddstr(int y, int x, zword * buf)
+static void utf8_mvaddstr(int y, int x, zchar * buf)
 {
-    zword *bp = buf;
+    zchar *bp = buf;
 
     move(y,x);
     while(*bp) {
@@ -567,7 +567,7 @@ static void utf8_mvaddstr(int y, int x, zword * buf)
  * to implement word completion (similar to tcsh under Unix).
  *
  */
-zword os_read_line (int bufmax, zword *buf, int timeout, int width,
+zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
                     int continued)
 {
     int ch, y, x, len = strlen( (char *)buf);
@@ -716,7 +716,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 #warning "Bill -- fix this for wide characters"
 	    {
 		int status;
-		zword extension[10], saved_char;
+		zchar extension[10], saved_char;
 
 		saved_char = buf[scrpos];
 		buf[scrpos] = '\0';
@@ -797,15 +797,15 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
  * return it. Input aborts after timeout/10 seconds.
  *
  */
-zword os_read_key (int timeout, int cursor)
+zchar os_read_key (int timeout, int cursor)
 {
-    zword c;
+    zchar c;
 
     refresh();
     if (!cursor) curs_set(0);
 
     unix_set_global_timeout(timeout);
-    c = unix_read_char(0);
+    c = (zchar) unix_read_char(0);
 
     if (!cursor) curs_set(1);
     return c;
@@ -843,7 +843,7 @@ char *os_read_file_name (const char *default_name, int flag)
     char *tempname;
     zchar answer[4];
     char path_separator[2];
-    zword file_name[FILENAME_MAX + 1];
+    zchar file_name[FILENAME_MAX + 1];
 
     path_separator[0] = PATH_SEPARATOR;
     path_separator[1] = 0;
@@ -961,7 +961,7 @@ zword os_read_mouse (void)
  * param buf input buffer
  * returns new position
  */
-static int start_of_prev_word(int currpos, const zword* buf) {
+static int start_of_prev_word(int currpos, const zchar* buf) {
 	int i, j;
 	for (i = currpos - 1; i > 0 && buf[i] == ' '; i--) {}
 	j = i;
@@ -979,7 +979,7 @@ static int start_of_prev_word(int currpos, const zword* buf) {
  * param len length of buf
  * returns new position
  */
-static int end_of_next_word(int currpos, const zword* buf, int len) {
+static int end_of_next_word(int currpos, const zchar* buf, int len) {
 	int i;
 	for (i = currpos; i < len && buf[i] == ' '; i++) {}
 	for (; i < len && buf[i] != ' '; i++) {}
