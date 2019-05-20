@@ -751,7 +751,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 	    /* ASCII or ISO-Latin-1 */
 	    if ((ch >= ZC_ASCII_MIN && ch <= ZC_ASCII_MAX)
 		|| (!u_setup.plain_ascii
-		    && ch >= ZC_LATIN1_MIN && ch <= ZC_LATIN1_MAX)) {
+		    && ch >= ZC_LATIN1_MIN /*&& ch <= ZC_LATIN1_MAX*/)) {
 		searchpos = -1;
 		if ((scrpos == max) || (insert_flag && (len == max))) {
 		    os_beep(BEEP_HIGH);
