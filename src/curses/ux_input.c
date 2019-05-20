@@ -390,7 +390,7 @@ static void unix_add_to_history(zchar *str)
 
     if (*history_next != NULL)
 	free( *history_next);
-    *history_next = (zchar *)malloc(zwordstrlen(str) + 1);
+    *history_next = (zchar *)malloc((zwordstrlen(str) + 1) * sizeof(zchar));
     zwordstrncpy( *history_next, str, zwordstrlen(str) + 1);
     RING_INC( history_next, history_buffer, history_end);
     history_view = history_next; /* Reset user frame after each line */
