@@ -348,7 +348,7 @@ static int unix_read_char(int extkeys)
     }
 }
 
-size_t zwordstrlen(zword *str)
+size_t zcharstrlen(zchar *str)
 {
     size_t ret = 0;
     
@@ -359,7 +359,7 @@ size_t zwordstrlen(zword *str)
     return ret;
 }
 
-zword *zwordstrncpy(zword *dest, zword *src, size_t n)
+zchar *zcharstrncpy(zchar *dest, zchar *src, size_t n)
 {
     size_t i;
 
@@ -370,7 +370,7 @@ zword *zwordstrncpy(zword *dest, zword *src, size_t n)
 
     return dest;
 }
-int zwordstrncmp(zword *s1, zword *s2, size_t n)
+int zcharstrncmp(zchar *s1, zchar *s2, size_t n)
 {
     zchar u1, u2;
     while (n-- > 0)
@@ -396,8 +396,8 @@ static void unix_add_to_history(zchar *str)
 
     if (*history_next != NULL)
 	free( *history_next);
-    *history_next = (zchar *)malloc((zwordstrlen(str) + 1) * sizeof(zchar));
-    zwordstrncpy( *history_next, str, zwordstrlen(str) + 1);
+    *history_next = (zchar *)malloc((zcharstrlen(str) + 1) * sizeof(zchar));
+    zcharstrncpy( *history_next, str, zcharstrlen(str) + 1);
     RING_INC( history_next, history_buffer, history_end);
     history_view = history_next; /* Reset user frame after each line */
 
@@ -424,10 +424,10 @@ static int unix_history_back(zchar *str, int searchlen, int maxlen)
 	    history_view = prev;
 	    return 0;
 	}
-    } while (zwordstrlen( *history_view) > (size_t) maxlen
-	     || (searchlen != 0 && zwordstrncmp(str, *history_view, searchlen)));
-    zwordstrncpy(str + searchlen, *history_view + searchlen,
-		(size_t) maxlen - (zwordstrlen(str) + searchlen));
+    } while (zcharstrlen( *history_view) > (size_t) maxlen
+	     || (searchlen != 0 && zcharstrncmp(str, *history_view, searchlen)));
+    zcharstrncpy(str + searchlen, *history_view + searchlen,
+		(size_t) maxlen - (zcharstrlen(str) + searchlen));
     return 1;
 }
 
@@ -450,10 +450,10 @@ static int unix_history_forward(zchar *str, int searchlen, int maxlen)
 	    history_view = prev;
 	    return 0;
 	}
-    } while (zwordstrlen( *history_view) > (size_t) maxlen
-	     || (searchlen != 0 && zwordstrncmp(str, *history_view, searchlen)));
-    zwordstrncpy(str + searchlen, *history_view + searchlen,
-		(size_t) maxlen - (zwordstrlen(str) + searchlen));
+    } while (zcharstrlen( *history_view) > (size_t) maxlen
+	     || (searchlen != 0 && zcharstrncmp(str, *history_view, searchlen)));
+    zcharstrncpy(str + searchlen, *history_view + searchlen,
+		(size_t) maxlen - (zcharstrlen(str) + searchlen));
     return 1;
 }
 
@@ -576,7 +576,7 @@ static void utf8_mvaddstr(int y, int x, zchar * buf)
 zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
                     int continued)
 {
-    int ch, y, x, len = zwordstrlen(buf);
+    int ch, y, x, len = zcharstrlen(buf);
     const int margin = MAX(h_screen_width - width, 0);
 
     /* These are static to allow input continuation to work smoothly. */
@@ -710,7 +710,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 #else
 	    mvaddstr(y, x, buf);
 #endif
-	    scrpos = len = zwordstrlen(buf);
+	    scrpos = len = zcharstrlen(buf);
 	    continue;
 
 	/* Passthrough as up/down arrows for Beyond Zork. */
@@ -730,7 +730,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		buf[scrpos] = saved_char;
 
 		if (status != 2) {
-		    int ext_len = zwordstrlen(extension);
+		    int ext_len = zcharstrlen(extension);
 		    if (ext_len > max - len) {
 			ext_len = max - len;
 			status = 1;
