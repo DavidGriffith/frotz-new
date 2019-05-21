@@ -66,7 +66,7 @@ typedef unsigned short zword;
  * doesn't mess with command history.
  */
 
-#ifdef MSDOS_16BIT
+#ifndef USE_UTF8
 typedef unsigned char zchar;
 #else
 typedef unsigned short zchar;
