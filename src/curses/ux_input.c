@@ -878,8 +878,35 @@ char *os_read_file_name (const char *default_name, int flag)
 	} else
 	   print_string (default_name);
 	print_string ("\": ");
-print_string ("\n");
-//	read_string (FILENAME_MAX, (zchar *)file_name);
+#ifdef USE_UTF8
+	{
+	    zchar z_name[FILENAME_MAX + 1];
+	    zchar *zp;
+	    read_string (FILENAME_MAX, z_name);
+	    i = 0;
+	    zp = z_name;
+	    while (*zp)
+	    {
+		if(*zp <= 0x7f) {
+		    if (i > FILENAME_MAX) break;
+		    file_name[i++] = *zp;
+		} else if(*zp > 0x7ff) {
+		    if (i > FILENAME_MAX - 2) break;
+		    file_name[i++] = 0xe0 | ((*zp >> 12) & 0xf);
+		    file_name[i++] = 0x80 | ((*zp >> 6) & 0x3f);
+		    file_name[i++] = 0x80 | (*zp & 0x3f);
+		} else {
+		    if (i > FILENAME_MAX - 1) break;
+		    file_name[i++] = 0xc0 | ((*zp >> 6) & 0x1f);
+		    file_name[i++] = 0x80 | (*zp & 0x3f);
+		}
+		zp++;
+	    }
+	    file_name[i] = 0;
+	}
+#else
+	read_string (FILENAME_MAX, file_name);
+#endif
     }
 
     /* Return failure if path provided when in restricted mode.
