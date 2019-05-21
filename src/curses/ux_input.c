@@ -876,7 +876,29 @@ char *os_read_file_name (const char *default_name, int flag)
 	    tempname = basename((char *)default_name);
 	    print_string(tempname);
 	} else
+#ifdef USE_UTF8
+	{
+	    zchar z;
+	    i = 0;
+	    while (default_name[i])
+	    {
+		if((default_name[i] & 0x80) == 0) {
+		    print_char(default_name[i++]);
+		} else if((default_name[i] & 0xe0) == 0xc0 ) {
+		    z = default_name[i++] & 0x1f;
+		    z = (z << 6) | (default_name[i++] & 0x3f);
+		    print_char(z);
+		} else {
+		    z = default_name[i++] & 0xf;
+		    z = (z << 6) | (default_name[i++] & 0x3f);
+		    z = (z << 6) | (default_name[i++] & 0x3f);
+		    print_char(z);
+		}
+	    }
+	}
+#else
 	   print_string (default_name);
+#endif
 	print_string ("\": ");
 #ifdef USE_UTF8
 	{
