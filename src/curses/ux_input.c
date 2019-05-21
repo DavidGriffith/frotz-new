@@ -41,8 +41,8 @@
 
 #include "ux_frotz.h"
 
-static int start_of_prev_word(int, const zword*);
-static int end_of_next_word(int, const zword*, int);
+static int start_of_prev_word(int, const zchar*);
+static int end_of_next_word(int, const zchar*, int);
 
 static struct timeval global_timeout;
 
@@ -57,14 +57,14 @@ static struct timeval global_timeout;
 #define RING_INC( ptr, beg, end) (ptr < (end) ? ++ptr : (ptr = (beg)))
 
 #define MAX_HISTORY 20
-static zword *history_buffer[MAX_HISTORY];
-static zword **history_next = history_buffer; /* Next available slot. */
-static zword **history_view = history_buffer; /* What the user is looking at. */
+static zchar *history_buffer[MAX_HISTORY];
+static zchar **history_next = history_buffer; /* Next available slot. */
+static zchar **history_view = history_buffer; /* What the user is looking at. */
 #define history_end (history_buffer + MAX_HISTORY - 1)
 
-extern bool is_terminator (zword);
-extern void read_string (int, zword *);
-extern int completion (const zword *, zword *);
+extern bool is_terminator (zchar);
+extern void read_string (int, zchar *);
+extern int completion (const zchar *, zchar *);
 
 #ifndef wint_t
 typedef unsigned int wint_t;
@@ -160,6 +160,7 @@ void os_tick()
  * If unix_set_global_timeout has been used to set a global timeout
  * this routine may also return ZC_TIME_OUT if input times out.
  */
+
 static int unix_read_char(int extkeys)
 {
     wint_t c;
@@ -188,7 +189,7 @@ static int unix_read_char(int extkeys)
 
         timeout(0);
 #ifdef USE_UTF8
-	get_wch(&c);
+	sel = get_wch(&c);
 #else
 	c = getch();
 #endif
@@ -211,6 +212,11 @@ static int unix_read_char(int extkeys)
 	    /* OE dipthong */
 	    return 0xd6;
 	}
+#endif
+
+#ifdef USE_UTF8
+    if (sel != KEY_CODE_YES && c >= ZC_LATIN1_MIN)
+        return c;
 #endif
 
 	/* On many terminals the backspace key returns DEL. */
@@ -342,7 +348,7 @@ static int unix_read_char(int extkeys)
     }
 }
 
-size_t zwordstrlen(zword *str)
+size_t zcharstrlen(zchar *str)
 {
     size_t ret = 0;
     
@@ -353,7 +359,7 @@ size_t zwordstrlen(zword *str)
     return ret;
 }
 
-zword *zwordstrncpy(zword *dest, zword *src, size_t n)
+zchar *zcharstrncpy(zchar *dest, zchar *src, size_t n)
 {
     size_t i;
 
@@ -364,7 +370,7 @@ zword *zwordstrncpy(zword *dest, zword *src, size_t n)
 
     return dest;
 }
-int zwordstrncmp(zword *s1, zword *s2, size_t n)
+int zcharstrncmp(zchar *s1, zchar *s2, size_t n)
 {
     zchar u1, u2;
     while (n-- > 0)
@@ -385,13 +391,13 @@ int zwordstrncmp(zword *s1, zword *s2, size_t n)
  * Add the given string to the next available history buffer slot.
  *
  */
-static void unix_add_to_history(zword *str)
+static void unix_add_to_history(zchar *str)
 {
 
     if (*history_next != NULL)
 	free( *history_next);
-    *history_next = (zword *)malloc(zwordstrlen(str) + 1);
-    zwordstrncpy( *history_next, str, zwordstrlen(str) + 1);
+    *history_next = (zchar *)malloc((zcharstrlen(str) + 1) * sizeof(zchar));
+    zcharstrncpy( *history_next, str, zcharstrlen(str) + 1);
     RING_INC( history_next, history_buffer, history_end);
     history_view = history_next; /* Reset user frame after each line */
 
@@ -406,9 +412,9 @@ static void unix_add_to_history(zword *str)
  * Only lines of at most maxlen characters will be considered.  In addition
  * the first searchlen characters of the history entry must match those of str.
  */
-static int unix_history_back(zword *str, int searchlen, int maxlen)
+static int unix_history_back(zchar *str, int searchlen, int maxlen)
 {
-    zword **prev = history_view;
+    zchar **prev = history_view;
 
     do {
 	RING_DEC( history_view, history_buffer, history_end);
@@ -418,10 +424,10 @@ static int unix_history_back(zword *str, int searchlen, int maxlen)
 	    history_view = prev;
 	    return 0;
 	}
-    } while (zwordstrlen( *history_view) > (size_t) maxlen
-	     || (searchlen != 0 && zwordstrncmp(str, *history_view, searchlen)));
-    zwordstrncpy(str + searchlen, *history_view + searchlen,
-		(size_t) maxlen - (zwordstrlen(str) + searchlen));
+    } while (zcharstrlen( *history_view) > (size_t) maxlen
+	     || (searchlen != 0 && zcharstrncmp(str, *history_view, searchlen)));
+    zcharstrncpy(str + searchlen, *history_view + searchlen,
+		(size_t) maxlen - (zcharstrlen(str) + searchlen));
     return 1;
 }
 
@@ -431,9 +437,9 @@ static int unix_history_back(zword *str, int searchlen, int maxlen)
  *
  * Opposite of unix_history_back, and works in the same way.
  */
-static int unix_history_forward(zword *str, int searchlen, int maxlen)
+static int unix_history_forward(zchar *str, int searchlen, int maxlen)
 {
-    zword **prev = history_view;
+    zchar **prev = history_view;
 
     do {
 	RING_INC( history_view, history_buffer, history_end);
@@ -444,10 +450,10 @@ static int unix_history_forward(zword *str, int searchlen, int maxlen)
 	    history_view = prev;
 	    return 0;
 	}
-    } while (zwordstrlen( *history_view) > (size_t) maxlen
-	     || (searchlen != 0 && zwordstrncmp(str, *history_view, searchlen)));
-    zwordstrncpy(str + searchlen, *history_view + searchlen,
-		(size_t) maxlen - (zwordstrlen(str) + searchlen));
+    } while (zcharstrlen( *history_view) > (size_t) maxlen
+	     || (searchlen != 0 && zcharstrncmp(str, *history_view, searchlen)));
+    zcharstrncpy(str + searchlen, *history_view + searchlen,
+		(size_t) maxlen - (zcharstrlen(str) + searchlen));
     return 1;
 }
 
@@ -498,9 +504,9 @@ static void scrnset(int start, int c, int n)
 }
 
 #ifdef USE_UTF8
-static void utf8_mvaddstr(int y, int x, zword * buf)
+static void utf8_mvaddstr(int y, int x, zchar * buf)
 {
-    zword *bp = buf;
+    zchar *bp = buf;
 
     move(y,x);
     while(*bp) {
@@ -567,10 +573,10 @@ static void utf8_mvaddstr(int y, int x, zword * buf)
  * to implement word completion (similar to tcsh under Unix).
  *
  */
-zword os_read_line (int bufmax, zword *buf, int timeout, int width,
+zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
                     int continued)
 {
-    int ch, y, x, len = strlen( (char *)buf);
+    int ch, y, x, len = zcharstrlen(buf);
     const int margin = MAX(h_screen_width - width, 0);
 
     /* These are static to allow input continuation to work smoothly. */
@@ -618,7 +624,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 		len--; scrpos--; searchpos = -1;
 		scrnmove(x + scrpos, x + scrpos + 1, len - scrpos);
 		mvaddch(y, x + len, ' ');
-		memmove(buf + scrpos, buf + scrpos + 1, len - scrpos);
+		memmove(buf + scrpos, buf + scrpos + 1, (len - scrpos)*sizeof(zchar));
 	    }
 	    break;
 	case ZC_DEL_WORD:
@@ -631,7 +637,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 			len -= delta;
 			scrpos -= delta;
 			scrnmove(x + scrpos, x + oldscrpos, len - scrpos);
-			memmove(buf + scrpos, buf + oldscrpos, len - scrpos);
+			memmove(buf + scrpos, buf + oldscrpos, (len - scrpos)*sizeof(zchar));
 			int i = newoffset;
 			for (i = len; i <= oldlen ; i++) {
 				mvaddch(y, x + i, ' ');
@@ -643,7 +649,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 			searchpos = -1;
 			len -= scrpos;
 			scrnmove(x, x + scrpos, len);
-			memmove(buf, buf + scrpos, len);
+			memmove(buf, buf + scrpos, len*sizeof(zchar));
 			for (int i = len; i <= len + scrpos; i++) {
 				mvaddch(y, x + i, ' ');
 			}
@@ -656,7 +662,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 		len--; searchpos = -1;
 		scrnmove(x + scrpos, x + scrpos + 1, len - scrpos);
 		mvaddch(y, x + len, ' ');
-		memmove(buf + scrpos, buf + scrpos + 1, len - scrpos);
+		memmove(buf + scrpos, buf + scrpos + 1, (len - scrpos)*sizeof(zchar));
 	    }
 	    continue;		/* Don't feed is_terminator bad zchars. */
 
@@ -704,7 +710,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 #else
 	    mvaddstr(y, x, buf);
 #endif
-	    scrpos = len = strlen((char *) buf);
+	    scrpos = len = zcharstrlen(buf);
 	    continue;
 
 	/* Passthrough as up/down arrows for Beyond Zork. */
@@ -716,7 +722,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 #warning "Bill -- fix this for wide characters"
 	    {
 		int status;
-		zword extension[10], saved_char;
+		zchar extension[10], saved_char;
 
 		saved_char = buf[scrpos];
 		buf[scrpos] = '\0';
@@ -724,14 +730,14 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 		buf[scrpos] = saved_char;
 
 		if (status != 2) {
-		    int ext_len = zwordstrlen(extension);
+		    int ext_len = zcharstrlen(extension);
 		    if (ext_len > max - len) {
 			ext_len = max - len;
 			status = 1;
 		    }
 		    memmove(buf + scrpos + ext_len, buf + scrpos,
-			len - scrpos);
-		    memmove(buf + scrpos, extension, ext_len);
+			(len - scrpos)*sizeof(zchar));
+		    memmove(buf + scrpos, extension, ext_len*sizeof(zchar));
 		    scrnmove(x + scrpos + ext_len, x + scrpos, len - scrpos);
 		    mvaddnstr(y, x + scrpos, (char *) extension, ext_len);
 		    scrpos += ext_len;
@@ -745,7 +751,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 	    /* ASCII or ISO-Latin-1 */
 	    if ((ch >= ZC_ASCII_MIN && ch <= ZC_ASCII_MAX)
 		|| (!u_setup.plain_ascii
-		    && ch >= ZC_LATIN1_MIN && ch <= ZC_LATIN1_MAX)) {
+		    && ch >= ZC_LATIN1_MIN /*&& ch <= ZC_LATIN1_MAX*/)) {
 		searchpos = -1;
 		if ((scrpos == max) || (insert_flag && (len == max))) {
 		    os_beep(BEEP_HIGH);
@@ -754,7 +760,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 		if (insert_flag && (scrpos < len)) {
 		    /* move what's there to the right */
 		    scrnmove(x + scrpos + 1, x + scrpos, len - scrpos);
-		    memmove(buf + scrpos + 1, buf + scrpos, len - scrpos);
+		    memmove(buf + scrpos + 1, buf + scrpos, (len - scrpos)*sizeof(zchar));
 		}
 		if (insert_flag || scrpos == len)
 		    len++;
@@ -766,7 +772,7 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
 		    addch(0x80 | ((ch >> 6) & 0x3f));
 		    addch(0x80 | (ch & 0x3f));
 		} else {
-		    addch(0xc0 | ((ch >> 6) & 0x1f));
+		    mvaddch(y, x + scrpos, 0xc0 | ((ch >> 6) & 0x1f));
 		    addch(0x80 | (ch & 0x3f));
 		}
 #else
@@ -797,15 +803,15 @@ zword os_read_line (int bufmax, zword *buf, int timeout, int width,
  * return it. Input aborts after timeout/10 seconds.
  *
  */
-zword os_read_key (int timeout, int cursor)
+zchar os_read_key (int timeout, int cursor)
 {
-    zword c;
+    zchar c;
 
     refresh();
     if (!cursor) curs_set(0);
 
     unix_set_global_timeout(timeout);
-    c = unix_read_char(0);
+    c = (zchar) unix_read_char(0);
 
     if (!cursor) curs_set(1);
     return c;
@@ -843,7 +849,7 @@ char *os_read_file_name (const char *default_name, int flag)
     char *tempname;
     zchar answer[4];
     char path_separator[2];
-    zword file_name[FILENAME_MAX + 1];
+    char file_name[FILENAME_MAX + 1];
 
     path_separator[0] = PATH_SEPARATOR;
     path_separator[1] = 0;
@@ -872,7 +878,35 @@ char *os_read_file_name (const char *default_name, int flag)
 	} else
 	   print_string (default_name);
 	print_string ("\": ");
+#ifdef USE_UTF8
+	{
+	    zchar z_name[FILENAME_MAX + 1];
+	    zchar *zp;
+	    read_string (FILENAME_MAX, z_name);
+	    i = 0;
+	    zp = z_name;
+	    while (*zp)
+	    {
+		if(*zp <= 0x7f) {
+		    if (i > FILENAME_MAX) break;
+		    file_name[i++] = *zp;
+		} else if(*zp > 0x7ff) {
+		    if (i > FILENAME_MAX - 2) break;
+		    file_name[i++] = 0xe0 | ((*zp >> 12) & 0xf);
+		    file_name[i++] = 0x80 | ((*zp >> 6) & 0x3f);
+		    file_name[i++] = 0x80 | (*zp & 0x3f);
+		} else {
+		    if (i > FILENAME_MAX - 1) break;
+		    file_name[i++] = 0xc0 | ((*zp >> 6) & 0x1f);
+		    file_name[i++] = 0x80 | (*zp & 0x3f);
+		}
+		zp++;
+	    }
+	    file_name[i] = 0;
+	}
+#else
 	read_string (FILENAME_MAX, file_name);
+#endif
     }
 
     /* Return failure if path provided when in restricted mode.
@@ -961,7 +995,7 @@ zword os_read_mouse (void)
  * param buf input buffer
  * returns new position
  */
-static int start_of_prev_word(int currpos, const zword* buf) {
+static int start_of_prev_word(int currpos, const zchar* buf) {
 	int i, j;
 	for (i = currpos - 1; i > 0 && buf[i] == ' '; i--) {}
 	j = i;
@@ -979,7 +1013,7 @@ static int start_of_prev_word(int currpos, const zword* buf) {
  * param len length of buf
  * returns new position
  */
-static int end_of_next_word(int currpos, const zword* buf, int len) {
+static int end_of_next_word(int currpos, const zchar* buf, int len) {
 	int i;
 	for (i = currpos; i < len && buf[i] == ' '; i++) {}
 	for (; i < len && buf[i] != ' '; i++) {}

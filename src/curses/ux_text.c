@@ -201,7 +201,7 @@ void os_set_font (int UNUSED(new_font))
  * bottom right corner.
  *
  */
-void os_display_char (zword c)
+void os_display_char (zchar c)
 {
     if (c >= ZC_LATIN1_MIN) {
         if (u_setup.plain_ascii) {
@@ -256,9 +256,9 @@ void os_display_char (zword c)
  * Pass a string of characters to os_display_char.
  *
  */
-void os_display_string (const zword *s)
+void os_display_string (const zchar *s)
 {
-    zword c;
+    zchar c;
 
     while ((c =  *s++) != 0) {
 
@@ -284,7 +284,7 @@ void os_display_string (const zword *s)
  * Return the width of the character in screen units.
  *
  */
-int os_char_width (zword c)
+int os_char_width (zchar c)
 {
     if (c >= ZC_LATIN1_MIN && u_setup.plain_ascii) {
 
@@ -317,10 +317,10 @@ int os_char_width (zword c)
  *    NEW_FONT  - next character is a new font
  *
  */
-int os_string_width (const zword *s)
+int os_string_width (const zchar *s)
 {
     int width = 0;
-    zword c;
+    zchar c;
 
     while ((c = *s++) != 0) {
 
