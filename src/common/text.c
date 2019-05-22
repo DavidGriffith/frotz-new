@@ -334,11 +334,16 @@ void z_check_unicode (void)
 	store (3);
     else if (c == 0xa0)
 	store (1);
-    else if (c >= 0xa1)
-	/* being optimistic, we can print and input
-	 * all unicode characters
-	 */
+#ifndef USE_UTF8
+    else if (c >= 0xa1 && c <= 0xff)
 	store (3);
+#else
+    else if (c >= 0xa1)
+	/* being optimistic, we can print all unicode characters
+	 * and input the ones with zscii representation
+	 */
+	store ((unicode_to_zscii (c) != 0) ? 3 : 1);
+#endif
     else
 	store (0);
 
