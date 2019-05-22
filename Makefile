@@ -268,7 +268,7 @@ endif
 ifdef HANDLE_OE_DIPTHONG
 	@echo "#define HANDLE_OE_DIPTHONG" >> $@
 endif
-ifdef USE_UTF8
+ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
@@ -293,7 +293,7 @@ endif
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
 endif
-ifdef USE_UTF8
+ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
 endif
 ifdef HANDLE_OE_DIPTHONG
