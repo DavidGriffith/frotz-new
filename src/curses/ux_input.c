@@ -201,19 +201,6 @@ static int unix_read_char(int extkeys)
 	    return c;
 
 	/* ...and the other 2% makes up 98% of the code. :( */
-#ifdef HANDLE_OE_DIPTHONG
-	if (c == 0x153)
-	{
-	    /* oe dipthong */
-	    return 0xf6;
-	}
-	if (c == 0x152)
-	{
-	    /* OE dipthong */
-	    return 0xd6;
-	}
-#endif
-
 #ifdef USE_UTF8
     if (sel != KEY_CODE_YES && c >= ZC_LATIN1_MIN)
         return c;

@@ -61,11 +61,6 @@ DEFAULT_CONVERTER ?= SRC_SINC_MEDIUM_QUALITY
 # Comment this out if you don't want UTF-8 support
 USE_UTF8 ?= yes
 
-# The OE dipthong is not a latin1 character, but it seems the zmachine
-# can handle it, and it is tested for in terpetude.  Comment this out
-# if you don't want to support the OE dipthong
-HANDLE_OE_DIPTHONG ?= yes
-
 # Comment this out if your machine's version of curses doesn't support color.
 COLOR ?= yes
 
@@ -265,9 +260,6 @@ endif
 ifdef NO_STRDUP
 	@echo "#define NO_STRDUP" >> $@
 endif
-ifdef HANDLE_OE_DIPTHONG
-	@echo "#define HANDLE_OE_DIPTHONG" >> $@
-endif
 ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
 endif
@@ -295,9 +287,6 @@ ifdef COLOR
 endif
 ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
-endif
-ifdef HANDLE_OE_DIPTHONG
-	@echo "#define HANDLE_OE_DIPTHONG" >> $@
 endif
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
 
