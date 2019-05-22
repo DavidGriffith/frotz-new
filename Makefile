@@ -2,6 +2,9 @@
 CC=gcc
 #CC=clang
 
+# Your DOS C Compiler (Watcom)
+WCC=wcc
+
 # Enable compiler warnings. This is an absolute minimum.
 CFLAGS += -Wall -std=c99 #-Wextra
 
@@ -191,15 +194,16 @@ SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 SDL_LDFLAGS = `pkg-config $(SDL_PKGS) --libs` -lm
 
+DOS_DIR = $(SRCDIR)/dos
 
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR)
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 
 FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
-
+DOS_BIN = frotz.exe
 
 # Build recipes
 #
@@ -219,6 +223,13 @@ $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
+dos: $(DOS_BIN)
+$(DOS_BIN): $(COMMON_LIB) $(DOS_LIB) $(COMMON_LIB)
+	@echo "***********************************"
+	@echo "** Cannot compile for DOS yet... **"
+	@echo "***********************************"
+
+
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
@@ -226,6 +237,7 @@ curses_lib:	$(CURSES_LIB)
 sdl_lib:	$(SDL_LIB)
 dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
+dos_lib:	$(DOS_LIB)
 
 $(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
 $(CURSES_LIB): $(HASH) $(COMMON_DEFINES) $(CURSES_DEFINES) $(CURSES_DIR);
@@ -399,4 +411,5 @@ help:
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz \
 	$(SUBDIRS) $(SUB_CLEAN) \
-	$(COMMON_DIR)/defines.h $(CURSES_DIR)/defines.h
+	$(COMMON_DIR)/defines.h $(CURSES_DIR)/defines.h \
+	$(DOS_BIN) dos
