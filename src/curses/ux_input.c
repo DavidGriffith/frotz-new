@@ -513,11 +513,14 @@ static void utf8_mvaddnstr(int y, int x, zchar * buf, int n)
 	n--;
     }
 }
+
 static void utf8_mvaddstr(int y, int x, zchar * buf)
 {
     utf8_mvaddnstr(y,x,buf,zcharstrlen(buf));
 }
 #endif /* USE_UTF8 */
+
+
 /*
  * os_read_line
  *
