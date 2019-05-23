@@ -491,12 +491,12 @@ static void scrnset(int start, int c, int n)
 }
 
 #ifdef USE_UTF8
-static void utf8_mvaddstr(int y, int x, zchar * buf)
+static void utf8_mvaddnstr(int y, int x, zchar * buf, int n)
 {
     zchar *bp = buf;
 
     move(y,x);
-    while(*bp) {
+    while(*bp && (n > 0)) {
 	if(*bp < ZC_LATIN1_MIN) {
 	    addch(*bp);
 	} else {
@@ -510,7 +510,12 @@ static void utf8_mvaddstr(int y, int x, zchar * buf)
 	    }
 	}
 	bp++;
+	n--;
     }
+}
+static void utf8_mvaddstr(int y, int x, zchar * buf)
+{
+    utf8_mvaddnstr(y,x,buf,zcharstrlen(buf));
 }
 #endif /* USE_UTF8 */
 /*
@@ -706,7 +711,6 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 	case '\t':
 	    /* This really should be fixed to work also in the middle of a
 	       sentence. */
-#warning "Bill -- fix this for wide characters"
 	    {
 		int status;
 		zchar extension[10], saved_char;
@@ -726,7 +730,11 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 			(len - scrpos)*sizeof(zchar));
 		    memmove(buf + scrpos, extension, ext_len*sizeof(zchar));
 		    scrnmove(x + scrpos + ext_len, x + scrpos, len - scrpos);
-		    mvaddnstr(y, x + scrpos, (char *) extension, ext_len);
+#ifdef USE_UTF8
+		    utf8_mvaddnstr(y, x + scrpos, extension, ext_len);
+#else
+		    mvaddnstr(y, x + scrpos, extension, ext_len);
+#endif
 		    scrpos += ext_len;
 		    len += ext_len;
 		    searchpos = -1;
