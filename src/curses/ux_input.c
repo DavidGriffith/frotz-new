@@ -700,7 +700,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 #ifdef USE_UTF8
 	    utf8_mvaddstr(y, x, buf);
 #else
-	    mvaddstr(y, x, buf);
+	    mvaddstr(y, x, (char *)buf);
 #endif
 	    scrpos = len = zcharstrlen(buf);
 	    continue;
@@ -733,7 +733,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 #ifdef USE_UTF8
 		    utf8_mvaddnstr(y, x + scrpos, extension, ext_len);
 #else
-		    mvaddnstr(y, x + scrpos, extension, ext_len);
+		    mvaddnstr(y, x + scrpos, (char *)extension, ext_len);
 #endif
 		    scrpos += ext_len;
 		    len += ext_len;
@@ -922,7 +922,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	    file_name[i] = 0;
 	}
 #else
-	read_string (FILENAME_MAX, file_name);
+	read_string (FILENAME_MAX, (zchar *)file_name);
 #endif
     }
 
