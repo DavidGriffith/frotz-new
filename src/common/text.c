@@ -78,8 +78,13 @@ zchar translate_from_zscii (zbyte c)
 
 		LOW_WORD (addr, unicode)
 
+#ifdef USE_UTF8
 		if (unicode < 0x20)
 			return '?';
+#else
+		if ((unicode < 0x20) ||(unicode > 0xff))
+			return '?';
+#endif
 
 		return unicode;
 
