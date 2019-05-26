@@ -57,9 +57,9 @@ static struct timeval global_timeout;
 #define RING_INC( ptr, beg, end) (ptr < (end) ? ++ptr : (ptr = (beg)))
 
 #define MAX_HISTORY 20
-static char *history_buffer[MAX_HISTORY];
-static char **history_next = history_buffer; /* Next available slot. */
-static char **history_view = history_buffer; /* What the user is looking at. */
+static zchar *history_buffer[MAX_HISTORY];
+static zchar **history_next = history_buffer; /* Next available slot. */
+static zchar **history_view = history_buffer; /* What the user is looking at. */
 #define history_end (history_buffer + MAX_HISTORY - 1)
 
 extern bool is_terminator (zchar);
@@ -160,6 +160,7 @@ void os_tick()
  * If unix_set_global_timeout has been used to set a global timeout
  * this routine may also return ZC_TIME_OUT if input times out.
  */
+
 static int unix_read_char(int extkeys)
 {
     wint_t c;
@@ -188,7 +189,7 @@ static int unix_read_char(int extkeys)
 
         timeout(0);
 #ifdef USE_UTF8
-	get_wch(&c);
+	sel = get_wch(&c);
 #else
 	c = getch();
 #endif
@@ -200,17 +201,9 @@ static int unix_read_char(int extkeys)
 	    return c;
 
 	/* ...and the other 2% makes up 98% of the code. :( */
-#ifdef HANDLE_OE_DIPTHONG
-	if (c == 0x153)
-	{
-	    /* oe dipthong */
-	    return 0xf6;
-	}
-	if (c == 0x152)
-	{
-	    /* OE dipthong */
-	    return 0xd6;
-	}
+#ifdef USE_UTF8
+    if (sel != KEY_CODE_YES && c >= ZC_LATIN1_MIN)
+        return c;
 #endif
 
 	/* On many terminals the backspace key returns DEL. */
@@ -342,6 +335,42 @@ static int unix_read_char(int extkeys)
     }
 }
 
+size_t zcharstrlen(zchar *str)
+{
+    size_t ret = 0;
+    
+    while (str[ret] != 0)
+    {
+	ret++;
+    }
+    return ret;
+}
+
+zchar *zcharstrncpy(zchar *dest, zchar *src, size_t n)
+{
+    size_t i;
+
+    for (i = 0; i < n && src[i] != '\0'; i++)
+	dest[i] = src[i];
+    for ( ; i < n; i++)
+        dest[i] = 0;
+
+    return dest;
+}
+int zcharstrncmp(zchar *s1, zchar *s2, size_t n)
+{
+    zchar u1, u2;
+    while (n-- > 0)
+    {
+      u1 = *s1++;
+      u2 = *s2++;
+      if (u1 != u2)
+        return u1 - u2;
+      if (u1 == 0)
+        return 0;
+    }
+    return 0;
+}
 
 /*
  * unix_add_to_history
@@ -354,8 +383,8 @@ static void unix_add_to_history(zchar *str)
 
     if (*history_next != NULL)
 	free( *history_next);
-    *history_next = (char *)malloc(strlen((char *)str) + 1);
-    strncpy( *history_next, (char *)str, strlen((char*)str) + 1);
+    *history_next = (zchar *)malloc((zcharstrlen(str) + 1) * sizeof(zchar));
+    zcharstrncpy( *history_next, str, zcharstrlen(str) + 1);
     RING_INC( history_next, history_buffer, history_end);
     history_view = history_next; /* Reset user frame after each line */
 
@@ -372,7 +401,7 @@ static void unix_add_to_history(zchar *str)
  */
 static int unix_history_back(zchar *str, int searchlen, int maxlen)
 {
-    char **prev = history_view;
+    zchar **prev = history_view;
 
     do {
 	RING_DEC( history_view, history_buffer, history_end);
@@ -382,10 +411,10 @@ static int unix_history_back(zchar *str, int searchlen, int maxlen)
 	    history_view = prev;
 	    return 0;
 	}
-    } while (strlen( *history_view) > (size_t) maxlen
-	     || (searchlen != 0 && strncmp( (char *)str, *history_view, searchlen)));
-    strncpy((char *)str + searchlen, *history_view + searchlen,
-		(size_t) maxlen - (strlen((char *)str) + searchlen));
+    } while (zcharstrlen( *history_view) > (size_t) maxlen
+	     || (searchlen != 0 && zcharstrncmp(str, *history_view, searchlen)));
+    zcharstrncpy(str + searchlen, *history_view + searchlen,
+		(size_t) maxlen - (zcharstrlen(str) + searchlen));
     return 1;
 }
 
@@ -397,7 +426,7 @@ static int unix_history_back(zchar *str, int searchlen, int maxlen)
  */
 static int unix_history_forward(zchar *str, int searchlen, int maxlen)
 {
-    char **prev = history_view;
+    zchar **prev = history_view;
 
     do {
 	RING_INC( history_view, history_buffer, history_end);
@@ -408,10 +437,10 @@ static int unix_history_forward(zchar *str, int searchlen, int maxlen)
 	    history_view = prev;
 	    return 0;
 	}
-    } while (strlen( *history_view) > (size_t) maxlen
-	     || (searchlen != 0 && strncmp( (char *)str, *history_view, searchlen)));
-    strncpy((char *)str + searchlen, *history_view + searchlen,
-		(size_t) maxlen - (strlen((char *)str) + searchlen));
+    } while (zcharstrlen( *history_view) > (size_t) maxlen
+	     || (searchlen != 0 && zcharstrncmp(str, *history_view, searchlen)));
+    zcharstrncpy(str + searchlen, *history_view + searchlen,
+		(size_t) maxlen - (zcharstrlen(str) + searchlen));
     return 1;
 }
 
@@ -462,27 +491,36 @@ static void scrnset(int start, int c, int n)
 }
 
 #ifdef USE_UTF8
-static void utf8_mvaddstr(int y, int x, char * buf)
+static void utf8_mvaddnstr(int y, int x, zchar * buf, int n)
 {
-    unsigned char *bp = (unsigned char *)buf;
+    zchar *bp = buf;
 
     move(y,x);
-    while(*bp) {
+    while(*bp && (n > 0)) {
 	if(*bp < ZC_LATIN1_MIN) {
 	    addch(*bp);
 	} else {
-	    if(*bp < 0xc0) {
-		addch(0xc2);
-		addch(*bp);
+	    if(*bp > 0x7ff) {
+		addch(0xe0 | ((*bp >> 12) & 0xf));
+		addch(0x80 | ((*bp >> 6) & 0x3f));
+		addch(0x80 | (*bp & 0x3f));
 	    } else {
-		addch(0xc3);
-		addch(*bp - 0x40);
+		addch(0xc0 | ((*bp >> 6) & 0x1f));
+		addch(0x80 | (*bp & 0x3f));
 	    }
 	}
 	bp++;
+	n--;
     }
 }
+
+static void utf8_mvaddstr(int y, int x, zchar * buf)
+{
+    utf8_mvaddnstr(y,x,buf,zcharstrlen(buf));
+}
 #endif /* USE_UTF8 */
+
+
 /*
  * os_read_line
  *
@@ -533,7 +571,7 @@ static void utf8_mvaddstr(int y, int x, char * buf)
 zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
                     int continued)
 {
-    int ch, y, x, len = strlen( (char *)buf);
+    int ch, y, x, len = zcharstrlen(buf);
     const int margin = MAX(h_screen_width - width, 0);
 
     /* These are static to allow input continuation to work smoothly. */
@@ -581,7 +619,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		len--; scrpos--; searchpos = -1;
 		scrnmove(x + scrpos, x + scrpos + 1, len - scrpos);
 		mvaddch(y, x + len, ' ');
-		memmove(buf + scrpos, buf + scrpos + 1, len - scrpos);
+		memmove(buf + scrpos, buf + scrpos + 1, (len - scrpos)*sizeof(zchar));
 	    }
 	    break;
 	case ZC_DEL_WORD:
@@ -594,7 +632,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 			len -= delta;
 			scrpos -= delta;
 			scrnmove(x + scrpos, x + oldscrpos, len - scrpos);
-			memmove(buf + scrpos, buf + oldscrpos, len - scrpos);
+			memmove(buf + scrpos, buf + oldscrpos, (len - scrpos)*sizeof(zchar));
 			int i = newoffset;
 			for (i = len; i <= oldlen ; i++) {
 				mvaddch(y, x + i, ' ');
@@ -606,7 +644,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 			searchpos = -1;
 			len -= scrpos;
 			scrnmove(x, x + scrpos, len);
-			memmove(buf, buf + scrpos, len);
+			memmove(buf, buf + scrpos, len*sizeof(zchar));
 			for (int i = len; i <= len + scrpos; i++) {
 				mvaddch(y, x + i, ' ');
 			}
@@ -619,7 +657,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		len--; searchpos = -1;
 		scrnmove(x + scrpos, x + scrpos + 1, len - scrpos);
 		mvaddch(y, x + len, ' ');
-		memmove(buf + scrpos, buf + scrpos + 1, len - scrpos);
+		memmove(buf + scrpos, buf + scrpos + 1, (len - scrpos)*sizeof(zchar));
 	    }
 	    continue;		/* Don't feed is_terminator bad zchars. */
 
@@ -663,11 +701,11 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 
 	    scrnset(x, ' ', len);
 #ifdef USE_UTF8
-	    utf8_mvaddstr(y, x, (char *) buf);
+	    utf8_mvaddstr(y, x, buf);
 #else
-	    mvaddstr(y, x, (char *) buf);
+	    mvaddstr(y, x, (char *)buf);
 #endif
-	    scrpos = len = strlen((char *) buf);
+	    scrpos = len = zcharstrlen(buf);
 	    continue;
 
 	/* Passthrough as up/down arrows for Beyond Zork. */
@@ -686,16 +724,20 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		buf[scrpos] = saved_char;
 
 		if (status != 2) {
-		    int ext_len = strlen((char *) extension);
+		    int ext_len = zcharstrlen(extension);
 		    if (ext_len > max - len) {
 			ext_len = max - len;
 			status = 1;
 		    }
 		    memmove(buf + scrpos + ext_len, buf + scrpos,
-			len - scrpos);
-		    memmove(buf + scrpos, extension, ext_len);
+			(len - scrpos)*sizeof(zchar));
+		    memmove(buf + scrpos, extension, ext_len*sizeof(zchar));
 		    scrnmove(x + scrpos + ext_len, x + scrpos, len - scrpos);
-		    mvaddnstr(y, x + scrpos, (char *) extension, ext_len);
+#ifdef USE_UTF8
+		    utf8_mvaddnstr(y, x + scrpos, extension, ext_len);
+#else
+		    mvaddnstr(y, x + scrpos, (char *)extension, ext_len);
+#endif
 		    scrpos += ext_len;
 		    len += ext_len;
 		    searchpos = -1;
@@ -707,7 +749,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 	    /* ASCII or ISO-Latin-1 */
 	    if ((ch >= ZC_ASCII_MIN && ch <= ZC_ASCII_MAX)
 		|| (!u_setup.plain_ascii
-		    && ch >= ZC_LATIN1_MIN && ch <= ZC_LATIN1_MAX)) {
+		    && ch >= ZC_LATIN1_MIN /*&& ch <= ZC_LATIN1_MAX*/)) {
 		searchpos = -1;
 		if ((scrpos == max) || (insert_flag && (len == max))) {
 		    os_beep(BEEP_HIGH);
@@ -716,19 +758,20 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		if (insert_flag && (scrpos < len)) {
 		    /* move what's there to the right */
 		    scrnmove(x + scrpos + 1, x + scrpos, len - scrpos);
-		    memmove(buf + scrpos + 1, buf + scrpos, len - scrpos);
+		    memmove(buf + scrpos + 1, buf + scrpos, (len - scrpos)*sizeof(zchar));
 		}
 		if (insert_flag || scrpos == len)
 		    len++;
 #ifdef USE_UTF8
 		if (ch < ZC_LATIN1_MIN) {
 		    mvaddch(y, x + scrpos, ch);
-		} else if (ch < 0xc0) {
-		    mvaddch(y, x + scrpos, 0xc2);
-		    addch(ch);
+		} else if(ch > 0x7ff) {
+		    mvaddch(y, x + scrpos, 0xe0 | ((ch >> 12) & 0xf));
+		    addch(0x80 | ((ch >> 6) & 0x3f));
+		    addch(0x80 | (ch & 0x3f));
 		} else {
-		    mvaddch(y, x + scrpos, 0xc3);
-		    addch(ch - 0x40);
+		    mvaddch(y, x + scrpos, 0xc0 | ((ch >> 6) & 0x1f));
+		    addch(0x80 | (ch & 0x3f));
 		}
 #else
                 mvaddch(y, x + scrpos, ch);
@@ -831,9 +874,59 @@ char *os_read_file_name (const char *default_name, int flag)
 	    tempname = basename((char *)default_name);
 	    print_string(tempname);
 	} else
+#ifdef USE_UTF8
+	{
+	    zchar z;
+	    i = 0;
+	    while (default_name[i])
+	    {
+		if((default_name[i] & 0x80) == 0) {
+		    print_char(default_name[i++]);
+		} else if((default_name[i] & 0xe0) == 0xc0 ) {
+		    z = default_name[i++] & 0x1f;
+		    z = (z << 6) | (default_name[i++] & 0x3f);
+		    print_char(z);
+		} else {
+		    z = default_name[i++] & 0xf;
+		    z = (z << 6) | (default_name[i++] & 0x3f);
+		    z = (z << 6) | (default_name[i++] & 0x3f);
+		    print_char(z);
+		}
+	    }
+	}
+#else
 	   print_string (default_name);
+#endif
 	print_string ("\": ");
+#ifdef USE_UTF8
+	{
+	    zchar z_name[FILENAME_MAX + 1];
+	    zchar *zp;
+	    read_string (FILENAME_MAX, z_name);
+	    i = 0;
+	    zp = z_name;
+	    while (*zp)
+	    {
+		if(*zp <= 0x7f) {
+		    if (i > FILENAME_MAX) break;
+		    file_name[i++] = *zp;
+		} else if(*zp > 0x7ff) {
+		    if (i > FILENAME_MAX - 2) break;
+		    file_name[i++] = 0xe0 | ((*zp >> 12) & 0xf);
+		    file_name[i++] = 0x80 | ((*zp >> 6) & 0x3f);
+		    file_name[i++] = 0x80 | (*zp & 0x3f);
+		} else {
+		    if (i > FILENAME_MAX - 1) break;
+		    file_name[i++] = 0xc0 | ((*zp >> 6) & 0x1f);
+		    file_name[i++] = 0x80 | (*zp & 0x3f);
+		}
+		zp++;
+	    }
+	    file_name[i] = 0;
+	}
+#else
 	read_string (FILENAME_MAX, (zchar *)file_name);
+#endif
     }
 
     /* Return failure if path provided when in restricted mode.

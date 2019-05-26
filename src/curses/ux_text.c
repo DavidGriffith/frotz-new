@@ -223,26 +223,14 @@ void os_display_char (zchar c)
 	    addch(c);
 #else
 	} else {
-	  // Looking at the UTF-8 table at
-	  // https://www.utf8-chartable.de/unicode-utf8-table.pl
-	  // Shows that characters from 0xa0-0xbf are encoded as
-	  // 0xc2 0xa0-0xbf, and characters from 0xc0-0xff are
-	  // encoded as 0xc3 0x80-0xbf
-	  if ( c < 0xc0) {
-	    addch(0xc2);
-	    addch(c);
-#ifdef HANDLE_OE_DIPTHONG
-	  } else if (c == 0xd6) {
-	    addch(0xc5);
-	    addch(0x92);
-	  } else if (c == 0xf6) {
-	    addch(0xc5);
-	    addch(0x93);
-#endif /* HANDLE_OE_DIPTHONG */
-	  } else {
-	    addch(0xc3);
-	    addch(c - 0x40);
-	  }
+	   if(c > 0x7ff) {
+		addch(0xe0 | ((c >> 12) & 0xf));
+                addch(0x80 | ((c >> 6) & 0x3f));
+                addch(0x80 | (c & 0x3f));
+            } else {
+                addch(0xc0 | ((c >> 6) & 0x1f));
+                addch(0x80 | (c & 0x3f));
+            }
 	}
 #endif /* USE_UTF8 */
 	return;
@@ -272,7 +260,7 @@ void os_display_string (const zchar *s)
 {
     zchar c;
 
-    while ((c = (unsigned char) *s++) != 0) {
+    while ((c =  *s++) != 0) {
 
         if (c == ZC_NEW_FONT || c == ZC_NEW_STYLE) {
 

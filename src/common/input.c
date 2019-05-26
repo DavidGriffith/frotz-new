@@ -26,7 +26,7 @@ extern zchar stream_read_key (zword, zword, bool);
 extern zchar stream_read_input (int, zchar *, zword, zword, bool, bool);
 
 extern void tokenise_line (zword, zword, zword, bool);
-
+zword unicode_tolower (zword);
 static bool truncate_question_mark(void);
 
 /*
@@ -235,10 +235,8 @@ void z_read (void)
     for (i = 0; buffer[i] != 0; i++) {
 
 	if (key == ZC_RETURN) {
-	    if (buffer[i] >= 'A' && buffer[i] <= 'Z')
-		buffer[i] += 'a' - 'A';
-	    if (buffer[i] >= 0xc0 && buffer[i] <= 0xde && buffer[i] != 0xd7)
-		buffer[i] += 0x20;
+
+	    buffer[i] = unicode_tolower (buffer[i]);
 
 	}
 

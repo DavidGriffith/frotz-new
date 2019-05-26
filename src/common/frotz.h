@@ -65,15 +65,12 @@ typedef unsigned short zword;
  * Unix side, please let me know and please test it to make sure it
  * doesn't mess with command history.
  */
-/*
-#ifdef MSDOS_16BIT
+
+#ifndef USE_UTF8
 typedef unsigned char zchar;
 #else
 typedef unsigned short zchar;
 #endif
-*/
-
-typedef unsigned char zchar;
 
 enum story {
     ZORK1,
