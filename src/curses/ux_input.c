@@ -513,11 +513,14 @@ static void utf8_mvaddnstr(int y, int x, zchar * buf, int n)
 	n--;
     }
 }
+
 static void utf8_mvaddstr(int y, int x, zchar * buf)
 {
     utf8_mvaddnstr(y,x,buf,zcharstrlen(buf));
 }
 #endif /* USE_UTF8 */
+
+
 /*
  * os_read_line
  *
@@ -701,9 +704,9 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 	    {
 		scrnset(x, ' ', len);
 #ifdef USE_UTF8
-		utf8_mvaddstr(y, x, (char *) buf);
+		utf8_mvaddstr(y, x, (zchar *) buf);
 #else
-		mvaddstr(y, x, buf);
+	        mvaddstr(y, x, (char *)buf);
 #endif
 		scrpos = len = zcharstrlen(buf);
 	    }
@@ -737,7 +740,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 #ifdef USE_UTF8
 		    utf8_mvaddnstr(y, x + scrpos, extension, ext_len);
 #else
-		    mvaddnstr(y, x + scrpos, extension, ext_len);
+		    mvaddnstr(y, x + scrpos, (char *)extension, ext_len);
 #endif
 		    scrpos += ext_len;
 		    len += ext_len;
@@ -926,7 +929,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	    file_name[i] = 0;
 	}
 #else
-	read_string (FILENAME_MAX, file_name);
+	read_string (FILENAME_MAX, (zchar *)file_name);
 #endif
     }
 
