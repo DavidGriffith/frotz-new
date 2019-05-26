@@ -2,6 +2,8 @@
 #include <signal.h>
 #include <stdlib.h>
 
+#include <SDL.h>
+
 #include "sf_frotz.h"
 
 #ifdef WIN32
@@ -80,8 +82,11 @@ static void bt_sighandler(int sig, siginfo_t *info,
   int i, trace_size = 0;
 //  ucontext_t *uc = (ucontext_t *)secret;
 
-  if (sig == SIGINT)
-    os_fatal("Emergency exit!\n\n(Signal SIGINT received)");
+  if (sig == SIGINT) {
+    fprintf(stderr, "Emergency Exit (Signal SIGITNT received)\n");
+    SDL_Quit();
+    exit(EXIT_FAILURE);
+  }
 
   /* Do something useful with siginfo_t */
 

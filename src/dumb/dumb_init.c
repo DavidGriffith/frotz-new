@@ -40,7 +40,7 @@ Syntax: dfrotz [options] story-file\n\
   -O   watch object locating      \t -v   show version information\n\
   -L <file> load this save file   \t -w # screen width\n\
   -m   turn off MORE prompts      \t -x   expand abbreviations g/x/z\n\
-  -p   plain ASCII output only\n"
+  -p   plain ASCII output only    \t -Z # error checking (see below)\n"
 
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
@@ -221,7 +221,11 @@ void os_restart_game (int UNUSED (stage)) {}
 void os_fatal (const char *s, ...)
 {
     fprintf(stderr, "\nFatal error: %s\n", s);
-    exit(1);
+    if (f_setup.ignore_errors) {
+	fprintf(stderr, "Continuing anyway...\n");
+    } else {
+	exit(1);
+    }
 }
 
 FILE *os_load_story(void)

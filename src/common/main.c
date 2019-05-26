@@ -33,6 +33,7 @@
 extern void interpret (void);
 extern void init_memory (void);
 extern void init_undo (void);
+extern void reset_screen (void);
 extern void reset_memory (void);
 
 bool need_newline_at_exit = FALSE;
@@ -167,6 +168,8 @@ int cdecl main (int argc, char *argv[])
     z_restart ();
 
     interpret ();
+
+    reset_screen ();
 
     reset_memory ();
 

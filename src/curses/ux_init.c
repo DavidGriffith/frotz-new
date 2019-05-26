@@ -140,13 +140,28 @@ void os_fatal (const char *s, ...)
 	os_display_string((zchar *)s);
 	os_display_string((zchar *)"\n");
 	new_line();
-	os_reset_screen();
-	ux_blorb_stop();
-	exit(1);
+	if (f_setup.ignore_errors) {
+	    os_display_string((zchar *)"Continuing anyway...");
+	    new_line();
+	    scrollok(stdscr, TRUE);
+	    scroll(stdscr);
+	    flush_buffer();
+	    refresh();
+	    return;
+	} else {
+	    os_reset_screen();
+	    ux_blorb_stop();
+	    exit(1);
+	}
     }
 
     fputs ("\nFatal error: ", stderr);
     fputs (s, stderr);
+    if (f_setup.ignore_errors) {
+	fputs ("\n\rContinuing anyway", stderr);
+	return;
+    }
+
     fputs ("\n\n", stderr);
 
     exit (1);
@@ -210,7 +225,6 @@ void os_process_arguments (int argc, char *argv[])
 
     if (signal(SIGINT, SIG_IGN) != SIG_IGN)
 	signal(SIGINT, sigint_handler);
-
 
     if (signal(SIGTTIN, SIG_IGN) != SIG_IGN)
 	signal(SIGTTIN, SIG_IGN);

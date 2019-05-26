@@ -918,7 +918,7 @@ zchar os_read_key (int timeout, bool cursor)
  *
  */
 
-int os_read_file_name (char *file_name, const char *default_name, int flag)
+char *os_read_file_name (const char *default_name, int flag)
 {
     char *extension;
     FILE *fp;
@@ -930,6 +930,7 @@ int os_read_file_name (char *file_name, const char *default_name, int flag)
 
     int i;
     char *tempname;
+    char file_name[FILENAME_MAX + 1];
 
     /* Turn off playback and recording temporarily */
 
@@ -1015,6 +1016,18 @@ finished:
     istream_replay = saved_replay;
     ostream_record = saved_record;
 
-    return result;
+    if (!result) return NULL;
+
+    return strdup(file_name);
 
 }/* os_read_file_name */
+
+
+/*
+ * Called regularly by the interpreter, at least every few instructions
+ * (only when interpreting: e.g., not when waiting for input).
+ */
+void os_tick(void)
+{
+	/* do nothing */
+}

@@ -101,7 +101,7 @@ void runtime_error (int errnum)
 	return;
 
     if (f_setup.err_report_mode == ERR_REPORT_FATAL
-	|| (!f_setup.ignore_errors && errnum <= ERR_MAX_FATAL)) {
+	|| errnum <= ERR_MAX_FATAL) {
 	flush_buffer ();
 	os_fatal (err_messages[errnum - 1]);
 	return;

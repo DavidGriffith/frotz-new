@@ -330,6 +330,7 @@ void os_process_arguments (int argc, char *argv[])
   char *p;
 
   sf_installhandlers();
+  sf_readsettings();
   parse_options(argc, argv);
 
   if (optind != argc - 1) 
@@ -395,8 +396,6 @@ void os_process_arguments (int argc, char *argv[])
   /* Save the executable file name */
 
   progname = argv[0];
-
-  sf_readsettings();
 
   if (user_screen_width > 0) AcWidth = user_screen_width;
   if (user_screen_height > 0) AcHeight = user_screen_height;
