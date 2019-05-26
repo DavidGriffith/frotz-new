@@ -572,6 +572,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
                     int continued)
 {
     int ch, y, x, len = zcharstrlen(buf);
+    int res;
     const int margin = MAX(h_screen_width - width, 0);
 
     /* These are static to allow input continuation to work smoothly. */
@@ -695,17 +696,20 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 	    if (searchpos < 0)
 		searchpos = len;
 	    if (ch == ZC_ARROW_UP)
-		unix_history_back(buf, searchpos, max);
+		res = unix_history_back(buf, searchpos, max);
             else
-		unix_history_forward(buf, searchpos, max);
+		res = unix_history_forward(buf, searchpos, max);
 
 	    scrnset(x, ' ', len);
+	    if (res) {
+		scrnset(x, ' ', len);
 #ifdef USE_UTF8
-	    utf8_mvaddstr(y, x, buf);
+		utf8_mvaddstr(y, x, buf);
 #else
-	    mvaddstr(y, x, (char *)buf);
+		mvaddstr(y, x, (char *)buf);
 #endif
-	    scrpos = len = zcharstrlen(buf);
+		scrpos = len = zcharstrlen(buf);
+	    }
 	    continue;
 
 	/* Passthrough as up/down arrows for Beyond Zork. */
