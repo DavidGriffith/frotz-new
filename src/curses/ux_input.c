@@ -662,8 +662,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
             else
 		res = unix_history_forward(buf, searchpos, max);
 
-	    if (res)
-	    {
+	    if (res) {
 		scrnset(x, ' ', len);
 #ifdef USE_UTF8
 		utf8_mvaddstr(y, x, (char *) buf);
