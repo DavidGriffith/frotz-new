@@ -20,6 +20,9 @@ src/common/version.c
 src/common/defs.h
 src/curses/ux_defines.h
 *.z?
+*.blb
+*.blorb
+*.zblorb
 src/test/*mem
 src/test/*rec
 *.qzl

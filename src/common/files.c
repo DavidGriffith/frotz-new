@@ -155,38 +155,38 @@ void script_char (zchar c)
 	{ script_char (' '); script_char (' '); return; }
 
 #ifdef __MSDOS__
+    if (c > 0xff)
+	c = '?';
     if (c >= ZC_LATIN1_MIN)
 	c = latin1_to_ibm[c - ZC_LATIN1_MIN];
-#endif
 
-#ifdef USE_UTF8
-    if (c >= ZC_LATIN1_MIN)
-    {
-      if ( c < 0xc0) {
-	fputc (0xc2, sfp); 
-	fputc (c, sfp);
-#ifdef HANDLE_OE_DIPTHONG
-      } else if (c == 0xd6) {
-	fputc (0xc5, sfp);
-	fputc (0x92, sfp);
-      } else if (c == 0xf6) {
-	fputc (0xc5, sfp);
-	fputc (0x93, sfp);
-#endif /* HANDLE_OE_DIPTHONG */
-      } else {
-	fputc (0xc3, sfp);
-	fputc (c - 0x40, sfp);
-      }
-    }
-    else
-    {
-	fputc (c, sfp);
-    }
-#else
     fputc (c, sfp);
-#endif
     script_width++;
 
+#else
+
+    /* Encode as UTF-8 */
+
+    if (c > 0x7ff) {
+
+	fputc (0xe0 | ((c >> 12) & 0xf), sfp);
+	fputc (0x80 | ((c >> 6) & 0x3f), sfp);
+	fputc (0x80 | (c & 0x3f), sfp);
+
+    }
+    else if (c > 0x7f) {
+
+	fputc (0xc0 | ((c >> 6) & 0x1f), sfp);
+	fputc (0x80 | (c & 0x3f), sfp);
+
+    }
+    else
+
+	fputc (c, sfp);
+
+    script_width++;
+
+#endif
 }/* script_char */
 
 /*

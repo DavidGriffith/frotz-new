@@ -14,6 +14,13 @@
    But since no os_* function uses it, it's safe to let the frotz core see
    this definition, but have the unix port see the curses version. */
 
+#ifdef MSDOS_16BIT
+#ifdef USE_UTF8
+#error UTF-8 is not supported in DOS Frotz
+#endif
+#endif
+
+/* This will be addressed later. */
 #ifndef MSDOS_16BIT
 #include "git_hash.h"
 #endif
@@ -65,15 +72,12 @@ typedef unsigned short zword;
  * Unix side, please let me know and please test it to make sure it
  * doesn't mess with command history.
  */
-/*
-#ifdef MSDOS_16BIT
+
+#ifndef USE_UTF8
 typedef unsigned char zchar;
 #else
 typedef unsigned short zchar;
 #endif
-*/
-
-typedef unsigned char zchar;
 
 enum story {
     ZORK1,
