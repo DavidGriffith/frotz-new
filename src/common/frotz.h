@@ -14,6 +14,13 @@
    But since no os_* function uses it, it's safe to let the frotz core see
    this definition, but have the unix port see the curses version. */
 
+#ifdef MSDOS_16BIT
+#ifdef USE_UTF8
+#error UTF-8 is not supported in DOS Frotz
+#endif
+#endif
+
+/* This will be addressed later. */
 #ifndef MSDOS_16BIT
 #include "git_hash.h"
 #endif
