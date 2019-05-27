@@ -132,7 +132,7 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 	GIT_DATE = $(shell git show -s --format=%ci)
 else
-	GIT_BRANCH = $(shell echo "$Format:%D$" | sed s/^.*\>\\s*//)
+	GIT_BRANCH = $(shell echo "$Format:%D$" | sed s/^.*\>\\s*// | cut -d, -f1)
 	GIT_HASH = "$Format:%H$"
 	GIT_HASH_SHORT = "$Format:%h$"
 	GIT_DATE = "$Format:%ci$"
