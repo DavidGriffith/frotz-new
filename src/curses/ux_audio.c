@@ -17,6 +17,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  * Or visit http://www.fsf.org/
+ *
+ * This file and only this file is dual licensed under the MIT license.
+ *
+ * Copyright (c) 2019 Mark McCurry
  */
 
 #define __UNIX_PORT_FILE
@@ -24,11 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <signal.h>
+#include <assert.h>
 
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
@@ -36,147 +38,767 @@
 #include <curses.h>
 #endif
 
-#include "ux_frotz.h"
-#include "ux_blorb.h"
-#include "ux_locks.h"
+#include "../blorb/blorb.h"
+#include "../blorb/blorblow.h"
+#include "ux_audio.h"
 
 #ifndef NO_SOUND
 
 #include <ao/ao.h>
 #include <sndfile.h>
 #include <samplerate.h>
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
 #include <libmodplug/modplug.h>
 
-enum sound_type {
+/* Exports
+ * void  os_init_sound(void);                     startup system
+ * void  os_beep(int);                            enqueue a beep sample
+ * void  os_prepare_sample(int);                  put a sample into memory
+ * void  os_start_sample(int, int, int, zword);   queue up a sample
+ * void  os_stop_sample(int);                     terminate sample
+ * void  os_finish_with_sample(int);              remove from memory
+ */
+
+#define EVENT_START_STREAM  1
+#define EVENT_STOP_STREAM   2
+
+typedef struct {
+    SRC_STATE *src_state;
+    SRC_DATA   src_data;
+    float     *scratch;
+    float     *input;
+    float     *output;
+} resampler_t;
+
+
+typedef struct {
+    bool active; /* If a voice is actively outputting sound*/
+    int  src;    /* The source sound ID*/
+    int  type;   /* The voice type 0, 1, 2..N*/
+    int  pos;    /* The current position*/
+    int  repid;  /* The current number of repetitions*/
+} sound_state_t;
+
+
+typedef struct {
+    float  *samples;
+    int     nsamples;
+} sound_buffer_t;
+
+typedef enum {
     FORM,
     OGGV,
     MOD
-};
+} sound_type_t;
+
+typedef struct sound_stream {
+    /*returns 1 if process can continue*/
+    int (*process)(struct sound_stream *self, float *outl, float *outr, unsigned samples);
+    void (*cleanup)(struct sound_stream *self);
+    sound_type_t sound_type;
+    int id;
+} sound_stream_t;
 
 typedef struct {
-    FILE *fp;
-    bb_result_t result;
-    enum sound_type type;
-    int number;
-    int vol;
-    int repeats;
-} EFFECT;
+    int (*process)(sound_stream_t *self, float *outl, float *outr, unsigned samples);
+    void (*cleanup)(sound_stream_t *self);
+    sound_type_t sound_type;
+    int id;
+} sound_stream_dummy_t;
 
-static void *playaiff(EFFECT *);
-static void *playmusic(EFFECT *);
-static void *playmod(EFFECT *);
-static void *playogg(EFFECT *);
+typedef struct {
+    uint8_t *data;
+    size_t   len;
+    size_t   pos;
+} buf_t;
 
-static void floattopcm16(short *, float *, int);
-static void pcm16tofloat(float *, short *, int);
-static void stereoize(float *, float *, size_t);
+typedef struct {
+    int (*process)(sound_stream_t *self, float *outl, float *outr, unsigned samples);
+    void (*cleanup)(sound_stream_t *self);
+    sound_type_t sound_type;
+    int id;
 
-static int mypower(int, int);
-static char *getfiledata(FILE *, long *);
-static void *mixer(void *);
+    resampler_t *rsmp;
+    float  volume;
+    float *floatbuffer;
 
-static pthread_t	mixer_id;
-static pthread_t	playaiff_id;
-static pthread_t	playmusic_id;
-static pthread_mutex_t	mutex;
-static sem_t		playaiff_okay;
-static sem_t		playmusic_okay;
+    SNDFILE *sndfile;
+    SF_INFO  sf_info;
+    size_t length;     /* Number of samples (= smpsl.length == smpsr.length)*/
+    int    repeats;    /* Total times to play the sample 1..n*/
+    int    pos;
 
-bool    bleep_playing = FALSE;
-bool	bleep_stop = FALSE;
+    buf_t buf;
+} sound_stream_aiff_t;
 
-int	bleepcount;
-int	bleepnum;
+typedef struct {
+    int (*process)(sound_stream_t *self, float *outl, float *outr, unsigned samples);
+    void (*cleanup)(sound_stream_t *self);
+    sound_type_t sound_type;
+    int id;
 
-bool    music_playing = FALSE;
-bool	music_stop = FALSE;
+    char *filedata;
+    short *shortbuffer;
+    ModPlugFile *mod;
+    ModPlug_Settings settings;
+} sound_stream_mod_t;
 
-typedef struct
+typedef struct {
+    uint8_t type;
+    union {
+        sound_stream_t *e;
+        int            i;
+    };
+} sound_event_t;
+
+#define NUM_VOICES 8
+
+typedef struct {
+    /*Audio driver parameters*/
+    size_t buffer_size;
+    float  sample_rate;
+
+    /*Output buffers*/
+    float *outl;
+    float *outr;
+
+    /*Sound parameters*/
+    sound_stream_t *streams[NUM_VOICES]; /* Active streams*/
+    sound_state_t   voices[NUM_VOICES];  /* Max concurrent sound effects/music*/
+
+    /*Event (one is process per frame of audio)*/
+    sem_t ev_free;    /*1 if an event can be submitted*/
+    sem_t ev_pending; /*1 if there's an event ready to be processed*/
+    sound_event_t event;
+} sound_engine_t;
+
+static sound_engine_t frotz_audio;
+/*FILE *audio_log;*/
+
+/**********************************************************************
+ *                         Utilities                                  *
+ *                                                                    *
+ * getfiledata          - get all bytes of a file after               *
+ *                        the start point                             *
+ * load_block_from_file - Load size bytes from current offset         *
+ * make_id              - Create BLORB identifier                     *
+ * get_type             - Get OGG/FORM/AIFF type                      *
+ * limit                - x -> a <= x <= b                            *
+ *                                                                    *
+ **********************************************************************/
+static char *
+getfiledata(FILE *fp, long *size)
 {
-    sem_t   full;
-    sem_t   empty;
-    float  *samples;
-    int     nsamples;
-} audiobuffer;
+    long offset = ftell(fp);
+    fseek(fp, 0L, SEEK_END);
+    (*size) = ftell(fp);
+    fseek(fp, offset, SEEK_SET);
+    char *data = (char*)malloc(*size);
+    fread(data, *size, sizeof(char), fp);
+    fseek(fp, offset, SEEK_SET);
+    return(data);
+}
 
-audiobuffer bleep_buffer;
-audiobuffer music_buffer;
-
-void audiobuffer_init(audiobuffer *ab)
+static uint8_t *
+load_block_from_file(FILE *fp, long size)
 {
-    sem_init(&ab->full, 0, 0);
-    sem_init(&ab->empty, 0, 0);
-    sem_post(&ab->empty);
-    ab->samples = malloc(BUFFSIZE * 2 * sizeof(float));
-    ab->nsamples = 0;
+    long offset = ftell(fp);
+    uint8_t *data = (uint8_t*)malloc(size);
+    fread(data, size, sizeof(uint8_t), fp);
+    fseek(fp, offset, SEEK_SET);
+    return data;
+}
+
+static
+int32_t make_id(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
+{
+    return (a << 24) | (b << 16) | (c << 8) | d;
+}
+
+static int
+get_type(int magic)
+{
+    /*fprintf(audio_log, "magic = %x\n", magic);*/
+    if (magic == make_id('F','O','R','M'))
+        return FORM;
+    if (magic == make_id('M','O','D',' '))
+        return MOD;
+    if (magic == make_id('O','G','G','V'))
+        return OGGV;
+    return -1;
+}
+
+static float
+limit(float mn, float mx, float v)
+{
+    if(v<mn) return mn;
+    if(v>mx) return mx;
+    return v;
 }
 
 
-/*
- * os_init_sound
- *
- * Do any required setup for sound output.
- * Here we start a thread to act as a mixer.
- *
- */
-void os_init_sound(void)
+/**********************************************************************
+ *                         Resampler                                  *
+ *                                                                    *
+ * Processes data input at one sampling rate and converts to another. *
+ * Used on ogg and aiff streams.                                      *
+ *                                                                    *
+ * NOTE: Additional code may be needed to smoothly handle repeat loop *
+ *       conditions                                                   *
+ *                                                                    *
+ * resampler_init    - Create resampler                               *
+ * resampler_cleanup - Deallocate resampler resources
+ * resampler_step    - Add data to resampler                          *
+ * resampler_consume - Remove data from resampler                     *
+ **********************************************************************/
+
+static resampler_t*
+resampler_init(int sample_rate_input)
 {
-    int err;
-    static pthread_attr_t attr;
+    resampler_t *rsmp = (resampler_t*)calloc(sizeof(resampler_t), 1);
+    int error;
+    rsmp->src_state = src_new(SRC_SINC_FASTEST, 2, &error);
+    rsmp->input   = (float*)calloc(frotz_audio.buffer_size, sizeof(float)*2);
+    rsmp->output  = (float*)calloc(frotz_audio.buffer_size, sizeof(float)*2);
+    rsmp->scratch = (float*)calloc(frotz_audio.buffer_size, sizeof(float)*2);
+    rsmp->src_data.src_ratio     = frotz_audio.sample_rate*1.0f/sample_rate_input;
+    rsmp->src_data.input_frames  = 0;
+    rsmp->src_data.output_frames = frotz_audio.buffer_size;
+    rsmp->src_data.data_in       = rsmp->input;
+    rsmp->src_data.data_out      = rsmp->output;
+    rsmp->src_data.end_of_input  = 0;
 
-    ao_initialize();
-    pthread_mutex_init(&mutex, NULL);
-    audiobuffer_init(&music_buffer);
-    audiobuffer_init(&bleep_buffer);
-    sem_init(&playaiff_okay, 0, 0);
-    sem_init(&playmusic_okay, 0, 0);
+    return rsmp;
+}
+static void
+resampler_cleanup(resampler_t *rsmp)
+{
+    src_delete(rsmp->src_state);
+    free(rsmp->input);
+    free(rsmp->output);
+    free(rsmp->scratch);
+}
 
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-    err = pthread_create(&(mixer_id), &attr, &mixer, NULL);
-    if (err != 0) {
-	printf("Can't create mixer thread :[%s]", strerror(err));
-	exit(1);
+/*0 done running, 1 run again with more data*/
+static int
+resampler_step(resampler_t *rsmp, float *block)
+{
+    /*Always stereo*/
+    const int channels = 2;
+    const int smps     = frotz_audio.buffer_size;
+    if(block) {
+        assert(rsmp->src_data.input_frames == 0);
+        memcpy(rsmp->input, block, channels*smps*sizeof(float));
+        rsmp->src_data.data_in      = rsmp->input;
+        rsmp->src_data.input_frames = smps;
+    }
+
+    src_process(rsmp->src_state, &rsmp->src_data);
+
+    int u_in = rsmp->src_data.input_frames_used;
+    rsmp->src_data.data_in      += 2*u_in;
+    rsmp->src_data.input_frames -= u_in;
+    int g_out = rsmp->src_data.output_frames_gen;
+    rsmp->src_data.data_out      += 2*g_out;
+    rsmp->src_data.output_frames -= g_out;
+
+    if(rsmp->src_data.output_frames == 0)
+        return 0;
+    return 1;
+}
+
+static void
+resampler_consume(resampler_t *rsmp)
+{
+    rsmp->src_data.data_out      = rsmp->output;
+    rsmp->src_data.output_frames = frotz_audio.buffer_size;
+}
+
+/**********************************************************************
+ *                           MOD                                      *
+ *                                                                    *
+ * Processes MOD data via libmodplug                                  *
+ *                                                                    *
+ * process_mod - Generate MOD samples                                 *
+ * cleanup_mod - Free MOD resources                                   *
+ * load_mod    - Create MOD stream                                    *
+ **********************************************************************/
+
+static int
+process_mod(sound_stream_t *self_, float *outl, float *outr, unsigned samples)
+{
+    sound_stream_mod_t *self = (sound_stream_mod_t*)self_;
+
+    int n = ModPlug_Read(self->mod, self->shortbuffer, samples*2) / 2;
+    const float scale = (1.0f/32768.0f);/*volfactor;*/
+    int i;
+    for(i=0; i<n; ++i) {
+        outl[i] += scale*self->shortbuffer[i];
+        outr[i] += scale*self->shortbuffer[i];
+    }
+
+    if(n <= 0)
+        return 0;
+
+    return 1;
+}
+
+static void
+cleanup_mod(sound_stream_t *s)
+{
+    sound_stream_mod_t *self = (sound_stream_mod_t*)s;
+    ModPlug_Unload(self->mod);
+    free(self->shortbuffer);
+    free(self->filedata);
+}
+
+/*file, data start, id, volume*/
+static sound_stream_t *
+load_mod(FILE *fp, long startpos, int id, float volume)
+{
+    sound_stream_mod_t *stream = (sound_stream_mod_t*)calloc(sizeof(sound_stream_mod_t), 1);
+    long size;
+    long filestart = ftell(fp);
+    fseek(fp, startpos, SEEK_SET);
+
+    stream->id         = id;
+    stream->sound_type = MOD;
+    stream->process    = process_mod;
+    stream->cleanup    = cleanup_mod;
+
+    ModPlug_GetSettings(&stream->settings);
+
+    /* Note: All "Basic Settings" must be set before ModPlug_Load. */
+    stream->settings.mResamplingMode   = MODPLUG_RESAMPLE_FIR; /* RESAMP */
+    stream->settings.mChannels         = 2;
+    stream->settings.mBits             = 16;
+    stream->settings.mFrequency        = frotz_audio.sample_rate;
+    stream->settings.mStereoSeparation = 128;
+    stream->settings.mMaxMixChannels   = 256;
+
+    /* insert more setting changes here */
+    ModPlug_SetSettings(&stream->settings);
+
+    /* remember to free() filedata later */
+    stream->filedata = getfiledata(fp, &size);
+
+    stream->mod = ModPlug_Load(stream->filedata, size);
+    fseek(fp, filestart, SEEK_SET);
+    if (!stream->mod) {
+        fprintf(stderr, "Unable to load MOD chunk.\n\r");
+        return 0;
+    }
+
+    ModPlug_SetMasterVolume(stream->mod, volume * 256);/*powf(2.0f, 8.0f));*/
+
+    stream->shortbuffer = (int16_t*)calloc(frotz_audio.buffer_size, sizeof(short) * 2);
+
+    return (sound_stream_t*)stream;
+}
+
+/**********************************************************************
+ *                         AIFF/OGG                                   *
+ *                                                                    *
+ * Processes OGG/AIFF data via sndfile + resampler                    *
+ *                                                                    *
+ * process_aiff     - Create OGG/AIFF samples                         *
+ * cleanup_aiff     - Free   OGG/AIFF resources                       *
+ * mem_snd_read     - In memory read                                  *
+ * mem_snd_seek     - In memory seek                                  *
+ * mem_tell         - In memory tell                                  *
+ * mem_get_filelen  - In memory filelen                               *
+ * load_aiff        - Create OGG/AIFF stream                          *
+ *                                                                    *
+ **********************************************************************/
+
+static int
+process_aiff(sound_stream_t *self_, float *outl, float *outr, unsigned samples)
+{
+    sound_stream_aiff_t *self = (sound_stream_aiff_t*)self_;
+
+    int needs_data = resampler_step(self->rsmp, 0);
+    int i;
+    while(needs_data) {
+        int inf = sf_readf_float(self->sndfile, self->floatbuffer, samples);
+        if(self->sf_info.channels == 1) {
+            for(i=0; i<inf; ++i) {
+                self->rsmp->scratch[2*i+0] = self->floatbuffer[i];
+                self->rsmp->scratch[2*i+1] = self->floatbuffer[i];
+            }
+        } else if(self->sf_info.channels == 2) {
+            for(i=0; i<inf; ++i) {
+                self->rsmp->scratch[2*i+0] = self->floatbuffer[2*i+0];
+                self->rsmp->scratch[2*i+1] = self->floatbuffer[2*i+1];
+            }
+        }
+        if(inf <= 0)
+            return 0;
+        needs_data = resampler_step(self->rsmp, self->rsmp->scratch);
+    }
+    resampler_consume(self->rsmp);
+
+    for(i=0; i<(int)samples; ++i) {
+        outl[i] += self->rsmp->output[2*i+0]*self->volume;
+        outr[i] += self->rsmp->output[2*i+1]*self->volume;
+    }
+
+    return 1;
+}
+
+static void
+cleanup_aiff(sound_stream_t *s)
+{
+    sound_stream_aiff_t *self = (sound_stream_aiff_t*)s;
+
+    /*Cleanup frame*/
+    resampler_cleanup(self->rsmp);
+    free(self->rsmp);
+    sf_close(self->sndfile);
+    free(self->floatbuffer);
+    free(self->buf.data);
+}
+
+static sf_count_t
+mem_snd_read(void *ptr_, sf_count_t size, void* datasource)
+{
+    uint8_t *ptr = (uint8_t*)ptr_;
+    buf_t *buf = (buf_t *)datasource;
+    size_t to_read = size;
+    size_t did_read = 0;
+    while(to_read > 0 && buf->pos < buf->len) {
+        *ptr++ = buf->data[buf->pos++];
+        did_read++;
+        to_read--;
+    }
+    return did_read;
+}
+
+static sf_count_t
+mem_snd_seek(sf_count_t offset, int whence, void *datasource) {
+    buf_t *buf = (buf_t *)datasource;
+    int64_t pos = 0;
+    if(whence == SEEK_SET)
+        pos = offset;
+    if(whence == SEEK_CUR)
+        pos += offset;
+    if(whence == SEEK_END)
+        pos = buf->len-offset;
+    if(pos >= (int64_t)buf->len)
+        pos = buf->len-1;
+    if(pos < 0)
+        pos = 0;
+    buf->pos = pos;
+
+    return 0;
+}
+
+
+static long
+mem_tell(void *datasource) {
+    buf_t *buf = (buf_t *)datasource;
+    return buf->pos;
+}
+
+static sf_count_t
+mem_get_filelen(void *datasource)
+{
+    buf_t *buf = (buf_t *)datasource;
+    return buf->len;
+}
+
+static sound_stream_t *
+load_aiff(FILE *fp, long startpos, long length, int id, float volume)
+{
+    sound_stream_aiff_t *aiff =
+        (sound_stream_aiff_t*)calloc(sizeof(sound_stream_aiff_t), 1);
+    aiff->sound_type = FORM;
+    aiff->id         = id;
+    aiff->process    = process_aiff;
+    aiff->cleanup    = cleanup_aiff;
+
+    aiff->volume = volume;
+    aiff->sf_info.format = 0;
+
+    fseek(fp, startpos, SEEK_SET);
+    aiff->buf.data = load_block_from_file(fp, length);
+    aiff->buf.len  = length;
+
+    SF_VIRTUAL_IO mem_cb = {
+        .seek        = mem_snd_seek,
+        .read        = mem_snd_read,
+        .tell        = (sf_vio_tell)mem_tell,
+        .get_filelen = mem_get_filelen,
+        .write       = NULL
+    };
+
+    aiff->sndfile = sf_open_virtual(&mem_cb, SFM_READ, &aiff->sf_info, &aiff->buf);
+    aiff->rsmp = resampler_init(aiff->sf_info.samplerate);
+
+    aiff->floatbuffer = (float*)malloc(frotz_audio.buffer_size * aiff->sf_info.channels * sizeof(float));
+
+    return (sound_stream_t*) aiff;
+}
+
+
+
+
+/**********************************************************************
+ *                       Sound Engine                                 *
+ *                                                                    *
+ * Processes OGG/AIFF data via sndfile + resampler                    *
+ *                                                                    *
+ * process_engine     - Create a frame of output                      *
+ * audio_loop         - Stream audio to sound device                  *
+ * sound_halt_aiff    - Stop all AIFF voices                          *
+ * sound_halt_mod     - Stop all MOD voices                           *
+ * sound_halt_ogg     - Stop all OGG voices                           *
+ * sound_stop_id      - Proxy to stop an id                           *
+ * sound_stop_id_real - Stop a given stream id                        *
+ * sound_enqueue      - Proxy to start a stream obj                   *
+ * sound_enqueue_real - Start a stream obj                            *
+ * volume_factor      - Convert volume to scalar multiplier           *
+ **********************************************************************/
+
+static void
+sound_enqueue_real(sound_engine_t *e, sound_stream_t *s);
+static void
+sound_stop_id_real(sound_engine_t *e, int id);
+
+static void
+process_engine(sound_engine_t *e)
+{
+    int i;
+    /*Handle event*/
+    if(sem_trywait(&e->ev_pending) == 0) {
+        if(e->event.type == EVENT_START_STREAM)
+            sound_enqueue_real(e,e->event.e);
+        else if(e->event.type == EVENT_STOP_STREAM)
+            sound_stop_id_real(e,e->event.i);
+        sem_post(&e->ev_free);
+    }
+
+    /*Start out with an empty buffer*/
+    memset(e->outl, 0, sizeof(float)*e->buffer_size);
+    memset(e->outr, 0, sizeof(float)*e->buffer_size);
+
+    for(i=0; i<8; ++i) {
+        sound_state_t *state = &e->voices[i];
+
+        /*Only process active voices*/
+        if(!state->active)
+            continue;
+
+        sound_stream_t *sound = e->streams[i];
+
+        if(sound) {
+            int ret = sound->process(sound, e->outl, e->outr, e->buffer_size);
+            if(ret == 0) {
+                /*fprintf(audio_log, "stream #%d is complete\n", i);*/
+                state->active = false;
+                sound->cleanup(sound);
+                free(sound);
+                e->streams[i] = NULL;
+            }
+        }
     }
 }
 
-
-/*
- * os_beep
- *
- * Play a beep sound. Ideally, the sound should be high- (number == 1)
- * or low-pitched (number == 2).
- *
- */
-void os_beep (int number)
+static void*
+audio_loop(void*v)
 {
-    int i = number;
-    i++;
+    (void)v;
+    size_t outsize = frotz_audio.buffer_size*2*sizeof(int16_t);
+    int16_t *buf  = (int16_t*)calloc(outsize,1);
+    int i;
+    ao_device *device;
+    ao_sample_format format;
+    ao_initialize();
+    int default_driver = ao_default_driver_id();
 
-    beep();
-}/* os_beep */
+    memset(&format, 0, sizeof(ao_sample_format));
+
+    format.byte_format = AO_FMT_NATIVE;
+    format.bits = 16;
+    format.channels = 2;
+    format.rate = 48000.0f;
+    device = ao_open_live(default_driver, &format, NULL);
+
+    while(1) {
+        process_engine(&frotz_audio);
+
+        const float mul = (32768.0f);
+        for(i=0; i<(int)frotz_audio.buffer_size; ++i) {
+            buf[2*i+0] = limit(-32764,32767,mul*0.8*frotz_audio.outl[i]);
+            buf[2*i+1] = limit(-32764,32767,mul*0.8*frotz_audio.outr[i]);
+        }
+        ao_play(device, (char*)buf, outsize);
+    }
+    return 0;
+}
 
 
-/*
- * os_prepare_sample
- *
- * Load the sample from the disk.
- *
- * Actually it's more efficient these days to load and play a sound in
- * the same operation.  This function therefore does nothing.
- *
- */
-void os_prepare_sample (int number)
+static void
+sound_halt_aiff(void)
 {
-    int i = number;
-    i++;
+    int i;
+    for(i=0; i<NUM_VOICES; ++i) {
+        if(frotz_audio.streams[i] && frotz_audio.streams[i]->sound_type == FORM) {
+            /*fprintf(audio_log, "killing aiff stream #%d\n", i);*/
+            sound_stream_t *s = frotz_audio.streams[i];
+            frotz_audio.streams[i] = 0;
+            s->cleanup(s);
+            free(s);
+        }
+    }
+}
 
-    return;
-}/* os_prepare_sample */
+static void
+sound_halt_mod(void)
+{
+    int i;
+    for(i=0; i<NUM_VOICES; ++i) {
+        if(frotz_audio.streams[i] && frotz_audio.streams[i]->sound_type == MOD) {
+            /*fprintf(audio_log, "killing mod stream #%d\n", i);*/
+            sound_stream_t *s = frotz_audio.streams[i];
+            frotz_audio.streams[i] = 0;
+            s->cleanup(s);
+            free(s);
+        }
+    }
+}
 
+static void
+sound_halt_ogg(void)
+{
+    int i;
+    for(i=0; i<NUM_VOICES; ++i) {
+        if(frotz_audio.streams[i] && frotz_audio.streams[i]->sound_type == OGGV) {
+            /*fprintf(audio_log, "killing ogg stream #%d\n", i);*/
+            sound_stream_t *s = frotz_audio.streams[i];
+            frotz_audio.streams[i] = 0;
+            s->cleanup(s);
+            free(s);
+        }
+    }
+}
+
+static sound_stream_t *load_mod(FILE *fp, long startpos, int id, float volume);
+static sound_stream_t *load_aiff(FILE *fp, long startpos, long length, int id, float volume);
+
+static void
+sound_stop_id(int id)
+{
+    sem_wait(&frotz_audio.ev_free);
+    frotz_audio.event.type = EVENT_STOP_STREAM;
+    frotz_audio.event.i    = id;
+    sem_post(&frotz_audio.ev_pending);
+}
+
+static void
+sound_stop_id_real(sound_engine_t *e, int id)
+{
+    int i;
+    for(i=0; i<NUM_VOICES; ++i) {
+        sound_stream_t *s = e->streams[i];
+        if(s && s->id == id) {
+            /*fprintf(audio_log, "killing stream #%d\n", i);*/
+            e->streams[i] = 0;
+            s->cleanup(s);
+            free(s);
+        }
+    }
+}
+
+static void
+sound_enqueue(sound_stream_t *s)
+{
+    sem_wait(&frotz_audio.ev_free);
+    frotz_audio.event.type = EVENT_START_STREAM;
+    frotz_audio.event.e    = s;
+    sem_post(&frotz_audio.ev_pending);
+}
+
+static void
+sound_enqueue_real(sound_engine_t *e, sound_stream_t *s)
+{
+    assert(e);
+    assert(s);
+    int i;
+
+    if(s->sound_type == FORM) {
+        sound_halt_aiff();
+    } else if(s->sound_type == MOD) {
+        sound_halt_mod();
+        sound_halt_ogg();
+    } else if(s->sound_type == OGGV) {
+        sound_halt_mod();
+        sound_halt_ogg();
+    }
+
+    for(i=0; i<NUM_VOICES; ++i) {
+        if(e->streams[i]) /*only use free voices*/
+            continue;
+        /*fprintf(audio_log, "Enqueue %p to %d\n", s, i);*/
+        e->streams[i]       = s;
+        e->voices[i].active = true;
+        e->voices[i].src    = 0;
+        e->voices[i].pos    = 0;
+        e->voices[i].repid  = 0;
+        break;
+    }
+}
+
+static float
+volume_factor(int vol)
+{
+    static float lut[8] = {0.0078125f, 0.015625f, 0.03125f, 0.0625f, 0.125f, 0.25f, 0.5f, 1.0f};
+
+    if(vol < 1) vol = 1;
+    if(vol > 8) vol = 8;
+    return lut[vol-1];
+    /*return powf(2, vol - 8);*/
+}
+
+
+/**********************************************************************
+ *                       Public API                                   *
+ *                                                                    *
+ **********************************************************************/
+
+void
+os_init_sound(void)
+{
+    int i;
+    int err;
+    static pthread_attr_t attr;
+
+    /*Initialize sound engine*/
+    /*audio_log = fopen("audio_log.txt", "w");*/
+    /*fprintf(audio_log, "os_init_sound...\n");*/
+    frotz_audio.buffer_size = 1024;
+    frotz_audio.sample_rate = 48000;
+    frotz_audio.outl        = (float*)calloc(frotz_audio.buffer_size, sizeof(float));
+    frotz_audio.outr        = (float*)calloc(frotz_audio.buffer_size, sizeof(float));
+
+    for(i=0; i<NUM_VOICES; ++i)
+        frotz_audio.voices[i].active = 0;
+
+    /*No events registered on startup*/
+    sem_init(&frotz_audio.ev_free,    0, 1);
+    sem_init(&frotz_audio.ev_pending, 0, 0);
+    frotz_audio.event.type = 0;
+
+    /*Start audio thread*/
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+    pthread_t unused_id;
+    err = pthread_create(&unused_id, &attr, &audio_loop, NULL);
+    if (err != 0) {
+        fprintf(stderr, "Can't create audio thread :[%s]", strerror(err));
+        exit(1);
+    }
+}
 
 /*
  * os_start_sample
@@ -188,690 +810,80 @@ void os_prepare_sample (int number)
  * the sound file itself. The end_of_sound function is called as soon
  * as the sound finishes.
  *
+ * XXX: Currently the end_of_sound function is never called
+ *
  */
-void os_start_sample (int number, int volume, int repeats, zword eos)
+void
+os_start_sample(int number, int volume, int repeats, zword eos)
 {
+    (void) repeats;
+    (void) eos;
+    /*fprintf(audio_log, "os_start_sample(%d,%d,%d,%d)...\n",number,volume,repeats, eos);*/
+    /*fflush(audio_log);*/
+    extern bb_map_t     *blorb_map;
+    extern FILE         *blorb_fp;
+
     bb_result_t resource;
-    EFFECT myeffect;
-    int err;
-    static pthread_attr_t attr;
-    zword foo = eos;
-
-    foo++;
-
-    if (blorb_map == NULL) return;
-
-    if (bb_err_None != bb_load_resource(blorb_map, bb_method_FilePos, &resource, bb_ID_Snd, number))
-	return;
-
-    myeffect.fp = blorb_fp;
-    myeffect.result = resource;
-    myeffect.vol = volume;
-    myeffect.repeats = repeats;
-    myeffect.number = number;
-
-    pthread_attr_init(&attr);
-
-    if (blorb_map->chunks[resource.chunknum].type == bb_ID_FORM)
-	myeffect.type = FORM;
-    else if (blorb_map->chunks[resource.chunknum].type == bb_ID_MOD)
-	myeffect.type = MOD;
-    else if (blorb_map->chunks[resource.chunknum].type == bb_ID_OGGV)
-	myeffect.type = OGGV;
-
-    if (myeffect.type == FORM) {
-	if (bleep_playing) {
-	    bleep_playing = FALSE;
-	    pthread_join(playaiff_id, NULL);
-	}
-	err = pthread_create(&playaiff_id, &attr, (void *) &playaiff, &myeffect);
-	if (err != 0) {
-	    printf("Can't create playaiff thread :[%s]", strerror(err));
-	    return;
-	}
-	sem_wait(&playaiff_okay);
-    } else if (myeffect.type == MOD || myeffect.type == OGGV) {
-	if (music_playing) {
-	    music_playing = FALSE;
-	    pthread_join(playmusic_id, NULL);
-	}
-	err = pthread_create(&playmusic_id, &attr, (void *) &playmusic, &myeffect);
-	if (err != 0) {
-	    printf("Can't create playmusic thread :[%s]", strerror(err));
-	    return;
-	}
-	sem_wait(&playmusic_okay);
-    } else {
-	/* Something else was presented as an audio chunk.  Ignore it. */
-    }
-}/* os_start_sample */
+    int type;
+    const float vol = volume_factor(volume);
+    sound_stream_t *s = 0;
 
 
-/*
- * os_stop_sample
- *
- * Turn off the current sample.
- *
- */
-void os_stop_sample (int number)
-{
-    if (bleep_playing && (number == bleepnum || number == 0)) {
-        bleep_playing = FALSE;
-        sem_post(&bleep_buffer.empty);
-        pthread_join(playaiff_id, 0);
+    /*Load resource from BLORB data*/
+    if(blorb_map == NULL) return;
+
+    if(bb_err_None != bb_load_resource(blorb_map, bb_method_FilePos, &resource, bb_ID_Snd, number))
+        return;
+
+    type = get_type(blorb_map->chunks[resource.chunknum].type);
+
+    if (type == FORM) {
+        s = load_aiff(blorb_fp,
+                resource.data.startpos,
+                resource.length,
+                number,
+                vol);
+    } else if (type == MOD) {
+        s = load_mod(blorb_fp, resource.data.startpos, number, vol);
+    } else if (type == OGGV) {
+        s = load_aiff(blorb_fp,
+                resource.data.startpos,
+                resource.length,
+                number,
+                vol);
+        s->sound_type = OGGV;
     }
 
-    if (get_music_playing() && (number == get_musicnum () || number == 0)) {
-        set_music_playing(false);
-        sem_post(&music_buffer.empty);
-        pthread_join(playmusic_id, 0);
-    }
-
-    return;
-}/* os_stop_sample */
-
-
-/*
- * os_finish_with_sample
- *
- * Remove the current sample from memory (if any).
- *
- */
-void os_finish_with_sample (int number)
-{
-    os_stop_sample(number);
-
-}/* os_finish_with_sample */
-
-
-/*
- * os_wait_sample
- *
- * Stop repeating the current sample and wait until it finishes.
- *
- */
-void os_wait_sample (void)
-{
-
-    /* Not implemented */
-
-}/* os_wait_sample */
-
-
-/*
- **********************************************
- * These functions are internal to ux_audio.c
- *
- **********************************************
- */
-
-/*
- * mixer
- *
- * In a classic producer/consumer arrangement, this mixer watches for audio
- * data to be placed in *bleepbuffer or *musicbuffer.  When a semaphore for
- * either is raised, the mixer processes the buffer.
- *
- * Data presented to the mixer must be floats at 44100hz
- *
- */
-static void *mixer(void * UNUSED(arg))
-{
-    short *shortbuffer;
-    int default_driver;
-    ao_device *device;
-    ao_sample_format format;
-    int samplecount;
-
-    default_driver = ao_default_driver_id();
-
-    shortbuffer = malloc(BUFFSIZE * sizeof(short) * 2);
-    if (shortbuffer == NULL) {
-        printf("Unable to malloc shortbuffer\n");
-        exit(1);
-    }
-
-    memset(&format, 0, sizeof(ao_sample_format));
-
-    format.byte_format = AO_FMT_NATIVE;
-    format.bits = 16;
-    format.channels = 2;
-    format.rate = SAMPLERATE;
-
-    device = NULL;
-
-    while (1) {
-        if(music_playing) {
-            sem_wait(&music_buffer.full);          /* Wait until output buffer is full */
-        }
-        if(bleep_playing ) {
-            sem_wait(&bleep_buffer.full);          /* Wait until output buffer is full */
-        }
-
-        pthread_mutex_lock(&mutex);     /* Acquire mutex */
-
-        if (device == NULL) {
-            device = ao_open_live(default_driver, &format, NULL);
-            if (device == NULL) {
-                printf(" Error opening sound device.\n");
-            }
-        }
-
-        if (bleep_playing && !music_playing) {
-            floattopcm16(shortbuffer, bleep_buffer.samples, bleep_buffer.nsamples);
-            ao_play(device, (char *) shortbuffer, bleep_buffer.nsamples * sizeof(short));
-            bleep_buffer.nsamples = 0;
-        }
-
-        if (music_playing && !bleep_playing) {
-            floattopcm16(shortbuffer, music_buffer.samples, music_buffer.nsamples);
-            ao_play(device, (char *) shortbuffer, music_buffer.nsamples * sizeof(short));
-            music_buffer.nsamples = 0;
-        }
-
-        if (music_playing && bleep_playing) {
-            int samples = 100000;
-            if(bleep_buffer.nsamples == -1)
-                bleep_buffer.nsamples = 0;
-            if(music_buffer.nsamples == -1)
-                music_buffer.nsamples = 0;
-            if(samples > bleep_buffer.nsamples && bleep_buffer.nsamples > 0)
-                samples = bleep_buffer.nsamples;
-
-            if(samples > music_buffer.nsamples && music_buffer.nsamples > 0)
-                samples = music_buffer.nsamples;
-
-            //both buffers have invalid sample data or are empty
-            if(samples == 100000)
-                samples = 0;
-
-            float *outbuf = calloc(samples+1,sizeof(float));
-            for(int i=0; i < samples; ++i)
-                outbuf[i] += music_buffer.samples[i];
-            for(int i=0; i < samples; ++i)
-                outbuf[i] += bleep_buffer.samples[i];
-
-            //only partially consume data
-            if(bleep_buffer.nsamples > samples) {
-                memmove(bleep_buffer.samples, bleep_buffer.samples+samples,
-                        sizeof(float)*(bleep_buffer.nsamples-samples));
-            }
-            if(bleep_buffer.nsamples > 0)
-                bleep_buffer.nsamples -= samples;
-
-            if(music_buffer.nsamples > samples) {
-                memmove(music_buffer.samples, music_buffer.samples+samples,
-                        sizeof(float)*(music_buffer.nsamples-samples));
-            }
-            if(music_buffer.nsamples > 0)
-                music_buffer.nsamples -= samples;
-
-
-            samplecount = samples;
-            floattopcm16(shortbuffer, outbuf, samples);
-            ao_play(device, (char *) shortbuffer, samplecount * sizeof(short));
-            free(outbuf);
-        }
-
-        if (!bleep_playing && !music_playing) {
-            ao_close(device);
-            device = NULL;
-        }
-
-        pthread_mutex_unlock(&mutex);   /* release the mutex lock */
-
-        if(bleep_buffer.nsamples) {
-            sem_post(&bleep_buffer.full);
-        }
-        if(music_buffer.nsamples) {
-            sem_post(&music_buffer.full);
-        }
-
-        int tmp;
-        sem_getvalue(&bleep_buffer.empty, &tmp);
-
-        if(bleep_buffer.nsamples <= 0 && tmp == 0) {
-            sem_post(&bleep_buffer.empty);         /* signal empty */
-        }
-
-        sem_getvalue(&music_buffer.empty, &tmp);
-        if(music_buffer.nsamples <= 0 && tmp == 0) {
-            sem_post(&music_buffer.empty);         /* signal empty */
-        }
-    }
-} /* mixer */
-
-
-/* Convert back to shorts */
-static void floattopcm16(short *outbuf, float *inbuf, int length)
-{
-    int   count;
-
-    const float mul = (32768.0f);
-    for (count = 0; count <= length; count++) {
-	int32_t tmp = (int32_t)(mul * inbuf[count]);
-	tmp = MAX( tmp, -32768 ); // CLIP < 32768
-	tmp = MIN( tmp, 32767 );  // CLIP > 32767
-	outbuf[count] = tmp;
-    }
+    if(s)
+        sound_enqueue(s);
 }
 
 
-/* Convert the buffer to floats. (before resampling) */
-static void pcm16tofloat(float *outbuf, short *inbuf, int length)
+void os_beep(int bv)
 {
-    int   count;
-
-    const float div = (1.0f/32768.0f);
-    for (count = 0; count <= length; count++) {
-	outbuf[count] = div * (float) inbuf[count];
-    }
+    (void) bv;
+    /*Currently not implemented*/
+    /*To implement generate a high frequency beep for bv=1,*/
+    /*low frequency for bv=2*/
+    /*fprintf(audio_log, "os_beep(%d)...\n", bv);*/
+}
+void os_prepare_sample(int id)
+{
+    (void) id;
+    /*Currently not implemented*/
+    /*fprintf(audio_log, "os_prepare_sample(%d)...\n", id);*/
 }
 
-
-/*
- * stereoize
- *
- * Copy the single channel of a monaural stream to both channels
- * of a stereo stream.
- *
- */
-static void stereoize(float *outbuf, float *inbuf, size_t length)
+void os_stop_sample(int id)
 {
-    size_t count;
-    int outcount;
-
-    outcount = 0;
-
-    for (count = 0; count < length; count++) {
-	outbuf[outcount] = outbuf[outcount+1] = inbuf[count];
-	outcount += 2;
-    }
+    /*fprintf(audio_log, "os_stop_sample(%d)...\n", id);*/
+    sound_stop_id(id);
 }
 
-
-/*
- * mypower
- *
- * Just a simple recursive integer-based power function because I don't
- * want to use the floating-point version from libm.
- *
- */
-static int mypower(int base, int exp) {
-    if (exp == 0)
-        return 1;
-    else if (exp % 2)
-        return base * mypower(base, exp - 1);
-    else {
-        int temp = mypower(base, exp / 2);
-        return temp * temp;
-    }
+void os_finish_with_sample(int id)
+{
+    /*fprintf(audio_log, "os_finish_with_sample(%d)...\n", id);*/
+    os_stop_sample(id);
 }
-
-
-/*
- * playaiff
- *
- * This function takes a file pointer to a Blorb file and a bb_result_t
- * struct describing what chunk to play.  It's up to the caller to make
- * sure that an AIFF chunk is to be played.  Volume and repeats are also
- * handled here.
- *
- * This function should be able to play OGG chunks, but because of a bug
- * or oversight in Libsndfile, that library is incapable of playing OGG
- * data which are embedded in a larger file.
- *
- */
-void *playaiff(EFFECT *raw_effect)
-{
-//    long filestart;
-
-    int volcount;
-    int volfactor;
-
-    float *floatbuffer;
-    float *floatbuffer2;
-
-    SNDFILE     *sndfile;
-    SF_INFO     sf_info;
-
-    SRC_STATE	*src_state;
-    SRC_DATA	src_data;
-    int		error;
-    sf_count_t	output_count = 0;
-
-    EFFECT myeffect = *raw_effect;
-
-    sem_post(&playaiff_okay);
-
-    sf_info.format = 0;
-    bleepnum = myeffect.number;
-
-//    filestart = ftell(myeffect.fp);
-    lseek(fileno(myeffect.fp), myeffect.result.data.startpos, SEEK_SET);
-    sndfile = sf_open_fd(fileno(myeffect.fp), SFM_READ, &sf_info, 0);
-
-    if (myeffect.vol < 1) myeffect.vol = 1;
-    if (myeffect.vol > 8) myeffect.vol = 8;
-    volfactor = mypower(2, -myeffect.vol + 8);
-
-    floatbuffer = malloc(BUFFSIZE * sf_info.channels * sizeof(float));
-    floatbuffer2 = malloc(BUFFSIZE * 2 * sizeof(float));
-    memset(bleep_buffer.samples, 0, BUFFSIZE * sizeof(float) * 2);
-
-    /* Set up for conversion */
-    if ((src_state = src_new(SRC_SINC_FASTEST, sf_info.channels, &error)) == NULL) {
-	printf("Error: src_new() failed: %s.\n", src_strerror(error));
-	exit(1);
-    }
-    src_data.end_of_input = 0;
-    src_data.input_frames = 0;
-    src_data.data_in = floatbuffer;
-    src_data.src_ratio = (1.0 * SAMPLERATE) / sf_info.samplerate;
-    src_data.data_out = floatbuffer2;
-    src_data.output_frames = BUFFSIZE / sf_info.channels;
-
-    bleep_playing = TRUE;
-
-    while (1) {
-        /* Check if we're being told to stop. */
-        if (!bleep_playing) break;
-        sem_wait(&bleep_buffer.empty);
-        pthread_mutex_lock(&mutex);
-
-        /* If floatbuffer is empty, refill it. */
-        if (src_data.input_frames == 0) {
-            src_data.input_frames = sf_readf_float(sndfile, floatbuffer, BUFFSIZE / sf_info.channels);
-            src_data.data_in = floatbuffer;
-            /* Mark end of input. */
-            if (src_data.input_frames < BUFFSIZE / sf_info.channels)
-                src_data.end_of_input = SF_TRUE;
-        }
-
-        /* Do the sample rate conversion. */
-        if ((error = src_process(src_state, &src_data))) {
-            printf("Error: %s\n", src_strerror(error));
-            exit(1);
-        }
-
-        bleep_buffer.nsamples = src_data.output_frames_gen * 2;
-
-        /* Stereoize monaural sound-effects. */
-        if (sf_info.channels == 1) {
-            /* Remember that each monaural frame contains just one sample. */
-            stereoize(bleep_buffer.samples, floatbuffer2, src_data.output_frames_gen);
-        } else {
-            /* It's already stereo.  Just copy the buffer. */
-            memmove(bleep_buffer.samples, floatbuffer2, sizeof(float) * src_data.output_frames_gen * 2);
-        }
-
-        /* Adjust volume. */
-        for (volcount = 0; volcount <= bleep_buffer.nsamples; volcount++)
-            bleep_buffer.samples[volcount] /= volfactor;
-
-        /* If that's all, terminate and signal that we're done. */
-        if (src_data.end_of_input && src_data.output_frames_gen == 0) {
-            sem_post(&bleep_buffer.full);
-            pthread_mutex_unlock(&mutex);
-            break;
-        }
-
-        /* Get ready for the next chunk. */
-        output_count += src_data.output_frames_gen;
-        src_data.data_in += src_data.input_frames_used * sf_info.channels;
-        src_data.input_frames -= src_data.input_frames_used;
-
-        /* By this time, the buffer is full.  Signal the mixer to play it. */
-        pthread_mutex_unlock(&mutex);
-        sem_post(&bleep_buffer.full);
-    }
-
-    /* The two ways to exit the above loop are to process all the
-     * samples in the AIFF file or else get told to stop early.
-     * Whichever, we need to clean up and terminate this thread.
-     */
-
-    bleep_playing = FALSE;
-    memset(bleep_buffer.samples, 0, BUFFSIZE * sizeof(float) * 2);
-
-    //    fseek(myeffect.fp, filestart, SEEK_SET);
-
-    //    pthread_mutex_unlock(&mutex);
-    //    sem_post(&audio_empty);
-
-    sf_close(sndfile);
-    free(floatbuffer);
-    free(floatbuffer2);
-
-    pthread_exit(NULL);
-} /* playaiff */
-
-
-/*
- * playmusic
- *
- * To more easily make sure only one of MOD or OGGV plays at one time.
- *
- */
-static void *playmusic(EFFECT *raw_effect)
-{
-    EFFECT myeffect = *raw_effect;
-
-    sem_post(&playmusic_okay);
-
-    if (myeffect.type == MOD)		playmod(&myeffect);
-    else if (myeffect.type == OGGV)	playogg(&myeffect);
-    else { } /* do nothing */
-
-    pthread_exit(NULL);
-
-} /* playmusic */
-
-
-/*
- * playmod
- *
- * This function takes a file pointer to a Blorb file and a bb_result_t
- * struct describing what chunk to play.  It's up to the caller to make
- * sure that a MOD chunk is to be played.  Volume and repeats are also
- * handled here.
- *
- */
-static void *playmod(EFFECT *raw_effect)
-{
-    short *shortbuffer;
-
-//    int modlen;
-//    int count;
-
-    char *filedata;
-    long size;
-    ModPlugFile *mod;
-    ModPlug_Settings settings;
-
-    long filestart;
-
-    EFFECT myeffect = *raw_effect;
-
-    set_musicnum(myeffect.number);
-
-    filestart = ftell(myeffect.fp);
-    fseek(myeffect.fp, myeffect.result.data.startpos, SEEK_SET);
-
-    ModPlug_GetSettings(&settings);
-
-    /* Note: All "Basic Settings" must be set before ModPlug_Load. */
-    settings.mResamplingMode = MODPLUG_RESAMPLE_FIR; /* RESAMP */
-    settings.mChannels = 2;
-    settings.mBits = 16;
-    settings.mFrequency = SAMPLERATE;
-    settings.mStereoSeparation = 128;
-    settings.mMaxMixChannels = 256;
-
-    /* insert more setting changes here */
-    ModPlug_SetSettings(&settings);
-
-    /* remember to free() filedata later */
-    filedata = getfiledata(myeffect.fp, &size);
-
-    mod = ModPlug_Load(filedata, size);
-    fseek(myeffect.fp, filestart, SEEK_SET);
-    if (!mod) {
-        printf("Unable to load MOD chunk.\n\r");
-        return 0;
-    }
-
-    if (myeffect.vol < 1) myeffect.vol = 1;
-    if (myeffect.vol > 8) myeffect.vol = 8;
-    ModPlug_SetMasterVolume(mod, mypower(2, myeffect.vol));
-
-    shortbuffer = malloc(BUFFSIZE * sizeof(short) * 2);
-
-    music_playing = TRUE;
-
-    while (1) {
-        sem_wait(&music_buffer.empty);
-        pthread_mutex_lock(&mutex);
-        memset(music_buffer.samples, 0, BUFFSIZE * sizeof(float) * 2);
-        if (!music_playing) {
-            break;
-        }
-        music_buffer.nsamples = ModPlug_Read(mod, shortbuffer, BUFFSIZE) / 2;
-        pcm16tofloat(music_buffer.samples, shortbuffer, music_buffer.nsamples);
-        if (music_buffer.nsamples == 0) break;
-        pthread_mutex_unlock(&mutex);
-        sem_post(&music_buffer.full);
-    }
-
-    music_playing = FALSE;
-    memset(music_buffer.samples, 0, BUFFSIZE * sizeof(float) * 2);
-
-    pthread_mutex_unlock(&mutex);
-    sem_post(&music_buffer.empty);
-
-    ModPlug_Unload(mod);
-    free(shortbuffer);
-    free(filedata);
-
-    return 0;
-} /* playmod */
-
-
-/*
- * getfiledata
- *
- * libmodplug requires the whole file to be pulled into memory.
- * This function does that and then closes the file.
- */
-static char *getfiledata(FILE *fp, long *size)
-{
-    char *data;
-    long offset;
-
-    offset = ftell(fp);
-    fseek(fp, 0L, SEEK_END);
-    (*size) = ftell(fp);
-    fseek(fp, offset, SEEK_SET);
-    data = (char*)malloc(*size);
-    fread(data, *size, sizeof(char), fp);
-    fseek(fp, offset, SEEK_SET);
-    return(data);
-} /* getfiledata */
-
-
-/*
- * playogg
- *
- * This function takes a file pointer to a Blorb file and a bb_result_t
- * struct describing what chunk to play.  It's up to the caller to make
- * sure that an OGG chunk is to be played.  Volume and repeats are also
- * handled here.
- *
- * Libsndfile is capable of reading OGG files, but not if the file is
- * embedded in another file.  That's why we're using libvorbisfile
- * directly instead of going through libsndfile.  Erikd, main developer
- * of libsndfile is working on a fix.
- *
- */
-static void *playogg(EFFECT *raw_effect)
-{
-    ogg_int64_t toread;
-    ogg_int64_t frames_read;
-    ogg_int64_t count;
-
-    vorbis_info *info;
-
-    OggVorbis_File vf;
-
-    int current_section;
-    short *shortbuffer;
-
-//    long filestart;
-    int volcount;
-    int volfactor;
-
-    EFFECT myeffect = *raw_effect;
-
-//    filestart = ftell(myeffect.fp);
-    fseek(myeffect.fp, myeffect.result.data.startpos, SEEK_SET);
-
-    if (ov_open_callbacks(myeffect.fp, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0) {
-	printf("Unable to load OGGV chunk.\n\r");
-	return 0;
-    }
-
-    info = ov_info(&vf, -1);
-    if (info == NULL) {
-	printf("Unable to get info on OGGV chunk.\n\r");
-	return 0;
-    }
-
-    if (myeffect.vol < 1) myeffect.vol = 1;
-    if (myeffect.vol > 8) myeffect.vol = 8;
-    volfactor = mypower(2, -myeffect.vol + 8);
-
-    shortbuffer = malloc(BUFFSIZE * info->channels * sizeof(short));
-
-    frames_read = 0;
-    toread = ov_pcm_total(&vf, -1) * 2 * info->channels;
-    count = 0;
-
-    music_playing = TRUE;
-
-    while (count < toread) {
-	sem_wait(&music_buffer.empty);
-	pthread_mutex_lock(&mutex);
-	memset(music_buffer.samples, 0, BUFFSIZE * sizeof(float) * 2);
-	if (!music_playing) break;
-
-        frames_read = ov_read(&vf, (char *)shortbuffer, BUFFSIZE, 0,2,1,&current_section);
-
-        pcm16tofloat(music_buffer.samples, shortbuffer, frames_read);
-        for (volcount = 0; volcount <= frames_read / 2; volcount++) {
-            ((float *) music_buffer.samples)[volcount] /= volfactor;
-        }
-
-	music_buffer.nsamples  = frames_read / 2;
-    if(music_buffer.nsamples == -1)
-        music_buffer.nsamples  = 0;
-    //perform mix down
-    count += frames_read;
-
-	pthread_mutex_unlock(&mutex);
-	sem_post(&music_buffer.full);
-    }
-
-//    fseek(myeffect.fp, filestart, SEEK_SET);
-    music_playing = FALSE;
-
-    pthread_mutex_unlock(&mutex);
-    sem_post(&music_buffer.empty);
-
-    ov_clear(&vf);
-
-    free(shortbuffer);
-
-    return 0;
-} /* playogg */
 
 #endif /* NO_SOUND */
