@@ -329,12 +329,12 @@ process_mod(sound_stream_t *self_, float *outl, float *outr, unsigned samples)
 {
     sound_stream_mod_t *self = (sound_stream_mod_t*)self_;
 
-    int n = ModPlug_Read(self->mod, self->shortbuffer, samples*2) / 2;
+    int n = ModPlug_Read(self->mod, self->shortbuffer, samples*4) / 4;
     const float scale = (1.0f/32768.0f);/*volfactor;*/
     int i;
     for(i=0; i<n; ++i) {
-        outl[i] += scale*self->shortbuffer[i];
-        outr[i] += scale*self->shortbuffer[i];
+        outl[i] += scale*self->shortbuffer[i*2+0];
+        outr[i] += scale*self->shortbuffer[i*2+1];
     }
 
     if(n <= 0)
