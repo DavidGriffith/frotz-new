@@ -31,6 +31,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <assert.h>
+#include <unistd.h> //pread
 
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
@@ -112,6 +113,13 @@ typedef struct {
 } buf_t;
 
 typedef struct {
+    FILE    *file;
+    size_t   base_offset;
+    size_t   len;
+    size_t   pos;
+} file_reader_t;
+
+typedef struct {
     int (*process)(sound_stream_t *self, float *outl, float *outr, unsigned samples);
     void (*cleanup)(sound_stream_t *self);
     sound_type_t sound_type;
@@ -127,7 +135,7 @@ typedef struct {
     int    repeats;    /* Total times to play the sample 1..n*/
     int    pos;
 
-    buf_t buf;
+    file_reader_t freader;
 } sound_stream_aiff_t;
 
 typedef struct {
@@ -179,7 +187,6 @@ static sound_engine_t frotz_audio;
  *                                                                    *
  * getfiledata          - get all bytes of a file after               *
  *                        the start point                             *
- * load_block_from_file - Load size bytes from current offset         *
  * make_id              - Create BLORB identifier                     *
  * get_type             - Get OGG/FORM/AIFF type                      *
  * limit                - x -> a <= x <= b                            *
@@ -196,16 +203,6 @@ getfiledata(FILE *fp, long *size)
     fread(data, *size, sizeof(char), fp);
     fseek(fp, offset, SEEK_SET);
     return(data);
-}
-
-static uint8_t *
-load_block_from_file(FILE *fp, long size)
-{
-    long offset = ftell(fp);
-    uint8_t *data = (uint8_t*)malloc(size);
-    fread(data, size, sizeof(uint8_t), fp);
-    fseek(fp, offset, SEEK_SET);
-    return data;
 }
 
 static
@@ -455,39 +452,45 @@ cleanup_aiff(sound_stream_t *s)
     free(self->rsmp);
     sf_close(self->sndfile);
     free(self->floatbuffer);
-    free(self->buf.data);
 }
 
 static sf_count_t
 mem_snd_read(void *ptr_, sf_count_t size, void* datasource)
 {
     uint8_t *ptr = (uint8_t*)ptr_;
-    buf_t *buf = (buf_t *)datasource;
+    file_reader_t *fr = (file_reader_t *)datasource;
     size_t to_read = size;
-    size_t did_read = 0;
-    while(to_read > 0 && buf->pos < buf->len) {
-        *ptr++ = buf->data[buf->pos++];
-        did_read++;
-        to_read--;
+    size_t read_total = 0;
+    ssize_t did_read = 0;
+    while(to_read > 0) {
+        did_read = pread(fileno(fr->file), ptr, size, fr->pos+fr->base_offset);
+        if(did_read < 0)
+            return did_read;
+        else if(did_read == 0)
+            return read_total;
+        read_total += did_read;
+        fr->pos    += did_read;
+        ptr        += did_read;
+        to_read    -= did_read;
     }
-    return did_read;
+    return read_total;
 }
 
 static sf_count_t
 mem_snd_seek(sf_count_t offset, int whence, void *datasource) {
-    buf_t *buf = (buf_t *)datasource;
+    file_reader_t *fr = (file_reader_t *)datasource;
     int64_t pos = 0;
     if(whence == SEEK_SET)
         pos = offset;
     if(whence == SEEK_CUR)
         pos += offset;
     if(whence == SEEK_END)
-        pos = buf->len-offset;
-    if(pos >= (int64_t)buf->len)
-        pos = buf->len-1;
+        pos = fr->len-offset;
+    if(pos >= (int64_t)fr->len)
+        pos = fr->len-1;
     if(pos < 0)
         pos = 0;
-    buf->pos = pos;
+    fr->pos = pos;
 
     return 0;
 }
@@ -495,15 +498,15 @@ mem_snd_seek(sf_count_t offset, int whence, void *datasource) {
 
 static long
 mem_tell(void *datasource) {
-    buf_t *buf = (buf_t *)datasource;
-    return buf->pos;
+    file_reader_t *fr = (file_reader_t*)datasource;
+    return fr->pos;
 }
 
 static sf_count_t
 mem_get_filelen(void *datasource)
 {
-    buf_t *buf = (buf_t *)datasource;
-    return buf->len;
+    file_reader_t *fr = (file_reader_t*)datasource;
+    return fr->len;
 }
 
 static sound_stream_t *
@@ -520,8 +523,10 @@ load_aiff(FILE *fp, long startpos, long length, int id, float volume)
     aiff->sf_info.format = 0;
 
     fseek(fp, startpos, SEEK_SET);
-    aiff->buf.data = load_block_from_file(fp, length);
-    aiff->buf.len  = length;
+    aiff->freader.file        = fp;
+    aiff->freader.pos         = 0;
+    aiff->freader.len         = length;
+    aiff->freader.base_offset = startpos;
 
     SF_VIRTUAL_IO mem_cb = {
         .seek        = mem_snd_seek,
@@ -531,7 +536,7 @@ load_aiff(FILE *fp, long startpos, long length, int id, float volume)
         .write       = NULL
     };
 
-    aiff->sndfile = sf_open_virtual(&mem_cb, SFM_READ, &aiff->sf_info, &aiff->buf);
+    aiff->sndfile = sf_open_virtual(&mem_cb, SFM_READ, &aiff->sf_info, &aiff->freader);
     aiff->rsmp = resampler_init(aiff->sf_info.samplerate);
 
     aiff->floatbuffer = (float*)malloc(frotz_audio.buffer_size * aiff->sf_info.channels * sizeof(float));
