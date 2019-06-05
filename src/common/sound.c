@@ -48,10 +48,13 @@ static bool playing = FALSE;
  */
 void init_sound (void)
 {
-    locked = FALSE;
-    playing = FALSE;
-
-    os_init_sound();
+    if ((h_flags & SOUND_FLAG) || (h_flags & OLD_SOUND_FLAG))  {
+	f_setup.sound_flag = TRUE;
+	locked = FALSE;
+	playing = FALSE;
+	os_init_sound();
+    } else
+	f_setup.sound_flag = FALSE;
 
 } /* init_sound */
 
@@ -154,6 +157,11 @@ void z_sound_effect (void)
 	effect = EFFECT_PLAY;
     if (zargc < 3)
 	volume = 8;
+
+    if (!f_setup.sound_flag) {
+        runtime_error(ERR_PLAY_SOUND);
+        return;
+    }
 
     if (number >= 3 || number == 0) {
 
