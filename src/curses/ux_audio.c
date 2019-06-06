@@ -42,6 +42,8 @@
 #include "ux_frotz.h"
 #include "ux_audio.h"
 
+f_setup_t f_setup;
+
 #ifndef NO_SOUND
 
 #include <ao/ao.h>
@@ -776,6 +778,8 @@ os_init_sound(void)
     int err;
     static pthread_attr_t attr;
 
+    if (!f_setup.sound_flag) return;
+
     /*Initialize sound engine*/
     /*audio_log = fopen("audio_log.txt", "w");*/
     /*fprintf(audio_log, "os_init_sound...\n");*/
@@ -832,6 +836,7 @@ os_start_sample(int number, int volume, int repeats, zword eos)
     const float vol = volume_factor(volume);
     sound_stream_t *s = 0;
 
+    if (!f_setup.sound_flag) return;
 
     /*Load resource from BLORB data*/
     if(blorb_map == NULL) return;
@@ -881,6 +886,7 @@ void os_prepare_sample(int id)
 void os_stop_sample(int id)
 {
     /*fprintf(audio_log, "os_stop_sample(%d)...\n", id);*/
+    if (!f_setup.sound_flag) return;
     sound_stop_id(id);
 }
 

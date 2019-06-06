@@ -740,8 +740,9 @@ void	runtime_error (int);
 #define ERR_MOVE_OBJECT_TO_0 30	/* @move_object called moving into object 0 */
 #define ERR_REMOVE_OBJECT_0 31	/* @remove_object called with object 0 */
 #define ERR_GET_NEXT_PROP_0 32	/* @get_next_prop called with object 0 */
-#define ERR_NUM_ERRORS (32)
- 
+#define ERR_PLAY_SOUND 33	/* @play_sound called without SOUND_FLAG or OLD_SOUND_FLAG set */
+#define ERR_NUM_ERRORS (33)
+
 /* There are four error reporting modes: never report errors;
   report only the first time a given error type occurs; report
   every time an error occurs; or treat all errors as fatal

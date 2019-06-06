@@ -62,7 +62,8 @@ static char *err_messages[] = {
     "@move_object called moving object 0",
     "@move_object called moving into object 0",
     "@remove_object called with object 0",
-    "@get_next_prop called with object 0"
+    "@get_next_prop called with object 0",
+    "@play_sound called without SOUND_FLAG or OLD_SOUND_FLAG set"
 };
 
 static void print_long (unsigned long value, int base);
