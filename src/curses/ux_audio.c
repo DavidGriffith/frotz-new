@@ -39,8 +39,6 @@
 #include <curses.h>
 #endif
 
-#include "../blorb/blorb.h"
-#include "../blorb/blorblow.h"
 #include "ux_frotz.h"
 #include "ux_audio.h"
 

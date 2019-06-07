@@ -1,4 +1,3 @@
-typedef unsigned short zword;
 void os_init_sound(void);                     /* startup system*/
 void os_beep(int);                            /* enqueue a beep sample*/
 void os_prepare_sample(int);                  /* put a sample into memory*/
