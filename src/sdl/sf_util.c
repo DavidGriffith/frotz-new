@@ -582,7 +582,7 @@ static int ingame_read_file_name (char *file_name, const char *default_name, int
   print_string (default_name);
   print_string ("\": ");
 
-  read_string (MAX_FILE_NAME - 4, (byte *) file_name);
+  read_string (MAX_FILE_NAME - 4, (zchar *) file_name);
 
     /* Use the default name if nothing was typed */
 
