@@ -156,7 +156,7 @@ static MYFONT * makefont( int totglyphs)
   return res;
   }
 
-#define MAXUNI 0x153
+#define MAXUNI 0xffff
 
 static void setglyph( MYFONT *f, FT_Face face, int ch)
   {
@@ -166,6 +166,8 @@ static void setglyph( MYFONT *f, FT_Face face, int ch)
   FT_GlyphSlot slot = face->glyph;
   int i,j, nbypr;
   FT_Bitmap *bitmap;
+
+  if (!gid) return;
 
   if (m_aafonts) mode = FT_RENDER_MODE_NORMAL;
 
@@ -233,9 +235,7 @@ static SFONT * loadftype( char *fname, int size, SFONT *like, int *err)
   res->minchar = 32;
   setglyph(res,face,0);
   for (i=32;i<127;i++) setglyph(res,face,i);
-  for (i=0xa0;i<256;i++) setglyph(res,face,i);
-  setglyph(res,face,0x152);
-  setglyph(res,face,0x153);
+  for (i=0xa0;i<65536;i++) setglyph(res,face,i);
 
   FT_Done_Face( face );
 
