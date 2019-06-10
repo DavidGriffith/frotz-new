@@ -90,6 +90,12 @@ static char *dumb_changes_row(int r)
     return screen_changes + r * h_screen_cols;
 }
 
+int os_check_unicode(int font, zword c)
+{
+/* Only UTF-8 output, no input yet.  */
+    return 1;
+}
+
 int os_char_width (zchar z)
 {
     if (plain_ascii && z >= ZC_LATIN1_MIN) {
