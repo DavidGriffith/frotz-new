@@ -361,6 +361,9 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
   int terminator;
   static bool timed_out_last_time;
   int timed_out;
+#ifdef USE_UTF8
+  int i, len;
+#endif
 
   /* Discard any keys read for single key input.  */
   read_key_buffer[0] = '\0';
@@ -396,7 +399,19 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
   dumb_display_user_input(read_line_buffer);
 
   /* copy to the buffer and save the rest for next time.  */
+#ifndef USE_UTF8
   strncat((char*) buf, read_line_buffer, (INPUT_BUFFER_SIZE - strlen((char *)buf)) - 2);
+#else
+  for (len = 0;; len++)
+    if (!buf[len])
+      break;
+  for (i = 0; i < INPUT_BUFFER_SIZE - len - 2; i++) {
+    buf[len + i] = read_line_buffer[i];
+    if (!read_line_buffer[i])
+      break;
+  }
+  buf[len + i] = 0;
+#endif
   p = read_line_buffer + strlen(read_line_buffer) + 1;
   memmove(read_line_buffer, p, strlen(p) + 1);
 

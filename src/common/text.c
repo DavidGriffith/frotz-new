@@ -25,6 +25,7 @@ enum string_type {
 };
 
 extern zword object_name (zword);
+extern zword get_window_font (zword);
 
 static zchar decoded[10];
 static zword encoded[3];
@@ -343,11 +344,13 @@ void z_check_unicode (void)
     else if (c >= 0xa1 && c <= 0xff)
 	store (3);
 #else
-    else if (c >= 0xa1)
-	/* being optimistic, we can print all unicode characters
+    else if (c >= 0xa1) {
+	/* being optimistic, we can print all unicode characters supported
 	 * and input the ones with zscii representation
 	 */
-	store ((unicode_to_zscii (c) != 0) ? 3 : 1);
+	zword mask = (unicode_to_zscii (c) != 0) ? 3 : 1;
+	store (mask & os_check_unicode (get_window_font(cwin), c));
+    }
 #endif
     else
 	store (0);

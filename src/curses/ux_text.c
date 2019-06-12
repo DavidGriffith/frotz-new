@@ -277,6 +277,18 @@ void os_display_string (const zchar *s)
 
 }/* os_display_string */
 
+/*
+ * os_check_unicode
+ *
+ * Return with bit 0 set if the Unicode character can be
+ * displayed, and bit 1 if it can be input.
+ *
+ */
+int os_check_unicode(int font, zword c)
+{
+/* Assume full input and output.  */
+    return 3;
+}
 
 /*
  * os_char_width

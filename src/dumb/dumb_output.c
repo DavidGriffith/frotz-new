@@ -42,13 +42,17 @@ static char latin1_to_ascii[] =
 static int screen_cells;
 
 /* The in-memory state of the screen.  */
-/* Each cell contains a style in the upper byte and a char in the lower. */
+/* Each cell contains a style in the lower byte and a zchar above. */
+#ifdef USE_UTF8
+typedef unsigned int cell;
+#else
 typedef unsigned short cell;
+#endif
 static cell *screen_data;
 
-static cell make_cell(int style, char c) {return (style << 8) | (0xff & c);}
-static char cell_char(cell c) {return c & 0xff;}
-static int cell_style(cell c) {return c >> 8;}
+static cell make_cell(int style, zchar c) {return (c << 8) | (0xff & style);}
+static zchar cell_char(cell c) {return c >> 8;}
+static int cell_style(cell c) {return c & 0xff;}
 
 
 /* A cell's style is REVERSE_STYLE, normal (0), or PICTURE_STYLE.
@@ -84,6 +88,12 @@ static cell *dumb_row(int r) {return screen_data + r * h_screen_cols;}
 static char *dumb_changes_row(int r)
 {
     return screen_changes + r * h_screen_cols;
+}
+
+int os_check_unicode(int font, zword c)
+{
+/* Only UTF-8 output, no input yet.  */
+    return 1;
 }
 
 int os_char_width (zchar z)
@@ -130,7 +140,7 @@ static void dumb_set_cell(int row, int col, cell c)
     dumb_row(row)[col] = c;
 }
 
-void dumb_set_picture_cell(int row, int col, char c)
+void dumb_set_picture_cell(int row, int col, zchar c)
 {
     dumb_set_cell(row, col, make_cell(PICTURE_STYLE, c));
 }
@@ -150,7 +160,7 @@ void os_set_text_style(int x)
 }
 
 /* put a character in the cell at the cursor and advance the cursor.  */
-static void dumb_display_char(char c)
+static void dumb_display_char(zchar c)
 {
     dumb_set_cell(cursor_row, cursor_col, make_cell(current_style, c));
     if (++cursor_col == h_screen_cols) {
@@ -262,26 +272,49 @@ int os_font_data(int font, int *height, int *width)
 void os_set_colour (int UNUSED (x), int UNUSED (y)) {}
 void os_set_font (int UNUSED (x)) {}
 
+#ifdef USE_UTF8
+void zputchar(zchar c)
+{
+    if(c > 0x7ff) {
+	putchar(0xe0 | ((c >> 12) & 0xf));
+	putchar(0x80 | ((c >> 6) & 0x3f));
+	putchar(0x80 | (c & 0x3f));
+    } else if(c > 0x7f) {
+	putchar(0xc0 | ((c >> 6) & 0x1f));
+	putchar(0x80 | (c & 0x3f));
+    } else {
+	putchar(c);
+    }
+}
+#else
+#define zputchar(x) putchar(x)
+#endif
+
 /* Print a cell to stdout.  */
 static void show_cell(cell cel)
 {
-    char c = cell_char(cel);
+    zchar c = cell_char(cel);
     switch (cell_style(cel)) {
     case 0:
-	putchar(c);
+	zputchar(c);
 	break;
     case PICTURE_STYLE:
-	putchar(show_pictures ? c : ' ');
+	zputchar(show_pictures ? c : ' ');
 	break;
     case REVERSE_STYLE:
 	if (c == ' ')
 	    putchar(rv_blank_char);
 	else
 	    switch (rv_mode) {
-	    case RV_NONE: putchar(c); break;
-	    case RV_CAPS: putchar(toupper(c)); break;
-	    case RV_UNDERLINE: putchar('_'); putchar('\b'); putchar(c); break;
-	    case RV_DOUBLESTRIKE: putchar(c); putchar('\b'); putchar(c); break;
+	    case RV_CAPS:
+		if (c <= 0x7f )
+		{
+		    zputchar(toupper(c));
+		    break;
+		}
+	    case RV_NONE: zputchar(c); break;
+	    case RV_UNDERLINE: putchar('_'); putchar('\b'); zputchar(c); break;
+	    case RV_DOUBLESTRIKE: zputchar(c); putchar('\b'); zputchar(c); break;
 	    }
 	break;
     }
