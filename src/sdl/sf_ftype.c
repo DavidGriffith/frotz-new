@@ -47,6 +47,8 @@ typedef struct {
   SFONT sfont;
   int ascent, descent, height;
   int minchar, maxchar, totglyphs;
+  FT_Face face;
+  char *isset;
   SF_glyph *glyphs[0];
   } MYFONT;
 
@@ -58,6 +60,8 @@ static void bdestroy( SFONT *s)
     int i; MYFONT *f = (MYFONT *)s;
     for (i=0;i<f->totglyphs;i++)
 	if (f->glyphs[i]) free(f->glyphs[i]);
+    free(f->isset);
+    if (f->face) FT_Done_Face( f->face );
     free(s);
     }
   }
@@ -92,6 +96,8 @@ static int bmaxchar( SFONT *s)
   return 0;
   }
 
+static void setglyph( MYFONT *f, FT_Face face, int ch);
+
 static SF_glyph *getglyph( SFONT *s, word c, int allowdef)
   {
   if (s)
@@ -102,6 +108,7 @@ static SF_glyph *getglyph( SFONT *s, word c, int allowdef)
 	if (allowdef) c = 0;
 	else return NULL;
 	}
+    if (!f->isset[c]) setglyph(f,f->face,c);
     return f->glyphs[c];
     }
   return NULL;
@@ -143,6 +150,12 @@ static MYFONT * makefont( int totglyphs)
   MYFONT * res;
   res = calloc(1,sizeof(MYFONT)+totglyphs*sizeof(SF_glyph *));
   if (!res) return NULL;
+  res->isset = calloc(1,totglyphs);
+  if (!res->isset)
+    {
+    free(res);
+    return NULL;
+    }
   res->sfont.destroy = bdestroy;
   res->sfont.height = bheight;
   res->sfont.ascent = bascent;
@@ -167,6 +180,7 @@ static void setglyph( MYFONT *f, FT_Face face, int ch)
   int i,j, nbypr;
   FT_Bitmap *bitmap;
 
+  f->isset[ch] = 1;
   if (!gid) return;
 
   if (m_aafonts) mode = FT_RENDER_MODE_NORMAL;
@@ -219,6 +233,7 @@ static SFONT * loadftype( char *fname, int size, SFONT *like, int *err)
 
   *err = FT_New_Face( library, fname, 0, &face ); /* create face object */
   if (*err){ res->sfont.destroy(&res->sfont); return NULL; }
+  res->face = face;
 
   if (like) {
       SF_glyph *zero = like->getglyph(like, '0', TRUE);
@@ -235,9 +250,9 @@ static SFONT * loadftype( char *fname, int size, SFONT *like, int *err)
   res->minchar = 32;
   setglyph(res,face,0);
   for (i=32;i<127;i++) setglyph(res,face,i);
-  for (i=0xa0;i<65536;i++) setglyph(res,face,i);
-
-  FT_Done_Face( face );
+  for (i=0xa0;i<256;i++) setglyph(res,face,i);
+  setglyph(res,face,0x152);
+  setglyph(res,face,0x153);
 
   return (SFONT *) res;
   }
@@ -284,5 +299,4 @@ SFONT * sf_loadftype( char *fspec, SFONT *like, int *err)
 void sf_initloader()
 {
   ttfontloader = sf_loadftype;
-  ttfontsdone = libfinish;
 }
