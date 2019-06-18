@@ -43,6 +43,7 @@
 #include "ux_audio.h"
 
 f_setup_t f_setup;
+sem_t sound_done;	/* 1 if the sound is done */
 
 #ifndef NO_SOUND
 
@@ -604,6 +605,7 @@ process_engine(sound_engine_t *e)
                 sound->cleanup(sound);
                 free(sound);
                 e->streams[i] = NULL;
+                sem_post(&sound_done);
             }
         }
     }
@@ -794,6 +796,7 @@ os_init_sound(void)
     /*No events registered on startup*/
     sem_init(&frotz_audio.ev_free,    0, 1);
     sem_init(&frotz_audio.ev_pending, 0, 0);
+    sem_init(&sound_done, 0, 0);
     frotz_audio.event.type = 0;
 
     /*Start audio thread*/

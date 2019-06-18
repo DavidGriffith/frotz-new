@@ -39,6 +39,11 @@
 #include <curses.h>
 #endif
 
+#ifndef NO_SOUND
+#include <semaphore.h>
+sem_t sound_done;
+#endif
+
 #include "ux_frotz.h"
 
 static int start_of_prev_word(int, const zchar*);
@@ -145,6 +150,9 @@ void os_tick()
         terminal_resized = 0;
         unix_resize_display();
     }
+
+    if (sem_trywait(&sound_done) == 0)
+	end_of_sound();
 }
 
 
