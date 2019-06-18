@@ -8,8 +8,8 @@ WCC=wcc
 # Enable compiler warnings. This is an absolute minimum.
 CFLAGS += -Wall -std=c99 #-Wextra
 
-# If compiling on OS/X add the following
-# CFLAGS += -D_DARWIN_C_SOURCE -_XOPEN_SOURCE=600
+# If compiling on Apple's MacOS, uncomment this:
+# MACOS = yes
 
 # strdup, strndup
 CFLAGS += -D_POSIX_C_SOURCE=200809L
@@ -162,6 +162,11 @@ ifeq ($(SOUND), ao)
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
 endif
 
+ifdef MACOS
+  CFLAGS += /usr/local/opt/freetype/include/freetype2
+  CURSES = curses
+endif
+
 
 # Source locations
 #
@@ -274,6 +279,10 @@ ifdef NO_STRDUP
 endif
 ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
+endif
+ifdef MACOS
+	@echo "#define _DARWIN_C_SOURCE" >> $@
+	@echo "#define __XOPEN_SOURCE=600" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 
