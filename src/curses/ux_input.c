@@ -151,8 +151,10 @@ void os_tick()
         unix_resize_display();
     }
 
+#ifndef NO_SOUND
     if (sem_trywait(&sound_done) == 0)
 	end_of_sound();
+#endif
 }
 
 
