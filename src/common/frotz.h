@@ -105,6 +105,8 @@ enum story {
     ARTHUR,
     JOURNEY,
     LURKING_HORROR,
+    BUREAUCRACY,
+    TRINITY,
     UNKNOWN
 };
 

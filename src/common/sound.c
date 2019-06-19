@@ -48,6 +48,23 @@ static bool playing = FALSE;
  */
 void init_sound (void)
 {
+
+    /* These games use sound effects numbers 1 and 2, which are defined
+     * as high and low "bleeps" respectively, yet they do not set SOUND_FLAG
+     * or OLD_SOUND_FLAG.  Note that OLD_SOUND_FLAG uses the same bit as does
+     * UNDO_FLAG, but the former is only for V3 games and the latter for V5+.
+     *
+     * Currently os_beep() just rings the terminal, so f_setup.bleep isn't
+     * yet being used.
+     */
+    switch (story_id) {
+	case TRINITY:
+	case BUREAUCRACY:
+ 	case AMFV:	f_setup.bleep = TRUE;
+			break;
+	default:	break;
+    }
+
     if ((h_flags & SOUND_FLAG) || (h_version == V3 && (h_flags & OLD_SOUND_FLAG))) {
 	f_setup.sound_flag = TRUE;
 	locked = FALSE;

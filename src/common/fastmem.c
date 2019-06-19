@@ -314,6 +314,15 @@ void init_memory (void)
 	{ LURKING_HORROR, 203, "870506" },
 	{ LURKING_HORROR, 219, "870912" },
 	{ LURKING_HORROR, 221, "870918" },
+	{    BUREAUCRACY,  86, "870212" },
+	{    BUREAUCRACY, 116, "870602" },
+	{    BUREAUCRACY, 160, "880521" },
+	{        TRINITY,   1, "851202" },
+	{        TRINITY,  14, "860313" },
+	{        TRINITY,   1, "860221" },
+	{        TRINITY,  11, "860509" },
+	{        TRINITY,  12, "860926" },
+	{        TRINITY,  15, "870628" },
 	{        UNKNOWN,   0, "------" }
     };
 

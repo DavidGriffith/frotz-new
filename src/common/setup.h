@@ -19,6 +19,7 @@ typedef struct frotz_setup_struct {
 	int script_cols;
 	int sound;
 	int sound_flag;
+	int bleep;
 	int err_report_mode;
 
 	char *story_file;
