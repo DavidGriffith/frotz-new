@@ -874,10 +874,11 @@ os_start_sample(int number, int volume, int repeats, zword eos)
 void os_beep(int bv)
 {
     (void) bv;
-    /*Currently not implemented*/
+    /*Currently implemented as a simple terminal bell*/
     /*To implement generate a high frequency beep for bv=1,*/
     /*low frequency for bv=2*/
     /*fprintf(audio_log, "os_beep(%d)...\n", bv);*/
+    beep();
 }
 void os_prepare_sample(int id)
 {

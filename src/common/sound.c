@@ -158,6 +158,11 @@ void z_sound_effect (void)
     if (zargc < 3)
 	volume = 8;
 
+    if (number == 1 || number == 2) {
+	os_beep(number);
+	return;
+    }
+
     if (!f_setup.sound_flag) {
         runtime_error(ERR_PLAY_SOUND);
         return;
@@ -206,6 +211,6 @@ void z_sound_effect (void)
 
 	locked = FALSE;
 
-    } else os_beep (number);
+    }
 
 }/* z_sound_effect */
