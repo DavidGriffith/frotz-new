@@ -48,7 +48,7 @@ static bool playing = FALSE;
  */
 void init_sound (void)
 {
-    if ((h_flags & SOUND_FLAG) || (h_flags & OLD_SOUND_FLAG))  {
+    if ((h_flags & SOUND_FLAG) || (h_version == V3 && (h_flags & OLD_SOUND_FLAG))) {
 	f_setup.sound_flag = TRUE;
 	locked = FALSE;
 	playing = FALSE;
