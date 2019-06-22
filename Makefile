@@ -73,6 +73,13 @@ COLOR ?= yes
 #CURSES ?= ncurses
 CURSES ?= ncursesw
 
+# On MACOS, curses is actually ncurses, but to get wide char support
+# you need to define _XOPEN_SOURCE_EXTENDED
+ifdef MACOS
+  CURSES = curses
+  CFLAGS += -D_XOPEN_SOURCE_EXTENDED
+endif
+
 # Uncomment this if you want to disable the compilation of Blorb support.
 #NO_BLORB = yes
 
@@ -140,10 +147,6 @@ endif
 BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
 export CFLAGS
 
-ifdef MACOS
-  CFLAGS += -I/usr/local/opt/freetype/include/freetype2
-  CURSES = curses
-endif
 
 # Compile time options handling
 #
