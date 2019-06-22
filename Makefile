@@ -8,8 +8,13 @@ WCC=wcc
 # Enable compiler warnings. This is an absolute minimum.
 CFLAGS += -Wall -std=c99 #-Wextra
 
-# If compiling on Apple's MacOS, uncomment this:
-# MACOS = yes
+# Determine if we are compiling on MAC OS X
+ifneq ($(OS),Windows_NT)
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Darwin)
+	MACOS = yes
+    endif
+endif
 
 # strdup, strndup
 CFLAGS += -D_POSIX_C_SOURCE=200809L
