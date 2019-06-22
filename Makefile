@@ -140,6 +140,10 @@ endif
 BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
 export CFLAGS
 
+ifdef MACOS
+  CFLAGS += -I/usr/local/opt/freetype/include/freetype2
+  CURSES = curses
+endif
 
 # Compile time options handling
 #
@@ -160,11 +164,6 @@ endif
 ifeq ($(SOUND), ao)
   CURSES_LDFLAGS += -lao -ldl -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
-endif
-
-ifdef MACOS
-  CFLAGS += /usr/local/opt/freetype/include/freetype2
-  CURSES = curses
 endif
 
 
@@ -282,7 +281,7 @@ ifeq ($(USE_UTF8), yes)
 endif
 ifdef MACOS
 	@echo "#define _DARWIN_C_SOURCE" >> $@
-	@echo "#define __XOPEN_SOURCE=600" >> $@
+	@echo "#define _XOPEN_SOURCE 600" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 
