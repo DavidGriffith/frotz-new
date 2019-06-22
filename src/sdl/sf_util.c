@@ -1,3 +1,5 @@
+#include "sf_frotz.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,8 +13,6 @@
 #ifdef __WIN32__
 #include <io.h>
 #endif
-
-#include "sf_frotz.h"
 
 f_setup_t f_setup;
 
