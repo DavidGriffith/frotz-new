@@ -176,7 +176,13 @@ static int unix_read_char(int extkeys)
     wint_t c;
     int sel, fd = fileno(stdin);
     fd_set rsel;
-    struct timeval tval, *t_left;
+    struct timeval tval, *t_left, maxwait;
+
+    /*
+     * If the timeout is 0, we still want to call os_tick once per second
+     */
+    maxwait.tv_sec=1;
+    maxwait.tv_usec=0;
 
     while(1) {
         /* Wait with select so that we get interrupted on SIGWINCH. */
@@ -185,7 +191,17 @@ static int unix_read_char(int extkeys)
         os_tick();
         refresh();
         t_left = timeout_left(&tval) ? &tval : NULL;
-        sel = select(fd + 1, &rsel, NULL, NULL, t_left);
+	/*
+	 * if the timeout is zero, we wait forever for input, but if
+	 * we are playing a sequence of sounds, we need to periodically
+	 * call os_tick().  So if the timeout is zero, wait up to a second
+	 * for input, but if we get no input continue the while loop.
+	 */
+	if (t_left)
+	    sel = select(fd + 1, &rsel, NULL, NULL, t_left);
+	else
+	    sel = select(fd + 1, &rsel, NULL, NULL, &maxwait);
+
         if (terminal_resized)
             continue;
         switch (sel) {
@@ -194,6 +210,12 @@ static int unix_read_char(int extkeys)
                 os_fatal(strerror(errno));
             continue;
         case 0:
+	    if (t_left == NULL)
+		/* 
+		 * The timeout was 0 (wait forever) but we need to call
+		 * call os_tick to handle sound sequences
+		 */
+		continue;
             return ZC_TIME_OUT;
         }
 
