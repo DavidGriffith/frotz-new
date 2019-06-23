@@ -27,7 +27,7 @@ static char information[] =
 "  -B # reverse background colour  \t -r # right margin\n"
 "  -c # context lines              \t -R <path> restricted read/write\n"
 "  -d # display mode (see below)   \t -s # random number seed value\n"
-"  -e # emphasis colour [mode 1]   \t -S # transscript width\n"
+"  -e # emphasis colour [mode 1]   \t -S # transcript width\n"
 "  -f # foreground colour          \t -t   set Tandy bit\n"
 "  -F # reverse foreground colour  \t -T   bold typing [modes 2+4+5]\n"
 "  -g # font [mode 5] (see below)  \t -u # slots for multiple undo\n"
