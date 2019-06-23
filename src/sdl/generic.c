@@ -5,6 +5,8 @@
  * really be put somewhere so that they can be shared.  For now, this.
  */
 
+#include "../common/frotz.h"
+
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -12,7 +14,6 @@
 #include <string.h>
 
 #include "../blorb/blorb.h"
-#include "../common/frotz.h"
 #include "generic.h"
 
 FILE *blorb_fp;

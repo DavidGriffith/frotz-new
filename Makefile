@@ -8,8 +8,13 @@ WCC=wcc
 # Enable compiler warnings. This is an absolute minimum.
 CFLAGS += -Wall -std=c99 #-Wextra
 
-# If compiling on Apple's MacOS, uncomment this:
-# MACOS = yes
+# Determine if we are compiling on MAC OS X
+ifneq ($(OS),Windows_NT)
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Darwin)
+	MACOS = yes
+    endif
+endif
 
 # strdup, strndup
 CFLAGS += -D_POSIX_C_SOURCE=200809L
@@ -72,6 +77,13 @@ COLOR ?= yes
 #CURSES ?= curses
 #CURSES ?= ncurses
 CURSES ?= ncursesw
+
+# On MACOS, curses is actually ncurses, but to get wide char support
+# you need to define _XOPEN_SOURCE_EXTENDED
+ifdef MACOS
+  CURSES = curses
+  CFLAGS += -D_XOPEN_SOURCE_EXTENDED
+endif
 
 # Uncomment this if you want to disable the compilation of Blorb support.
 #NO_BLORB = yes
@@ -160,11 +172,6 @@ endif
 ifeq ($(SOUND), ao)
   CURSES_LDFLAGS += -lao -ldl -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
-endif
-
-ifdef MACOS
-  CFLAGS += /usr/local/opt/freetype/include/freetype2
-  CURSES = curses
 endif
 
 
@@ -282,7 +289,7 @@ ifeq ($(USE_UTF8), yes)
 endif
 ifdef MACOS
 	@echo "#define _DARWIN_C_SOURCE" >> $@
-	@echo "#define __XOPEN_SOURCE=600" >> $@
+	@echo "#define _XOPEN_SOURCE 600" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 

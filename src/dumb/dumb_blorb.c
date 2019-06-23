@@ -20,6 +20,9 @@
  */
 
 
+#include "dumb_frotz.h"
+#include "dumb_blorb.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,8 +31,6 @@
 #include <libgen.h>
 #include <math.h>
 
-#include "dumb_frotz.h"
-#include "dumb_blorb.h"
 
 /* Don't build any of this if we don't want Blorb support. */
 #ifndef NO_BLORB

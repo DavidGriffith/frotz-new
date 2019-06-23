@@ -71,7 +71,7 @@ extern bool is_terminator (zchar);
 extern void read_string (int, zchar *);
 extern int completion (const zchar *, zchar *);
 
-#ifndef wint_t
+#ifndef _WINT_T
 typedef unsigned int wint_t;
 #endif
 

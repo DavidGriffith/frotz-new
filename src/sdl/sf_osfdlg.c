@@ -1,3 +1,5 @@
+#include "sf_frotz.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,8 +9,6 @@
 #include <unistd.h>
 
 #define STATIC static
-
-#include "sf_frotz.h"
 
 typedef struct {
   void *left, *right;

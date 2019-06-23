@@ -1,3 +1,5 @@
+#include "sf_frotz.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +11,6 @@
 
 #include <SDL.h>
 
-#include "sf_frotz.h"
 #include "../blorb/blorb.h"
 #include "../blorb/blorblow.h"
 

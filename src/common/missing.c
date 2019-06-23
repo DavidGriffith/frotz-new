@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <stdlib.h>
 #include "frotz.h"
+#include <stdlib.h>
 
 #ifdef NO_MEMMOVE
 /*

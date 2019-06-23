@@ -1,3 +1,5 @@
+#include "sf_frotz.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,8 +10,6 @@
 #include <SDL.h>
 
 #include "generic.h"
-
-#include "sf_frotz.h"
 
 static char banner[256];
 static int isfullscreen;
