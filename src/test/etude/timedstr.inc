@@ -18,7 +18,7 @@
     of text will appear. (If the lines appear at the rate of one
     every thirty seconds, your interpreter is using the incorrect
     timing rate caused by an old bug in ZIP.)^^";
-  print "Interrupts actually are occuring once per second; every
+  print "Interrupts actually are occurring once per second; every
     third interrupt prints a line of text, and the other two have no
     visible effect. After each line, your input should be redrawn so
     that you can continue typing and editing it.^^";

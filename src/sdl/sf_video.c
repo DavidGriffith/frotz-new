@@ -508,7 +508,7 @@ void os_draw_picture(int picture, int y, int x)
   ew = m_gfxScale*pic->width;
   eh = m_gfxScale*pic->height;
 
-	// this takes care of the fact taht x, y are really 16 bit values
+	// this takes care of the fact that x, y are really 16 bit values
   if (x & 0x8000) x |= 0xffff0000;
   if (y & 0x8000) y |= 0xffff0000;
 

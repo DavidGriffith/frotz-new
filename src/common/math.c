@@ -218,7 +218,7 @@ void z_or (void)
 
 
 /*
- * z_sub, 16bit substraction.
+ * z_sub, 16bit subtraction.
  *
  *	zargs[0] = first value
  *	zargs[1] = second value

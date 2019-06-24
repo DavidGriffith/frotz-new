@@ -33,7 +33,7 @@ Bug-testing Programs ||
 =======================
 
 Unix Frotz now comes with crashme, TerpEtude, gntests, strictz, and
-Unicode Test.  These are intended to excercise the interpreter and
+Unicode Test.  These are intended to exercise the interpreter and
 verify that it is functioning according to spec.  You will find these
 programs in the src/test/ directory.
 
@@ -70,7 +70,7 @@ assumed to trade saves across platforms.
 Arrow Key Handling ||
 =====================
 
-Not really a bug, but an idiosyncracy.  In "Journey", sometimes you can't
+Not really a bug, but an idiosyncrasy.  In "Journey", sometimes you can't
 use the right-arrow key to move from the "party commands" menu to the
 "individual commands" menu.  IMHO, this is a bit sloppy, but it isn't
 Frotz's fault.  Instead, use the spacebar to jump from menu to menu.
