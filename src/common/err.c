@@ -125,7 +125,7 @@ void runtime_error (int errnum)
 	if (f_setup.err_report_mode == ERR_REPORT_ONCE) {
 	    print_string (" (will ignore further occurrences)");
 	} else {
-	    print_string (" (occurence ");
+	    print_string (" (occurrence ");
 	    print_long (error_count[errnum - 1], 10);
 	    print_char (')');
 	}

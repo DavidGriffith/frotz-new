@@ -1053,7 +1053,7 @@ static int geterrmode(char *value)
 /*
  * sigwinch_handler
  *
- * Called whenever Frotz recieves a SIGWINCH signal to make curses
+ * Called whenever Frotz receives a SIGWINCH signal to make curses
  * cleanly resize the window.  To be safe, just set a flag here.
  * It is checked and cleared in unix_read_char.
  *

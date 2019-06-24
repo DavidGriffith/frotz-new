@@ -152,7 +152,7 @@ NEW FEATURES
 
 BUG FIXES AND MINOR ENHANCEMENTS
 
-- In BUGS, an idiosyncracy of "Journey" by Infocom was mistakenly
+- In BUGS, an idiosyncrasy of "Journey" by Infocom was mistakenly
   identified as a bug in Frotz.
   (Reported by someone whom I forget)
 
@@ -246,5 +246,5 @@ NEW FEATURES
 
 - Faster undo functionality (borrowed from Nitfol).
 
-- History searchs has been added.  Type the beginning of a past command
+- History searches have been added.  Type the beginning of a past command
   and hit the up or down arrow key.

@@ -50,7 +50,7 @@ static int isblorb(FILE *fp)
  * gen_blorb_init
  *
  * Check if we're opening a Blorb file directly.  If not, check
- * to see if there's a seperate Blorb file that looks like it goes
+ * to see if there's a separate Blorb file that looks like it goes
  * along with this Zcode file.  If we have a Blorb file one way or the
  * other, make a Blorb map.  If we opened a Blorb file directly, that
  * means that our executable is in that file and therefore we will look
@@ -73,7 +73,7 @@ bb_err_t gen_blorb_init(char *filename)
         return bb_err_Read;
 
     /* Is this really a Blorb file?  If not, maybe we're loading a naked
-     * zcode file and our resources are in a seperate blorb file.
+     * zcode file and our resources are in a separate blorb file.
      */
     if (isblorb(fp)) {                  /* Now we know to look */
         f_setup.exec_in_blorb = 1;      /* for zcode in the blorb */
@@ -106,7 +106,7 @@ bb_err_t gen_blorb_init(char *filename)
         }
 
         /* At this point we know that we're using a naked zcode file */
-        /* with resources in a seperate Blorb file. */
+        /* with resources in a separate Blorb file. */
         blorb_fp = fp;
         f_setup.use_blorb = 1;
     }
