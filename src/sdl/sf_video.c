@@ -22,6 +22,8 @@ static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 int m_timerinterval = 100;
 
+bool sdl_active;
+
 static void sf_quitconf();
 
 // clipping region
@@ -433,6 +435,9 @@ void sf_initvideo( int W, int H, int full)
     if ( SDL_Init(initflags) < 0 ) {
         os_fatal("Couldn't initialize SDL: %s", SDL_GetError());
     }
+
+    sdl_active = TRUE;
+
     /* We don't handle text edit events.  Not that I know why anyone would
        want to use such an IME with Frotz. */
     SDL_SetHint(SDL_HINT_IME_INTERNAL_EDITING, "1");

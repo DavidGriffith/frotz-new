@@ -93,6 +93,8 @@ extern int m_frequency;
 
 extern double 	m_gamma;
 
+extern bool sdl_active;
+
 // sf_resource.c
 
 // must be called as soon as possible (i.e. by os_process_arguments())

@@ -50,6 +50,8 @@ char *	m_reslist_file = NULL;
 char *	m_setupfile = ".sfrotzrc";
 extern int m_frequency;
 
+bool sdl_active;
+
 static int countedpics = 0;
 static int maxlegalpic = 0;
 static int releaseno = 0;
@@ -780,37 +782,41 @@ void os_fatal(const char *s, ...)
 //	if (theWnd != NULL)
 //		theWnd->FlushDisplay();
 
-  os_set_text_style(0);
-
-
-  os_display_string((zchar *)"\n\n");
-  os_beep(BEEP_HIGH);
-  os_set_text_style(BOLDFACE_STYLE);
-
   fprintf(stderr,"\n%s: ",sf_msgstring(IDS_FATAL));
   va_start( m, s);
   vfprintf( stderr, s, m);
   va_end(m);
   fprintf(stderr,"\n");
 
-  os_display_string((zchar *)"Fatal error: ");
-  os_set_text_style(0);
-  os_display_string((zchar *)s);
-  os_display_string((zchar *)"\n\n");
-  new_line();
-  flush_buffer();
+  if (sdl_active) {
+    os_set_text_style(0);
+    os_display_string((zchar *)"\n\n");
+    os_beep(BEEP_HIGH);
+    os_set_text_style(BOLDFACE_STYLE);
+
+    os_display_string((zchar *)"Fatal error: ");
+    os_set_text_style(0);
+    os_display_string((zchar *)s);
+    os_display_string((zchar *)"\n\n");
+    new_line();
+    flush_buffer();
+  }
 
   if (f_setup.ignore_errors) {
-    os_display_string((zchar *)"Continuing anyway...");
-    new_line();
-    new_line();
+    if (sdl_active) {
+      os_display_string((zchar *)"Continuing anyway...");
+      new_line();
+      new_line();
+    }
     fprintf(stderr, "Continuing anyway...\n");
     return;
   }
 
-  os_reset_screen();
+  if (sdl_active) {
+    os_reset_screen();
+    SDL_Quit();
+  }
   sf_cleanup_all();
-  SDL_Quit();
   exit(EXIT_FAILURE);
 
 //	::MessageBox(AfxGetMainWnd()->GetSafeHwnd(),s,CResString(IDS_FATAL),MB_ICONERROR|MB_OK);
@@ -1068,4 +1074,6 @@ void os_init_setup(void)
     f_setup.sound = 1;
     f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
     f_setup.restore_mode = 0;
+
+    sdl_active = FALSE;
 }
