@@ -28,8 +28,8 @@
 #ifdef MACOS
 #include <dispatch/dispatch.h>
 struct ux_sema {
-dispatch_semaphore_t dsem;
-}
+    dispatch_semaphore_t dsem;
+};
 typedef struct ux_sema ux_sem_t;
 
 /* 
