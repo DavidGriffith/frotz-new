@@ -40,8 +40,8 @@
 #endif
 
 #ifndef NO_SOUND
-#include <semaphore.h>
-sem_t sound_done;
+#include "ux_sema.h"
+ux_sem_t sound_done;
 #endif
 
 #include "ux_frotz.h"
@@ -152,7 +152,7 @@ void os_tick()
     }
 
 #ifndef NO_SOUND
-    if (sem_trywait(&sound_done) == 0)
+    if (ux_sem_trywait(&sound_done) == 0)
 	end_of_sound();
 #endif
 }

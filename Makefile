@@ -82,7 +82,7 @@ CURSES ?= ncursesw
 # you need to define _XOPEN_SOURCE_EXTENDED
 ifdef MACOS
   CURSES = curses
-  CFLAGS += -D_XOPEN_SOURCE_EXTENDED
+  CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS
 endif
 
 # Uncomment this if you want to disable the compilation of Blorb support.
