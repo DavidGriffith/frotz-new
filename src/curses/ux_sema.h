@@ -38,7 +38,7 @@ typedef struct ux_sema ux_sem_t;
  */
 static inline void  ux_sem_init(ux_sem_t *sem, int pshared, unsigned int value)
 {
-    dispatch_semaphore_t *sema = &sem->sem;
+    dispatch_semaphore_t *sema = &sem->dsem;
     (void) pshared;
 
     *sema = dispatch_semaphore_create(value);
@@ -46,17 +46,17 @@ static inline void  ux_sem_init(ux_sem_t *sem, int pshared, unsigned int value)
 
 static inline void  ux_sem_post(ux_sem_t *sem)
 {
-    dispatch_semaphore_signal(sem->sem);
+    dispatch_semaphore_signal(sem->dsem);
 }
 
 static inline void ux_sem_wait(ux_sem_t *sem)
 {
-    dispatch_semaphore_wait(sem->sem, DISPATCH_TIME_FOREVER);
+    dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_FOREVER);
 }
 
 static inline int ux_sem_trywait(ux_sem_t *sem)
 {
-    return (int) dispatch_semaphore_wait(sem->sem, DISPATCH_TIME_NOW);
+    return (int) dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_NOW);
 }
 #else
 #include <semaphore.h>
