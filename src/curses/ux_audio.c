@@ -292,7 +292,15 @@ resampler_step(resampler_t *rsmp, float *block)
         rsmp->src_data.input_frames = smps;
     }
 
-    src_process(rsmp->src_state, &rsmp->src_data);
+    if (src_process(rsmp->src_state, &rsmp->src_data))
+    {
+	/*
+	 * src_process returned an error, don't update
+	 * the rsmp structure, and tell the caller to
+	 * re-run the resampler
+	 */
+	return 1;
+    }
 
     int u_in = rsmp->src_data.input_frames_used;
     rsmp->src_data.data_in      += 2*u_in;

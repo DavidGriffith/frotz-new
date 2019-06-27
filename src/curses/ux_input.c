@@ -181,8 +181,8 @@ static int unix_read_char(int extkeys)
     /*
      * If the timeout is 0, we still want to call os_tick once per second
      */
-    maxwait.tv_sec=1;
-    maxwait.tv_usec=0;
+    maxwait.tv_sec=0;
+    maxwait.tv_usec=1000;
 
     while(1) {
         /* Wait with select so that we get interrupted on SIGWINCH. */
