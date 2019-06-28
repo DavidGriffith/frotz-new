@@ -61,6 +61,25 @@ static struct timeval global_timeout;
 #define RING_DEC( ptr, beg, end) (ptr > (beg) ? --ptr : (ptr = (end)))
 #define RING_INC( ptr, beg, end) (ptr < (end) ? ++ptr : (ptr = (beg)))
 
+#define timersub(a, b, result)                                                \
+  do {                                                                        \
+    (result)->tv_sec = (a)->tv_sec - (b)->tv_sec;                             \
+    (result)->tv_usec = (a)->tv_usec - (b)->tv_usec;                          \
+    if ((result)->tv_usec < 0) {                                              \
+      --(result)->tv_sec;                                                     \
+      (result)->tv_usec += 1000000;                                           \
+    }                                                                         \
+  } while (0)
+
+#define timercmp(a, b, CMP)                                                   \
+  (((a)->tv_sec == (b)->tv_sec) ?                                             \
+   ((a)->tv_usec CMP (b)->tv_usec) :                                          \
+   ((a)->tv_sec CMP (b)->tv_sec))
+
+#define timerisset(tvp)        ((tvp)->tv_sec || (tvp)->tv_usec)
+
+
+
 #define MAX_HISTORY 20
 static zchar *history_buffer[MAX_HISTORY];
 static zchar **history_next = history_buffer; /* Next available slot. */
@@ -191,16 +210,34 @@ static int unix_read_char(int extkeys)
         os_tick();
         refresh();
         t_left = timeout_left(&tval) ? &tval : NULL;
-	/*
-	 * if the timeout is zero, we wait forever for input, but if
-	 * we are playing a sequence of sounds, we need to periodically
-	 * call os_tick().  So if the timeout is zero, wait up to a second
-	 * for input, but if we get no input continue the while loop.
-	 */
-	if (t_left)
-	    sel = select(fd + 1, &rsel, NULL, NULL, t_left);
-	else
+	if (t_left == NULL)
+	{
+	    /*
+	     * if the timeout is zero, we wait forever for input,
+	     * but if we are playing a sequence of sounds, we need
+	     * to periodically call os_tick().  So if the timeout
+	     * is zero, wait up to a millisecond for input, but if
+	     * we get no input continue the while loop.
+	     */
 	    sel = select(fd + 1, &rsel, NULL, NULL, &maxwait);
+	}
+	else
+	{
+	    /*
+	     * Also, if the timeout is greater than the max wait,
+	     * wait only for the max wait, and subtract the max
+	     * wait from the timeout
+	     */
+	    if(timercmp(t_left,&maxwait,<))
+	    {
+		sel = select(fd + 1, &rsel, NULL, NULL, t_left);
+	    }
+	    else
+	    {
+		sel = select(fd + 1, &rsel, NULL, NULL, &maxwait);
+		timersub(t_left, &maxwait, t_left);
+	    }
+	}
 
         if (terminal_resized)
             continue;
@@ -210,10 +247,12 @@ static int unix_read_char(int extkeys)
                 os_fatal(strerror(errno));
             continue;
         case 0:
-	    if (t_left == NULL)
+	    if ((t_left == NULL) || (timerisset(t_left)))
 		/* 
-		 * The timeout was 0 (wait forever) but we need to call
-		 * call os_tick to handle sound sequences
+		 * The timeout was 0 (wait forever) or the timeout
+		 * was more than the maximum wait for sound to work
+		 * correctly. We need to call os_tick to handle
+		 * sound sequences
 		 */
 		continue;
             return ZC_TIME_OUT;
