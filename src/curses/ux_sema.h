@@ -49,17 +49,21 @@ static inline void  ux_sem_init(ux_sem_t *sem, int pshared, unsigned int value)
 
 static inline void  ux_sem_post(ux_sem_t *sem)
 {
-    dispatch_semaphore_signal(sem->dsem);
+    if (sem->dsem != NULL)
+	dispatch_semaphore_signal(sem->dsem);
 }
 
 static inline void ux_sem_wait(ux_sem_t *sem)
 {
-    dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_FOREVER);
+    if (sem->dsem != NULL)
+	dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_FOREVER);
 }
 
 static inline int ux_sem_trywait(ux_sem_t *sem)
 {
-    return (int) dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_NOW);
+    if (sem->dsem != NULL)
+	return (int) dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_NOW);
+    return -1;
 }
 #else
 #include <semaphore.h>
