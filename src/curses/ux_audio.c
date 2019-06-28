@@ -291,20 +291,18 @@ resampler_step(resampler_t *rsmp, float *block)
         rsmp->src_data.data_in      = rsmp->input;
         rsmp->src_data.input_frames = smps;
     }
-
-    if (src_process(rsmp->src_state, &rsmp->src_data))
-    {
-	/*
-	 * src_process returned an error, don't update
-	 * the rsmp structure, and tell the caller to
-	 * re-run the resampler
-	 */
-	return 1;
-    }
+    int err = src_process(rsmp->src_state, &rsmp->src_data);
+    assert(err == 0);
 
     int u_in = rsmp->src_data.input_frames_used;
     rsmp->src_data.data_in      += 2*u_in;
     rsmp->src_data.input_frames -= u_in;
+    /*
+     * If input buffer is empty, reset data_in pointer just in case
+     * the output buffer is also full.
+     */
+    if(rsmp->src_data.input_frames == 0)
+	rsmp->src_data.data_in      = rsmp->input;
     int g_out = rsmp->src_data.output_frames_gen;
     rsmp->src_data.data_out      += 2*g_out;
     rsmp->src_data.output_frames -= g_out;
