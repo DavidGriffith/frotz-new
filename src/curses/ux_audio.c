@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <unistd.h> //pread
 
@@ -39,11 +38,12 @@
 #include <curses.h>
 #endif
 
+#include "ux_sema.h"
 #include "ux_frotz.h"
 #include "ux_audio.h"
 
 f_setup_t f_setup;
-sem_t sound_done;	/* 1 if the sound is done */
+ux_sem_t sound_done;	/* 1 if the sound is done */
 
 #ifndef NO_SOUND
 
@@ -176,8 +176,8 @@ typedef struct {
     sound_state_t   voices[NUM_VOICES];  /* Max concurrent sound effects/music*/
 
     /*Event (one is process per frame of audio)*/
-    sem_t ev_free;    /*1 if an event can be submitted*/
-    sem_t ev_pending; /*1 if there's an event ready to be processed*/
+    ux_sem_t ev_free;    /*1 if an event can be submitted*/
+    ux_sem_t ev_pending; /*1 if there's an event ready to be processed*/
     sound_event_t event;
 } sound_engine_t;
 
@@ -291,12 +291,18 @@ resampler_step(resampler_t *rsmp, float *block)
         rsmp->src_data.data_in      = rsmp->input;
         rsmp->src_data.input_frames = smps;
     }
-
-    src_process(rsmp->src_state, &rsmp->src_data);
+    int err = src_process(rsmp->src_state, &rsmp->src_data);
+    assert(err == 0);
 
     int u_in = rsmp->src_data.input_frames_used;
     rsmp->src_data.data_in      += 2*u_in;
     rsmp->src_data.input_frames -= u_in;
+    /*
+     * If input buffer is empty, reset data_in pointer just in case
+     * the output buffer is also full.
+     */
+    if(rsmp->src_data.input_frames == 0)
+	rsmp->src_data.data_in      = rsmp->input;
     int g_out = rsmp->src_data.output_frames_gen;
     rsmp->src_data.data_out      += 2*g_out;
     rsmp->src_data.output_frames -= g_out;
@@ -576,12 +582,12 @@ process_engine(sound_engine_t *e)
 {
     int i;
     /*Handle event*/
-    if(sem_trywait(&e->ev_pending) == 0) {
+    if(ux_sem_trywait(&e->ev_pending) == 0) {
         if(e->event.type == EVENT_START_STREAM)
             sound_enqueue_real(e,e->event.e);
         else if(e->event.type == EVENT_STOP_STREAM)
             sound_stop_id_real(e,e->event.i);
-        sem_post(&e->ev_free);
+        ux_sem_post(&e->ev_free);
     }
 
     /*Start out with an empty buffer*/
@@ -605,7 +611,7 @@ process_engine(sound_engine_t *e)
                 sound->cleanup(sound);
                 free(sound);
                 e->streams[i] = NULL;
-                sem_post(&sound_done);
+                ux_sem_post(&sound_done);
             }
         }
     }
@@ -696,10 +702,10 @@ static sound_stream_t *load_aiff(FILE *fp, long startpos, long length, int id, f
 static void
 sound_stop_id(int id)
 {
-    sem_wait(&frotz_audio.ev_free);
+    ux_sem_wait(&frotz_audio.ev_free);
     frotz_audio.event.type = EVENT_STOP_STREAM;
     frotz_audio.event.i    = id;
-    sem_post(&frotz_audio.ev_pending);
+    ux_sem_post(&frotz_audio.ev_pending);
 }
 
 static void
@@ -720,10 +726,10 @@ sound_stop_id_real(sound_engine_t *e, int id)
 static void
 sound_enqueue(sound_stream_t *s)
 {
-    sem_wait(&frotz_audio.ev_free);
+    ux_sem_wait(&frotz_audio.ev_free);
     frotz_audio.event.type = EVENT_START_STREAM;
     frotz_audio.event.e    = s;
-    sem_post(&frotz_audio.ev_pending);
+    ux_sem_post(&frotz_audio.ev_pending);
 }
 
 static void
@@ -794,9 +800,9 @@ os_init_sound(void)
         frotz_audio.voices[i].active = 0;
 
     /*No events registered on startup*/
-    sem_init(&frotz_audio.ev_free,    0, 1);
-    sem_init(&frotz_audio.ev_pending, 0, 0);
-    sem_init(&sound_done, 0, 0);
+    ux_sem_init(&frotz_audio.ev_free,    0, 1);
+    ux_sem_init(&frotz_audio.ev_pending, 0, 0);
+    ux_sem_init(&sound_done, 0, 0);
     frotz_audio.event.type = 0;
 
     /*Start audio thread*/
