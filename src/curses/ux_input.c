@@ -178,11 +178,6 @@ static int unix_read_char(int extkeys)
     fd_set rsel;
     struct timeval tval, *t_left, maxwait;
 
-    /*
-     * If the timeout is 0, we still want to call os_tick once per second
-     */
-    maxwait.tv_sec=0;
-    maxwait.tv_usec=1000;
 
     while(1) {
         /* Wait with select so that we get interrupted on SIGWINCH. */
@@ -190,6 +185,13 @@ static int unix_read_char(int extkeys)
         FD_SET(fd, &rsel);
         os_tick();
         refresh();
+
+	/*
+	 * If the timeout is 0, we still want to call os_tick once per second
+	 */
+	maxwait.tv_sec=0;
+	maxwait.tv_usec=1000;
+
         t_left = timeout_left(&tval) ? &tval : NULL;
 	/*
 	 * if the timeout is zero, we wait forever for input, but if
