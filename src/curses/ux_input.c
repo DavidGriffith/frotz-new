@@ -189,7 +189,7 @@ static int unix_read_char(int extkeys)
 	/*
 	 * If the timeout is 0, we still want to call os_tick periodically
 	 *
-	 * Based on experimentation, 10 msec seems to strike a balance 
+	 * Based on experimentation, 10 msec seems to strike a balance
 	 * between cpu usage and not having pauses between sounds
 	 */
 	maxwait.tv_sec=0;
@@ -216,7 +216,7 @@ static int unix_read_char(int extkeys)
             continue;
         case 0:
 	    if (t_left == NULL)
-		/* 
+		/*
 		 * The timeout was 0 (wait forever) but we need to call
 		 * call os_tick to handle sound sequences
 		 */
@@ -375,7 +375,7 @@ static int unix_read_char(int extkeys)
 size_t zcharstrlen(zchar *str)
 {
     size_t ret = 0;
-    
+
     while (str[ret] != 0)
     {
 	ret++;
