@@ -325,10 +325,45 @@ static char read_key_buffer[INPUT_BUFFER_SIZE];
 /* Similar.  Useful for using function key abbreviations.  */
 static char read_line_buffer[INPUT_BUFFER_SIZE];
 
+#ifdef USE_UTF8
+/* Convert UTF-8 encoded char starting at in[idx] to zchar (UCS-2) if
+ * representable in 16 bits or '?' otherwise and return index to next
+ * char of input array. */
+static int utf8_to_zchar(zchar *out, char *in, int idx)
+{
+  zchar ch;
+  int i;
+  if ((in[idx] & 0x80) == 0) {
+    ch = in[idx++];
+  } else if ((in[idx] & 0xe0) == 0xc0) {
+    ch = in[idx++] & 0x1f;
+    if ((in[idx] & 0xc0) != 0x80)
+      goto error;
+    ch = (ch << 6) | (in[idx++] & 0x3f);
+  } else if ((in[idx] & 0xf0) == 0xe0) {
+    ch = in[idx++] & 0xf;
+    for (i = 0; i < 2; i++) {
+      if ((in[idx] & 0xc0) != 0x80)
+        goto error;
+      ch = (ch << 6) | (in[idx++] & 0x3f);
+    }
+  } else {
+    /* Consume all subsequent continuation bytes. */
+    while ((in[++idx] & 0xc0) == 0x80)
+      ;
+error:
+    ch = '?';
+  }
+  *out = ch;
+  return idx;
+}
+#endif
+
 zchar os_read_key (int timeout, bool show_cursor)
 {
-  char c;
+  zchar c;
   int timed_out;
+  int idx = 1;
 
   /* Discard any keys read for line input.  */
   read_line_buffer[0] = '\0';
@@ -347,8 +382,12 @@ zchar os_read_key (int timeout, bool show_cursor)
   if (timed_out)
     return ZC_TIME_OUT;
 
+#ifndef USE_UTF8
   c = read_key_buffer[0];
-  memmove(read_key_buffer, read_key_buffer + 1, strlen(read_key_buffer));
+#else
+  idx = utf8_to_zchar(&c, read_key_buffer, 0);
+#endif
+  memmove(read_key_buffer, read_key_buffer + idx, strlen(read_key_buffer) - idx + 1);
 
   /* TODO: error messages for invalid special chars.  */
 
@@ -362,7 +401,7 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
   static bool timed_out_last_time;
   int timed_out;
 #ifdef USE_UTF8
-  int i, len;
+  int i, j, len;
 #endif
 
   /* Discard any keys read for single key input.  */
@@ -405,12 +444,13 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
   for (len = 0;; len++)
     if (!buf[len])
       break;
-  for (i = 0; i < INPUT_BUFFER_SIZE - len - 2; i++) {
-    buf[len + i] = read_line_buffer[i];
-    if (!read_line_buffer[i])
+  j = 0;
+  for (i = len; i < INPUT_BUFFER_SIZE - 2; i++) {
+    if (!read_line_buffer[j])
       break;
+    j = utf8_to_zchar(&buf[i], read_line_buffer, j);
   }
-  buf[len + i] = 0;
+  buf[i] = 0;
 #endif
   p = read_line_buffer + strlen(read_line_buffer) + 1;
   memmove(read_line_buffer, p, strlen(p) + 1);
