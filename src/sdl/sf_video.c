@@ -853,7 +853,7 @@ zchar os_read_line(int max, zchar *buf, int timeout, int width, int continued)
                     // Delete the character to the left of the cursor
                     if (pos > 0) {
                         memmove(buf + pos - 1, buf + pos,
-                                sizeof(zword) * (mywcslen(buf) - pos + 1));
+                                sizeof(zchar) * (mywcslen(buf) - pos + 1));
                         pos--;
                         sf_DrawInput(buf,pos,ptx,pty,width,true);
                     }
@@ -862,7 +862,7 @@ zchar os_read_line(int max, zchar *buf, int timeout, int width, int continued)
                     // Delete the character to the right of the cursor
                     if (pos < mywcslen(buf)) {
                         memmove(buf + pos, buf + pos + 1,
-                                sizeof(zword) * (mywcslen(buf) - pos));
+                                sizeof(zchar) * (mywcslen(buf) - pos));
                         sf_DrawInput(buf,pos,ptx,pty,width,true);
                     }
                     continue;
@@ -923,7 +923,7 @@ zchar os_read_line(int max, zchar *buf, int timeout, int width, int continued)
                         //printf("l%d w%d p%d\n",len,width,pos);
                         // Only allow if the width limit is not exceeded
                         if (len <= width) {
-                            memmove(buf+pos+1,buf+pos,sizeof(zword)*(mywcslen(buf)-pos+1));
+                            memmove(buf+pos+1,buf+pos,sizeof(zchar)*(mywcslen(buf)-pos+1));
                             *(buf+pos) = c;
                             pos++;
                             sf_DrawInput(buf,pos,ptx,pty,width,true);
@@ -1068,7 +1068,7 @@ void os_more_prompt(void)
 	x = ts->cx; y = ts->cy;
 	h = ts->font->height(ts->font);
 		// Show a [More] prompt
-	while (*p) os_display_char((zword)(*p++));
+	while (*p) os_display_char((zchar)(*p++));
 //		theWnd->WriteText(CResString(IDS_MORE));
 // 	sf_drawcursor(true);
 // 	sf_flushdisplay();
