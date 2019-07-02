@@ -227,6 +227,15 @@ int os_storyfile_tell(FILE * fp)
 
 }
 
+static void print_c_string (const char *s)
+{
+    zchar c;
+
+    while ((c = *s++) != 0) {
+	    os_display_char (c);
+    }
+}
+
 /*
  * os_warn
  *
@@ -244,18 +253,61 @@ void os_warn (const char *s, ...)
     len = vsnprintf(buf, sizeof(buf), s, va);
     va_end(va);
     /* Solaris 2.6's cc complains if the below cast is missing */
-    os_display_string((zchar *)"\n\n");
+    print_c_string("\n\n");
     os_beep(BEEP_HIGH);
     os_set_text_style(BOLDFACE_STYLE);
-    os_display_string((zchar *)"Warning: ");
+    print_c_string("Warning: ");
     os_set_text_style(0);
-    os_display_string((zchar *)(len < 0 ? s : buf));
-    os_display_string((zchar *)"\n");
+    print_c_string((len < 0 ? s : buf));
+    print_c_string("\n");
     if (len < 0)
-        os_display_string((zchar *)"(formatting error)\n");
+        print_c_string("(formatting error)\n");
     else if (len >= sizeof(buf))
-        os_display_string((zchar *)"(truncated)\n");
+        print_c_string("(truncated)\n");
     new_line();
+}
+
+size_t zcharstrlen(zchar *str)
+{
+    size_t ret = 0;
+
+    while (str[ret] != 0)
+    {
+	ret++;
+    }
+    return ret;
+}
+
+zchar *zcharstrcpy(zchar *dest, zchar *src)
+{
+    size_t i;
+
+    for (i = 0; src[i] != '\0'; i++)
+	dest[i] = src[i];
+    dest[i] = 0;
+
+    return dest;
+}
+
+int zcharstrncmp(zchar *s1, zchar *s2, size_t n)
+{
+    zchar u1, u2;
+    while (n-- > 0)
+    {
+      u1 = *s1++;
+      u2 = *s2++;
+      if (u1 != u2)
+        return u1 - u2;
+      if (u1 == 0)
+        return 0;
+    }
+    return 0;
+}
+
+zchar *zcharstrdup(zchar *src) {
+    zchar *dest = malloc((zcharstrlen(src) + 1) * sizeof(zchar));
+    if (dest) zcharstrcpy(dest, src);
+    return dest;
 }
 
 /* These are useful for circular buffers.
@@ -264,9 +316,9 @@ void os_warn (const char *s, ...)
 #define RING_INC( ptr, beg, end) (ptr < (end) ? ++ptr : (ptr = (beg)))
 
 #define MAX_HISTORY 256
-static char *history_buffer[MAX_HISTORY];
-static char **history_next = history_buffer; /* Next available slot. */
-static char **history_view = history_buffer; /* What the user is looking at. */
+static zchar *history_buffer[MAX_HISTORY];
+static zchar **history_next = history_buffer; /* Next available slot. */
+static zchar **history_view = history_buffer; /* What the user is looking at. */
 #define history_end (history_buffer + MAX_HISTORY - 1)
 
 
@@ -278,7 +330,7 @@ void gen_add_to_history(zchar *str)
 
     if (*history_next != NULL)
         free( *history_next);
-    *history_next = strdup((char *)str);
+    *history_next = zcharstrdup(str);
     RING_INC( history_next, history_buffer, history_end);
     history_view = history_next; /* Reset user frame after each line */
 
@@ -302,7 +354,7 @@ void gen_history_reset()
  */
 int gen_history_back(zchar *str, int searchlen, int maxlen)
 {
-    char **prev = history_view;
+    zchar **prev = history_view;
 
     do {
         RING_DEC(history_view, history_buffer, history_end);
@@ -312,10 +364,10 @@ int gen_history_back(zchar *str, int searchlen, int maxlen)
             history_view = prev;
             return 0;
         }
-    } while (strlen(*history_view) > (size_t)maxlen
+    } while (zcharstrlen(*history_view) > (size_t)maxlen
              || (searchlen != 0
-                 && strncmp((char *)str, *history_view, searchlen)));
-    strcpy((char *)str + searchlen, *history_view + searchlen);
+                 && zcharstrncmp(str, *history_view, searchlen)));
+    zcharstrcpy(str + searchlen, *history_view + searchlen);
     return 1;
 }
 
@@ -325,7 +377,7 @@ int gen_history_back(zchar *str, int searchlen, int maxlen)
  */
 int gen_history_forward(zchar *str, int searchlen, int maxlen)
 {
-    char **prev = history_view;
+    zchar **prev = history_view;
 
     do {
         RING_INC(history_view, history_buffer, history_end);
@@ -336,9 +388,9 @@ int gen_history_forward(zchar *str, int searchlen, int maxlen)
             history_view = prev;
             return 0;
         }
-    } while (strlen(*history_view) > (size_t) maxlen
+    } while (zcharstrlen(*history_view) > (size_t) maxlen
              || (searchlen != 0
-                 && strncmp((char *)str, *history_view, searchlen)));
-    strcpy((char *)str + searchlen, *history_view + searchlen);
+                 && zcharstrncmp(str, *history_view, searchlen)));
+    zcharstrcpy(str + searchlen, *history_view + searchlen);
     return 1;
 }
