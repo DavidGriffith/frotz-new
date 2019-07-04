@@ -136,6 +136,51 @@ STATIC void clarea( int n)
   sf_fillrect(a->back,a->x,a->y,a->w,a->h);
   }
 
+#ifdef USE_UTF8
+/* Convert UTF-8 encoded char starting at in[idx] to zchar (UCS-2) if
+ * representable in 16 bits or '?' otherwise and return index to next
+ * char of input array. */
+STATIC int utf8_to_zchar(zchar *out, const char *in, int idx)
+{
+  zchar ch;
+  int i;
+  if ((in[idx] & 0x80) == 0) {
+    ch = in[idx++];
+  } else if ((in[idx] & 0xe0) == 0xc0) {
+    ch = in[idx++] & 0x1f;
+    if ((in[idx] & 0xc0) != 0x80)
+      goto error;
+    ch = (ch << 6) | (in[idx++] & 0x3f);
+  } else if ((in[idx] & 0xf0) == 0xe0) {
+    ch = in[idx++] & 0xf;
+    for (i = 0; i < 2; i++) {
+      if ((in[idx] & 0xc0) != 0x80)
+        goto error;
+      ch = (ch << 6) | (in[idx++] & 0x3f);
+    }
+  } else {
+    /* Consume all subsequent continuation bytes. */
+    while ((in[++idx] & 0xc0) == 0x80)
+      ;
+error:
+    ch = '?';
+  }
+  *out = ch;
+  return idx;
+}
+
+STATIC size_t utf8_len(const char *str)
+  {
+  size_t ret = 0;
+  while (*str)
+	 {
+	 if ((*str++ & 0xc0) != 0x80)
+	   ret++;
+	 }
+  return ret;
+  }
+#endif
+
 STATIC void writetext( ulong color, const char *s, int x, int y, int w, int center)
   {
   int ox,oy,ow,oh;
@@ -147,7 +192,11 @@ STATIC void writetext( ulong color, const char *s, int x, int y, int w, int cent
 //printf("1\n");
   if (center)
 	{
+#ifdef USE_UTF8
+	int wt = 8*utf8_len(s);
+#else
 	int wt = 8*strlen(s);
+#endif
 	x += (w-wt)/2;
 	}
 //printf("2 ts %p\n",ts); fflush(stdout); if (ts < 1000){sf_flushdisplay(); getchar();}
@@ -155,8 +204,17 @@ STATIC void writetext( ulong color, const char *s, int x, int y, int w, int cent
   ts->cy = y;
   ts->fore = color;
 //printf("3\n"); fflush(stdout);
+#ifndef USE_UTF8
   while (*s)
       sf_writeglyph(ts->font->getglyph(ts->font, (unsigned char)(*s++), 1));
+#else
+  while (*s)
+      {
+      zchar ch;
+      s += utf8_to_zchar(&ch, s, 0);
+      sf_writeglyph(ts->font->getglyph(ts->font, ch, 1));
+      }
+#endif
 //printf("4\n");
   sf_setclip(ox,oy,ow,oh);
 //printf("5\n");
@@ -183,7 +241,11 @@ STATIC void showfilename( int pos)
   clarea(A_entry);
   writetext(0,filename,a->x,a->y,a->w,0);
   if (pos >= 0)
-    sf_cvline(a->x+8*pos,a->y,O_BLACK,HTEXT);
+    {
+    int width, height;
+    os_font_data(0, &height, &width);
+    sf_cvline(a->x+width*pos,a->y,O_BLACK,HTEXT);
+    }
   }
 
 STATIC void clicked( BAREA *a)
@@ -316,7 +378,7 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
 
 //printf("saved: %p %d %d %d %d\n",saved,saved[0],saved[1],saved[2],saved[3]);
   sf_pushtextsettings();
-  ts->font = sf_VGA_SFONT;
+  os_set_font(FIXED_WIDTH_FONT);
   ts->style = 0;
   ts->oh = 0;
   ts->fore = 0;
@@ -841,6 +903,22 @@ STATIC zword yesnoover( int xc, int yc)
   return c;
   }
 
+#ifdef USE_UTF8
+// Convert character count into index in UTF-8 encoded string.
+// Works by skipping over continuation bytes.
+STATIC int utf8_char_pos(char *s, int pos)
+  {
+  int cpos;
+  int idx = 0;
+  for (cpos = 0; s[cpos] && idx < pos; cpos++)
+    {
+    if ((s[cpos+1] & 0xc0) != 0x80)
+      idx++;
+    }
+  return cpos;
+}
+#endif
+
 // this is needed for overlapping source and dest in Zentry
 // (lib does not guarantee correct behaviour in that case)
 static void mystrcpy( char *d, const char *s)
@@ -852,17 +930,26 @@ STATIC zword Zentry( int x, int y)
   {
   static int pos = 10000;
   int i,n,nmax; zword c;
-
-  nmax = wentry/8;
+  int cpos,clen,nchars;
+  int width, height;
+  os_font_data(0, &height, &width);
+  nmax = wentry/width;
   if (nmax >= FILENAME_MAX) nmax = FILENAME_MAX-1;
   n = strlen(filename);
+#ifndef USE_UTF8
   if (n > nmax) { n = nmax; filename[n] = 0;}
+  nchars=n;
+#else
+  nchars=utf8_len(filename);
+  if (nchars > nmax) { nchars = nmax; n = utf8_char_pos(filename, nchars); filename[n] = 0;}
+#endif
+
   if (y >= 0)
     {
-    pos = x/4-1; if (pos < 0) pos = 0;
+    pos = x/(width/2)-1; if (pos < 0) pos = 0;
     pos /= 2;
     }
-  if (pos > n) pos = n;
+  if (pos > nchars) pos = nchars;
   showfilename(pos);
   for (;;)
     {
@@ -882,29 +969,61 @@ STATIC zword Zentry( int x, int y)
 	}
     if (c == ZC_ARROW_RIGHT)
 	{
-	if (pos < n){ pos++; showfilename(pos); }
+	if (pos < nchars){ pos++; showfilename(pos); }
 	continue;
 	}
     if (c == ZC_BACKSPACE)
 	{
 	if (pos)
 		{
+		clen = 1;
+#ifndef USE_UTF8
+		cpos = pos;
+#else
+		cpos = utf8_char_pos(filename, pos);
+		while (cpos>clen && (filename[cpos-clen]&0xc0)==0x80) clen++;
+#endif
 			// needs mystrcpy() because overlapping src-dst
-		if (pos < n) mystrcpy(filename+pos-1,filename+pos);
-		n--;
+		if (cpos < n) mystrcpy(filename+cpos-clen,filename+cpos);
+		n-=clen;
+		nchars--;
 		filename[n] = 0;
 		pos--;
 		showfilename(pos);
 		}
 	continue;
 	}
-    if ((c >= 32 && c < 127) || (c >= 160 && c < 256))
+    if ((c >= 32 && c < 127) || (c >= 160 ))
 	{
-	if (n >= nmax) continue;
-	if (n > pos)
-	  for (i=n;i>pos;i--) filename[i] = filename[i-1];
-	filename[pos] = c;
-	n++;
+#ifndef USE_UTF8
+	cpos = pos;
+	clen = 1;
+#else
+	cpos = utf8_char_pos(filename, pos);
+	if (c < 0x80) clen = 1;
+	else if (c < 0x800) clen = 2;
+	else if (c < 0x10000) clen = 3;
+	else {clen = 1; c = '?';}
+#endif
+	if (nchars >= nmax) continue;
+	if (n > cpos)
+	  for (i=n-1;i>=cpos;i--) filename[i+clen] = filename[i];
+#ifndef USE_UTF8
+	filename[cpos] = c;
+#else
+	if (c > 0x7ff) {
+	  filename[cpos] = 0xe0 | ((c >> 12) & 0xf);
+	  filename[cpos+1] = 0x80 | ((c >> 6) & 0x3f);
+	  filename[cpos+2] = 0x80 | (c & 0x3f);
+	} else if (c > 0x7f) {
+	  filename[cpos] = 0xc0 | ((c >> 6) & 0x1f);
+	  filename[cpos+1] = 0x80 | (c & 0x3f);
+	} else {
+	  filename[cpos] = c;
+	}
+#endif
+	n+=clen;
+	nchars++;
 	filename[n] = 0;
 	pos++;
 	showfilename(pos);

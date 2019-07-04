@@ -582,7 +582,34 @@ static int ingame_read_file_name (char *file_name, const char *default_name, int
   print_string (default_name);
   print_string ("\": ");
 
+#ifdef USE_UTF8
+  {
+    zchar z_name[FILENAME_MAX + 1];
+    zchar *zp;
+    int i = 0;
+    read_string (FILENAME_MAX - 4, z_name);
+    zp = z_name;
+    while (*zp) {
+      if(*zp <= 0x7f) {
+	if (i > FILENAME_MAX - 4) break;
+	file_name[i++] = *zp;
+      } else if(*zp > 0x7ff) {
+	if (i > FILENAME_MAX - 6) break;
+	file_name[i++] = 0xe0 | ((*zp >> 12) & 0xf);
+	file_name[i++] = 0x80 | ((*zp >> 6) & 0x3f);
+	file_name[i++] = 0x80 | (*zp & 0x3f);
+      } else {
+	if (i > FILENAME_MAX - 5) break;
+	file_name[i++] = 0xc0 | ((*zp >> 6) & 0x1f);
+	file_name[i++] = 0x80 | (*zp & 0x3f);
+      }
+      zp++;
+    }
+    file_name[i] = 0;
+  }
+#else
   read_string (MAX_FILE_NAME - 4, (zchar *) file_name);
+#endif
 
     /* Use the default name if nothing was typed */
 
