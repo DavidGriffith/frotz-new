@@ -641,6 +641,21 @@ STATIC ENTRY * dodir(
   return res;
   }
 
+#ifdef USE_UTF8
+// Convert character count into index in UTF-8 encoded string.
+// Works by skipping over continuation bytes.
+STATIC int utf8_char_pos(char *s, int pos)
+  {
+  int cpos;
+  int idx = 0;
+  for (cpos = 0; s[cpos] && idx < pos; cpos++)
+    {
+    if ((s[cpos+1] & 0xc0) != 0x80)
+      idx++;
+    }
+  return cpos;
+}
+#endif
 
 //////////////////////////////////////////////
 // white,black,gray,yellow
@@ -722,18 +737,31 @@ STATIC void drawit( int x, int y, ENTRY *e, int w, int issub)
   int i, j, n, color;
   unsigned char *bmp;
   char *s = e->value;
+  int width, height;
+  os_font_data(0, &height, &width);
   bmp = (issub ? folderbmp : docbmp);
   for (i=0;i<16;i++) for (j=0;j<16;j++) sf_wpixel(x+j,y+i,bcolors[*bmp++]);
   x += 17;
   w -= 17;
-  n = w/8;
+  n = w/width;
   if (n < 1) return;
   if (strlen(s) > n)
 	{
 	strcpy(buffer,s);
+#ifndef USE_UTF8
 	buffer[n] = 0;
 	buffer[n-1] = '>';
 	s = buffer;
+#else
+	i = utf8_len(buffer);
+	if (i > n-1)
+	  {
+	  j = utf8_char_pos(buffer, n-1);
+	  buffer[j+1] = 0;
+	  buffer[j] = '>';
+	  s = buffer;
+	  }
+#endif
 	}
   if (e == selected)
 	{
@@ -902,22 +930,6 @@ STATIC zword yesnoover( int xc, int yc)
   drawlist();
   return c;
   }
-
-#ifdef USE_UTF8
-// Convert character count into index in UTF-8 encoded string.
-// Works by skipping over continuation bytes.
-STATIC int utf8_char_pos(char *s, int pos)
-  {
-  int cpos;
-  int idx = 0;
-  for (cpos = 0; s[cpos] && idx < pos; cpos++)
-    {
-    if ((s[cpos+1] & 0xc0) != 0x80)
-      idx++;
-    }
-  return cpos;
-}
-#endif
 
 // this is needed for overlapping source and dest in Zentry
 // (lib does not guarantee correct behaviour in that case)
