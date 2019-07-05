@@ -340,8 +340,8 @@ void os_process_arguments (int argc, char *argv[])
     f_setup.story_file = strdup(argv[zoptind]);
     f_setup.story_name = strdup(basename(argv[zoptind]));
 
-    if (argv[3] != NULL)
-	f_setup.blorb_file = strdup(argv[3]);
+    if (argv[optind+1] != NULL)
+	f_setup.blorb_file = strdup(argv[optind+1]);
 
     /* Now strip off the extension */
     p = strrchr(f_setup.story_name, '.');
