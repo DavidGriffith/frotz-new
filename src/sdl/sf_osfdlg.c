@@ -184,18 +184,20 @@ STATIC size_t utf8_len(const char *str)
 STATIC void writetext( ulong color, const char *s, int x, int y, int w, int center)
   {
   int ox,oy,ow,oh;
+  int wtext, htext;
+  os_font_data(0, &htext, &wtext);
 //printf("W %p [%s]\n",s,s ? s : "??");
   if (!s) return;
   if (!s[0]) return;
   sf_getclip(&ox,&oy,&ow,&oh);
-  sf_setclip(x,y,w,HTEXT);
+  sf_setclip(x,y,w,htext);
 //printf("1\n");
   if (center)
 	{
 #ifdef USE_UTF8
-	int wt = 8*utf8_len(s);
+	int wt = wtext * utf8_len(s);
 #else
-	int wt = 8*strlen(s);
+	int wt = wtext * strlen(s);
 #endif
 	x += (w-wt)/2;
 	}
@@ -244,7 +246,7 @@ STATIC void showfilename( int pos)
     {
     int width, height;
     os_font_data(0, &height, &width);
-    sf_cvline(a->x+width*pos,a->y,O_BLACK,HTEXT);
+    sf_cvline(a->x+width*pos,a->y,O_BLACK,height);
     }
   }
 
@@ -320,6 +322,7 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
   {
   char *pp; ulong *saved; int y0, y1, y2, x1;
   zword c = 0;
+  int wtext, htext, buttw;
 
 	// allow system-specific dialog if not fullscreen
   if (isfull == 0) if (sf_sysdialog)
@@ -358,8 +361,16 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
 
   nbareas = 0;
 
+#ifndef USE_UTF8
+  htext = HTEXT;
+  buttw = BUTTW;
+#else
+  os_font_data(FIXED_WIDTH_FONT, &htext, &wtext);
+  buttw = 6 * wtext + 12;
+#endif
+
   W = WDLG+4*BFRAME+2*SPC;
-  H = HDLG+4*BFRAME+6*SPC+6*BFRAME+3*(HTEXT+2)+HCURSOR+HTEXT;
+  H = HDLG+4*BFRAME+6*SPC+6*BFRAME+3*(htext+2)+HCURSOR+htext;
 
   if (W > ew) return SF_NOTIMP;
   if (H > eh) return SF_NOTIMP;
@@ -369,9 +380,9 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
 
 	// internal!!
   xdlg = X+SPC+2*BFRAME;
-  ydlg = Y+2*SPC+4*BFRAME+HTEXT+HTEXT;
+  ydlg = Y+2*SPC+4*BFRAME+htext+htext;
 
-  wentry = wdlg - BUTTW - SPC - 2*BFRAME;
+  wentry = wdlg - buttw - SPC - 2*BFRAME;
 
   saved = sf_savearea(X,Y,W,H);
   if (!saved) return SF_NOTIMP;
@@ -392,30 +403,30 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
 //  frame_upframe(X,Y,W,H);
   sf_rect(FRAMECOLOR,X,Y,W,H);
   sf_rect(FRAMECOLOR,X+1,Y+1,W-2,H-2);
-  sf_fillrect(FRAMECOLOR,X,Y+2,W,HTEXT);
+  sf_fillrect(FRAMECOLOR,X,Y+2,W,htext);
   if (tit) writetext(O_WHITE,tit,X+2+SPC,Y+2,W-4,0);
   A_list = addarea(xdlg,ydlg,wdlg,hdlg,Zselect);
   bareas[A_list].back = O_WHITE;
   clarea(A_list);
   frame_downframe(xdlg-2,ydlg-2,wdlg+4,hdlg+4);
 
-  y0 = Y+SPC+2*BFRAME+HTEXT;
-  y2 = Y+H-SPC-2*BFRAME-HTEXT;
-  y1 = y2-SPC-HTEXT-2*BFRAME;
+  y0 = Y+SPC+2*BFRAME+htext;
+  y2 = Y+H-SPC-2*BFRAME-htext;
+  y1 = y2-SPC-htext-2*BFRAME;
   x1 = xdlg+wentry+2*BFRAME+SPC;
 
-  A_dir = addarea(xdlg,y0,wentry,HTEXT,NULL);
-  A_entry = addarea(xdlg,y1,wentry,HTEXT,Zentry);
+  A_dir = addarea(xdlg,y0,wentry,htext,NULL);
+  A_entry = addarea(xdlg,y1,wentry,htext,Zentry);
   bareas[A_entry].back = O_WHITE;
   clarea(A_entry);
-  frame_downframe(xdlg-2,y1-2,wentry+4,HTEXT+4);
-  B_up = addbutton(x1,y0,BUTTW,HTEXT,"^up^",Zup);
-  A_filter = addarea(xdlg,y2,wentry,HTEXT,NULL);
+  frame_downframe(xdlg-2,y1-2,wentry+4,htext+4);
+  B_up = addbutton(x1,y0,buttw,htext,"^up^",Zup);
+  A_filter = addarea(xdlg,y2,wentry,htext,NULL);
   strcpy(buffer,"Filter: ");
   strcat(buffer,filt);
   writetext(0,buffer,xdlg,y2,wentry,0);
-  B_cancel = addbutton(x1,y2,BUTTW,HTEXT,"Cancel",Zcanc);
-  B_ok = addbutton(x1,y1,BUTTW,HTEXT,"OK",Zok);
+  B_cancel = addbutton(x1,y2,buttw,htext,"Cancel",Zcanc);
+  B_ok = addbutton(x1,y1,buttw,htext,"OK",Zok);
 
   showfilename(-1);
   updatelist();
@@ -743,8 +754,9 @@ STATIC void drawit( int x, int y, ENTRY *e, int w, int issub)
   char *s = e->value;
   int width, height;
   os_font_data(0, &height, &width);
+  if (height < 16) height = 16;
   bmp = (issub ? folderbmp : docbmp);
-  for (i=0;i<16;i++) for (j=0;j<16;j++) sf_wpixel(x+j,y+i,bcolors[*bmp++]);
+  for (i=0;i<16;i++) for (j=0;j<16;j++) sf_wpixel(x+j,y+i+height/2-8,bcolors[*bmp++]);
   x += 17;
   w -= 17;
   n = w/width;
@@ -783,7 +795,13 @@ STATIC void drawnames( int x, int y, int w, int h, ENTRY *files, int first, int 
   {
   int i;
 
+#ifdef USE_UTF8
+  int width;
+  os_font_data(0, &Fh, &width);
+  if (Fh < 16) Fh = 16;
+#else
   Fh = 16;
+#endif
   Ewid = ewid;
   Ncols = w/ewid;
   Nrows = h/Fh;
