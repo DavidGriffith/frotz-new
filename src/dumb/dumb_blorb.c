@@ -95,12 +95,16 @@ bb_err_t dumb_blorb_init(char *filename)
 	fp = NULL;
 
 	/* Check if foo.blb is there. */
-        if ((blorb_fp = fopen(mystring, "rb")) == NULL) {
-	    p = strrchr(mystring, '.');
-	    if (p != NULL)
-		*p = '\0';
-            strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
-	    blorb_fp = fopen(mystring, "rb");
+	if (f_setup.blorb_file != NULL)
+	    mystring = strdup(f_setup.blorb_file);
+	else {
+	    if ((blorb_fp = fopen(mystring, "rb")) == NULL) {
+		p = strrchr(mystring, '.');
+		if (p != NULL)
+		    *p = '\0';
+		strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
+		blorb_fp = fopen(mystring, "rb");
+	    }
 	}
 
 	if (blorb_fp == NULL || !isblorb(fp))	/* No matching blorbs found. */

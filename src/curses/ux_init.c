@@ -316,7 +316,7 @@ void os_process_arguments (int argc, char *argv[])
 
     } while (c != EOF);
 
-    if (zoptind != argc - 1) {
+    if (argc < 2) {
 	printf("FROTZ V%s\tCurses interface.  ", VERSION);
 
 #ifndef NO_SOUND
@@ -339,6 +339,9 @@ void os_process_arguments (int argc, char *argv[])
 
     f_setup.story_file = strdup(argv[zoptind]);
     f_setup.story_name = strdup(basename(argv[zoptind]));
+
+    if (argv[3] != NULL)
+	f_setup.blorb_file = strdup(argv[3]);
 
     /* Now strip off the extension */
     p = strrchr(f_setup.story_name, '.');
