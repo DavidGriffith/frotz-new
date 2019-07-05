@@ -378,7 +378,11 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
 
 //printf("saved: %p %d %d %d %d\n",saved,saved[0],saved[1],saved[2],saved[3]);
   sf_pushtextsettings();
+#ifndef USE_UTF8
+  ts->font = sf_VGA_SFONT;
+#else
   os_set_font(FIXED_WIDTH_FONT);
+#endif
   ts->style = 0;
   ts->oh = 0;
   ts->fore = 0;
@@ -1005,7 +1009,11 @@ STATIC zword Zentry( int x, int y)
 		}
 	continue;
 	}
+#ifndef USE_UTF8
+    if ((c >= 32 && c < 127) || (c >= 160 && c < 256))
+#else
     if ((c >= 32 && c < 127) || (c >= 160 ))
+#endif
 	{
 #ifndef USE_UTF8
 	cpos = pos;
