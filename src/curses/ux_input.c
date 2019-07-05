@@ -239,8 +239,10 @@ static int unix_read_char(int extkeys)
 
 	/* ...and the other 2% makes up 98% of the code. :( */
 #ifdef USE_UTF8
-    if (sel != KEY_CODE_YES && c >= ZC_LATIN1_MIN)
+    if (sel != KEY_CODE_YES && c >= ZC_LATIN1_MIN) {
+        if (c > 0xffff) continue;
         return c;
+    }
 #endif
 
 	/* On many terminals the backspace key returns DEL. */
@@ -926,11 +928,14 @@ char *os_read_file_name (const char *default_name, int flag)
 		    z = default_name[i++] & 0x1f;
 		    z = (z << 6) | (default_name[i++] & 0x3f);
 		    print_char(z);
-		} else {
+		} else if((default_name[i] & 0xf0) == 0xe0 ) {
 		    z = default_name[i++] & 0xf;
 		    z = (z << 6) | (default_name[i++] & 0x3f);
 		    z = (z << 6) | (default_name[i++] & 0x3f);
 		    print_char(z);
+		} else {
+		    i+=4;
+		    print_char('?');
 		}
 	    }
 	}
