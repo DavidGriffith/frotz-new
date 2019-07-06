@@ -423,21 +423,64 @@ process_aiff(sound_stream_t *self_, float *outl, float *outr, unsigned samples)
 
     int needs_data = resampler_step(self->rsmp, 0);
     int i;
+    unsigned remaining_samples = samples;
+
     while(needs_data) {
-        int inf = sf_readf_float(self->sndfile, self->floatbuffer, samples);
+        int inf = sf_readf_float(self->sndfile, 
+				 self->floatbuffer, 
+				 remaining_samples);
         if(self->sf_info.channels == 1) {
             for(i=0; i<inf; ++i) {
-                self->rsmp->scratch[2*i+0] = self->floatbuffer[i];
-                self->rsmp->scratch[2*i+1] = self->floatbuffer[i];
+                self->rsmp->scratch[2*i+0+2*(samples-remaining_samples)] =
+						        self->floatbuffer[i];
+                self->rsmp->scratch[2*i+1+2*(samples-remaining_samples)] =
+						        self->floatbuffer[i];
             }
         } else if(self->sf_info.channels == 2) {
             for(i=0; i<inf; ++i) {
-                self->rsmp->scratch[2*i+0] = self->floatbuffer[2*i+0];
-                self->rsmp->scratch[2*i+1] = self->floatbuffer[2*i+1];
+                self->rsmp->scratch[2*i+0+2*(samples-remaining_samples)] =
+							 self->floatbuffer[2*i+0];
+                self->rsmp->scratch[2*i+1+2*(samples-remaining_samples)] =
+							 self->floatbuffer[2*i+1];
             }
         }
-        if(inf <= 0)
-            return 0;
+	/* 
+         * If the read function didn't fill the scratch buffer, see if
+	 * there are more repeats and if so, continue filling the scratch
+	 * buffer, a repeat value of 255 means repeat forever
+	 */
+        if(inf < remaining_samples) {
+	    if(self->repeats<255)
+		self->repeats--;
+	    if(self->repeats > 0){
+		/*
+		 * Repeating... Seek back to the beginning of the sound
+		 * and allow the read to get enough samples to fill the
+		 * scratch buffer, and continue with the while loop
+		 */
+		sf_seek(self->sndfile,0, SEEK_SET);
+		if( inf == remaining_samples)
+		    remaining_samples = samples;
+		else
+		    remaining_samples = remaining_samples-inf;
+		continue;
+	    } else if(inf <= 0) {
+		/*
+		 * No repeats and no data left in the sound file, 
+		 * return 0 to tell the next level up that the sound
+		 * is done
+		 */
+	    
+		return 0;
+	    } else {
+		/*
+		 * No repeats but there was data read, set things back
+		 * up so that the maximum buffer size can be read, but
+		 * fall through to make sure the data is resampled
+		 */
+		remaining_samples = samples;
+	    }
+	}
         needs_data = resampler_step(self->rsmp, self->rsmp->scratch);
     }
     resampler_consume(self->rsmp);
@@ -518,7 +561,7 @@ mem_get_filelen(void *datasource)
 }
 
 static sound_stream_t *
-load_aiff(FILE *fp, long startpos, long length, int id, float volume)
+load_aiff(FILE *fp, long startpos, long length, int id, float volume, int repeats)
 {
     sound_stream_aiff_t *aiff =
         (sound_stream_aiff_t*)calloc(sizeof(sound_stream_aiff_t), 1);
@@ -526,6 +569,7 @@ load_aiff(FILE *fp, long startpos, long length, int id, float volume)
     aiff->id         = id;
     aiff->process    = process_aiff;
     aiff->cleanup    = cleanup_aiff;
+    aiff->repeats    = repeats;
 
     aiff->volume = volume;
     aiff->sf_info.format = 0;
@@ -697,7 +741,7 @@ sound_halt_ogg(void)
 }
 
 static sound_stream_t *load_mod(FILE *fp, long startpos, int id, float volume);
-static sound_stream_t *load_aiff(FILE *fp, long startpos, long length, int id, float volume);
+static sound_stream_t *load_aiff(FILE *fp, long startpos, long length, int id, float volume, int repeats);
 
 static void
 sound_stop_id(int id)
@@ -833,7 +877,6 @@ os_init_sound(void)
 void
 os_start_sample(int number, int volume, int repeats, zword eos)
 {
-    (void) repeats;
     (void) eos;
     /*fprintf(audio_log, "os_start_sample(%d,%d,%d,%d)...\n",number,volume,repeats, eos);*/
     /*fflush(audio_log);*/
@@ -860,7 +903,8 @@ os_start_sample(int number, int volume, int repeats, zword eos)
                 resource.data.startpos,
                 resource.length,
                 number,
-                vol);
+                vol,
+		repeats);
     } else if (type == MOD) {
         s = load_mod(blorb_fp, resource.data.startpos, number, vol);
     } else if (type == OGGV) {
@@ -868,7 +912,8 @@ os_start_sample(int number, int volume, int repeats, zword eos)
                 resource.data.startpos,
                 resource.length,
                 number,
-                vol);
+                vol,
+		repeats);
         s->sound_type = OGGV;
     }
 
