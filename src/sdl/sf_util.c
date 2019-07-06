@@ -333,19 +333,18 @@ void os_process_arguments (int argc, char *argv[])
   sf_readsettings();
   parse_options(argc, argv);
 
-  if (optind != argc - 1) 
+  if (argv[optind] == NULL)
 	{
 	usage();
 	exit (EXIT_FAILURE);
 	}
   f_setup.story_file = strdup(argv[optind]);
 
-  // it's useless to test the retval, as in case of error it does not return
-  sf_load_resources( f_setup.story_file);
+  if(argv[optind+1] != NULL)
+    f_setup.blorb_file = argv[optind+1];
 
     /* Strip path and extension off the story file name */
-
-  f_setup.story_name = new_basename(argv[optind]);
+  f_setup.story_name = new_basename(f_setup.story_file);
 
   /* Now strip off the extension. */
   p = strrchr(f_setup.story_name, '.');
@@ -357,7 +356,6 @@ void os_process_arguments (int argc, char *argv[])
   }
   else
     //	blorb_ext = strdup(EXT_BLORB);
-
 
     /* Get rid of extensions with 1 to 6 character extensions. */
     /* This will take care of an extension like ".zblorb". */
@@ -405,6 +403,9 @@ void os_process_arguments (int argc, char *argv[])
   if (user_background != -1) m_defaultBack = sf_GetColour(user_background);
   if (user_foreground != -1) m_defaultFore = sf_GetColour(user_foreground);
   if (user_tandy_bit != -1) m_tandy = user_tandy_bit;
+
+  // it's useless to test the retval, as in case of error it does not return
+  sf_load_resources( f_setup.story_file);
 
   sf_initfonts();
 

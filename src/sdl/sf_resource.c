@@ -201,13 +201,23 @@ static int load_resources( char *givenfn)
   zsize = ftell(f);
   zoffset = 0;
 
-	// try loading a corresponding blorb, but without complaining...
-  p = strrchr(buf,'.');
-  if (p){
-    strcpy(p,".blb");
-    tryloadblorb(buf);
-    }
+  // See if the user explicitly provided a blorb file
+  if (f_setup.blorb_file != NULL) {
+    tryloadblorb(f_setup.blorb_file);
+  } else {
+  // No?  Let's see if we can find one.
+    p = malloc(strlen(f_setup.story_name) + strlen(EXT_BLORB4) * sizeof(char));
+    strncpy(p, f_setup.story_name, strlen(f_setup.story_name));
+    strncat(p, EXT_BLORB3, strlen(EXT_BLORB3)+1);
 
+    if (tryloadblorb(p) != bb_err_None) {  /* Trying foo.blorb */
+      free(p);
+      p = malloc(strlen(f_setup.story_name) + strlen(EXT_BLORB4) * sizeof(char));
+      strncpy(p, f_setup.story_name, strlen(f_setup.story_name));
+      strncat(p, EXT_BLORB, strlen(EXT_BLORB)+1);
+      tryloadblorb(p);  /* Trying foo.blb */
+    }
+  }
   return 0;
   }
 
@@ -1074,6 +1084,19 @@ void os_init_setup(void)
     f_setup.sound = 1;
     f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
     f_setup.restore_mode = 0;
+
+    f_setup.blorb_file = NULL;
+    f_setup.story_file = NULL;
+    f_setup.story_name = NULL;
+    f_setup.story_base = NULL;
+    f_setup.script_name = NULL;
+    f_setup.command_name = NULL;
+    f_setup.save_name = NULL;
+    f_setup.tmp_save_name = NULL;
+    f_setup.aux_name = NULL;
+    f_setup.story_path = NULL;
+    f_setup.zcode_path = NULL;
+    f_setup.restricted_path = NULL;
 
     sdl_active = FALSE;
 }

@@ -23,6 +23,7 @@ typedef struct frotz_setup_struct {
 	int err_report_mode;
 
 	char *story_file;
+	char *blorb_file;
         char *story_name;
         char *story_base;
         char *script_name;

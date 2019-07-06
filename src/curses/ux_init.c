@@ -316,7 +316,7 @@ void os_process_arguments (int argc, char *argv[])
 
     } while (c != EOF);
 
-    if (zoptind != argc - 1) {
+    if ((argv[zoptind] == NULL)) {
 	printf("FROTZ V%s\tCurses interface.  ", VERSION);
 
 #ifndef NO_SOUND
@@ -339,6 +339,9 @@ void os_process_arguments (int argc, char *argv[])
 
     f_setup.story_file = strdup(argv[zoptind]);
     f_setup.story_name = strdup(basename(argv[zoptind]));
+
+    if (argv[zoptind+1] != NULL)
+	f_setup.blorb_file = strdup(argv[zoptind+1]);
 
     /* Now strip off the extension */
     p = strrchr(f_setup.story_name, '.');
@@ -1103,6 +1106,19 @@ void os_init_setup(void)
 	f_setup.bleep = 0;
 	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
 	f_setup.restore_mode = 0;
+
+	f_setup.blorb_file = NULL;
+	f_setup.story_file = NULL;
+	f_setup.story_name = NULL;
+	f_setup.story_base = NULL;
+	f_setup.script_name = NULL;
+	f_setup.command_name = NULL;
+	f_setup.save_name = NULL;
+	f_setup.tmp_save_name = NULL;
+	f_setup.aux_name = NULL;
+	f_setup.story_path = NULL;
+	f_setup.zcode_path = NULL;
+	f_setup.restricted_path = NULL;
 
 	f_setup.use_blorb = 0;
 	f_setup.exec_in_blorb = 0;
