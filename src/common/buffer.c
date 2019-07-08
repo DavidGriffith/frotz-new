@@ -31,6 +31,20 @@ static int bufpos = 0;
 static zchar prev_c = 0;
 
 /*
+ * init_buffer
+ *
+ * Initialize buffer variables.
+ *
+ */
+
+void init_buffer(void)
+{
+    memset(buffer, 0, sizeof (zchar) * TEXT_BUFFER_SIZE);
+    bufpos = 0;
+    prev_c = 0;
+}
+
+/*
  * flush_buffer
  *
  * Copy the contents of the text buffer to the output streams.
@@ -52,12 +66,7 @@ void flush_buffer (void)
 
     buffer[bufpos] = 0;
 
-
-    locked = TRUE;
-
-    stream_word (buffer);
-
-    locked = FALSE;
+    locked = TRUE; stream_word (buffer); locked = FALSE;
 
     /* Reset the buffer */
 
@@ -129,15 +138,3 @@ void new_line (void)
 }/* new_line */
 
 
-/*
- * init_buffer
- *
- * Initialize buffer variables.
- *
- */
-void init_buffer(void)
-{
-    memset(buffer, 0, sizeof (zchar) * TEXT_BUFFER_SIZE);
-    bufpos = 0;
-    prev_c = 0;
-}

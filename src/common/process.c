@@ -180,8 +180,7 @@ void (*ext_opcodes[0x1d]) (void) = {
 void init_process (void)
 {
     finished = 0;
-} /* init_process */
-
+}
 
 /*
  * load_operand
