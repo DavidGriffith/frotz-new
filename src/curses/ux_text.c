@@ -284,7 +284,7 @@ void os_display_string (const zchar *s)
  * displayed, and bit 1 if it can be input.
  *
  */
-int os_check_unicode(int font, zword c)
+int os_check_unicode(int font, zchar c)
 {
 /* Assume full input and output.  */
     return 3;

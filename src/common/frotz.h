@@ -807,7 +807,7 @@ Zwindow * curwinrec( void);
 
 void 	os_beep (int);
 int  	os_char_width (zchar);
-int  	os_check_unicode (int, zword);
+int  	os_check_unicode (int, zchar);
 void 	os_display_char (zchar);
 void 	os_display_string (const zchar *);
 void 	os_draw_picture (int, int, int);
