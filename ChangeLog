@@ -24,6 +24,8 @@ BUG FIXES
 
 - Corrected problems with error handling.
 
+- Fixed a lot of unsafe strcpy() and strcat() calls.
+
 
 Summary of changes between Frotz 2.43 and Frotz 2.44:
 =====================================================
