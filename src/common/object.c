@@ -41,10 +41,9 @@
  * Calculate the address of an object.
  *
  */
+
 static zword object_address (zword obj)
 {
-/*    zchar obj_num[10]; */
-
     /* Check object number */
 
     if (obj > ((h_version <= V3) ? 255 : MAX_OBJECT)) {

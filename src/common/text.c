@@ -243,13 +243,15 @@ static void load_string (zword addr, zword length)
  * Encode the Unicode text in the global "decoded" string then write
  * the result to the global "encoded" array. (This is used to look up
  * words in the dictionary.) Up to V3 the vocabulary resolution is
- * two, since V4 it is three words. Because each word contains three
- * Z-characters, that makes six or nine Z-characters respectively.
- * Longer words are chopped to the proper size, shorter words are are
- * padded out with 5's. For word completion we pad with 0s and 31s,
- * the minimum and maximum Z-characters.
+ * two, since V4 it is three words.
+ * Because each word contains three Z-characters, that makes six or
+ * nine Z-characters respectively. Longer words are chopped to the
+ * proper size, shorter words are are padded out with 5's. For word
+ * completion we pad with 0s and 31s, the minimum and maximum
+ * Z-characters.
  *
  */
+
 static void encode_text (int padding)
 {
     static zchar again[] = { 'a', 'g', 'a', 'i', 'n', 0 };
@@ -325,9 +327,8 @@ static void encode_text (int padding)
 
 }/* encode_text */
 
-
 /*
- * z_check_unicode, test if a unicode character can be read and printed.
+ * z_check_unicode, test if a unicode character can be printed (bit 0) and read (bit 1).
  *
  * 	zargs[0] = Unicode
  *
@@ -433,7 +434,7 @@ static void decode_text (enum string_type st, zword addr)
 	    byte_addr = (long) addr << 2;
 	else if (h_version <= V7)
 	    byte_addr = ((long) addr << 2) + ((long) h_strings_offset << 3);
-	else /* h_version == V8 */
+	else /* (h_version == V8) */
 	    byte_addr = (long) addr << 3;
 
 	if (byte_addr >= story_size)
@@ -545,8 +546,8 @@ static void decode_text (enum string_type st, zword addr)
 	*ptr = 0;
 
 }/* decode_text */
-#undef outchar
 
+#undef outchar
 
 /*
  * z_new_line, print a new line.
