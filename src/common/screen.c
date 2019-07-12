@@ -1239,13 +1239,20 @@ void z_print_table (void)
 
 	if (i != 0) {
 
-	    flush_buffer ();
-	    os_font_data(0, &font_height, &font_width);
-	    cwp->y_cursor += font_height;
-	    cwp->x_cursor = x;
+	    if (h_version != V6 && cwin == 0) {
 
-	    update_cursor ();
+		new_line ();
 
+	    } else {
+
+		flush_buffer ();
+		os_font_data(0, &font_height, &font_width);
+		cwp->y_cursor += font_height;
+		cwp->x_cursor = x;
+
+		update_cursor ();
+
+	    }
 	}
 
 	for (j = 0; j < zargs[1]; j++) {
