@@ -129,6 +129,9 @@ export SYSCONFDIR
 export INCLUDEDIR
 export LIBDIR
 export COLOR
+export SOUND
+export NOSOUND
+export CURSES_SOUND_LDFLAGS
 
 NAME = frotz
 VERSION = 2.45pre
@@ -170,9 +173,11 @@ ifeq ($(CURSES), ncursesw)
 endif
 
 ifeq ($(SOUND), ao)
-  CURSES_LDFLAGS += -lao -ldl -lpthread -lm \
+  CURSES_SOUND_LDFLAGS += -lao -ldl -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
 endif
+# To report if Frotz compiled with or without sound support
+CURSES_SOUND = enabled
 
 
 # Source locations
@@ -206,19 +211,26 @@ DOS_DIR = $(SRCDIR)/dos
 SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
-
 FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
+
 
 # Build recipes
 #
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
-	$(CC) $(CFLAGS) $(CURSES_CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS)
+	$(CC) $(CFLAGS) $(CURSES_CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS)
 	@echo "** Done building Frotz with curses interface"
+	@echo "** Audio support $(CURSES_SOUND)"
+
+nosound: nosound_helper $(FROTZ_BIN)
+nosound_helper:
+	$(eval NOSOUND= -DNO_SOUND)
+	$(eval CURSES_SOUND_LDFLAGS= )
+	$(eval CURSES_SOUND= disabled)
 
 dumb: $(DFROTZ_BIN)
 $(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
@@ -392,6 +404,7 @@ distclean: clean
 help:
 	@echo "Targets:"
 	@echo "    frotz: (default target) the standard curses edition"
+	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
 	@echo "    all: build curses, dumb, and SDL versions"
@@ -412,7 +425,7 @@ help:
 .SUFFIXES: .c .o .h
 
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
-	common_defines curses_defines \
+	common_defines curses_defines nosound nosound_helper\
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz \
 	$(SUBDIRS) $(SUB_CLEAN) \

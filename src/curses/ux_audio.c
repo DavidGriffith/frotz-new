@@ -43,9 +43,10 @@
 #include "ux_audio.h"
 
 f_setup_t f_setup;
-ux_sem_t sound_done;	/* 1 if the sound is done */
 
 #ifndef NO_SOUND
+
+ux_sem_t sound_done;	/* 1 if the sound is done */
 
 #include <ao/ao.h>
 #include <sndfile.h>

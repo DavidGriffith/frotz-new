@@ -28,6 +28,8 @@
  * at https://stackoverflow.com/questions/27736618/why-are-sem-init-sem-getvalue-sem-destroy-deprecated-on-mac-os-x-and-w 
  */
 
+#ifndef NO_SOUND
+
 #ifdef MACOS
 #include <dispatch/dispatch.h>
 struct ux_sema {
@@ -35,7 +37,7 @@ struct ux_sema {
 };
 typedef struct ux_sema ux_sem_t;
 
-/* 
+/*
  * Note that the current implementation does not check return codes
  * so use void to make things simpler on the MAC side
  */
@@ -69,7 +71,7 @@ static inline int ux_sem_trywait(ux_sem_t *sem)
 #include <semaphore.h>
 typedef sem_t ux_sem_t;
 
-/* 
+/*
  * Note that the current implementation does not check return codes
  * so use void to make things simpler on the MAC side
  */
@@ -93,3 +95,5 @@ static inline int ux_sem_trywait(ux_sem_t *sem)
     return sem_trywait(sem);
 }
 #endif
+
+#endif /* NO_SOUND */

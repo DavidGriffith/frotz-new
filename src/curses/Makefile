@@ -35,4 +35,4 @@ clean:
 	rm -f $(TARGET) $(OBJECTS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CURSES_CFLAGS) -fPIC -fpic -o $@ -c $<
+	$(CC) $(CFLAGS) $(CURSES_CFLAGS) $(NOSOUND) -fPIC -fpic -o $@ -c $<
