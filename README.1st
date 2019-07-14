@@ -1,7 +1,6 @@
 What are all these files for?
 
 AUTHORS		People who've had a hand in making Frotz what it is.
-BUGS		A list of known bugs and workarounds (if known).
 build.bat	A batch file for building Frotz for PC/MS DOS.
 COPYING		Full text of the GNU General Public License.
 ChangeLog	Summary of changes from one version to another.
