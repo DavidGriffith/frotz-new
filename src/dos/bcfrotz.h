@@ -1,7 +1,7 @@
 /*
- * "BCfrotz.h"
+ * bcfrotz.h
  *
- * Borland C interface, declarations
+ * DOS interface, declarations, definitions, and defaults.
  *
  */
 
