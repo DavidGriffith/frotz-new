@@ -4,6 +4,7 @@ AUTHORS		People who've had a hand in making Frotz what it is.
 build.bat	A batch file for building Frotz for PC/MS DOS.
 COPYING		Full text of the GNU General Public License.
 ChangeLog	Summary of changes from one version to another.
+CONTRIBUTORS	People who've helped fund Frotz development.
 DOSBUILD.txt	How to build and install Frotz for PC/MS DOS.
 DUMB		Description of the dumb-interface version of Frotz.
 HOW_TO_PLAY	How to play Interactive Fiction.
