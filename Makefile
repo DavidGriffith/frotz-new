@@ -30,7 +30,7 @@ CFLAGS += -D_POSIX_C_SOURCE=200809L
 CFLAGS += -g
 
 # This keeps make(1) output understandable when using -j for parallel
-# building If your version of make(1) can't do parallel builds, comment
+# building. If your version of make(1) can't do parallel builds, comment
 # this out.
 MAKEFLAGS += -Orecurse
 
@@ -223,6 +223,7 @@ DOS_BIN = frotz.exe
 
 # Build recipes
 #
+
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
@@ -230,7 +231,7 @@ $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	@echo "** Done building Frotz with curses interface"
 	@echo "** Audio support $(CURSES_SOUND)"
 
-nosound: nosound_helper $(FROTZ_BIN)
+nosound: nosound_helper $(FROTZ_BIN) | nosound_helper
 nosound_helper:
 	$(eval NOSOUND= -DNO_SOUND)
 	$(eval CURSES_SOUND_LDFLAGS= )
@@ -262,11 +263,19 @@ dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
 
-$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
-$(CURSES_LIB): $(HASH) $(COMMON_DEFINES) $(CURSES_DEFINES) $(CURSES_DIR);
-$(SDL_LIB): $(HASH) $(COMMON_DEFINES) $(SDL_DIR);
-$(DUMB_LIB): $(HASH) $(COMMON_DEFINES) $(DUMB_DIR);
-$(BLORB_LIB): $(BLORB_DIR);
+$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH)
+	$(MAKE) -C $(COMMON_DIR)
+
+$(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
+	$(MAKE) -C $(CURSES_DIR)
+
+$(SDL_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(SDL_DIR)
+
+$(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(DUMB_DIR)
+
+$(BLORB_LIB): $(BLORB_DIR)
 
 $(SUBDIRS):
 	$(MAKE) -C $@
