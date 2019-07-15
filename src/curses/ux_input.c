@@ -33,6 +33,14 @@
 #include <sys/time.h>
 #include <sys/select.h>
 
+#ifdef USE_UTF8
+#include <wchar.h>
+#else
+#ifdef wint_t
+typedef unsigned int wint_t;
+#endif
+#endif
+
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
 #else
@@ -71,9 +79,6 @@ extern bool is_terminator (zchar);
 extern void read_string (int, zchar *);
 extern int completion (const zchar *, zchar *);
 
-#ifndef _WINT_T
-typedef unsigned int wint_t;
-#endif
 
 /*
  * unix_set_global_timeout
