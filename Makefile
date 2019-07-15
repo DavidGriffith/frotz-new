@@ -14,6 +14,9 @@ ifneq ($(OS),Windows_NT)
     ifeq ($(UNAME_S),Darwin)
 	MACOS = yes
     endif
+    ifeq ($(UNAME_S),NetBSD)
+	CFLAGS += -D_NETBSD_SOURCE
+    endif
 endif
 
 # strdup, strndup
