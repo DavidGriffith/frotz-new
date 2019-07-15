@@ -175,9 +175,10 @@ endif
 ifeq ($(SOUND), ao)
   CURSES_SOUND_LDFLAGS += -lao -ldl -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
+  CURSES_SOUND = enabled
+else
+  CURSES_SOUND = disabled
 endif
-# To report if Frotz compiled with or without sound support
-CURSES_SOUND = enabled
 
 
 # Source locations
