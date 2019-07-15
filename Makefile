@@ -17,6 +17,9 @@ ifneq ($(OS),Windows_NT)
     ifeq ($(UNAME_S),NetBSD)
 	CFLAGS += -D_NETBSD_SOURCE
     endif
+    ifeq ($(UNAME_S),Linux)
+	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
+    endif
 endif
 
 # strdup, strndup
@@ -123,6 +126,7 @@ AR ?= $(shell which ar)
 export CC
 export CFLAGS
 export CURSES_CFLAGS
+export NPROCS
 export MAKEFLAGS
 export AR
 export RANLIB
