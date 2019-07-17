@@ -12,12 +12,8 @@
 /* Things you (the porter) have to edit: */
 
 /* As you might expect, uint32 must be a 32-bit unsigned numeric type,
-    and uint16 a 16-bit unsigned numeric type. You should also uncomment
-    exactly one of the two ENDIAN definitions. */
+    and uint16 a 16-bit unsigned numeric type. */
 
-/* #define BLORB_BIG_ENDIAN */
-
-#define BLORB_LITTLE_ENDIAN
 #include <limits.h>
 #if UINT_MAX == (1UL<<32)-1UL
 typedef unsigned int  uint32;
@@ -148,6 +144,11 @@ typedef struct bb_zheader_struct {
 /* bb_map_t: Holds the complete description of an open Blorb file.
     This type is opaque for normal interpreter use. */
 typedef struct bb_map_struct bb_map_t;
+
+
+/* This can be handy elsewhere. */
+extern int bigendian;
+
 
 /* Function declarations. These functions are of fairly general use;
     they would apply to any Blorb file. */
