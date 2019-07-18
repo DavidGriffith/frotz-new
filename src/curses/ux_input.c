@@ -36,7 +36,7 @@
 #ifdef USE_UTF8
 #include <wchar.h>
 #else
-#ifdef wint_t
+#ifndef wint_t
 typedef unsigned int wint_t;
 #endif
 #endif
