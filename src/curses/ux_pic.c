@@ -71,23 +71,6 @@ static int round_div(int x, int y)
 }
 
 
-extern int bigendian;
-
-static void swapbytes(void *object, size_t size)
-{
-  unsigned char *start, *end;
-  unsigned char swap;
-
-  if(!bigendian) {
-    for (start = (unsigned char *)object, end = start + size - 1; start < end; ++start, --end ) {
-      swap = *start;
-      *start = *end;
-      *end = swap;
-    }
-  }
-}
-
-
 bool unix_init_pictures (void)
 {
   int maxlegalpic = 0;
@@ -150,10 +133,6 @@ bool unix_init_pictures (void)
 	  } /* while */
 	} /* JFIF */
       } /* JPEG */
-    }
-    if (bigendian) {
-      swapbytes(&pict_info[i].orig_width, 4);
-      swapbytes(&pict_info[i].orig_height, 4);
     }
     pict_info[i].height = round_div(pict_info[i].orig_height *
 	h_screen_rows, y_scale);

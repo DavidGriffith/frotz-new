@@ -146,10 +146,6 @@ typedef struct bb_zheader_struct {
 typedef struct bb_map_struct bb_map_t;
 
 
-/* This can be handy elsewhere. */
-extern int bigendian;
-
-
 /* Function declarations. These functions are of fairly general use;
     they would apply to any Blorb file. */
 

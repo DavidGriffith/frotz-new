@@ -16,8 +16,7 @@ static int lib_inited = FALSE;
 static bb_err_t bb_initialize_map(bb_map_t *map);
 static bb_err_t bb_initialize(void);
 static int sortsplot(const void *p1, const void *p2);
-
-int bigendian;
+static int bigendian;
 
 static uint16 bb_native2(uint16 v)
 {
