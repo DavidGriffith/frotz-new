@@ -1,4 +1,5 @@
-# For GNU Make.
+# Makefile for Unix Frotz
+# GNU make is required
 
 SOURCES = dumb_blorb.c dumb_init.c dumb_input.c dumb_output.c dumb_pic.c
 

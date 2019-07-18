@@ -1,3 +1,6 @@
+# Makefile for Unix Frotz
+# GNU make is required.
+
 # Your C compiler
 CC=gcc
 #CC=clang
