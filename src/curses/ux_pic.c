@@ -51,6 +51,7 @@ static struct {
   int height;
   int orig_width;
   int orig_height;
+  uint32 type;
 } *pict_info;
 static int num_pictures = 0;
 
@@ -83,7 +84,6 @@ bool unix_init_pictures (void)
   unsigned char jfif_name[5]	  = {'J', 'F', 'I', 'F', 0x00};
 
   bb_result_t res;
-
   uint32 pos;
 
   if (blorb_map == NULL) return FALSE;
@@ -99,41 +99,58 @@ bool unix_init_pictures (void)
 
   for (i = 1; i <= num_pictures; i++) {
     if (bb_load_resource(blorb_map, bb_method_Memory, &res, bb_ID_Pict, i) == bb_err_None) {
+      pict_info[i].type = blorb_map->chunks[res.chunknum].type;
       /* Copy and scale. */
       pict_info[i].z_num = i;
       /* Check to see if we're dealing with a PNG file. */
-      if (memcmp(res.data.ptr, png_magic, 8) == 0) {
-	/* Check for IHDR chunk.  If it's not there, PNG file is invalid. */
-	if (memcmp(res.data.ptr+12, ihdr_name, 4) == 0) {
-	  pict_info[i].orig_width =
+      if (pict_info[i].type == bb_ID_PNG) {
+	if (memcmp(res.data.ptr, png_magic, 8) == 0) {
+	  /* Check for IHDR chunk.  If it's not there, PNG file is invalid. */
+	  if (memcmp(res.data.ptr+12, ihdr_name, 4) == 0) {
+	    pict_info[i].orig_width =
 		(*((unsigned char *)res.data.ptr+16) << 24) +
 		(*((unsigned char *)res.data.ptr+17) << 16) +
 		(*((unsigned char *)res.data.ptr+18) <<  8) +
 		(*((unsigned char *)res.data.ptr+19) <<  0);
-	  pict_info[i].orig_height =
+	    pict_info[i].orig_height =
 		(*((unsigned char *)res.data.ptr+20) << 24) +
 		(*((unsigned char *)res.data.ptr+21) << 16) +
 		(*((unsigned char *)res.data.ptr+22) <<  8) +
 		(*((unsigned char *)res.data.ptr+23) <<  0);
+	  }
 	}
-      } else if (memcmp(res.data.ptr, jpg_magic, 3) == 0) { /* Is it JPEG? */
-	if (memcmp(res.data.ptr+6, jfif_name, 5) == 0) { /* Look for JFIF */
-	  pos = 11;
-	  while (pos < res.length) {
-	    pos++;
-	    if (pos >= res.length) break;	/* Avoid segfault */
-	    if (*((unsigned char *)res.data.ptr+pos) != 0xFF) continue;
-	    if (*((unsigned char *)res.data.ptr+pos+1) != 0xC0) continue;
-	    pict_info[i].orig_width =
-		(*((unsigned char *)res.data.ptr+pos+7)*256) +
-		*((unsigned char *)res.data.ptr+pos+8);
-	    pict_info[i].orig_height =
-		(*((unsigned char *)res.data.ptr+pos+5)*256) +
-		*((unsigned char *)res.data.ptr+pos+6);
-	  } /* while */
-	} /* JFIF */
-      } /* JPEG */
-    }
+      } else if (pict_info[i].type == bb_ID_Rect) {
+	pict_info[i].orig_width =
+		(*((unsigned char *)res.data.ptr+0) << 24) +
+		(*((unsigned char *)res.data.ptr+1) << 16) +
+		(*((unsigned char *)res.data.ptr+2) <<  8) +
+		(*((unsigned char *)res.data.ptr+3) <<  0);
+	pict_info[i].orig_height =
+		(*((unsigned char *)res.data.ptr+4) << 24) +
+		(*((unsigned char *)res.data.ptr+5) << 16) +
+		(*((unsigned char *)res.data.ptr+6) <<  8) +
+		(*((unsigned char *)res.data.ptr+7) <<  0);
+      } else if (pict_info[i].type == bb_ID_JPEG) {
+	if (memcmp(res.data.ptr, jpg_magic, 3) == 0) { /* Is it JPEG? */
+	  if (memcmp(res.data.ptr+6, jfif_name, 5) == 0) { /* Look for JFIF */
+	    pos = 11;
+	    while (pos < res.length) {
+	      pos++;
+	      if (pos >= res.length) break;	/* Avoid segfault */
+	      if (*((unsigned char *)res.data.ptr+pos) != 0xFF) continue;
+	      if (*((unsigned char *)res.data.ptr+pos+1) != 0xC0) continue;
+		pict_info[i].orig_width =
+		  (*((unsigned char *)res.data.ptr+pos+7)*256) +
+		  *((unsigned char *)res.data.ptr+pos+8);
+		pict_info[i].orig_height =
+		  (*((unsigned char *)res.data.ptr+pos+5)*256) +
+		  *((unsigned char *)res.data.ptr+pos+6);
+	    } /* while */
+	  } /* JFIF */
+	} /* JPEG */
+      }
+    } /* for */
+
     pict_info[i].height = round_div(pict_info[i].orig_height *
 	h_screen_rows, y_scale);
     pict_info[i].width = round_div(pict_info[i].orig_width *
