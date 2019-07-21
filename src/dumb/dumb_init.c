@@ -88,7 +88,6 @@ static int user_screen_width = 75;
 static int user_screen_height = 24;
 static int user_random_seed = -1;
 static int user_tandy_bit = 0;
-static char *graphics_filename = NULL;
 static bool plain_ascii = FALSE;
 
 /*
@@ -208,7 +207,7 @@ void os_init_screen(void)
 
     dumb_init_input();
     dumb_init_output();
-    dumb_init_pictures(graphics_filename);
+    dumb_init_pictures();
 }
 
 int os_random_seed (void)
@@ -238,7 +237,7 @@ FILE *os_load_story(void)
 #ifndef NO_BLORB
     switch (dumb_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
-//	  printf("No blorb file found.\n\n");
+/*	  printf("No blorb file found.\n\n"); */
 	  break;
 	case bb_err_Format:
 	  printf("Blorb file loaded, but unable to build map.\n\n");
@@ -247,7 +246,7 @@ FILE *os_load_story(void)
 	  printf("Blorb file loaded, but lacks executable chunk.\n\n");
 	  break;
 	case bb_err_None:
-//	  printf("No blorb errors.\n\n");
+/*	  printf("No blorb errors.\n\n"); */
 	  break;
     }
 

@@ -39,7 +39,7 @@ f_setup_t f_setup;
 
 FILE *blorb_fp;
 bb_result_t blorb_res;
-/* bb_map_t *blorb_map; */	/* Used only locally */
+bb_map_t *blorb_map;
 
 static int isblorb(FILE *);
 
@@ -67,8 +67,6 @@ bb_err_t dumb_blorb_init(char *filename)
 
     bb_err_t blorb_err;
 
-    bb_map_t *blorb_map = NULL;
-
     if ((fp = fopen(filename, "rb")) == NULL)
 	return bb_err_Read;
 
@@ -77,41 +75,37 @@ bb_err_t dumb_blorb_init(char *filename)
      */
     if (isblorb(fp)) {			/* Now we know to look */
 	f_setup.exec_in_blorb = 1;	/* for zcode in the blorb */
-        blorb_fp = fopen(filename, "rb");
+        blorb_fp = fp;
     } else {
-	len1 = strlen(filename) + strlen(EXT_BLORB);
-	len2 = strlen(filename) + strlen(EXT_BLORB3);
-
-	mystring = malloc(len2 * sizeof(char) + 1);
-        strncpy(mystring, filename, len1 * sizeof(char));
-	p = strrchr(mystring, '.');
-	if (p != NULL)
-	    *p = '\0';
-
-        strncat(mystring, EXT_BLORB, len1 * sizeof(char));
-
-	/* Done monkeying with the initial file. */
 	fclose(fp);
-	fp = NULL;
-
-	/* Check if foo.blb is there. */
 	if (f_setup.blorb_file != NULL)
 	    mystring = strdup(f_setup.blorb_file);
 	else {
-	    if ((blorb_fp = fopen(mystring, "rb")) == NULL) {
-		p = strrchr(mystring, '.');
-		if (p != NULL)
-		    *p = '\0';
-		strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
-		blorb_fp = fopen(mystring, "rb");
-	    }
+	    len1 = strlen(filename) + strlen(EXT_BLORB);
+	    len2 = strlen(filename) + strlen(EXT_BLORB3);
+	    mystring = malloc(len2 * sizeof(char) + 1);
+	    strncpy(mystring, filename, len1 * sizeof(char));
+	    p = strrchr(mystring, '.');
+	    if (p != NULL) *p = '\0';
+	    strncat(mystring, EXT_BLORB, len1 * sizeof(char));
 	}
 
-	if (blorb_fp == NULL || !isblorb(fp))	/* No matching blorbs found. */
-	    return bb_err_NoBlorb;
+	/* Check if foo.blb is there. */
+	if ((fp = fopen(mystring, "rb")) == NULL) {
+	    p = strrchr(mystring, '.');
+	    if (p != NULL) *p = '\0';
+	    strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
 
+	    if (!(fp = fopen(mystring, "rb")))
+		return bb_err_NoBlorb;
+	}
+	if (!isblorb(fp)) {
+	    fclose(fp);
+	    return bb_err_NoBlorb;
+	}
 	/* At this point we know that we're using a naked zcode file */
 	/* with resources in a separate Blorb file. */
+	blorb_fp = fp;
 	f_setup.use_blorb = 1;
     }
 
@@ -119,7 +113,7 @@ bb_err_t dumb_blorb_init(char *filename)
      * This will fail if the file is not a valid Blorb file.
      * From this map, we can now pick out any resource we need.
      */
-    blorb_err = bb_create_map(fp, &blorb_map);
+    blorb_err = bb_create_map(blorb_fp, &blorb_map);
     if (blorb_err != bb_err_None)
 	return bb_err_Format;
 
@@ -132,37 +126,15 @@ bb_err_t dumb_blorb_init(char *filename)
 	f_setup.exec_in_blorb = 1;
     }
 
-    fclose(fp);
     return blorb_err;
 }
 
-
-/*
- * ux_blorb_stop
- *
- * Basically just close the Blorb file.
- *
- */
-void ux_blorb_stop(void)
-{
-    if (blorb_fp != NULL)
-	fclose(blorb_fp);
-    blorb_fp = NULL;
-}
-
-/*
- **********************************************
- * These functions are internal to ux_blorb.c
- *
- **********************************************
- */
 
 /*
  * isblorb
  *
  * Returns 1 if this file is a Blorb file, 0 if not.
  *
- * FIXME Is there a potential endian problem here?
  */
 static int isblorb(FILE *fp)
 {
