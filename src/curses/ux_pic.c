@@ -164,6 +164,10 @@ bool unix_init_pictures (void)
 
     success = TRUE;
   } /* for */
+
+  if (success) h_config |= CONFIG_PICTURES;
+  else h_flags &= ~GRAPHICS_FLAG;
+
   return success;
 }
 
