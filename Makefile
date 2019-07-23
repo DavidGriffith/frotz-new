@@ -185,7 +185,7 @@ ifeq ($(CURSES), ncursesw)
 endif
 
 ifeq ($(SOUND), ao)
-  CURSES_SOUND_LDFLAGS += -lao -ldl -lpthread -lm \
+  CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
   CURSES_SOUND = enabled
 else
