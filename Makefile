@@ -18,7 +18,9 @@ ifneq ($(OS),Windows_NT)
 	MACOS = yes
     endif
     ifeq ($(UNAME_S),NetBSD)
-	CFLAGS += -D_NETBSD_SOURCE
+	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include 
+	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
+	CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw 
     endif
     ifeq ($(UNAME_S),Linux)
 	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
@@ -177,7 +179,7 @@ ifeq ($(CURSES), ncurses)
   CURSES_DEFINE = USE_NCURSES_H
 endif
 ifeq ($(CURSES), ncursesw)
-  CURSES_LDFLAGS += -lncursesw -ltinfo
+  CURSES_LDFLAGS += -lncursesw
   CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
   CURSES_DEFINE = USE_NCURSES_H
 endif
@@ -327,6 +329,16 @@ endif
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
+ifndef CURSES
+	@echo "** ERROR You need to pick a flavor of curses in the Makefile!"
+	exit 1
+endif
+ifdef USE_UTF8
+ifneq ($(CURSES),ncursesw)
+	@echo "** ERROR UTF-8 support only works with ncursesw!"
+	exit 2
+endif
+endif
 	@echo "** Generating $@"
 	@echo "#ifndef CURSES_DEFINES_H" > $@
 	@echo "#define CURSES_DEFINES_H" >> $@
