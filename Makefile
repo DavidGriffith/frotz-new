@@ -13,6 +13,8 @@ CFLAGS += -Wall -std=c99 #-Wextra
 
 # Determine if we are compiling on MAC OS X
 ifneq ($(OS),Windows_NT)
+    # For now, assume !windows == unix.
+    OS_TYPE ?= unix
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
 	MACOS = yes
@@ -306,6 +308,9 @@ $(COMMON_DEFINES):
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
+ifeq ($(OS_TYPE), unix)
+	@echo "#define UNIX" >> $@
+endif
 ifdef NO_BLORB
 	@echo "#define NO_BLORB" >> $@
 endif

@@ -14,6 +14,10 @@
 #include <io.h>
 #endif
 
+#ifdef UNIX
+#include <unistd.h>
+#endif
+
 f_setup_t f_setup;
 
 typedef void (*CLEANFUNC)();
