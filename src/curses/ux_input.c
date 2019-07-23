@@ -33,26 +33,22 @@
 #include <sys/time.h>
 #include <sys/select.h>
 
-#ifdef USE_UTF8
-#include <wchar.h>
-#else
-#ifndef wint_t
-typedef unsigned int wint_t;
-#endif
-#endif
-
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>
 #endif
 
+#include "ux_frotz.h"
+
+#ifdef USE_UTF8
+#include <wctype.h>
+#endif
+
 #ifndef NO_SOUND
 #include "ux_sema.h"
 ux_sem_t sound_done;
 #endif
-
-#include "ux_frotz.h"
 
 static int start_of_prev_word(int, const zchar*);
 static int end_of_next_word(int, const zchar*, int);
@@ -178,7 +174,11 @@ void os_tick()
 
 static int unix_read_char(int extkeys)
 {
+#ifdef USE_UTF8
     wint_t c;
+#else
+    int c;
+#endif
     int sel, fd = fileno(stdin);
     fd_set rsel;
     struct timeval tval, *t_left, maxwait;
