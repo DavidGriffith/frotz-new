@@ -23,6 +23,7 @@ ifneq ($(OS),Windows_NT)
 	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include 
 	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
 	CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw 
+	SDL_LDFLAGS += -lexecinfo
     endif
     ifeq ($(UNAME_S),Linux)
 	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
@@ -219,7 +220,7 @@ endif
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
-SDL_LDFLAGS = `pkg-config $(SDL_PKGS) --libs` -lm
+SDL_LDFLAGS += `pkg-config $(SDL_PKGS) --libs` -lm
 
 DOS_DIR = $(SRCDIR)/dos
 
