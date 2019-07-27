@@ -149,9 +149,6 @@ void os_process_arguments(int argc, char *argv[])
     f_setup.story_file = strdup(argv[zoptind]);
     f_setup.story_name = strdup(basename(argv[zoptind]));
 
-    if (argv[optind+1] != NULL)
-	f_setup.blorb_file = strdup(argv[optind+1]);
-
     if (argv[zoptind+1] != NULL)
 	f_setup.blorb_file = strdup(argv[zoptind+1]);
 

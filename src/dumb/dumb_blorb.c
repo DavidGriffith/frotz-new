@@ -92,12 +92,9 @@ bb_err_t dumb_blorb_init(char *filename)
 
 	/* Check if foo.blb is there. */
 	if ((fp = fopen(mystring, "rb")) == NULL) {
-	    mystring = strdup(f_setup.blorb_file);
-	else {
-		p = strrchr(mystring, '.');
+	    p = strrchr(mystring, '.');
 	    if (p != NULL) *p = '\0';
 	    strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
-	    }
 
 	    if (!(fp = fopen(mystring, "rb")))
 		return bb_err_NoBlorb;
