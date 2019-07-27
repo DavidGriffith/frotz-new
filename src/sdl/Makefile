@@ -1,4 +1,5 @@
-# For GNU Make.
+# Makefile for Unix Frotz
+# GNU make is required
 
 SDL_PKGS ?= libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 

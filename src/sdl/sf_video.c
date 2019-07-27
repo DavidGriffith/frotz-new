@@ -426,7 +426,7 @@ static void sf_toggle_fullscreen()
 
 void sf_initvideo( int W, int H, int full)
 {
-    Uint32 video_flags = 0, pixfmt;
+    Uint32 video_flags = SDL_WINDOW_RESIZABLE, pixfmt;
     Uint32 initflags = SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO;
 
     sprintf(banner, "SDL Frotz v%s - %s (z%d)",
@@ -446,7 +446,7 @@ void sf_initvideo( int W, int H, int full)
 
     isfullscreen = full;
     if (full)
-        video_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+        video_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     if ((window = SDL_CreateWindow(
             banner, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             W, H, video_flags)))

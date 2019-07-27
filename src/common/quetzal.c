@@ -47,10 +47,6 @@
 #define get_c fgetc
 #define put_c fputc
 
-/*
- * externs
- */
-
 typedef unsigned long zlong;
 
 /*

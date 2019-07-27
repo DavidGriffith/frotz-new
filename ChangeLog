@@ -15,6 +15,17 @@ NEW FEATURES
 
 - Sound driver selection is automated through the use of libao.
 
+- Allow for an alternative Blorb file to be specified on the command line.
+
+
+BUG FIXES
+
+- Overhauled MacOS compilation.
+
+- Corrected problems with error handling.
+
+- Fixed a lot of unsafe strcpy() and strcat() calls.
+
 
 Summary of changes between Frotz 2.43 and Frotz 2.44:
 =====================================================
@@ -38,7 +49,7 @@ BUG FIXES
 
 - Added some fflush() calls to make Dumb Frotz more suitable for bot use.
 
-- Removed old-style save support.  It was getting hard to manage.  Only 
+- Removed old-style save support.  It was getting hard to manage.  Only
   the Quetzal save file format is supported now.
 
 - Fixed assorted minor 64-bitness problems.

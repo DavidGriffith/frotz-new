@@ -1,4 +1,5 @@
-# For GNU Make.
+# Makefile for Unix Frotz
+# GNU make is required.
 
 SOURCES = ux_audio.c ux_audio_none.c ux_audio_oss.c ux_blorb.c ux_init.c \
 	ux_input.c ux_pic.c ux_resource.c ux_screen.c ux_text.c
@@ -35,4 +36,4 @@ clean:
 	rm -f $(TARGET) $(OBJECTS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CURSES_CFLAGS) -fPIC -fpic -o $@ -c $<
+	$(CC) $(CFLAGS) $(CURSES_CFLAGS) $(NOSOUND) -fPIC -fpic -o $@ -c $<

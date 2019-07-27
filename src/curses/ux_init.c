@@ -316,7 +316,7 @@ void os_process_arguments (int argc, char *argv[])
 
     } while (c != EOF);
 
-    if (argc < 2) {
+    if ((argv[zoptind] == NULL)) {
 	printf("FROTZ V%s\tCurses interface.  ", VERSION);
 
 #ifndef NO_SOUND
@@ -342,6 +342,9 @@ void os_process_arguments (int argc, char *argv[])
 
     if (argv[optind+1] != NULL)
 	f_setup.blorb_file = strdup(argv[optind+1]);
+
+    if (argv[zoptind+1] != NULL)
+	f_setup.blorb_file = strdup(argv[zoptind+1]);
 
     /* Now strip off the extension */
     p = strrchr(f_setup.story_name, '.');
@@ -835,7 +838,7 @@ static int getconfig(char *configfile)
 			;
 
 		/* Remove trailing whitespace and newline */
-		for (num = strlen(varname) - 1; (ssize_t) num >= 0 && isspace(varname[num]); num--)
+		for (num = strlen(varname) - 1; (ssize_t) num >= 0 && isspace((int) varname[num]); num--)
 		;
 		varname[num+1] = 0;
 
@@ -846,9 +849,9 @@ static int getconfig(char *configfile)
 		}
 
 		/* Find end of variable name */
-		for (num = 0; varname[num] != 0 && !isspace(varname[num]) && num < LINELEN; num++);
+		for (num = 0; varname[num] != 0 && !isspace((int) varname[num]) && num < LINELEN; num++);
 
-		for (num2 = num; isspace(varname[num2]) && num2 < LINELEN; num2++);
+		for (num2 = num; isspace((int) varname[num2]) && num2 < LINELEN; num2++);
 
 		/* Find the beginning of the value */
 		strncpy(value, &varname[num2], LINELEN);
@@ -962,7 +965,7 @@ static int getbool(char *value)
 
 	/* Be case-insensitive */
 	for (num = 0; value[num] !=0; num++)
-		value[num] = tolower(value[num]);
+		value[num] = tolower((int) value[num]);
 
 	if (strncmp(value, "y", 1) == 0)
 		return TRUE;
@@ -990,7 +993,7 @@ static int getcolor(char *value)
 
 	/* Be case-insensitive */
 	for (num = 0; value[num] !=0; num++)
-		value[num] = tolower(value[num]);
+		value[num] = tolower((int) value[num]);
 
 	if (strcmp(value, "black") == 0)
 		return BLACK_COLOUR;
@@ -1038,7 +1041,7 @@ static int geterrmode(char *value)
 
         /* Be case-insensitive */
 	for (num = 0; value[num] !=0; num++)
-		value[num] = tolower(value[num]);
+		value[num] = tolower((int) value[num]);
 
 	if (strcmp(value, "never") == 0)
 		return ERR_REPORT_NEVER;
@@ -1106,6 +1109,19 @@ void os_init_setup(void)
 	f_setup.bleep = 0;
 	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
 	f_setup.restore_mode = 0;
+
+	f_setup.blorb_file = NULL;
+	f_setup.story_file = NULL;
+	f_setup.story_name = NULL;
+	f_setup.story_base = NULL;
+	f_setup.script_name = NULL;
+	f_setup.command_name = NULL;
+	f_setup.save_name = NULL;
+	f_setup.tmp_save_name = NULL;
+	f_setup.aux_name = NULL;
+	f_setup.story_path = NULL;
+	f_setup.zcode_path = NULL;
+	f_setup.restricted_path = NULL;
 
 	f_setup.use_blorb = 0;
 	f_setup.exec_in_blorb = 0;

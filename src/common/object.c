@@ -41,10 +41,9 @@
  * Calculate the address of an object.
  *
  */
+
 static zword object_address (zword obj)
 {
-/*    zchar obj_num[10]; */
-
     /* Check object number */
 
     if (obj > ((h_version <= V3) ? 255 : MAX_OBJECT)) {
@@ -667,6 +666,11 @@ void z_get_prop_len (void)
 {
     zword addr;
     zbyte value;
+
+    if (zargs[0] == 0) {
+	store (0); /* demanded by Spec 1.1 */
+	return;
+    }
 
     /* Back up the property pointer to the property id */
 

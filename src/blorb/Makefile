@@ -1,4 +1,5 @@
-# For GNU Make.
+# Makefile for Unix Frotz
+# GNU make is required
 
 SOURCES = blorblib.c
 

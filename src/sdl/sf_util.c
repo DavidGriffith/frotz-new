@@ -14,6 +14,10 @@
 #include <io.h>
 #endif
 
+#ifdef UNIX
+#include <unistd.h>
+#endif
+
 f_setup_t f_setup;
 
 typedef void (*CLEANFUNC)();
@@ -333,19 +337,18 @@ void os_process_arguments (int argc, char *argv[])
   sf_readsettings();
   parse_options(argc, argv);
 
-  if (optind != argc - 1) 
+  if (argv[optind] == NULL)
 	{
 	usage();
 	exit (EXIT_FAILURE);
 	}
   f_setup.story_file = strdup(argv[optind]);
 
-  // it's useless to test the retval, as in case of error it does not return
-  sf_load_resources( f_setup.story_file);
+  if(argv[optind+1] != NULL)
+    f_setup.blorb_file = argv[optind+1];
 
     /* Strip path and extension off the story file name */
-
-  f_setup.story_name = new_basename(argv[optind]);
+  f_setup.story_name = new_basename(f_setup.story_file);
 
   /* Now strip off the extension. */
   p = strrchr(f_setup.story_name, '.');
@@ -357,7 +360,6 @@ void os_process_arguments (int argc, char *argv[])
   }
   else
     //	blorb_ext = strdup(EXT_BLORB);
-
 
     /* Get rid of extensions with 1 to 6 character extensions. */
     /* This will take care of an extension like ".zblorb". */
@@ -405,6 +407,9 @@ void os_process_arguments (int argc, char *argv[])
   if (user_background != -1) m_defaultBack = sf_GetColour(user_background);
   if (user_foreground != -1) m_defaultFore = sf_GetColour(user_foreground);
   if (user_tandy_bit != -1) m_tandy = user_tandy_bit;
+
+  // it's useless to test the retval, as in case of error it does not return
+  sf_load_resources( f_setup.story_file);
 
   sf_initfonts();
 
@@ -582,7 +587,34 @@ static int ingame_read_file_name (char *file_name, const char *default_name, int
   print_string (default_name);
   print_string ("\": ");
 
+#ifdef USE_UTF8
+  {
+    zchar z_name[FILENAME_MAX + 1];
+    zchar *zp;
+    int i = 0;
+    read_string (FILENAME_MAX - 4, z_name);
+    zp = z_name;
+    while (*zp) {
+      if(*zp <= 0x7f) {
+	if (i > FILENAME_MAX - 4) break;
+	file_name[i++] = *zp;
+      } else if(*zp > 0x7ff) {
+	if (i > FILENAME_MAX - 6) break;
+	file_name[i++] = 0xe0 | ((*zp >> 12) & 0xf);
+	file_name[i++] = 0x80 | ((*zp >> 6) & 0x3f);
+	file_name[i++] = 0x80 | (*zp & 0x3f);
+      } else {
+	if (i > FILENAME_MAX - 5) break;
+	file_name[i++] = 0xc0 | ((*zp >> 6) & 0x1f);
+	file_name[i++] = 0x80 | (*zp & 0x3f);
+      }
+      zp++;
+    }
+    file_name[i] = 0;
+  }
+#else
   read_string (MAX_FILE_NAME - 4, (zchar *) file_name);
+#endif
 
     /* Use the default name if nothing was typed */
 

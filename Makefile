@@ -1,3 +1,6 @@
+# Makefile for Unix Frotz
+# GNU make is required.
+
 # Your C compiler
 CC=gcc
 #CC=clang
@@ -10,9 +13,20 @@ CFLAGS += -Wall -std=c99 #-Wextra
 
 # Determine if we are compiling on MAC OS X
 ifneq ($(OS),Windows_NT)
+    # For now, assume !windows == unix.
+    OS_TYPE ?= unix
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
 	MACOS = yes
+    endif
+    ifeq ($(UNAME_S),NetBSD)
+	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include 
+	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
+	CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw 
+	SDL_LDFLAGS += -lexecinfo
+    endif
+    ifeq ($(UNAME_S),Linux)
+	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
     endif
 endif
 
@@ -27,7 +41,7 @@ CFLAGS += -D_POSIX_C_SOURCE=200809L
 CFLAGS += -g
 
 # This keeps make(1) output understandable when using -j for parallel
-# building If your version of make(1) can't do parallel builds, comment
+# building. If your version of make(1) can't do parallel builds, comment
 # this out.
 MAKEFLAGS += -Orecurse
 
@@ -120,6 +134,7 @@ AR ?= $(shell which ar)
 export CC
 export CFLAGS
 export CURSES_CFLAGS
+export NPROCS
 export MAKEFLAGS
 export AR
 export RANLIB
@@ -129,6 +144,9 @@ export SYSCONFDIR
 export INCLUDEDIR
 export LIBDIR
 export COLOR
+export SOUND
+export NOSOUND
+export CURSES_SOUND_LDFLAGS
 
 NAME = frotz
 VERSION = 2.45pre
@@ -164,14 +182,17 @@ ifeq ($(CURSES), ncurses)
   CURSES_DEFINE = USE_NCURSES_H
 endif
 ifeq ($(CURSES), ncursesw)
-  CURSES_LDFLAGS += -lncursesw -ltinfo
+  CURSES_LDFLAGS += -lncursesw
   CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
   CURSES_DEFINE = USE_NCURSES_H
 endif
 
 ifeq ($(SOUND), ao)
-  CURSES_LDFLAGS += -lao -ldl -lpthread -lm \
+  CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
+  CURSES_SOUND = enabled
+else
+  CURSES_SOUND = disabled
 endif
 
 
@@ -199,26 +220,34 @@ endif
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
-SDL_LDFLAGS = `pkg-config $(SDL_PKGS) --libs` -lm
+SDL_LDFLAGS += `pkg-config $(SDL_PKGS) --libs` -lm
 
 DOS_DIR = $(SRCDIR)/dos
 
 SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
-
 FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
 
+
 # Build recipes
 #
+
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
-	$(CC) $(CFLAGS) $(CURSES_CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS)
+	$(CC) $(CFLAGS) $(CURSES_CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS)
 	@echo "** Done building Frotz with curses interface"
+	@echo "** Audio support $(CURSES_SOUND)"
+
+nosound: nosound_helper $(FROTZ_BIN) | nosound_helper
+nosound_helper:
+	$(eval NOSOUND= -DNO_SOUND)
+	$(eval CURSES_SOUND_LDFLAGS= )
+	$(eval CURSES_SOUND= disabled)
 
 dumb: $(DFROTZ_BIN)
 $(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
@@ -246,11 +275,19 @@ dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
 
-$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH) $(COMMON_DIR);
-$(CURSES_LIB): $(HASH) $(COMMON_DEFINES) $(CURSES_DEFINES) $(CURSES_DIR);
-$(SDL_LIB): $(HASH) $(COMMON_DEFINES) $(SDL_DIR);
-$(DUMB_LIB): $(HASH) $(COMMON_DEFINES) $(DUMB_DIR);
-$(BLORB_LIB): $(BLORB_DIR);
+$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH)
+	$(MAKE) -C $(COMMON_DIR)
+
+$(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
+	$(MAKE) -C $(CURSES_DIR)
+
+$(SDL_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(SDL_DIR)
+
+$(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(DUMB_DIR)
+
+$(BLORB_LIB): $(BLORB_DIR)
 
 $(SUBDIRS):
 	$(MAKE) -C $@
@@ -272,6 +309,9 @@ $(COMMON_DEFINES):
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
+ifeq ($(OS_TYPE), unix)
+	@echo "#define UNIX" >> $@
+endif
 ifdef NO_BLORB
 	@echo "#define NO_BLORB" >> $@
 endif
@@ -295,6 +335,16 @@ endif
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
+ifndef CURSES
+	@echo "** ERROR You need to pick a flavor of curses in the Makefile!"
+	exit 1
+endif
+ifdef USE_UTF8
+ifneq ($(CURSES),ncursesw)
+	@echo "** ERROR UTF-8 support only works with ncursesw!"
+	exit 2
+endif
+endif
 	@echo "** Generating $@"
 	@echo "#ifndef CURSES_DEFINES_H" > $@
 	@echo "#define CURSES_DEFINES_H" >> $@
@@ -392,6 +442,7 @@ distclean: clean
 help:
 	@echo "Targets:"
 	@echo "    frotz: (default target) the standard curses edition"
+	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
 	@echo "    all: build curses, dumb, and SDL versions"
@@ -412,7 +463,7 @@ help:
 .SUFFIXES: .c .o .h
 
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
-	common_defines curses_defines \
+	common_defines curses_defines nosound nosound_helper\
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz \
 	$(SUBDIRS) $(SUB_CLEAN) \

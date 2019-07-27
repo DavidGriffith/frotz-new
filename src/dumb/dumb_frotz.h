@@ -41,4 +41,4 @@ void dumb_elide_more_prompt(void);
 void dumb_set_picture_cell(int row, int col, zchar c);
 
 /* dumb-pic.c */
-void dumb_init_pictures(char *graphics_filename);
+bool dumb_init_pictures(void);

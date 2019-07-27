@@ -434,7 +434,7 @@ void sf_poptextsettings()
  * 
  *
  */
-int os_check_unicode(int font, zword c)
+int os_check_unicode(int font, zchar c)
   {
   return ((current.font->hasglyph(current.font,c,0) != 0) ? 3 : 2);
   }

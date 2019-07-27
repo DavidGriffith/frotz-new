@@ -1,4 +1,5 @@
-# For GNU Make.
+# Makefile for Unix Frotz
+# GNU make is required.
 
 SOURCES = buffer.c err.c fastmem.c files.c getopt.c hotkey.c input.c \
 	main.c math.c missing.c object.c process.c quetzal.c random.c \

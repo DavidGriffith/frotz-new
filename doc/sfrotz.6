@@ -6,7 +6,30 @@ sfrotz \- interpreter for Infocom and other Z-Machine games (SDL interface)
 
 .SH SYNOPSIS
 .B sfrotz
-.RI [ options "] " file
+.RI [ options "] " "file " [ blorbfile "]"
+
+At least one file must be specified on the command line.  This can be
+either a plain Z-code file or a Blorb file.  A Z-code file is a compiled
+executable for the Z-Machine.  A Blorb file contains audio, graphics,
+and other things in addition to the game wrapped up into a single file.
+It can also optionally contain the Z-Machine executable.  If a plain
+Z-code file is supplied, then
+.B Frotz
+will check for a Blorb file with the same base name but an extension of
+.B .blb,
+.B .blorb,
+or
+.B .zblorb
+and load it if found.
+
+If the file supplied on the command line is a Blorb file, then
+.B Frotz
+will check to see if a Z-code file is contained within.  If not found, then
+.B Frotz
+will complain and exit.
+
+An alternatively-named Blorb file can be supplied as the optional second
+parameter to the command line invocatio
 
 
 .SH DESCRIPTION
@@ -760,11 +783,6 @@ http://www.brasslantern.org/beginners/
 http://www.musicwords.net/if/how_to_play.htm
 .br
 http://ifarchive.org/
-
-.PP
-If you prefer a PDF file of how to play, here is one:
-.br
-http://inform-fiction.org/I7Downloads/Examples/dm/IntroductionToIF.pdf
 
 
 .SH BUGS

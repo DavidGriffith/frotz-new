@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * Or visit http://www.fsf.org/
  *
  * This file and only this file is dual licensed under the MIT license.
@@ -28,6 +28,8 @@
  * at https://stackoverflow.com/questions/27736618/why-are-sem-init-sem-getvalue-sem-destroy-deprecated-on-mac-os-x-and-w 
  */
 
+#ifndef NO_SOUND
+
 #ifdef MACOS
 #include <dispatch/dispatch.h>
 struct ux_sema {
@@ -35,7 +37,7 @@ struct ux_sema {
 };
 typedef struct ux_sema ux_sem_t;
 
-/* 
+/*
  * Note that the current implementation does not check return codes
  * so use void to make things simpler on the MAC side
  */
@@ -69,7 +71,7 @@ static inline int ux_sem_trywait(ux_sem_t *sem)
 #include <semaphore.h>
 typedef sem_t ux_sem_t;
 
-/* 
+/*
  * Note that the current implementation does not check return codes
  * so use void to make things simpler on the MAC side
  */
@@ -93,3 +95,5 @@ static inline int ux_sem_trywait(ux_sem_t *sem)
     return sem_trywait(sem);
 }
 #endif
+
+#endif /* NO_SOUND */

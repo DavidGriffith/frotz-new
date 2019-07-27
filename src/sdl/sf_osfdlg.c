@@ -136,18 +136,69 @@ STATIC void clarea( int n)
   sf_fillrect(a->back,a->x,a->y,a->w,a->h);
   }
 
+#ifdef USE_UTF8
+/* Convert UTF-8 encoded char starting at in[idx] to zchar (UCS-2) if
+ * representable in 16 bits or '?' otherwise and return index to next
+ * char of input array. */
+STATIC int utf8_to_zchar(zchar *out, const char *in, int idx)
+{
+  zchar ch;
+  int i;
+  if ((in[idx] & 0x80) == 0) {
+    ch = in[idx++];
+  } else if ((in[idx] & 0xe0) == 0xc0) {
+    ch = in[idx++] & 0x1f;
+    if ((in[idx] & 0xc0) != 0x80)
+      goto error;
+    ch = (ch << 6) | (in[idx++] & 0x3f);
+  } else if ((in[idx] & 0xf0) == 0xe0) {
+    ch = in[idx++] & 0xf;
+    for (i = 0; i < 2; i++) {
+      if ((in[idx] & 0xc0) != 0x80)
+        goto error;
+      ch = (ch << 6) | (in[idx++] & 0x3f);
+    }
+  } else {
+    /* Consume all subsequent continuation bytes. */
+    while ((in[++idx] & 0xc0) == 0x80)
+      ;
+error:
+    ch = '?';
+  }
+  *out = ch;
+  return idx;
+}
+
+STATIC size_t utf8_len(const char *str)
+  {
+  size_t ret = 0;
+  while (*str)
+	 {
+	 if ((*str++ & 0xc0) != 0x80)
+	   ret++;
+	 }
+  return ret;
+  }
+#endif
+
 STATIC void writetext( ulong color, const char *s, int x, int y, int w, int center)
   {
   int ox,oy,ow,oh;
+  int wtext, htext;
+  os_font_data(0, &htext, &wtext);
 //printf("W %p [%s]\n",s,s ? s : "??");
   if (!s) return;
   if (!s[0]) return;
   sf_getclip(&ox,&oy,&ow,&oh);
-  sf_setclip(x,y,w,HTEXT);
+  sf_setclip(x,y,w,htext);
 //printf("1\n");
   if (center)
 	{
-	int wt = 8*strlen(s);
+#ifdef USE_UTF8
+	int wt = wtext * utf8_len(s);
+#else
+	int wt = wtext * strlen(s);
+#endif
 	x += (w-wt)/2;
 	}
 //printf("2 ts %p\n",ts); fflush(stdout); if (ts < 1000){sf_flushdisplay(); getchar();}
@@ -155,8 +206,17 @@ STATIC void writetext( ulong color, const char *s, int x, int y, int w, int cent
   ts->cy = y;
   ts->fore = color;
 //printf("3\n"); fflush(stdout);
+#ifndef USE_UTF8
   while (*s)
       sf_writeglyph(ts->font->getglyph(ts->font, (unsigned char)(*s++), 1));
+#else
+  while (*s)
+      {
+      zchar ch;
+      s += utf8_to_zchar(&ch, s, 0);
+      sf_writeglyph(ts->font->getglyph(ts->font, ch, 1));
+      }
+#endif
 //printf("4\n");
   sf_setclip(ox,oy,ow,oh);
 //printf("5\n");
@@ -183,7 +243,11 @@ STATIC void showfilename( int pos)
   clarea(A_entry);
   writetext(0,filename,a->x,a->y,a->w,0);
   if (pos >= 0)
-    sf_cvline(a->x+8*pos,a->y,O_BLACK,HTEXT);
+    {
+    int width, height;
+    os_font_data(0, &height, &width);
+    sf_cvline(a->x+width*pos,a->y,O_BLACK,height);
+    }
   }
 
 STATIC void clicked( BAREA *a)
@@ -258,6 +322,7 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
   {
   char *pp; ulong *saved; int y0, y1, y2, x1;
   zword c = 0;
+  int wtext, htext, buttw;
 
 	// allow system-specific dialog if not fullscreen
   if (isfull == 0) if (sf_sysdialog)
@@ -296,8 +361,16 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
 
   nbareas = 0;
 
+#ifndef USE_UTF8
+  htext = HTEXT;
+  buttw = BUTTW;
+#else
+  os_font_data(FIXED_WIDTH_FONT, &htext, &wtext);
+  buttw = 6 * wtext + 12;
+#endif
+
   W = WDLG+4*BFRAME+2*SPC;
-  H = HDLG+4*BFRAME+6*SPC+6*BFRAME+3*(HTEXT+2)+HCURSOR+HTEXT;
+  H = HDLG+4*BFRAME+6*SPC+6*BFRAME+3*(htext+2)+HCURSOR+htext;
 
   if (W > ew) return SF_NOTIMP;
   if (H > eh) return SF_NOTIMP;
@@ -307,16 +380,20 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
 
 	// internal!!
   xdlg = X+SPC+2*BFRAME;
-  ydlg = Y+2*SPC+4*BFRAME+HTEXT+HTEXT;
+  ydlg = Y+2*SPC+4*BFRAME+htext+htext;
 
-  wentry = wdlg - BUTTW - SPC - 2*BFRAME;
+  wentry = wdlg - buttw - SPC - 2*BFRAME;
 
   saved = sf_savearea(X,Y,W,H);
   if (!saved) return SF_NOTIMP;
 
 //printf("saved: %p %d %d %d %d\n",saved,saved[0],saved[1],saved[2],saved[3]);
   sf_pushtextsettings();
+#ifndef USE_UTF8
   ts->font = sf_VGA_SFONT;
+#else
+  os_set_font(FIXED_WIDTH_FONT);
+#endif
   ts->style = 0;
   ts->oh = 0;
   ts->fore = 0;
@@ -326,30 +403,30 @@ STATIC int myosdialog( bool existing, const char *def, const char *filt, const c
 //  frame_upframe(X,Y,W,H);
   sf_rect(FRAMECOLOR,X,Y,W,H);
   sf_rect(FRAMECOLOR,X+1,Y+1,W-2,H-2);
-  sf_fillrect(FRAMECOLOR,X,Y+2,W,HTEXT);
+  sf_fillrect(FRAMECOLOR,X,Y+2,W,htext);
   if (tit) writetext(O_WHITE,tit,X+2+SPC,Y+2,W-4,0);
   A_list = addarea(xdlg,ydlg,wdlg,hdlg,Zselect);
   bareas[A_list].back = O_WHITE;
   clarea(A_list);
   frame_downframe(xdlg-2,ydlg-2,wdlg+4,hdlg+4);
 
-  y0 = Y+SPC+2*BFRAME+HTEXT;
-  y2 = Y+H-SPC-2*BFRAME-HTEXT;
-  y1 = y2-SPC-HTEXT-2*BFRAME;
+  y0 = Y+SPC+2*BFRAME+htext;
+  y2 = Y+H-SPC-2*BFRAME-htext;
+  y1 = y2-SPC-htext-2*BFRAME;
   x1 = xdlg+wentry+2*BFRAME+SPC;
 
-  A_dir = addarea(xdlg,y0,wentry,HTEXT,NULL);
-  A_entry = addarea(xdlg,y1,wentry,HTEXT,Zentry);
+  A_dir = addarea(xdlg,y0,wentry,htext,NULL);
+  A_entry = addarea(xdlg,y1,wentry,htext,Zentry);
   bareas[A_entry].back = O_WHITE;
   clarea(A_entry);
-  frame_downframe(xdlg-2,y1-2,wentry+4,HTEXT+4);
-  B_up = addbutton(x1,y0,BUTTW,HTEXT,"^up^",Zup);
-  A_filter = addarea(xdlg,y2,wentry,HTEXT,NULL);
+  frame_downframe(xdlg-2,y1-2,wentry+4,htext+4);
+  B_up = addbutton(x1,y0,buttw,htext,"^up^",Zup);
+  A_filter = addarea(xdlg,y2,wentry,htext,NULL);
   strcpy(buffer,"Filter: ");
   strcat(buffer,filt);
   writetext(0,buffer,xdlg,y2,wentry,0);
-  B_cancel = addbutton(x1,y2,BUTTW,HTEXT,"Cancel",Zcanc);
-  B_ok = addbutton(x1,y1,BUTTW,HTEXT,"OK",Zok);
+  B_cancel = addbutton(x1,y2,buttw,htext,"Cancel",Zcanc);
+  B_ok = addbutton(x1,y1,buttw,htext,"OK",Zok);
 
   showfilename(-1);
   updatelist();
@@ -579,6 +656,21 @@ STATIC ENTRY * dodir(
   return res;
   }
 
+#ifdef USE_UTF8
+// Convert character count into index in UTF-8 encoded string.
+// Works by skipping over continuation bytes.
+STATIC int utf8_char_pos(char *s, int pos)
+  {
+  int cpos;
+  int idx = 0;
+  for (cpos = 0; s[cpos] && idx < pos; cpos++)
+    {
+    if ((s[cpos+1] & 0xc0) != 0x80)
+      idx++;
+    }
+  return cpos;
+}
+#endif
 
 //////////////////////////////////////////////
 // white,black,gray,yellow
@@ -660,18 +752,32 @@ STATIC void drawit( int x, int y, ENTRY *e, int w, int issub)
   int i, j, n, color;
   unsigned char *bmp;
   char *s = e->value;
+  int width, height;
+  os_font_data(0, &height, &width);
+  if (height < 16) height = 16;
   bmp = (issub ? folderbmp : docbmp);
-  for (i=0;i<16;i++) for (j=0;j<16;j++) sf_wpixel(x+j,y+i,bcolors[*bmp++]);
+  for (i=0;i<16;i++) for (j=0;j<16;j++) sf_wpixel(x+j,y+i+height/2-8,bcolors[*bmp++]);
   x += 17;
   w -= 17;
-  n = w/8;
+  n = w/width;
   if (n < 1) return;
   if (strlen(s) > n)
 	{
 	strcpy(buffer,s);
+#ifndef USE_UTF8
 	buffer[n] = 0;
 	buffer[n-1] = '>';
 	s = buffer;
+#else
+	i = utf8_len(buffer);
+	if (i > n-1)
+	  {
+	  j = utf8_char_pos(buffer, n-1);
+	  buffer[j+1] = 0;
+	  buffer[j] = '>';
+	  s = buffer;
+	  }
+#endif
 	}
   if (e == selected)
 	{
@@ -689,7 +795,13 @@ STATIC void drawnames( int x, int y, int w, int h, ENTRY *files, int first, int 
   {
   int i;
 
+#ifdef USE_UTF8
+  int width;
+  os_font_data(0, &Fh, &width);
+  if (Fh < 16) Fh = 16;
+#else
   Fh = 16;
+#endif
   Ewid = ewid;
   Ncols = w/ewid;
   Nrows = h/Fh;
@@ -852,17 +964,26 @@ STATIC zword Zentry( int x, int y)
   {
   static int pos = 10000;
   int i,n,nmax; zword c;
-
-  nmax = wentry/8;
+  int cpos,clen,nchars;
+  int width, height;
+  os_font_data(0, &height, &width);
+  nmax = wentry/width;
   if (nmax >= FILENAME_MAX) nmax = FILENAME_MAX-1;
   n = strlen(filename);
+#ifndef USE_UTF8
   if (n > nmax) { n = nmax; filename[n] = 0;}
+  nchars=n;
+#else
+  nchars=utf8_len(filename);
+  if (nchars > nmax) { nchars = nmax; n = utf8_char_pos(filename, nchars); filename[n] = 0;}
+#endif
+
   if (y >= 0)
     {
-    pos = x/4-1; if (pos < 0) pos = 0;
+    pos = x/(width/2)-1; if (pos < 0) pos = 0;
     pos /= 2;
     }
-  if (pos > n) pos = n;
+  if (pos > nchars) pos = nchars;
   showfilename(pos);
   for (;;)
     {
@@ -882,29 +1003,65 @@ STATIC zword Zentry( int x, int y)
 	}
     if (c == ZC_ARROW_RIGHT)
 	{
-	if (pos < n){ pos++; showfilename(pos); }
+	if (pos < nchars){ pos++; showfilename(pos); }
 	continue;
 	}
     if (c == ZC_BACKSPACE)
 	{
 	if (pos)
 		{
+		clen = 1;
+#ifndef USE_UTF8
+		cpos = pos;
+#else
+		cpos = utf8_char_pos(filename, pos);
+		while (cpos>clen && (filename[cpos-clen]&0xc0)==0x80) clen++;
+#endif
 			// needs mystrcpy() because overlapping src-dst
-		if (pos < n) mystrcpy(filename+pos-1,filename+pos);
-		n--;
+		if (cpos < n) mystrcpy(filename+cpos-clen,filename+cpos);
+		n-=clen;
+		nchars--;
 		filename[n] = 0;
 		pos--;
 		showfilename(pos);
 		}
 	continue;
 	}
+#ifndef USE_UTF8
     if ((c >= 32 && c < 127) || (c >= 160 && c < 256))
+#else
+    if ((c >= 32 && c < 127) || (c >= 160 ))
+#endif
 	{
-	if (n >= nmax) continue;
-	if (n > pos)
-	  for (i=n;i>pos;i--) filename[i] = filename[i-1];
-	filename[pos] = c;
-	n++;
+#ifndef USE_UTF8
+	cpos = pos;
+	clen = 1;
+#else
+	cpos = utf8_char_pos(filename, pos);
+	if (c < 0x80) clen = 1;
+	else if (c < 0x800) clen = 2;
+	else if (c < 0x10000) clen = 3;
+	else {clen = 1; c = '?';}
+#endif
+	if (nchars >= nmax) continue;
+	if (n > cpos)
+	  for (i=n-1;i>=cpos;i--) filename[i+clen] = filename[i];
+#ifndef USE_UTF8
+	filename[cpos] = c;
+#else
+	if (c > 0x7ff) {
+	  filename[cpos] = 0xe0 | ((c >> 12) & 0xf);
+	  filename[cpos+1] = 0x80 | ((c >> 6) & 0x3f);
+	  filename[cpos+2] = 0x80 | (c & 0x3f);
+	} else if (c > 0x7f) {
+	  filename[cpos] = 0xc0 | ((c >> 6) & 0x1f);
+	  filename[cpos+1] = 0x80 | (c & 0x3f);
+	} else {
+	  filename[cpos] = c;
+	}
+#endif
+	n+=clen;
+	nchars++;
 	filename[n] = 0;
 	pos++;
 	showfilename(pos);

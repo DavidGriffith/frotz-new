@@ -90,7 +90,7 @@ static char *dumb_changes_row(int r)
     return screen_changes + r * h_screen_cols;
 }
 
-int os_check_unicode(int font, zword c)
+int os_check_unicode(int font, zchar c)
 {
 /* Only UTF-8 output, no input yet.  */
     return 1;
