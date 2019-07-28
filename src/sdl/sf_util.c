@@ -762,13 +762,28 @@ void sf_FinishProfile()
   rc = NULL;
   }
 
+#ifdef WIN32
+#define HOMEDIR "USERPROFILE"
+#else
+#define HOMEDIR "HOME"
+#endif
+
 void sf_InitProfile( const char *fn)
   {
   FILE *f; int size; char *s, *d;
+  char my_fn[FILENAME_MAX+1];
 
   if (!fn) return;
+
+  strncpy(my_fn,getenv(HOMEDIR),FILENAME_MAX);
+  strncat(my_fn, "/", 2);
+  strncat(my_fn, fn, strlen(fn) + 1);
+
   f = fopen(fn,"rb");
-  if (!f) return;
+  if (!f) {
+    f = fopen(my_fn,"rb");
+    if (!f) return;
+  }
   fseek(f,0,SEEK_END);
   size = ftell(f);
   if (!size) { fclose(f); return;}
