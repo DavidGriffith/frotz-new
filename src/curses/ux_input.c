@@ -1017,7 +1017,7 @@ char *os_read_file_name (const char *default_name, int flag)
     }
 
     /* Warn if overwriting a file. */
-    if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX || flag == FILE_RECORD)
+    if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX || flag == FILE_RECORD || flag == FILE_SCRIPT)
 	&& ((fp = fopen(file_name, "rb")) != NULL)) {
 	fclose (fp);
 	print_string("Overwrite existing file? ");
