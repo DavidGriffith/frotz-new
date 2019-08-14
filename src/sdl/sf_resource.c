@@ -207,13 +207,13 @@ static int load_resources( char *givenfn)
   } else {
   // No?  Let's see if we can find one.
     p = malloc(strlen(f_setup.story_name) + strlen(EXT_BLORB4) * sizeof(char));
-    strncpy(p, f_setup.story_name, strlen(f_setup.story_name));
+    strncpy(p, f_setup.story_name, strlen(f_setup.story_name)+1);
     strncat(p, EXT_BLORB3, strlen(EXT_BLORB3)+1);
 
     if (tryloadblorb(p) != bb_err_None) {  /* Trying foo.blorb */
       free(p);
       p = malloc(strlen(f_setup.story_name) + strlen(EXT_BLORB4) * sizeof(char));
-      strncpy(p, f_setup.story_name, strlen(f_setup.story_name));
+      strncpy(p, f_setup.story_name, strlen(f_setup.story_name)+1);
       strncat(p, EXT_BLORB, strlen(EXT_BLORB)+1);
       tryloadblorb(p);  /* Trying foo.blb */
     }
