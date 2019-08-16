@@ -464,6 +464,7 @@ help:
 
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
 	common_defines curses_defines nosound nosound_helper\
+	$(COMMON_DEFINES) $(CURSES_DEFINES) $(COMMON_STRINGS) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz \
 	$(SUBDIRS) $(SUB_CLEAN) \
