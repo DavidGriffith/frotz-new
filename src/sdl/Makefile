@@ -35,9 +35,4 @@ clean:
 	-rm -f $(TARGET) $(OBJECTS) $(DEPS)
 
 %.o: %.c
-%.o: %.c %.d
-	$(CC) -MMD -MP $(CFLAGS) -fPIC -fpic -c $<
-
-$(DEPS):;
-
-include $(wildcard $(DEPS))
+	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<
