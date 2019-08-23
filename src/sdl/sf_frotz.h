@@ -231,6 +231,8 @@ void sf_installhandlers(void);
 void sf_pushtextsettings(void);
 void sf_poptextsettings(void);
 
+char *sf_searchfile(char*, int, char *, char *);
+
 void sf_chline( int x, int y, ulong c, int n);
 void sf_cvline( int x, int y, ulong c, int n);
 bool sf_flushdisplay(void);
@@ -247,6 +249,8 @@ void sf_FinishProfile(void);
 #else
 #define OS_PATHSEP ':'
 #endif
+
+#define DEFSIZE 14
 
 // virtual keys
 #define VK_TAB	0x16

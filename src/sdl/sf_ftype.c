@@ -12,7 +12,7 @@
 
 /////////////////////////////////////////////////////////////////
 
-static char * sf_searchfile( char *fn, int fnlen, char *buf, char *paths)
+char * sf_searchfile( char *fn, int fnlen, char *buf, char *paths)
   {
   char *p;
   if (!fn) return NULL;
@@ -257,8 +257,6 @@ static SFONT * loadftype( char *fname, int size, SFONT *like, int *err)
 
   return (SFONT *) res;
   }
-
-#define DEFSIZE 14
 
 #ifdef WIN32
 #define SYSFONTS "c:/windows/fonts"

@@ -717,16 +717,29 @@ void (*ttfontsdone)() = NULL;
 
 static SFONT *tryloadfont( char *fspec, SFONT *like)
   {
-  int err,size;
-  char *p;
+  char buf[FILENAME_MAX];
+  int err,size = DEFSIZE;
+  char *p, *fn, *at;
+  int fnlen=-1;
   SFONT *b = NULL;
+
+  at = strchr(fspec, '@');
+  if (at) {
+    fnlen = at - fspec;
+    size = atoi(at+1);
+  }
+
+  if (m_fontdir != NULL)
+    fn = sf_searchfile(fspec, fnlen, buf, m_fontdir);
+
   for (;;){
     p = strchr(fspec,'|');
     if (p) *p = 0;
+
     if (ttfontloader)
 	b = ttfontloader(fspec, like, &err);
     if (!b)
-	b = loadfont(fspec,&err,&size);
+	b = loadfont(fn,&err,&size);
     if (b) break;
     if (p) { *p = '|'; fspec = p+1;}
     else break;
