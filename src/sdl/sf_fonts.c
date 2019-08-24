@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 // font handling
 
@@ -860,3 +861,32 @@ void sf_initfonts()
 
   }
 
+char * sf_searchfile( char *fn, int fnlen, char *buf, char *paths)
+  {
+  char *p;
+  if (!fn) return NULL;
+  if (!paths) paths = "";
+  if (fnlen < 0) fnlen = strlen(fn);
+  if (!fnlen) return NULL;
+  for (;;)
+    {
+    int plen;
+    p = strchr(paths,OS_PATHSEP);
+    if (p)
+	plen = p-paths;
+    else
+	plen = strlen(paths);
+    if (plen) strncpy(buf,paths,plen);
+    buf[plen] = 0;
+    if ((plen) && (buf[plen-1] != '\\') && (buf[plen-1] != '/'))
+	strcat(buf,"/");
+    plen = strlen(buf);
+    strncpy(buf+plen,fn,fnlen);
+    buf[plen+fnlen] = 0;
+//printf("try[%s]\n",buf);
+    if (access(buf,F_OK)==0) return buf;
+    if (p) paths = p+1;
+    else break;
+    }
+  return NULL;
+  }
