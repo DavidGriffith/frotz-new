@@ -16,6 +16,10 @@ run Frotz:
   * A POSIX-compliant version of make (GNU make will do)
   * A reasonably good SYSV derived curses library (ncurses is best)
 
+For Unicode support by way of UTF-8, libncursesw is required.  Unicode
+support can be disabled in the Makefile by commenting out this line:
+  USE_UTF8 ?= yes
+
 For sound support, a few more things are necessary:
   * libao         (1.1.0 or higher)
   * libmodplug    (0.8.8.4 or higher)
@@ -201,6 +205,11 @@ notices you don't have a config file of your own in "$HOME/.frotzrc".
 ===========================
 Platform-specific issues ||
 ===========================
+
+Unicode character support:
+Currently, only libncursesw is known to fully provide Unicode support by
+way of UTF-8 character encoding.  At the moment, it's not clear if BSD
+curses does the job all the way.
 
 Linux:  No apparent problems.
 
