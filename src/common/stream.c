@@ -255,9 +255,18 @@ continue_input:
 
     /* Handle timeouts */
 
-    if (key == ZC_TIME_OUT)
-	if (direct_call (routine) == 0)
-	    goto continue_input;
+    /*
+     * Make sure that this is a real timeout, by checking
+     * that the requested timeout is not zero.  For the case
+     * of a recorded stream, it is possible that a timeout
+     * keystroke might be replayed.
+     */
+    if (timeout != 0)
+    {
+	if (key == ZC_TIME_OUT)
+	    if (direct_call (routine) == 0)
+		goto continue_input;
+    }
 
     /* Handle hot keys */
 
@@ -327,9 +336,18 @@ continue_input:
 
     /* Handle timeouts */
 
-    if (key == ZC_TIME_OUT)
-	if (direct_call (routine) == 0)
-	    goto continue_input;
+    /*
+     * Make sure that this is a real timeout, by checking
+     * that the requested timeout is not zero.  For the case
+     * of a recorded stream, it is possible that a timeout
+     * keystroke might be replayed.
+     */
+    if (timeout != 0)
+    {
+	if (key == ZC_TIME_OUT)
+	    if (direct_call (routine) == 0)
+		goto continue_input;
+    }
 
     /* Handle hot keys */
 
