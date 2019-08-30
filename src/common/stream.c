@@ -261,11 +261,17 @@ continue_input:
      * of a recorded stream, it is possible that a timeout
      * keystroke might be replayed.
      */
-    if (timeout != 0)
+    if (key == ZC_TIME_OUT)
     {
-	if (key == ZC_TIME_OUT)
+	if (timeout != 0)
+	{
 	    if (direct_call (routine) == 0)
 		goto continue_input;
+	}
+	else
+	{
+	    goto continue_input;
+	}
     }
 
     /* Handle hot keys */
@@ -342,11 +348,17 @@ continue_input:
      * of a recorded stream, it is possible that a timeout
      * keystroke might be replayed.
      */
-    if (timeout != 0)
+    if (key == ZC_TIME_OUT)
     {
-	if (key == ZC_TIME_OUT)
+	if (timeout != 0)
+	{
 	    if (direct_call (routine) == 0)
 		goto continue_input;
+	}
+	else
+	{
+	    goto continue_input;
+	}
     }
 
     /* Handle hot keys */
