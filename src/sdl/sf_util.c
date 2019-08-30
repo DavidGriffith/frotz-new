@@ -187,7 +187,7 @@ extern char *optarg;
 extern int optind;
 extern int m_timerinterval;
 
-static char *options = "@:%aAb:B:c:f:Fh:iI:l:L:m:N:oOPqr:Rs:S:tTu:vVw:xZ:";
+static char *options = "@:%aAb:B:c:f:Fh:iI:l:L:m:N:oOPqr:s:S:tTu:vVw:xZ:";
 
 static int limit( int v, int m, int M)
   {
