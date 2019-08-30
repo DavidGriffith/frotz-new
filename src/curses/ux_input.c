@@ -917,7 +917,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	 * to show any path prepended to the actual file name.  Here,
 	 * we strip out that path and display only the filename.
 	 */
-	if (f_setup.restricted_path) {
+	if (f_setup.restricted_path != NULL) {
 	    tempname = basename((char *)default_name);
 	    print_string(tempname);
 	} else
