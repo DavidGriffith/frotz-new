@@ -1211,7 +1211,7 @@ static void print_version(void)
 #else
 	printf("Audio output disabled.");
 #endif
-    printf("\nBuild date:\t%s\n", build_timestamp);
+    printf("\nBuild date:\t%s\n", BUILD_DATE);
     printf("Commit date:\t%s\n", GIT_DATE);
     printf("Git commit:\t%s\n", GIT_HASH);
     printf("Git branch:\t%s\n", GIT_BRANCH);

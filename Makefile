@@ -201,7 +201,6 @@ endif
 SRCDIR = src
 COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
-COMMON_STRINGS = $(COMMON_DIR)/version.c
 COMMON_DEFINES = $(COMMON_DIR)/defs.h
 HASH = $(COMMON_DIR)/git_hash.h
 
@@ -275,7 +274,7 @@ dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
 
-$(COMMON_LIB): $(COMMON_DEFINES) $(COMMON_STRINGS) $(HASH)
+$(COMMON_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(COMMON_DIR)
 
 $(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
@@ -298,12 +297,6 @@ $(SUB_CLEAN):
 
 # Compile-time generated defines and strings
 #
-common_strings:	$(COMMON_STRINGS)
-$(COMMON_STRINGS):
-	@echo "** Generating $@"
-	@echo "#include \"frotz.h\"" > $@
-	@echo "const char build_timestamp[] = \"$(BUILD_DATE)\";" >> $@
-
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
 	@echo "** Generating $@"
@@ -376,6 +369,7 @@ $(HASH):
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
+	@echo "#define BUILD_DATE \"$(BUILD_DATE)\"" >> $@
 
 
 # Administrative stuff
@@ -429,7 +423,6 @@ endif
 clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
 	rm -rf $(COMMON_DEFINES) \
-		$(COMMON_STRINGS) \
 		$(CURSES_DEFINES) \
 		$(HASH)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB
@@ -464,7 +457,7 @@ help:
 
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
 	common_defines curses_defines nosound nosound_helper\
-	$(COMMON_DEFINES) $(CURSES_DEFINES) $(COMMON_STRINGS) $(HASH) \
+	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz \
 	$(SUBDIRS) $(SUB_CLEAN) \
