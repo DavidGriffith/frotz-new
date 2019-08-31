@@ -130,6 +130,7 @@ LDFLAGS += -L$(LIBDIR)
 
 RANLIB ?= $(shell which ranlib)
 AR ?= $(shell which ar)
+PKG_CONFIG ?= pkg-config
 
 export CC
 export CFLAGS
@@ -219,7 +220,7 @@ endif
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
-SDL_LDFLAGS += `pkg-config $(SDL_PKGS) --libs` -lm
+SDL_LDFLAGS += `$(PKG_CONFIG) $(SDL_PKGS) --libs` -lm
 
 DOS_DIR = $(SRCDIR)/dos
 
