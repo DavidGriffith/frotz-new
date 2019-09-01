@@ -49,13 +49,10 @@ MAKEFLAGS += -Orecurse
 PREFIX ?= /usr/local
 MANDIR ?= $(PREFIX)/share/man
 SYSCONFDIR ?= /etc
-INCLUDEDIR ?= $(PREFIX)/include
-LIBDIR ?= $(PREFIX)/lib
 
-## INCLUDEDIR path for Apple MacOS Sierra 10.12 plus MacPorts
-#INCLUDEDIR ?= /opt/local/include
-## LIBDIR path for Apple MacOS Sierra 10.12 plus MacPorts
-#LIBDIR ?= /opt/local/lib
+## Toolchain paths for Apple MacOS Sierra 10.12 plus MacPorts
+#CFLAGS += -I/opt/local/include
+#LDFLAGS += -L/opt/local/lib
 
 # Choose your sound support
 # OPTIONS: ao, none
@@ -125,9 +122,6 @@ endif
 # Under normal circumstances, nothing in this section should be changed.
 #########################################################################
 
-CFLAGS += -I$(INCLUDEDIR)
-LDFLAGS += -L$(LIBDIR)
-
 RANLIB ?= $(shell which ranlib)
 AR ?= $(shell which ar)
 PKG_CONFIG ?= pkg-config
@@ -142,8 +136,6 @@ export RANLIB
 export PREFIX
 export MANDIR
 export SYSCONFDIR
-export INCLUDEDIR
-export LIBDIR
 export COLOR
 export SOUND
 export NOSOUND
