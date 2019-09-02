@@ -280,9 +280,10 @@ $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(DUMB_DIR)
 
 $(BLORB_LIB): $(BLORB_DIR)
+	$(MAKE) -C $(BLORB_DIR)
 
-$(SUBDIRS):
-	$(MAKE) -C $@
+#$(SUBDIRS):
+#	$(MAKE) -C $@
 
 $(SUB_CLEAN):
 	-$(MAKE) -C $(@:%-clean=%) clean
@@ -450,9 +451,5 @@ help:
 
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
 	common_defines curses_defines nosound nosound_helper\
-	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
-	install install_dfrotz install_sfrotz \
-	$(SUBDIRS) $(SUB_CLEAN) \
-	$(COMMON_DIR)/defines.h $(CURSES_DIR)/defines.h \
-	$(DOS_BIN) dos
+	install install_dfrotz install_sfrotz $(SUB_CLEAN)
