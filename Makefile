@@ -169,14 +169,9 @@ export CFLAGS
 ifeq ($(CURSES), curses)
   CURSES_LDFLAGS += -lcurses
   CURSES_DEFINE = USE_CURSES_H
-endif
-ifeq ($(CURSES), ncurses)
-  CURSES_LDFLAGS += -lncurses
-  CURSES_DEFINE = USE_NCURSES_H
-endif
-ifeq ($(CURSES), ncursesw)
-  CURSES_LDFLAGS += -lncursesw
-  CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
+else ifneq ($(findstring ncurses,$(CURSES)),)
+  CURSES_LDFLAGS += $(or $(shell $(PKG_CONFIG) $(CURSES) --libs 2>/dev/null),-l$(CURSES))
+  CURSES_CFLAGS += $(or $(shell $(PKG_CONFIG) $(CURSES) --cflags 2>/dev/null),-D_XOPEN_SOURCE_EXTENDED)
   CURSES_DEFINE = USE_NCURSES_H
 endif
 
@@ -212,7 +207,7 @@ endif
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
-SDL_LDFLAGS += `$(PKG_CONFIG) $(SDL_PKGS) --libs` -lm
+SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
 
 DOS_DIR = $(SRCDIR)/dos
 
