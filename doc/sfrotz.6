@@ -141,25 +141,6 @@ Z-code.
 .B \-r N
 Sets the right margin.
 
-.TP
-.B \-R <path>
-Restricted read/write.  Reading and writing files will be restricted
-only to the provided path. Ordinarily
-.B Frotz
-will write or read its saves, transcripts, and move recordings in
-whatever path or directory the user provides when the
-.B SAVE,
-.B SCRIPT,
-or
-.B RECORDING
-commands are given.  This can be undesirable if
-.B Frotz
-is run in a restricted environment, by a front end, or by a chatbot.
-This option will cause
-.B Frotz
-to write or read only to the provided path and nowhere else. Then the
-controlling process can then watch that directory for changes and need
-not worry about someone scribbling or snooping who-knows-where.
 
 .TP
 .B \-s N
