@@ -20,14 +20,14 @@ ifneq ($(OS),Windows_NT)
 	MACOS = yes
     endif
     ifeq ($(UNAME_S),NetBSD)
-	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include 
+	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include
 	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
-	CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw 
+	CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw
 	SDL_LDFLAGS += -lexecinfo
     endif
     ifeq ($(UNAME_S),FreeBSD)
 	FREEBSD = yes
-	CFLAGS += -I/usr/local/include 
+	CFLAGS += -I/usr/local/include
 	LDFLAGS += -L/usr/local/lib
 	SDL_LDFLAGS += -lexecinfo
     endif
