@@ -32,13 +32,11 @@ ifneq ($(OS),Windows_NT)
 	SDL_LDFLAGS += -lexecinfo
     endif
     ifeq ($(UNAME_S),Linux)
+	CFLAGS += -D_POSIX_C_SOURCE=200809L
 	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
     endif
 endif
 
-# strdup, strndup
-# put this somewhere else
-#CFLAGS += -D_POSIX_C_SOURCE=200809L
 
 # Define your optimization flags.
 #
