@@ -233,7 +233,7 @@ DOS_BIN = frotz.exe
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
-	$(CC) $(CFLAGS) $(CURSES_CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS)
+	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS)
 	@echo "** Done building Frotz with curses interface"
 	@echo "** Audio support $(CURSES_SOUND)"
 
@@ -245,12 +245,12 @@ nosound_helper:
 
 dumb: $(DFROTZ_BIN)
 $(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
-	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION)
+	$(CC) $+ -o $@$(EXTENSION)
 	@echo "** Done building Frotz with dumb interface."
 
 sdl: $(SFROTZ_BIN)
 $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
-	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
+	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
 dos: $(DOS_BIN)
