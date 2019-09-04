@@ -27,6 +27,9 @@ ifneq ($(OS),Windows_NT)
     endif
     ifeq ($(UNAME_S),FreeBSD)
 	FREEBSD = yes
+	CFLAGS += -I/usr/local/include 
+	LDFLAGS += -L/usr/local/lib
+	SDL_LDFLAGS += -lexecinfo
     endif
     ifeq ($(UNAME_S),Linux)
 	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
@@ -34,7 +37,8 @@ ifneq ($(OS),Windows_NT)
 endif
 
 # strdup, strndup
-CFLAGS += -D_POSIX_C_SOURCE=200809L
+# put this somewhere else
+#CFLAGS += -D_POSIX_C_SOURCE=200809L
 
 # Define your optimization flags.
 #
