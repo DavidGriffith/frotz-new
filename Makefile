@@ -2,8 +2,8 @@
 # GNU make is required.
 
 # Your C compiler
-CC=gcc
-#CC=clang
+CC ?= gcc
+#CC ?= clang
 
 # Your DOS C Compiler (Watcom)
 WCC=wcc
@@ -24,6 +24,9 @@ ifneq ($(OS),Windows_NT)
 	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
 	CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw 
 	SDL_LDFLAGS += -lexecinfo
+    endif
+    ifeq ($(UNAME_S),FreeBSD)
+	FREEBSD = yes
     endif
     ifeq ($(UNAME_S),Linux)
 	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
@@ -308,6 +311,9 @@ ifdef NO_STRDUP
 endif
 ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
+endif
+ifdef FREEBSD
+	@echo "#define __BSD_VISIBLE 1" >> $@
 endif
 ifdef MACOS
 	@echo "#define _DARWIN_C_SOURCE" >> $@
