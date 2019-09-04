@@ -554,6 +554,20 @@ Watch object movement.  This option enables debugging messages from the
 interpreter which describe the movement of objects in the object tree.
 Default is "off".
 
+.SH UNICODE
+.B Frotz
+supports Unicode glyphs by way of UTF-8 if the terminal used supports
+UTF-8.  If you prefer using xterm, start it as uxterm.  This is a
+wrapper script that sets up xterm with UTF-8 locale.  You can also
+manually tell an xterm to switch into UTF-8 mode by holding CTRL and the
+right mouse button to bring up the VT FONTS menu.  Depending on how
+xterm was installed, you may see an option for "UTF-8 Fonts" which will
+allow Unicode to be properly displayed.
+
+Getting normal xterm to behave like this all the time can vary from
+system to system.  Other terminal emulators have their own ways of being
+set to use UTF-8 character encoding.
+
 
 .SH ENVIRONMENT
 If the ZCODE_PATH environmental variable is defined, frotz will search
