@@ -411,14 +411,31 @@ not very nice) modifications for the various styles. Even if Truetype
 fonts are specified in the setup file, Sfrotz can be forced to use the
 VGA font by the -V command line switch.
 
+
+.SH UNICODE
+.B Sfrotz
+supports Unicode glyphs by way of UTF-8 as long as the fonts loaded
+contain the glyphs you need.  The default font provided by SDL does not
+contain much beyond the Latin alphabet and some diacritical marks.
+Inverted punctuation marks as used in Spanish are missing.  Two
+monospaced fonts known to work well with most commonly-encountered
+alphabetic languages are Leggie and FreeMono. They can be found at
+https://memleek.org/leggie/ (X11 BDF fonts) and
+https://www.gnu.org/software/freefont/ (Truetype fonts). Logographic
+glyphs (Kanji and Chinese are not currently supported.
+
+
 .SH ENVIRONMENT
 If the ZCODE_PATH environmental variable is defined, frotz will search
 that path for game files.  If that doesn't exist, INFOCOM_PATH will be
 searched.
 
 
-.SH SETUP FILE DESCRIPTION
-There are four sections: Interpreter, Display, Fonts, and Resources.
+.SH SETUP FILE
+On startup,
+.B sfrotz
+will check $HOME/.sfrotzrc for setup information.  The setup file has
+four sections: Interpreter, Display, Fonts, and Resources.
 
 The
 .B Interpreter
