@@ -20,9 +20,9 @@ ifneq ($(OS),Windows_NT)
 	MACOS = yes
     endif
     ifeq ($(UNAME_S),NetBSD)
+	NETBSD = yes
 	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include
 	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
-	CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw
 	SDL_LDFLAGS += -lexecinfo
     endif
     ifeq ($(UNAME_S),FreeBSD)
@@ -178,6 +178,9 @@ else ifneq ($(findstring ncurses,$(CURSES)),)
   CURSES_LDFLAGS += $(or $(shell $(PKG_CONFIG) $(CURSES) --libs 2>/dev/null),-l$(CURSES))
   CURSES_CFLAGS += $(or $(shell $(PKG_CONFIG) $(CURSES) --cflags 2>/dev/null),-D_XOPEN_SOURCE_EXTENDED)
   CURSES_DEFINE = USE_NCURSES_H
+ifdef NETBSD
+  CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw
+endif
 endif
 
 ifeq ($(SOUND), ao)
