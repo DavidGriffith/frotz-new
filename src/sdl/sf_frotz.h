@@ -21,6 +21,7 @@ typedef struct {
 
 int sf_getresource( int num, int ispic, int method, myresource * res);
 void sf_freeresource( myresource *res);
+bool sf_IsAdaptive(int picture);
 
 #ifndef true
 #define true 1
@@ -104,6 +105,11 @@ typedef struct {
   int number;		// 0 means unallocated
   int width, height;
   byte *pixels;
+  ulong palette[16];
+  int  palette_entries;
+  int transparentcolor;
+  bool adaptive;
+  bool usespalette;
   } sf_picture;
 
 #define DEFAULT_GAMMA 2.2

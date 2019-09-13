@@ -65,7 +65,7 @@ static int loadpng( byte *data, int length, sf_picture *graphic)
   png_infop end_info = NULL;
   PNGData pngData;
   png_uint_32 width, height;
-  int i, bit_depth, color_type, size;
+  int color_type, size;
   double gamma;
 
   graphic->pixels = NULL;
@@ -115,64 +115,55 @@ static int loadpng( byte *data, int length, sf_picture *graphic)
 
   width = png_get_image_width(png_ptr,info_ptr);
   height = png_get_image_height(png_ptr,info_ptr);
-  bit_depth = png_get_bit_depth(png_ptr,info_ptr);
   color_type = png_get_color_type(png_ptr,info_ptr);
 
   graphic->width = width;
   graphic->height = height;
-
-  if (color_type == PNG_COLOR_TYPE_PALETTE && bit_depth <= 8)
-	png_set_palette_to_rgb(png_ptr);
-  if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-  	png_set_expand_gray_1_2_4_to_8(png_ptr);
-  if (png_get_valid(png_ptr,info_ptr,PNG_INFO_tRNS))
-	png_set_tRNS_to_alpha(png_ptr);
+  graphic->usespalette = FALSE;
 
   if (png_get_gAMA(png_ptr,info_ptr,&gamma))
 	png_set_gamma(png_ptr,m_gamma,gamma);
 
-  if (bit_depth == 16)
-	png_set_strip_16(png_ptr);
-  if (bit_depth < 8)
-	png_set_packing(png_ptr);
-  if (color_type == PNG_COLOR_TYPE_GRAY || 
-		color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-	png_set_gray_to_rgb(png_ptr);
+  if (color_type == PNG_COLOR_TYPE_PALETTE) {
+    graphic->usespalette = TRUE;
+    png_set_packing(png_ptr);
 
- // png_set_bgr(png_ptr);
-  png_set_filler(png_ptr,0xFF,PNG_FILLER_AFTER);
+    // Check for transparency.  In practice, the transparent
+    // color will always be color 0.
+    png_bytep trans;
+    int num_trans;
+    png_color_16p trans_values;
 
-//	graphic->m_header = new BITMAPINFOHEADER;
-//	::ZeroMemory(graphic->m_header,sizeof(BITMAPINFOHEADER));
-//	graphic->m_header->biSize = sizeof(BITMAPINFOHEADER);
-//	graphic->m_header->biWidth = width;
-//	graphic->m_header->biHeight = height*-1;
-//	graphic->m_header->biPlanes = 1;
-//	graphic->m_header->biBitCount = 32;
-//	graphic->m_header->biCompression = BI_RGB;
+    if (png_get_tRNS(png_ptr,info_ptr,&trans,&num_trans,&trans_values) && num_trans >= 1)
+      graphic->transparentcolor = trans[0];
 
-  size = width*height*4;
-  graphic->pixels = (byte *)malloc(size);
+    size = width*height;
+    graphic->pixels = (byte *)malloc(size);
 
-  rowPointers = (png_bytep *) malloc(height*sizeof(png_bytep));
-  for (i = 0; i < (int)height; i++)
-	rowPointers[i] = graphic->pixels+(width*i*4);
-  png_read_image(png_ptr,rowPointers);
+    rowPointers = malloc(sizeof(png_bytep) * height);
+    for (int i = 0; i < (int)height; i++)
+      rowPointers[i] = graphic->pixels+(width*i);
+    png_read_image(png_ptr,rowPointers);
 
-	// Get the palette after reading the image, so that the gamma
-	// correction is applied
-//	png_colorp palette;
-//	int num_palette;
-//	if (png_get_PLTE(png_ptr,info_ptr,&palette,&num_palette))
-//	{
-//		for (int i = 0; i < num_palette; i++)
-//		{
-//			DWORD colour =
-//				(palette[i].red<<16)|(palette[i].green<<8)|palette[i].blue;
-//			graphic->m_palette.Add(colour);
-//			graphic->m_invPalette[colour] = i;
-//		}
-//	}
+    // Get the palette after reading the image, so that the gamma
+    // correction is applied.
+    png_colorp palette;
+    int num_palette;
+    if (png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette)) {
+      graphic->palette_entries = num_palette;
+      for (int i = 0; i < num_palette; i++) {
+        ulong color = palette[i].red|(palette[i].green<<8)|(palette[i].blue<<16);
+        graphic->palette[i] = color;
+      }
+    }
+  } else {
+    if (graphic->adaptive)
+      os_fatal("Non-paletted graphics cannot be adaptive");
+
+    os_fatal("TODO: Support loading of non-paletted images");
+  }
+
+  /* Reading done. */
 
   png_read_end(png_ptr,end_info);
   png_destroy_read_struct(&png_ptr,&info_ptr,&end_info);
@@ -280,16 +271,6 @@ static int loadjpeg( byte *data, int length, sf_picture *graphic)
   graphic->height = height;
   size = width*height*4;
   graphic->pixels = (byte *)malloc(size);
-		
-//	graphic->m_header = new BITMAPINFOHEADER;
-//	::ZeroMemory(graphic->m_header,sizeof(BITMAPINFOHEADER));
-//	graphic->m_header->biSize = sizeof(BITMAPINFOHEADER);
-//	graphic->m_header->biWidth = width;
-//	graphic->m_header->biHeight = height*-1;
-//	graphic->m_header->biPlanes = 1;
-//	graphic->m_header->biBitCount = 32;
-//	graphic->m_header->biCompression = BI_RGB;
-//	graphic->m_pixels = new BYTE[width*height*4];
 
 	// Force RGB output
   info.out_color_space = JCS_RGB;
@@ -308,9 +289,6 @@ static int loadjpeg( byte *data, int length, sf_picture *graphic)
 			(width*(info.output_scanline-1)*4);
 	for (i = 0; i < width; i++)
 		{
-/*		pixelRow[(i*4)+0] = (*buffer)[(i*3)+2];
-		pixelRow[(i*4)+1] = (*buffer)[(i*3)+1];
-		pixelRow[(i*4)+2] = (*buffer)[(i*3)+0];*/
 		pixelRow[(i*4)+0] = (*buffer)[(i*3)+0];
 		pixelRow[(i*4)+1] = (*buffer)[(i*3)+1];
 		pixelRow[(i*4)+2] = (*buffer)[(i*3)+2];
@@ -343,6 +321,9 @@ static int sf_loadpic( int picture, sf_picture *graphic)
   myresource res;
   int st = 0;
 
+  // Set whether graphic has an adaptive palette
+  graphic->adaptive = sf_IsAdaptive(picture) ? TRUE : FALSE;
+
   if (sf_getresource( picture, 1, bb_method_Memory,&res) == bb_err_None)
 	{
 	byte * data = (byte *)res.bbres.data.ptr;
@@ -363,11 +344,11 @@ static int sf_loadpic( int picture, sf_picture *graphic)
 	else if (id == bb_ID_Rect)
 		st = loadrect( data, length, graphic);
 	sf_freeresource(&res);
-	}
+  }
 
   if (st) graphic->number = picture;
   return st;
-  }
+}
 
 ////////////////////
 // CACHE
@@ -425,4 +406,3 @@ sf_picture * sf_getpic( int num){
   if (sf_loadpic( num, res)) return res;
   return NULL;
   }
-

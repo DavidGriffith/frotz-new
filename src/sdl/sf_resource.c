@@ -500,7 +500,7 @@ void sf_readsettings(void)
 	m_fixedFontName = sf_GetProfileString("Display","Fixed Font Name",
 		"Courier New");
 	m_fontSize = sf_GetProfileInt("Display","Font Size",10);*/
-	
+
   m_v6scale = sf_GetProfileInt("Display","Infocom V6 Scaling",2);
   m_gfxScale = 1;
   m_defaultFore = ( sf_GetProfileInt("Display","Foreground",0xffffff));
@@ -848,6 +848,27 @@ bool sf_IsInfocomV6()
 	}
   return false;
   }
+
+// If true, this picture has an adaptive palette
+bool sf_IsAdaptive(int picture)
+{
+  bb_result_t result;
+  bool adaptive = FALSE;
+
+  if (bb_load_chunk_by_type(bmap, bb_method_Memory, &result, bb_ID_APal, 0) == bb_err_None) {
+    for (int i = 0; i < (int) result.length; i += 4) {
+      unsigned char* data = ((unsigned char*) result.data.ptr)+i;
+      int entry = (data[0]<<24)|(data[1]<<16)|(data[2]<<8)|data[3];
+      if (picture == entry) {
+	adaptive = TRUE;
+	break;
+      }
+    }
+  }
+  bb_unload_chunk(bmap, result.chunknum);
+  return adaptive;
+}
+
 
 #define LOCAL_MEM	-1
 #define LOCAL_FILE	-2

@@ -26,6 +26,9 @@ bool sdl_active;
 
 static void sf_quitconf();
 
+static bool ApplyPalette(sf_picture *);
+static ulong screen_palette[16];
+
 // clipping region
 static int xmin,xmax,ymin,ymax;
 
@@ -532,28 +535,46 @@ void os_draw_picture(int picture, int y, int x)
   if (ew <= 0) return;
   if (eh <= 0) return;
 
-  for (yy=0;yy<eh;yy++)
-    {
-    for (xx=0;xx<ew;xx++)
-	{
-   	dst = sbuffer + x +xx*m_gfxScale + sbpitch*(y + yy*m_gfxScale);
-	sval = src[xx];
-	alpha = (sval >> 24);
-	if (alpha == 255)
-		dval = sval & 0xffffff;
-	else
-		dval = sf_blend((int)(alpha + (alpha>>7)),sval,dst[0]);
-	for (iy=0;iy<m_gfxScale;iy++)
-	  {
-	  for (ix=0;ix<m_gfxScale;ix++) dst[ix] = dval;
-	  dst += sbpitch;
-	  }
-	}
-    src += pic->width;
+  /* Use simple scaling without interpolation in palette mode. */
+  /* Adapted from start of FrotzGfx::Paint() in Windows Frotz. */
+  if (pic->usespalette) {
+    if (!pic->adaptive && ApplyPalette(pic))
+      sf_flushdisplay();
+
+    for (yy=0; yy < eh * m_gfxScale; yy++) {
+      int ys = yy / m_gfxScale;
+      for (xx = 0; xx < ew * m_gfxScale; xx++) {
+        int xs = xx / m_gfxScale;
+	int index = pic->pixels[ys * pic->width + xs];
+        if (index != pic->transparentcolor)
+          sf_wpixel(x + xx, y + yy, screen_palette[index]);
+      }
     }
+  } else {
+    if (pic->adaptive)
+      os_fatal("Adaptive images must be paletted");
+
+    for (yy=0; yy < eh; yy++) {
+      for (xx = 0; xx < ew; xx++) {
+        dst = sbuffer + x +xx*m_gfxScale + sbpitch*(y + yy*m_gfxScale);
+        sval = src[xx];
+        alpha = (sval >> 24);
+        if (alpha == 255)
+                dval = sval & 0xffffff;
+        else
+                dval = sf_blend((int)(alpha + (alpha>>7)),sval,dst[0]);
+        for (iy=0;iy<m_gfxScale;iy++) {
+          for (ix=0;ix<m_gfxScale;ix++) dst[ix] = dval;
+          dst += sbpitch;
+        }
+      }
+
+      src += pic->width;
+    }
+  }
 
   dirty = 1;
-  }
+}
 
 static ulong mytimeout;
 int mouse_button;
@@ -1182,4 +1203,28 @@ void os_tick() {
                 handle_window_event(&ev);
         }
     }
+}
+
+
+/* Apply the picture's palette to the screen palette. */
+/* Adapted from FrotzGfx::ApplyPalette() in Windows Frotz. */
+static bool ApplyPalette(sf_picture *graphic)
+{
+    bool changed = FALSE;
+    int i, colors;
+
+    memset(&screen_palette, 0, sizeof(ulong));
+
+    if (graphic->usespalette) {
+	colors = graphic->palette_entries;
+	if (colors > 16)
+	    colors = 16;
+	for (i = 0; i < colors; i++) {
+	    if (screen_palette[i] != graphic->palette[i]) {
+		changed = TRUE;
+		screen_palette[i] = graphic->palette[i];
+	    }
+	}
+    }
+    return changed;
 }
