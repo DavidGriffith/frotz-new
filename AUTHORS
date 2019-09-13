@@ -30,3 +30,7 @@ Thanks goes to Erik de Castro Lopo, author of libsndfile and
 libsamplerate for putting up with my numerous questions about audio 
 programming and gently nudging me towards how to do things the right 
 way.
+
+Thanks goes to Paul Gilbert of the ScummVM project who figured out how
+to correctly process adaptive palette images from Zork Zero and Arthur
+when I kept doing the Wrong Thing.
