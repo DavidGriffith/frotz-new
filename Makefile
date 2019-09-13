@@ -31,6 +31,12 @@ ifneq ($(OS),Windows_NT)
 	LDFLAGS += -L/usr/local/lib
 	SDL_LDFLAGS += -lexecinfo
     endif
+    ifeq ($(UNAME_S),OpenBSD)
+	OPENBSD = yes
+	CFLAGS += -I/usr/local/include
+	LDFLAGS += -L/usr/local/lib
+	SDL_LDFLAGS += -lexecinfo
+    endif
     ifeq ($(UNAME_S),Linux)
 	CFLAGS += -D_POSIX_C_SOURCE=200809L
 	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
