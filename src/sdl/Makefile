@@ -8,7 +8,7 @@ CC = gcc
 #CC = clang
 
 PKG_CONFIG ?= pkg-config
-override CFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --cflags)
+override CFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --cflags) $(SDL_CFLAGS)
 
 SOURCES = sf_fonts.c sf_msg_en.c sf_resource.c sf_util.c \
 	sf_deffont.c sf_ftype.c sf_osfdlg.c sf_sig.c sf_video.c \

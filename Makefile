@@ -35,6 +35,7 @@ ifneq ($(OS),Windows_NT)
 	OPENBSD = yes
 	CFLAGS += -I/usr/local/include
 	LDFLAGS += -L/usr/local/lib
+	SDL_CFLAGS += -DSDL_DISABLE_IMMINTRIN_H
 	SDL_LDFLAGS += -lexecinfo
     endif
     ifeq ($(UNAME_S),Linux)
@@ -147,6 +148,7 @@ export RANLIB
 export PREFIX
 export MANDIR
 export SYSCONFDIR
+export SDL_CFLAGS
 export COLOR
 export SOUND
 export NOSOUND
