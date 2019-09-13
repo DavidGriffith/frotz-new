@@ -82,7 +82,7 @@ Prerequisite packages for sfrotz (NetBSD nomenclature):
   * freetype		(2.6.x or higher)
   * png			(1.6.x or higher)
   * jpeg		(1.5.x or higher)
-  * zlip		(1.2.x or higher)
+  * zlib		(1.2.x or higher)
   
 
 =======================
