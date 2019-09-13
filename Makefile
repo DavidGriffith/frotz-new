@@ -33,6 +33,9 @@ ifneq ($(OS),Windows_NT)
     endif
     ifeq ($(UNAME_S),OpenBSD)
 	OPENBSD = yes
+	NO_EXECINFO_H = yes
+	NO_UCONTEXT_H = yes
+	NO_IMMINTRIN_H = yes
 	CFLAGS += -I/usr/local/include
 	LDFLAGS += -L/usr/local/lib
 	SDL_CFLAGS += -DSDL_DISABLE_IMMINTRIN_H
@@ -321,6 +324,12 @@ ifdef NO_MEMMOVE
 endif
 ifdef NO_STRDUP
 	@echo "#define NO_STRDUP" >> $@
+endif
+ifdef NO_UCONTEXT_H
+	@echo "#define NO_UCONTEXT_H" >> $@
+endif
+ifdef NO_EXECINFO_H
+	@echo "#define NO_EXECINFO_H" >> $@
 endif
 ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@

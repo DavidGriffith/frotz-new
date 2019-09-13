@@ -44,12 +44,16 @@ void sf_installhandlers()
 
 #else
 
+#ifndef NO_EXECINFO_H
 #include <execinfo.h>
+#endif
 
 /* get REG_EIP from ucontext.h */
+#ifndef NO_UCONTEXT_H
 #ifndef __USE_GNU
 #define __USE_GNU
 #include <ucontext.h>
+#endif
 #endif
 
 // REG_EIP does not exist on 64bit CPU
