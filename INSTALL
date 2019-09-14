@@ -31,9 +31,12 @@ Earlier versions of these libraries might work, but are untested.
 Linux uses ncurses, so you're safe there.  The version of curses that
 comes with NetBSD 1.6.x and later is good too.  Earlier versions lacked
 certain features needed by Frotz.  I don't know about the other *BSD
-curses.  You can download ncurses from ftp://ftp.gnu/org/gnu/ncurses/.
-If you insist on using the vendor-supplied curses library, see the
-platform-specific info below.
+curses.  Of the current BSDs, only NetBSD still uses the old BSD curses 
+library.  All the others now use ncurses, including MacOS.
+
+You can download ncurses from https://www.gnu.org/software/ncurses/ or
+ftp://ftp.gnu/org/gnu/ncurses/.  If you must use the vendor-supplied
+curses library, see the platform-specific info below.
 
 For MacOS users, Frotz with all three of its user interfaces should
 compile without any changes to the source code or Makefiles.
@@ -83,6 +86,14 @@ Prerequisite packages for sfrotz (NetBSD nomenclature):
   * png			(1.6.x or higher)
   * jpeg		(1.5.x or higher)
   * zlib		(1.2.x or higher)
+
+Prerequisite packages for sfrotz (OpenBSD nomenclature):
+  * sdl2		(2.0.9 or higher)
+  * sdl2-mixer		(2.0.4 or higher)
+  * freetype		(2.6.x or higher)
+  * png			(1.6.x or higher)
+  * jpeg		(1.5.x or higher)
+  * zlib		(1.2.x or higher)
   
 
 =======================
@@ -108,9 +119,9 @@ be compiled.  If this doesn't work, chances are you have an older flavor
 of Unix.  Check the second section of the Makefile.  That's where you'll 
 find options for older flavors of Unix.  Are you using plain old curses 
 or ncurses.  On modern systems, the regular curses library is actually 
-ncurses.  For older systems, this isn't always true.  Figure out where 
-the necessary header files and libraries live and edit the Makefile 
-accordingly.
+ncurses except for NetBSD.  For older systems, this isn't always true.
+Figure out where the necessary header files and libraries live and edit
+the Makefile accordingly.
 
 Once the compile is complete, make sure you have the correct permissions 
 to write where you want Frotz installed, then type "make install".  To 
