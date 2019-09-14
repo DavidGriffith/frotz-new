@@ -429,7 +429,7 @@ clean: $(SUB_CLEAN)
 
 
 distclean: clean
-	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION)
+	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
 	rm -f $(NAME)*.tar.gz
 
 help:
