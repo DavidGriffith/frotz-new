@@ -568,6 +568,41 @@ Getting normal xterm to behave like this all the time can vary from
 system to system.  Other terminal emulators have their own ways of being
 set to use UTF-8 character encoding.
 
+.SS LOCALE
+An important means of ensuring the system knows to use UTF-8 is to make
+sure the locale is set appropriately.  This is valid only when
+.B Dumb Frotz
+runs under Unix-ish systems.
+
+Using the command
+.B "locale"
+will tell you what is currently in use.  Using
+.B "locale -a
+
+will show you what's available.  Then set your LANG evironmental
+variable to something appropriate by using one of these commands:
+
+    export LANG=C.UTF-8
+    export LANG=en_US.utf8
+
+This can be put in your shell configuration file, be it
+.B .profile,
+.B .bash_profile,
+.B .login,
+.B .bashrc,
+or whatever.
+
+It can also be set system-wide in the equivalent files in
+.B /etc.
+
+.SS SEE ALSO
+.B ash(1)
+.B bash(1)
+.B csh(1)
+.B ksh(1)
+.B sh(1)
+.B zsh(1)
+
 
 .SH ENVIRONMENT
 If the ZCODE_PATH environmental variable is defined, frotz will search
