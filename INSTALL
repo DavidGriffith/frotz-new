@@ -34,7 +34,7 @@ Linux uses ncurses, so you're safe there.  The version of curses that
 comes with NetBSD 1.6.x and later is good too.  Earlier versions lacked
 certain features needed by Frotz.  I don't know about the other *BSD
 curses.  Of the current BSDs, only NetBSD still uses the old BSD curses 
-library.  All the others now use ncurses, including MacOS.
+library.  All the others, including MacOS, now use ncurses.
 
 You can download ncurses from https://www.gnu.org/software/ncurses/ or
 ftp://ftp.gnu/org/gnu/ncurses/.  If you must use the vendor-supplied
