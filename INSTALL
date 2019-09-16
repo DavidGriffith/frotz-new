@@ -28,6 +28,8 @@ For sound support, a few more things are necessary:
   * libvorbis     (1.3.2 or higher)
 Earlier versions of these libraries might work, but are untested.
 
+For NetBSD, you must install the libao-sun plugin for libao.
+
 Linux uses ncurses, so you're safe there.  The version of curses that
 comes with NetBSD 1.6.x and later is good too.  Earlier versions lacked
 certain features needed by Frotz.  I don't know about the other *BSD
