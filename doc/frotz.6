@@ -554,6 +554,19 @@ Watch object movement.  This option enables debugging messages from the
 interpreter which describe the movement of objects in the object tree.
 Default is "off".
 
+.SH COLOR
+Whether or not
+.B Frotz
+will display color depends upon the curses library and the terminal.  In
+general, an xterm or other X11-based terminal emulator will support
+color.  Sometimes the value of $TERM will need to be set to something
+like "xterm-color" or "rxvt-256color".  For a Linux console, $TERM is
+almost always set to "linux".  This will support color.  For a NetBSD or
+OpenBSD console on an x86 or amd64, the default value of $TERM is
+"vt100".  To get color supported there, you need to set $TERM to "pc3".
+A FreeBSD console's $TERM is "xterm" and will support color.  Color on
+text consoles on machines other than x86 or amd64 is untested.
+
 .SH UNICODE
 .B Frotz
 supports Unicode glyphs by way of UTF-8 if the terminal used supports
