@@ -54,34 +54,38 @@ static int zoptopt = 0;
 static char *zoptarg = NULL;
 static int zgetopt (int argc, char *argv[], const char *options)
 {
-    static int pos = 1;
-    const char *p;
-    if (zoptind >= argc || argv[zoptind][0] != '-' || argv[zoptind][1] == 0)
-	return EOF;
-    zoptopt = argv[zoptind][pos++];
-    zoptarg = NULL;
-    if (argv[zoptind][pos] == 0)
-	{ pos = 1; zoptind++; }
-    p = strchr (options, zoptopt);
-    if (zoptopt == ':' || p == NULL) {
-	fputs ("illegal option -- ", stderr);
-	goto error;
-    } else if (p[1] == ':') {
-	if (zoptind >= argc) {
-	    fputs ("option requires an argument -- ", stderr);
-	    goto error;
-	} else {
-	    zoptarg = argv[zoptind];
-	    if (pos != 1)
-		zoptarg += pos;
-	    pos = 1; zoptind++;
+	static int pos = 1;
+	const char *p;
+
+	if (zoptind >= argc || argv[zoptind][0] != '-' ||
+				argv[zoptind][1] == 0)
+		return EOF;
+	zoptopt = argv[zoptind][pos++];
+	zoptarg = NULL;
+	if (argv[zoptind][pos] == 0) {
+		pos = 1;
+		zoptind++;
 	}
-    }
-    return zoptopt;
+	p = strchr (options, zoptopt);
+	if (zoptopt == ':' || p == NULL) {
+		fputs ("illegal option -- ", stderr);
+		goto error;
+	} else if (p[1] == ':') {
+		if (zoptind >= argc) {
+			fputs ("option requires an argument -- ", stderr);
+			goto error;
+		} else {
+			zoptarg = argv[zoptind];
+			if (pos != 1)
+				zoptarg += pos;
+			pos = 1; zoptind++;
+		}
+	}
+	return zoptopt;
 error:
-    fputc (zoptopt, stderr);
-    fputc ('\n', stderr);
-    return '?';
+	fputc (zoptopt, stderr);
+	fputc ('\n', stderr);
+	return '?';
 }/* zgetopt */
 
 static int user_screen_width = 75;
@@ -99,168 +103,221 @@ static bool plain_ascii = FALSE;
  */
 void os_process_arguments(int argc, char *argv[])
 {
-    int c;
-    char *p = NULL;
+	int c;
+	char *p = NULL;
 
-    do_more_prompts = TRUE;
-    /* Parse the options */
-    do {
-	c = zgetopt(argc, argv, "-aAh:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
-	switch(c) {
-	  case 'a': f_setup.attribute_assignment = 1; break;
-	  case 'A': f_setup.attribute_testing = 1; break;
-	case 'h': user_screen_height = atoi(zoptarg); break;
-	  case 'i': f_setup.ignore_errors = 1; break;
-	  case 'I': f_setup.interpreter_number = atoi(zoptarg); break;
-	case 'L': f_setup.restore_mode = 1;
-		  f_setup.tmp_save_name = strdup(zoptarg);
-		  break;
-	  case 'm': do_more_prompts = FALSE; break;
-	  case 'o': f_setup.object_movement = 1; break;
-	  case 'O': f_setup.object_locating = 1; break;
-	  case 'P': f_setup.piracy = 1; break;
-	case 'p': plain_ascii = 1; break;
-	case 'r': dumb_handle_setting(zoptarg, FALSE, TRUE); break;
-	case 'R': f_setup.restricted_path = strndup(zoptarg, PATH_MAX); break;
-	case 's': user_random_seed = atoi(zoptarg); break;
-	  case 'S': f_setup.script_cols = atoi(zoptarg); break;
-	case 't': user_tandy_bit = 1; break;
-	  case 'u': f_setup.undo_slots = atoi(zoptarg); break;
-	case 'v': print_version(); exit(2); break;
-	case 'w': user_screen_width = atoi(zoptarg); break;
-	  case 'x': f_setup.expand_abbreviations = 1; break;
-	  case 'Z': f_setup.err_report_mode = atoi(zoptarg);
-		if ((f_setup.err_report_mode < ERR_REPORT_NEVER) ||
-		(f_setup.err_report_mode > ERR_REPORT_FATAL))
-			f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
-		break;
+	do_more_prompts = TRUE;
+	/* Parse the options */
+	do {
+		c = zgetopt(argc, argv, "-aAh:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
+		switch(c) {
+		case 'a':
+			f_setup.attribute_assignment = 1;
+			break;
+		case 'A':
+			f_setup.attribute_testing = 1;
+			break;
+		case 'h':
+			user_screen_height = atoi(zoptarg);
+			break;
+		case 'i':
+			f_setup.ignore_errors = 1;
+			break;
+		case 'I':
+			f_setup.interpreter_number = atoi(zoptarg);
+			break;
+		case 'L':
+			f_setup.restore_mode = 1;
+			f_setup.tmp_save_name = strdup(zoptarg);
+			break;
+		case 'm':
+			do_more_prompts = FALSE;
+			break;
+		case 'o':
+			f_setup.object_movement = 1;
+			break;
+		case 'O':
+			f_setup.object_locating = 1;
+			break;
+		case 'P':
+			f_setup.piracy = 1;
+			break;
+		case 'p':
+			plain_ascii = 1;
+			break;
+		case 'r':
+			dumb_handle_setting(zoptarg, FALSE, TRUE);
+			break;
+		case 'R':
+			f_setup.restricted_path = strndup(zoptarg, PATH_MAX);
+			break;
+		case 's':
+			user_random_seed = atoi(zoptarg);
+			break;
+		case 'S':
+			f_setup.script_cols = atoi(zoptarg);
+			break;
+		case 't':
+			user_tandy_bit = 1;
+			break;
+		case 'u':
+			f_setup.undo_slots = atoi(zoptarg);
+			break;
+		case 'v':
+			print_version();
+			exit(2);
+			break;
+		case 'w':
+			user_screen_width = atoi(zoptarg);
+			break;
+		case 'x':
+			f_setup.expand_abbreviations = 1;
+			break;
+		case 'Z':
+			f_setup.err_report_mode = atoi(zoptarg);
+			if ((f_setup.err_report_mode < ERR_REPORT_NEVER) ||
+			 	(f_setup.err_report_mode > ERR_REPORT_FATAL))
+				f_setup.err_report_mode =
+					ERR_DEFAULT_REPORT_MODE;
+			break;
+		}
+	} while (c != EOF);
+
+	if ((argv[zoptind] == NULL)) {
+		printf("FROTZ V%s\tDumb interface.\n", VERSION);
+		puts(INFORMATION);
+		puts(INFO2);
+		exit(1);
 	}
-    } while (c != EOF);
 
-    if ((argv[zoptind] == NULL)) {
-	printf("FROTZ V%s\tDumb interface.\n", VERSION);
-	puts(INFORMATION);
-	puts(INFO2);
-	exit(1);
-    }
+	/* Save the story file name */
+	f_setup.story_file = strdup(argv[zoptind]);
+	f_setup.story_name = strdup(basename(argv[zoptind]));
 
-    /* Save the story file name */
+	if (argv[zoptind+1] != NULL)
+		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
-    f_setup.story_file = strdup(argv[zoptind]);
-    f_setup.story_name = strdup(basename(argv[zoptind]));
+	/* Now strip off the extension */
+	p = strrchr(f_setup.story_name, '.');
+	if ( p != NULL )
+		*p = '\0';	/* extension removed */
 
-    if (argv[zoptind+1] != NULL)
-	f_setup.blorb_file = strdup(argv[zoptind+1]);
+	/* Create nice default file names */
 
-    /* Now strip off the extension */
-    p = strrchr(f_setup.story_name, '.');
-    if ( p != NULL )
-    {
-	*p = '\0';	/* extension removed */
-    }
+	f_setup.script_name = malloc((strlen(f_setup.story_name) +
+		strlen(EXT_SCRIPT)) * sizeof(char) + 1);
+    	strncpy(f_setup.script_name, f_setup.story_name,
+		strlen(f_setup.story_name) + 1);
+	strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
 
-    /* Create nice default file names */
+	f_setup.command_name = malloc((strlen(f_setup.story_name) +
+		strlen(EXT_COMMAND)) * sizeof(char) + 1);
+	strncpy(f_setup.command_name, f_setup.story_name,
+		strlen(f_setup.story_name) + 1);
+	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
-    f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
-    strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
+	if (!f_setup.restore_mode) {
+		f_setup.save_name = malloc((strlen(f_setup.story_name) +
+			strlen(EXT_SAVE)) * sizeof(char) + 1);
+		strncpy(f_setup.save_name, f_setup.story_name,
+			strlen(f_setup.story_name) + 1);
+		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
+	} else { /* Set our auto load save as the name save */
+		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) +
+			strlen(EXT_SAVE)) * sizeof(char) + 1);
+		strncpy(f_setup.save_name, f_setup.tmp_save_name,
+			strlen(f_setup.tmp_save_name) + 1);
+		free(f_setup.tmp_save_name);
+	}
 
-    f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
-    strncpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
-
-    if (!f_setup.restore_mode) {
-      f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-      strncpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-      strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-    } else { /* Set our auto load save as the name save */
-      f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-      strncpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) + 1);
-      free(f_setup.tmp_save_name);
-    }
-
-    f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
-    strncpy(f_setup.aux_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
-
+	f_setup.aux_name = malloc((strlen(f_setup.story_name) +
+		strlen(EXT_AUX)) * sizeof(char) + 1);
+	strncpy(f_setup.aux_name, f_setup.story_name,
+		strlen(f_setup.story_name) + 1);
+	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
 }
+
 
 void os_init_screen(void)
 {
-    if (h_version == V3 && user_tandy_bit)
-	h_config |= CONFIG_TANDY;
+	if (h_version == V3 && user_tandy_bit)
+		h_config |= CONFIG_TANDY;
 
-    if (h_version >= V5 && f_setup.undo_slots == 0)
-	h_flags &= ~UNDO_FLAG;
+	if (h_version >= V5 && f_setup.undo_slots == 0)
+		h_flags &= ~UNDO_FLAG;
 
-    h_screen_rows = user_screen_height;
-    h_screen_cols = user_screen_width;
+	h_screen_rows = user_screen_height;
+	h_screen_cols = user_screen_width;
 
-    /* Use the ms-dos interpreter number for v6, because that's the
-     * kind of graphics files we understand.  Otherwise, use DEC.  */
-    if (f_setup.interpreter_number == INTERP_DEFAULT)
-	h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
-    else
- 	h_interpreter_number = f_setup.interpreter_number;
+	/* Use the ms-dos interpreter number for v6, because that's the
+	 * kind of graphics files we understand.  Otherwise, use DEC.  */
+	if (f_setup.interpreter_number == INTERP_DEFAULT)
+		h_interpreter_number = h_version ==
+			6 ? INTERP_MSDOS : INTERP_DEC_20;
+	else
+		h_interpreter_number = f_setup.interpreter_number;
 
-    h_interpreter_version = 'F';
+	h_interpreter_version = 'F';
 
-    dumb_init_input();
-    dumb_init_output();
-    dumb_init_pictures();
+	dumb_init_input();
+	dumb_init_output();
+	dumb_init_pictures();
 }
+
 
 int os_random_seed (void)
 {
-    if (user_random_seed == -1)
-	/* Use the epoch as seed value */
-	return (time(0) & 0x7fff);
-    else return user_random_seed;
+	if (user_random_seed == -1)	/* Use the epoch as seed value */
+		return (time(0) & 0x7fff);
+	return user_random_seed;
 }
+
 
 void os_restart_game (int UNUSED (stage)) {}
 
+
 void os_fatal (const char *s, ...)
 {
-    fprintf(stderr, "\nFatal error: %s\n", s);
-    if (f_setup.ignore_errors) {
-	fprintf(stderr, "Continuing anyway...\n");
-    } else {
-	exit(1);
-    }
+	fprintf(stderr, "\nFatal error: %s\n", s);
+	if (f_setup.ignore_errors)
+		fprintf(stderr, "Continuing anyway...\n");
+	else
+		exit(1);
 }
+
 
 FILE *os_load_story(void)
 {
-    FILE *fp;
+	FILE *fp;
 
 #ifndef NO_BLORB
-    switch (dumb_blorb_init(f_setup.story_file)) {
+	switch (dumb_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
-/*	  printf("No blorb file found.\n\n"); */
-	  break;
+/*		printf("No blorb file found.\n\n"); */
+		break;
 	case bb_err_Format:
-	  printf("Blorb file loaded, but unable to build map.\n\n");
-	  break;
+		printf("Blorb file loaded, but unable to build map.\n\n");
+		break;
 	case bb_err_NotFound:
-	  printf("Blorb file loaded, but lacks executable chunk.\n\n");
-	  break;
+		printf("Blorb file loaded, but lacks executable chunk.\n\n");
+		break;
 	case bb_err_None:
-/*	  printf("No blorb errors.\n\n"); */
-	  break;
-    }
+/*		printf("No blorb errors.\n\n"); */
+		break;
+	}
 
-    fp = fopen(f_setup.story_file, "rb");
+	fp = fopen(f_setup.story_file, "rb");
 
-    /* Is this a Blorb file containing Zcode? */
-    if (f_setup.exec_in_blorb)
-	 fseek(fp, blorb_res.data.startpos, SEEK_SET);
+	/* Is this a Blorb file containing Zcode? */
+	if (f_setup.exec_in_blorb)
+		fseek(fp, blorb_res.data.startpos, SEEK_SET);
 #else
-    fp = fopen(f_setup.story_file, "rb");
+	fp = fopen(f_setup.story_file, "rb");
 #endif /* NO_BLORB */
 
-    return fp;
+	return fp;
 }
+
 
 /*
  * Seek into a storyfile, either a standalone file or the
@@ -269,8 +326,9 @@ FILE *os_load_story(void)
  */
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
-    return fseek(fp, offset, whence);
+	return fseek(fp, offset, whence);
 }
+
 
 /*
  * Tell the position in a storyfile, either a standalone file
@@ -279,8 +337,9 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
  */
 int os_storyfile_tell(FILE * fp)
 {
-    return ftell(fp);
+	return ftell(fp);
 }
+
 
 void os_init_setup(void)
 {
@@ -314,19 +373,19 @@ void os_init_setup(void)
 	f_setup.restricted_path = NULL;
 }
 
+
 static void print_version(void)
 {
-    printf("FROTZ V%s\t", VERSION);
-    printf("Dumb interface.\n");
-    printf("Build date:\t%s\n", BUILD_DATE);
-    printf("Commit date:\t%s\n", GIT_DATE);
-    printf("Git commit:\t%s\n", GIT_HASH);
-    printf("Git branch:\t%s\n", GIT_BRANCH);
-    printf("  Frotz was originally written by Stefan Jokisch.\n");
-    printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
-    printf("  It was ported to Unix by Galen Hazelwood.\n");
-    printf("  The core and dumb port are currently maintained by David Griffith.\n");
-    printf("  Frotz's homepage is https://661.org/proj/if/frotz.\n\n");
-    return;
+	printf("FROTZ V%s\t", VERSION);
+	printf("Dumb interface.\n");
+	printf("Build date:\t%s\n", BUILD_DATE);
+	printf("Commit date:\t%s\n", GIT_DATE);
+	printf("Git commit:\t%s\n", GIT_HASH);
+	printf("Git branch:\t%s\n", GIT_BRANCH);
+	printf("  Frotz was originally written by Stefan Jokisch.\n");
+	printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+	printf("  It was ported to Unix by Galen Hazelwood.\n");
+	printf("  The core and dumb port are currently maintained by David Griffith.\n");
+	printf("  Frotz's homepage is https://661.org/proj/if/frotz.\n\n");
+	return;
 }
-
