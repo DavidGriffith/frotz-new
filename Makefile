@@ -266,10 +266,12 @@ $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	@echo "** Done building Frotz with SDL interface."
 
 dos: $(DOS_BIN)
-$(DOS_BIN): $(COMMON_LIB) $(DOS_LIB) $(COMMON_LIB)
-	@echo "***********************************"
-	@echo "** Cannot compile for DOS yet... **"
-	@echo "***********************************"
+$(DOS_BIN): $(COMMON_DEFINES) $(HASH)
+	@echo
+	@echo "  ** Cannot cross-compile for DOS yet"
+	@echo "  ** For now, I'm just making $(COMMON_DEFINES) and $(HASH)"
+	@echo "  ** To build for DOS, take what's here and use Turbo C in DOSBOX"
+	@echo
 
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
