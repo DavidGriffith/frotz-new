@@ -28,9 +28,9 @@ typedef struct sampledata_struct {
  *
  */
 typedef struct {
-    bb_result_t bbres;
-    unsigned long type;
-    FILE *fp;
+	bb_result_t bbres;
+	unsigned long type;
+	FILE *fp;
 } myresource;
 
 /* These are used only locally */
