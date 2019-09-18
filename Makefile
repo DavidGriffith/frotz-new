@@ -307,6 +307,7 @@ $(SUB_CLEAN):
 #
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
+ifeq ($(wildcard $(COMMON_DEFINES)), )
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
@@ -342,9 +343,12 @@ ifdef MACOS
 	@echo "#define _XOPEN_SOURCE 600" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
+endif
+
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
+ifeq ($(wildcard $(CURSES_DEFINES)), )
 ifndef CURSES
 	@echo "** ERROR You need to pick a flavor of curses in the Makefile!"
 	exit 1
@@ -377,9 +381,12 @@ ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
 endif
 	@echo "#endif /* CURSES_DEFINES_H */" >> $@
+endif
+
 
 hash: $(HASH)
 $(HASH):
+ifeq ($(wildcard $(HASH)), )
 	@echo "** Generating $@"
 	@echo "#define VERSION \"$(VERSION)\"" > $@
 	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" >> $@
@@ -387,6 +394,7 @@ $(HASH):
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
 	@echo "#define BUILD_DATE \"$(BUILD_DATE)\"" >> $@
+endif
 
 
 # Administrative stuff
@@ -474,5 +482,6 @@ help:
 
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
 	common_defines curses_defines nosound nosound_helper\
+	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz $(SUB_CLEAN)
