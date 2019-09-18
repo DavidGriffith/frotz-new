@@ -59,74 +59,74 @@ static int isblorb(FILE *);
  */
 bb_err_t dumb_blorb_init(char *filename)
 {
-    FILE *fp;
-    char *p;
-    char *mystring;
-    int  len1;
-    int  len2;
+	FILE *fp;
+	char *p;
+	char *mystring;
+	int  len1;
+	int  len2;
 
-    bb_err_t blorb_err;
+	bb_err_t blorb_err;
 
-    if ((fp = fopen(filename, "rb")) == NULL)
-	return bb_err_Read;
+	if ((fp = fopen(filename, "rb")) == NULL)
+		return bb_err_Read;
 
-    /* Is this really a Blorb file?  If not, maybe we're loading a naked
-     * zcode file and our resources are in a separate blorb file.
-     */
-    if (isblorb(fp)) {			/* Now we know to look */
-	f_setup.exec_in_blorb = 1;	/* for zcode in the blorb */
-        blorb_fp = fp;
-    } else {
-	fclose(fp);
-	if (f_setup.blorb_file != NULL)
-	    mystring = strdup(f_setup.blorb_file);
-	else {
-	    len1 = strlen(filename) + strlen(EXT_BLORB);
-	    len2 = strlen(filename) + strlen(EXT_BLORB3);
-	    mystring = malloc(len2 * sizeof(char) + 1);
-	    strncpy(mystring, filename, len1 * sizeof(char));
-	    p = strrchr(mystring, '.');
-	    if (p != NULL) *p = '\0';
-	    strncat(mystring, EXT_BLORB, len1 * sizeof(char));
+	/* Is this really a Blorb file?
+	 * If not, maybe we're loading a naked zcode file
+	 * and our resources are in a separate blorb file.
+	 */
+	if (isblorb(fp)) {			/* Now we know to look */
+		f_setup.exec_in_blorb = 1;	/* for zcode in the blorb */
+		blorb_fp = fp;
+	} else {
+		fclose(fp);
+		if (f_setup.blorb_file != NULL)
+			mystring = strdup(f_setup.blorb_file);
+		else {
+			len1 = strlen(filename) + strlen(EXT_BLORB);
+			len2 = strlen(filename) + strlen(EXT_BLORB3);
+			mystring = malloc(len2 * sizeof(char) + 1);
+			strncpy(mystring, filename, len1 * sizeof(char));
+			p = strrchr(mystring, '.');
+			if (p != NULL) *p = '\0';
+			strncat(mystring, EXT_BLORB, len1 * sizeof(char));
+		}
+
+		/* Check if foo.blb is there. */
+		if ((fp = fopen(mystring, "rb")) == NULL) {
+			p = strrchr(mystring, '.');
+			if (p != NULL) *p = '\0';
+			strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
+			if (!(fp = fopen(mystring, "rb")))
+				return bb_err_NoBlorb;
+		}
+		if (!isblorb(fp)) {
+			fclose(fp);
+			return bb_err_NoBlorb;
+		}
+		/* At this point we know that we're using a naked zcode file */
+		/* with resources in a separate Blorb file. */
+		blorb_fp = fp;
+		f_setup.use_blorb = 1;
 	}
 
-	/* Check if foo.blb is there. */
-	if ((fp = fopen(mystring, "rb")) == NULL) {
-	    p = strrchr(mystring, '.');
-	    if (p != NULL) *p = '\0';
-	    strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
+	/* Create a Blorb map from this file.
+	 * This will fail if the file is not a valid Blorb file.
+	 * From this map, we can now pick out any resource we need.
+	 */
+	blorb_err = bb_create_map(blorb_fp, &blorb_map);
+	if (blorb_err != bb_err_None)
+		return bb_err_Format;
 
-	    if (!(fp = fopen(mystring, "rb")))
-		return bb_err_NoBlorb;
+	/* Locate the EXEC chunk within the blorb file and record its
+	* location so os_load_story() can find it.
+	*/
+	if (f_setup.exec_in_blorb) {
+		blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
+			&blorb_res, bb_ID_ZCOD, 0);
+		f_setup.exec_in_blorb = 1;
 	}
-	if (!isblorb(fp)) {
-	    fclose(fp);
-	    return bb_err_NoBlorb;
-	}
-	/* At this point we know that we're using a naked zcode file */
-	/* with resources in a separate Blorb file. */
-	blorb_fp = fp;
-	f_setup.use_blorb = 1;
-    }
 
-    /* Create a Blorb map from this file.
-     * This will fail if the file is not a valid Blorb file.
-     * From this map, we can now pick out any resource we need.
-     */
-    blorb_err = bb_create_map(blorb_fp, &blorb_map);
-    if (blorb_err != bb_err_None)
-	return bb_err_Format;
-
-    /* Locate the EXEC chunk within the blorb file and record its
-     * location so os_load_story() can find it.
-     */
-    if (f_setup.exec_in_blorb) {
-	blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
-		&blorb_res, bb_ID_ZCOD, 0);
-	f_setup.exec_in_blorb = 1;
-    }
-
-    return blorb_err;
+	return blorb_err;
 }
 
 
@@ -138,22 +138,22 @@ bb_err_t dumb_blorb_init(char *filename)
  */
 static int isblorb(FILE *fp)
 {
-    char mybuf[4];
+	char mybuf[4];
 
-    if (fp == NULL)
-	return 0;
+	if (fp == NULL)
+		return 0;
 
-    fread(mybuf, 1, 4, fp);
-    if (strncmp(mybuf, "FORM", 4))
-	return 0;
+	fread(mybuf, 1, 4, fp);
+	if (strncmp(mybuf, "FORM", 4))
+		return 0;
 
-    fseek(fp, 4, SEEK_CUR);
-    fread(mybuf, 1, 4, fp);
+	fseek(fp, 4, SEEK_CUR);
+	fread(mybuf, 1, 4, fp);
 
-    if (strncmp(mybuf, "IFRS", 4))
-	return 0;
+	if (strncmp(mybuf, "IFRS", 4))
+		return 0;
 
-    return 1;
+	return 1;
 }
 
 #endif /* NO_BLORB */
