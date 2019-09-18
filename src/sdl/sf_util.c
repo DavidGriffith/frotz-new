@@ -26,6 +26,7 @@ typedef struct cfstruct cfrec;
 
 static void print_version(void);
 
+enum {USAGE_NORMAL, USAGE_EXTENDED};
 
 struct cfstruct {
   CLEANFUNC func;
@@ -111,12 +112,12 @@ static char user_names_format = 0;
 extern char *m_reslist_file;
 extern int option_scrollback_buffer;
 
-static char *info1 =
+static char *info_header =
 	"FROTZ V%s\tSDL graphics and audio interface.\n"
 	"An interpreter for all Infocom and other Z-Machine games.\n\n"
 	"Syntax: sfrotz [options] story-file\n";
 
-static char *infos[] = {
+static char *info[] = {
 	"-a   watch attribute setting",
 	"-A   watch attribute testing",
 	"-b # background colour",
@@ -124,11 +125,11 @@ static char *infos[] = {
 	"-f # foreground colour",
 	"-F   fullscreen mode",
 	"-h # screen height",
+	"-H   show extended options",
 	"-i   ignore runtime errors",
 	"-I # interpreter number",
 	"-l # left margin",
-	"-L   use local resources",
-	"-N <date|name> add date or number to save filename ",
+	"-L <file> load this save file",
 	"-o   watch object movement",
 	"-O   watch object locating",
 	"-P   alter piracy opcode",
@@ -141,22 +142,46 @@ static char *infos[] = {
 	"-w # screen width",
 	"-x   expand abbreviations g/x/z",
 	"-v   show version information",
-	"-V   force VGA fonts",
 	"-Z # error checking (see below)",
 	NULL};
 
-static char *info2 =
-	"\nError checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n"
+static char *info_footer =
+	"\nError checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.";
+
+static char *extended_header =
+	"\nExtended Options\n";
+
+static char *extended_options[] = {
+	"-@ <file> use resources in <file>",
+	"-%        use local resources",
+	"-F        run in fullscreen mode.",
+	"-m #      set timer interrupt cycle to # milliseconds",
+	"-N <mode> add date or number to save filename",
+	"-T        use in-game requests for filenames",
+	"-V        force VGA fonts",
+	NULL};
+
+static char *footer =
 	"More options and information are in the manual page.  Type \"man sfrotz\".\n";
 
 #define WIDCOL 40
-static void usage()
+static void usage(int type)
   {
-  char **p = infos; int i=0,len=0;
-  printf(info1, VERSION);
+  char **p;
+  int i=0,len=0;
+
+  printf(info_header, VERSION);
+
+  if (type == USAGE_NORMAL)
+    p = info;
+  else {
+    p = extended_options;
+    puts(extended_header);
+  }
+
   while (*p)
 	{
-	if (i)
+	if (i && type == USAGE_NORMAL)
 		{
 		while (len > 0){ fputc(' ',stdout); len--;}
 		puts(*p);
@@ -165,14 +190,22 @@ static void usage()
 		{
 		fputs("  ",stdout);
 		fputs(*p,stdout);
-		len = WIDCOL-strlen(*p)-2;
+		if (type == USAGE_NORMAL)
+			len = WIDCOL-strlen(*p)-2;
+		else
+			fputs("\n", stdout);
 		}
 	i = 1-i;
 	p++;
 	}
   if (i) fputc('\n',stdout);
-  puts (info2);
+
+  if (type == USAGE_NORMAL)
+    puts (info_footer);
+  puts (footer);
+
   }
+
 
 /*
  * parse_options
@@ -187,7 +220,7 @@ extern char *optarg;
 extern int optind;
 extern int m_timerinterval;
 
-static char *options = "@:%aAb:B:c:f:Fh:iI:l:L:m:N:oOPqr:s:S:tTu:vVw:xZ:";
+static char *options = "@:%aAb:B:c:f:Fh:HiI:l:L:m:N:oOPqr:s:S:tTu:vVw:xZ:";
 
 static int limit( int v, int m, int M)
   {
@@ -238,6 +271,10 @@ static void parse_options (int argc, char **argv)
 	    m_fullscreen = 1;
 	if (c == 'h')
 	    user_screen_height = num;
+	if (c == 'H') {
+	    usage(USAGE_EXTENDED);
+	    exit (EXIT_FAILURE);
+	}
 	if (c == 'i')
 	    f_setup.ignore_errors = 1;
 	if (c == 'I')
@@ -339,7 +376,7 @@ void os_process_arguments (int argc, char *argv[])
 
   if (argv[optind] == NULL)
 	{
-	usage();
+	usage(USAGE_NORMAL);
 	exit (EXIT_FAILURE);
 	}
   f_setup.story_file = strdup(argv[optind]);
