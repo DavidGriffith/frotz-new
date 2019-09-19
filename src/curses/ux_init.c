@@ -106,12 +106,11 @@ static FILE	*pathopen(const char *, const char *, const char *);
 
 static void print_c_string (const char *s)
 {
-    zchar c;
+	zchar c;
 
-    while ((c = *s++) != 0) {
-	    os_display_char (c);
-    }
-}
+	while ((c = *s++) != 0)
+		os_display_char (c);
+} /* print_c_string */
 
 
 /*
@@ -122,18 +121,19 @@ static void print_c_string (const char *s)
  */
 void os_warn (const char *s, ...)
 {
-    if (u_setup.curses_active) {
-	/* Solaris 2.6's cc complains if the below cast is missing */
-	print_c_string("\n\n");
-	os_beep(BEEP_HIGH);
-	os_set_text_style(BOLDFACE_STYLE);
-	print_c_string("Warning: ");
-	os_set_text_style(0);
-	print_c_string(s);
-	print_c_string("\n");
-	new_line();
-    }
-}/* os_warn */
+	if (u_setup.curses_active) {
+		/* Solaris 2.6's cc complains if the below cast is missing */
+		print_c_string("\n\n");
+		os_beep(BEEP_HIGH);
+		os_set_text_style(BOLDFACE_STYLE);
+		print_c_string("Warning: ");
+		os_set_text_style(0);
+		print_c_string(s);
+		print_c_string("\n");
+		new_line();
+	}
+} /* os_warn */
+
 
 /*
  * os_fatal
@@ -143,42 +143,42 @@ void os_warn (const char *s, ...)
  */
 void os_fatal (const char *s, ...)
 {
-    if (u_setup.curses_active) {
-	/* Solaris 2.6's cc complains if the below cast is missing */
-	print_c_string("\n\n");
-	os_beep(BEEP_HIGH);
-	os_set_text_style(BOLDFACE_STYLE);
-	print_c_string("Fatal error: ");
-	os_set_text_style(0);
-	print_c_string(s);
-	print_c_string("\n");
-	new_line();
-	if (f_setup.ignore_errors) {
-	    print_c_string("Continuing anyway...");
-	    new_line();
-	    scrollok(stdscr, TRUE);
-	    scroll(stdscr);
-	    flush_buffer();
-	    refresh();
-	    return;
-	} else {
-	    os_reset_screen();
-	    ux_blorb_stop();
-	    exit(1);
+	if (u_setup.curses_active) {
+		/* Solaris 2.6's cc complains if the below cast is missing */
+		print_c_string("\n\n");
+		os_beep(BEEP_HIGH);
+		os_set_text_style(BOLDFACE_STYLE);
+		print_c_string("Fatal error: ");
+		os_set_text_style(0);
+		print_c_string(s);
+		print_c_string("\n");
+		new_line();
+		if (f_setup.ignore_errors) {
+			print_c_string("Continuing anyway...");
+			new_line();
+			scrollok(stdscr, TRUE);
+			scroll(stdscr);
+			flush_buffer();
+			refresh();
+			return;
+		} else {
+			os_reset_screen();
+			ux_blorb_stop();
+			exit(1);
+		}
 	}
-    }
 
-    fputs ("\nFatal error: ", stderr);
-    fputs (s, stderr);
-    if (f_setup.ignore_errors) {
-	fputs ("\n\rContinuing anyway", stderr);
-	return;
-    }
+	fputs ("\nFatal error: ", stderr);
+	fputs (s, stderr);
+	if (f_setup.ignore_errors) {
+		fputs ("\n\rContinuing anyway", stderr);
+		return;
+	}
 
-    fputs ("\n\n", stderr);
+	fputs ("\n\n", stderr);
 
-    exit (1);
-}/* os_fatal */
+	exit (1);
+} /* os_fatal */
 
 /* extern char script_name[]; */
 /* extern char command_name[]; */
@@ -195,19 +195,21 @@ void os_fatal (const char *s, ...)
  */
 void os_process_arguments (int argc, char *argv[])
 {
-    int c;
-    char *p = NULL;
-// FIXME: put this back before committing merge fixes
-//    char *blorb_ext = NULL;
-
-    char *home;
-    char configfile[FILENAME_MAX + 1];
+	int c;
+	char *p = NULL;
+/*
+ * FIXME: Remove this after K&R treatment
+ * FIXME: put this back before committing merge fixes
+ *    char *blorb_ext = NULL;
+ */
+	char *home;
+	char configfile[FILENAME_MAX + 1];
 
 #ifndef WIN32
-    if ((getuid() == 0) || (geteuid() == 0)) {
-	printf("I won't run as root!\n");
-	exit(1);
-    }
+	if ((getuid() == 0) || (geteuid() == 0)) {
+		printf("I won't run as root!\n");
+		exit(1);
+	}
 #endif
 
 #ifdef WIN32
@@ -216,10 +218,10 @@ void os_process_arguments (int argc, char *argv[])
 #define HOMEDIR "HOME"
 #endif
 
-    if ((home = getenv(HOMEDIR)) == NULL) {
-	printf("Hard drive on fire!\n");
-	exit(1);
-    }
+	if ((home = getenv(HOMEDIR)) == NULL) {
+		printf("Hard drive on fire!\n");
+		exit(1);
+	}
 
 
 /*
@@ -233,178 +235,179 @@ void os_process_arguments (int argc, char *argv[])
  */
 
 
-//    if (signal(SIGWINCH, SIG_IGN) != SIG_IGN)
+/*	if (signal(SIGWINCH, SIG_IGN) != SIG_IGN) */
 	signal(SIGWINCH, sigwinch_handler);
 
-    if (signal(SIGINT, SIG_IGN) != SIG_IGN)
-	signal(SIGINT, sigint_handler);
+	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
+		signal(SIGINT, sigint_handler);
 
-    if (signal(SIGTTIN, SIG_IGN) != SIG_IGN)
-	signal(SIGTTIN, SIG_IGN);
+	if (signal(SIGTTIN, SIG_IGN) != SIG_IGN)
+		signal(SIGTTIN, SIG_IGN);
 
-    if (signal(SIGTTOU, SIG_IGN) != SIG_IGN)
-	signal(SIGTTOU, SIG_IGN);
+	if (signal(SIGTTOU, SIG_IGN) != SIG_IGN)
+		signal(SIGTTOU, SIG_IGN);
 
-    /* First check for a "$HOME/.frotzrc". */
-    /* If not found, look for CONFIG_DIR/frotz.conf */
-    /* $HOME/.frotzrc overrides CONFIG_DIR/frotz.conf */
+	/* First check for a "$HOME/.frotzrc". */
+	/* If not found, look for CONFIG_DIR/frotz.conf */
+	/* $HOME/.frotzrc overrides CONFIG_DIR/frotz.conf */
 
-    strncpy(configfile, home, FILENAME_MAX);
-    strncat(configfile, "/", 2);
+	strncpy(configfile, home, FILENAME_MAX);
+	strncat(configfile, "/", 2);
 
-    strncat(configfile, USER_CONFIG, strlen(USER_CONFIG) + 1);
-    if (!getconfig(configfile)) {
-        strncpy(configfile, CONFIG_DIR, FILENAME_MAX);
-        strncat(configfile, "/", 2);    /* added by DJP */
-        strncat(configfile, MASTER_CONFIG, FILENAME_MAX-10);
-        getconfig(configfile);  /* we're not concerned if this fails */
-    }
-
-    /* Parse the options */
-    do {
-	c = zgetopt(argc, argv, "-aAb:c:def:Fh:iI:l:L:oOpPqr:R:s:S:tu:vw:W:xZ:");
-	switch(c) {
-	  case 'a': f_setup.attribute_assignment = 1; break;
-	  case 'A': f_setup.attribute_testing = 1; break;
-	  case 'b': u_setup.background_color = getcolor(zoptarg);
-		u_setup.force_color = 1;
-		u_setup.disable_color = 0;
-		if ((u_setup.background_color < 2) ||
-		    (u_setup.background_color > 9))
-		  u_setup.background_color = -1;
-		break;
-	  case 'c': f_setup.context_lines = atoi(zoptarg); break;
-	  case 'd': u_setup.disable_color = 1; break;
-	  case 'e': f_setup.sound = 1; break;
-	  case 'f': u_setup.foreground_color = getcolor(zoptarg);
-		    u_setup.force_color = 1;
-		    u_setup.disable_color = 0;
-	            if ((u_setup.foreground_color < 2) ||
-			(u_setup.foreground_color > 9))
-			u_setup.foreground_color = -1;
-		    break;
-	  case 'F': u_setup.force_color = 1;
-		    u_setup.disable_color = 0;
-		    break;
-          case 'h': u_setup.screen_height = atoi(zoptarg); break;
-	  case 'i': f_setup.ignore_errors = 1; break;
-	  case 'I': f_setup.interpreter_number = atoi(zoptarg); break;
-	  case 'l': f_setup.left_margin = atoi(zoptarg); break;
-	  case 'L': f_setup.restore_mode = 1;
-		    f_setup.tmp_save_name = strdup(zoptarg);
-		    break;
-	  case 'o': f_setup.object_movement = 1; break;
-	  case 'O': f_setup.object_locating = 1; break;
-	  case 'p': u_setup.plain_ascii = 1; break;
-	  case 'P': f_setup.piracy = 1; break;
-	  case 'q': f_setup.sound = 0; break;
-	  case 'r': f_setup.right_margin = atoi(zoptarg); break;
-	  case 'R': f_setup.restricted_path = strndup(zoptarg, PATH_MAX); break;
-	  case 's': u_setup.random_seed = atoi(zoptarg); break;
-	  case 'S': f_setup.script_cols = atoi(zoptarg); break;
-	  case 't': u_setup.tandy_bit = 1; break;
-	  case 'u': f_setup.undo_slots = atoi(zoptarg); break;
-	  case 'v': print_version(); exit(2); break;
-	  case 'w': u_setup.screen_width = atoi(zoptarg); break;
-	  case 'x': f_setup.expand_abbreviations = 1; break;
-	  case 'Z': f_setup.err_report_mode = atoi(zoptarg);
-		    if ((f_setup.err_report_mode < ERR_REPORT_NEVER) ||
-			(f_setup.err_report_mode > ERR_REPORT_FATAL))
-		      f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
-		    break;
+	strncat(configfile, USER_CONFIG, strlen(USER_CONFIG) + 1);
+	if (!getconfig(configfile)) {
+		strncpy(configfile, CONFIG_DIR, FILENAME_MAX);
+		strncat(configfile, "/", 2);    /* added by DJP */
+		strncat(configfile, MASTER_CONFIG, FILENAME_MAX-10);
+		getconfig(configfile);  /* we're not concerned if this fails */
 	}
 
-    } while (c != EOF);
+	/* Parse the options */
+	do {
+		c = zgetopt(argc, argv, "-aAb:c:def:Fh:iI:l:L:oOpPqr:R:s:S:tu:vw:W:xZ:");
+		switch(c) {
+		case 'a': f_setup.attribute_assignment = 1; break;
+		case 'A': f_setup.attribute_testing = 1; break;
+		case 'b':
+			u_setup.background_color = getcolor(zoptarg);
+			u_setup.force_color = 1;
+			u_setup.disable_color = 0;
+			if ((u_setup.background_color < 2) ||
+			    (u_setup.background_color > 9))
+				u_setup.background_color = -1;
+			break;
+		case 'c': f_setup.context_lines = atoi(zoptarg); break;
+		case 'd': u_setup.disable_color = 1; break;
+		case 'e': f_setup.sound = 1; break;
+		case 'f':
+			u_setup.foreground_color = getcolor(zoptarg);
+			u_setup.force_color = 1;
+			u_setup.disable_color = 0;
+			if ((u_setup.foreground_color < 2) ||
+			  (u_setup.foreground_color > 9))
+				u_setup.foreground_color = -1;
+			break;
+		case 'F':
+			u_setup.force_color = 1;
+			u_setup.disable_color = 0;
+			break;
+		case 'h': u_setup.screen_height = atoi(zoptarg); break;
+		case 'i': f_setup.ignore_errors = 1; break;
+		case 'I': f_setup.interpreter_number = atoi(zoptarg); break;
+		case 'l': f_setup.left_margin = atoi(zoptarg); break;
+		case 'L':
+			f_setup.restore_mode = 1;
+			f_setup.tmp_save_name = strdup(zoptarg);
+			break;
+		case 'o': f_setup.object_movement = 1; break;
+		case 'O': f_setup.object_locating = 1; break;
+		case 'p': u_setup.plain_ascii = 1; break;
+		case 'P': f_setup.piracy = 1; break;
+		case 'q': f_setup.sound = 0; break;
+		case 'r': f_setup.right_margin = atoi(zoptarg); break;
+		case 'R': f_setup.restricted_path = strndup(zoptarg, PATH_MAX); break;
+		case 's': u_setup.random_seed = atoi(zoptarg); break;
+		case 'S': f_setup.script_cols = atoi(zoptarg); break;
+		case 't': u_setup.tandy_bit = 1; break;
+		case 'u': f_setup.undo_slots = atoi(zoptarg); break;
+		case 'v': print_version(); exit(2); break;
+		case 'w': u_setup.screen_width = atoi(zoptarg); break;
+		case 'x': f_setup.expand_abbreviations = 1; break;
+		case 'Z':
+			f_setup.err_report_mode = atoi(zoptarg);
+			if ((f_setup.err_report_mode < ERR_REPORT_NEVER) ||
+			  (f_setup.err_report_mode > ERR_REPORT_FATAL))
+				f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
+			break;
+		}
+	} while (c != EOF);
 
-    if (argv[zoptind] == NULL) {
-	printf("FROTZ V%s\tCurses interface.  ", VERSION);
+	if (argv[zoptind] == NULL) {
+		printf("FROTZ V%s\tCurses interface.  ", VERSION);
 
 #ifndef NO_SOUND
-	printf("Audio output enabled.");
+		printf("Audio output enabled.");
 #else
-	printf("Audio output disabled.");
+		printf("Audio output disabled.");
 #endif
-	putchar('\n');
+		putchar('\n');
 
-	puts (INFORMATION);
-	puts (INFO2);
-	exit (1);
-    }
+		puts (INFORMATION);
+		puts (INFO2);
+		exit (1);
+	}
 
-    /* This section is exceedingly messy and really can't be fixed
-       without major changes all over the place.
-     */
+	/* This section is exceedingly messy and really can't be fixed
+	 * without major changes all over the place.
+	 */
 
-    /* Save the story file name */
+	/* Save the story file name */
 
-    f_setup.story_file = strdup(argv[zoptind]);
-    f_setup.story_name = strdup(basename(argv[zoptind]));
+	f_setup.story_file = strdup(argv[zoptind]);
+	f_setup.story_name = strdup(basename(argv[zoptind]));
 
-    if (argv[zoptind+1] != NULL)
-	f_setup.blorb_file = strdup(argv[zoptind+1]);
+	if (argv[zoptind+1] != NULL)
+		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
-    /* Now strip off the extension */
-    p = strrchr(f_setup.story_name, '.');
-    if ( p != NULL )
-    {
-	*p = '\0';  /* extension removed */
-    }
+	/* Now strip off the extension */
+	p = strrchr(f_setup.story_name, '.');
+	if ( p != NULL )
+		*p = '\0';  /* extension removed */
 
-    /* Create nice default file names */
+	/* Create nice default file names */
 
-    f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
-    strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
+	f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
+	strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+	strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
 
-    f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
-    strncpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
+	f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
+	strncpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
-    if (!f_setup.restore_mode) {
-	f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-	strncpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-	strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-    } else {  /*Set our auto load save as the name_save*/
-	f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-	strncpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) + 1);
-	free(f_setup.tmp_save_name);
-    }
+	if (!f_setup.restore_mode) {
+		f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
+		strncpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
+	} else {  /*Set our auto load save as the name_save*/
+		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
+		strncpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) + 1);
+		free(f_setup.tmp_save_name);
+	}
 
-    f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
-    strncpy(f_setup.aux_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
-
-}/* os_process_arguments */
+	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
+	strncpy(f_setup.aux_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
+} /* os_process_arguments */
 
 
 void unix_get_terminal_size()
 {
-    int y, x;
-    getmaxyx(stdscr, y, x);
+	int y, x;
+	getmaxyx(stdscr, y, x);
 
-    if (u_setup.screen_height != -1)
-        h_screen_rows = u_setup.screen_height;
-    else
-        /* 255 disables paging entirely. */
-        h_screen_rows = MIN(254, y);
+	/* 255 disables paging entirely. */
+	if (u_setup.screen_height != -1)
+		h_screen_rows = u_setup.screen_height;
+	else
+		h_screen_rows = MIN(254, y);
 
-    if (u_setup.screen_width != -1)
-        h_screen_cols = u_setup.screen_width;
-    else
-        h_screen_cols = MIN(255, x);
+	if (u_setup.screen_width != -1)
+		h_screen_cols = u_setup.screen_width;
+	else
+		h_screen_cols = MIN(255, x);
 
-    if (h_screen_cols < 1) {
-        endwin();
-        u_setup.curses_active = FALSE;
-        os_fatal("Invalid screen width. Must be between 1 and 255.");
-    }
+	if (h_screen_cols < 1) {
+		endwin();
+		u_setup.curses_active = FALSE;
+		os_fatal("Invalid screen width. Must be between 1 and 255.");
+	}
 
-    h_font_width = 1;
-    h_font_height = 1;
+	h_font_width = 1;
+	h_font_height = 1;
 
-    h_screen_width = h_screen_cols;
-    h_screen_height = h_screen_rows;
-}
+	h_screen_width = h_screen_cols;
+	h_screen_height = h_screen_rows;
+} /* unix_get_terminal */
 
 
 /*
@@ -437,115 +440,113 @@ void unix_get_terminal_size()
  */
 void os_init_screen (void)
 {
-    /*trace(TRACE_CALLS);*/
+	/*trace(TRACE_CALLS);*/
 
 #ifdef USE_UTF8
-    setlocale(LC_ALL, "");
+	setlocale(LC_ALL, "");
 #endif
 
-    if (initscr() == NULL) {    /* Set up curses */
-	os_fatal("Unable to initialize curses. Maybe your $TERM setting is bad.");
-	exit(1);
-    }
-    u_setup.curses_active = 1;	/* Let os_fatal know curses is running */
-    raw();			/* Raw input mode, no line processing */
-    noecho();			/* No input echo */
-    nonl();			/* No newline translation */
-    intrflush(stdscr, TRUE);	/* Flush output on interrupt */
-    keypad(stdscr, TRUE);	/* Enable the keypad and function keys */
-    scrollok(stdscr, FALSE);	/* No scrolling unless explicitly asked for */
+	if (initscr() == NULL) {    /* Set up curses */
+		os_fatal("Unable to initialize curses. Maybe your $TERM setting is bad.");
+		exit(1);
+	}
+	u_setup.curses_active = 1;	/* Let os_fatal know curses is running */
+	raw();				/* Raw input mode, no line processing */
+	noecho();			/* No input echo */
+	nonl();				/* No newline translation */
+	intrflush(stdscr, TRUE);	/* Flush output on interrupt */
+	keypad(stdscr, TRUE);		/* Enable the keypad and function keys */
+	scrollok(stdscr, FALSE);	/* No scrolling unless explicitly asked for */
 
-    if (h_version == V3 && u_setup.tandy_bit != 0)
-        h_config |= CONFIG_TANDY;
+	if (h_version == V3 && u_setup.tandy_bit != 0)
+		h_config |= CONFIG_TANDY;
 
-    if (h_version == V3)
-	h_config |= CONFIG_SPLITSCREEN;
+	if (h_version == V3)
+		h_config |= CONFIG_SPLITSCREEN;
 
-    if (h_version >= V4)
-	h_config |= CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED | CONFIG_TIMEDINPUT;
+	if (h_version >= V4)
+		h_config |= CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED | CONFIG_TIMEDINPUT;
 
-    if (h_version >= V5)
-      h_flags &= ~(GRAPHICS_FLAG | MOUSE_FLAG | MENU_FLAG);
+	if (h_version >= V5)
+		h_flags &= ~(GRAPHICS_FLAG | MOUSE_FLAG | MENU_FLAG);
 
 #ifdef NO_SOUND
-    if (h_version >= V5)
-      h_flags &= ~SOUND_FLAG;
+	if (h_version >= V5)
+		h_flags &= ~SOUND_FLAG;
 
-    if (h_version == V3)
-      h_flags &= ~OLD_SOUND_FLAG;
+	if (h_version == V3)
+		h_flags &= ~OLD_SOUND_FLAG;
 #else
-    if ((h_version >= 5) && (h_flags & SOUND_FLAG))
-	h_flags |= SOUND_FLAG;
+	if ((h_version >= 5) && (h_flags & SOUND_FLAG))
+		h_flags |= SOUND_FLAG;
 
-    if ((h_version == 3) && (h_flags & OLD_SOUND_FLAG))
-	h_flags |= OLD_SOUND_FLAG;
+	if ((h_version == 3) && (h_flags & OLD_SOUND_FLAG))
+		h_flags |= OLD_SOUND_FLAG;
 
-    if ((h_version == 6) && (f_setup.sound != 0))
-	h_config |= CONFIG_SOUND;
+	if ((h_version == 6) && (f_setup.sound != 0))
+		h_config |= CONFIG_SOUND;
 #endif
 
-    if (h_version >= V5 && (h_flags & UNDO_FLAG))
-        if (f_setup.undo_slots == 0)
-            h_flags &= ~UNDO_FLAG;
+	if (h_version >= V5 && (h_flags & UNDO_FLAG)) {
+		if (f_setup.undo_slots == 0)
+			h_flags &= ~UNDO_FLAG;
+	}
 
-    unix_get_terminal_size();
+	unix_get_terminal_size();
 
-    /* Must be after screen dimensions are computed.  */
-    if (h_version == V6) {
-      if (unix_init_pictures())
-	h_config |= CONFIG_PICTURES;
-      else
-	h_flags &= ~GRAPHICS_FLAG;
-    }
+	/* Must be after screen dimensions are computed.  */
+	if (h_version == V6) {
+		if (unix_init_pictures())
+			h_config |= CONFIG_PICTURES;
+		else
+			h_flags &= ~GRAPHICS_FLAG;
+	}
 
-    /* Use the ms-dos interpreter number for v6, because that's the
-     * kind of graphics files we understand.  Otherwise, use DEC.  */
-    if (f_setup.interpreter_number == INTERP_DEFAULT)
-	h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
-    else
-	h_interpreter_number = f_setup.interpreter_number;
+	/* Use the ms-dos interpreter number for v6, because that's the
+	 * kind of graphics files we understand.  Otherwise, use DEC.  */
+	if (f_setup.interpreter_number == INTERP_DEFAULT)
+		h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
+	else
+		h_interpreter_number = f_setup.interpreter_number;
 
-    h_interpreter_version = 'F';
+	h_interpreter_version = 'F';
 
 #ifdef COLOR_SUPPORT
-    /* Enable colors if the terminal supports them, the user did not
-     * disable colors, and the game or user requested colors.  User
-     * requests them by specifying a foreground or background.
-     */
-    u_setup.color_enabled = (has_colors()
-			&& !u_setup.disable_color
-			&& (((h_version >= 5) && (h_flags & COLOUR_FLAG))
-			  || (u_setup.foreground_color != -1)
-			  || (u_setup.background_color != -1)));
+	/* Enable colors if the terminal supports them, the user did not
+	 * disable colors, and the game or user requested colors.  User
+	 * requests them by specifying a foreground or background.
+	 */
+	u_setup.color_enabled = (has_colors() && !u_setup.disable_color
+		&& (((h_version >= 5) && (h_flags & COLOUR_FLAG))
+		|| (u_setup.foreground_color != -1)
+		|| (u_setup.background_color != -1)));
 
-    /* Maybe we don't want to muck about with changing $TERM to
-     * xterm-color which some supposedly current Unicies still don't
-     * understand.
-     */
-    if (u_setup.force_color)
-	u_setup.color_enabled = TRUE;
+	/* Maybe we don't want to muck about with changing $TERM to
+	 * xterm-color which some supposedly current Unicies still don't
+	 * understand.
+	 */
+	if (u_setup.force_color)
+		u_setup.color_enabled = TRUE;
 
-    if (u_setup.color_enabled) {
-        h_config |= CONFIG_COLOUR;
-        h_flags |= COLOUR_FLAG; /* FIXME: beyond zork handling? */
-        start_color();
-	h_default_foreground =
-	  (u_setup.foreground_color == -1)
-	  	? FOREGROUND_DEF : u_setup.foreground_color;
-	h_default_background =
-	  (u_setup.background_color ==-1)
-		? BACKGROUND_DEF : u_setup.background_color;
-    } else
+	if (u_setup.color_enabled) {
+		h_config |= CONFIG_COLOUR;
+		h_flags |= COLOUR_FLAG; /* FIXME: beyond zork handling? */
+		start_color();
+		h_default_foreground = (u_setup.foreground_color == -1)
+			? FOREGROUND_DEF : u_setup.foreground_color;
+		h_default_background = (u_setup.background_color ==-1)
+			? BACKGROUND_DEF : u_setup.background_color;
+	} else
 #endif /* COLOR_SUPPORT */
-    {
-	/* Set these per spec 8.3.2. */
-	h_default_foreground = WHITE_COLOUR;
-	h_default_background = BLACK_COLOUR;
-	if (h_flags & COLOUR_FLAG) h_flags &= ~COLOUR_FLAG;
-    }
-    os_set_colour(h_default_foreground, h_default_background);
-    os_erase_area(1, 1, h_screen_rows, h_screen_cols, 0);
-}/* os_init_screen */
+	{
+		/* Set these per spec 8.3.2. */
+		h_default_foreground = WHITE_COLOUR;
+		h_default_background = BLACK_COLOUR;
+		if (h_flags & COLOUR_FLAG) h_flags &= ~COLOUR_FLAG;
+	}
+	os_set_colour(h_default_foreground, h_default_background);
+	os_erase_area(1, 1, h_screen_rows, h_screen_cols, 0);
+} /* os_init_screen */
 
 
 /*
@@ -556,12 +557,12 @@ void os_init_screen (void)
  */
 void os_reset_screen (void)
 {
-    os_stop_sample(0);
-    os_set_text_style(0);
-    print_c_string("[Hit any key to exit.]\n");
-    os_read_key(0, FALSE);
-    os_quit();
-}/* os_reset_screen */
+	os_stop_sample(0);
+	os_set_text_style(0);
+	print_c_string("[Hit any key to exit.]\n");
+	os_read_key(0, FALSE);
+	os_quit();
+} /* os_reset_screen */
 
 
 /*
@@ -572,16 +573,16 @@ void os_reset_screen (void)
  */
 void os_quit(void)
 {
-    os_stop_sample(0);
-    ux_blorb_stop();
-    if (u_setup.curses_active) {
-        scrollok(stdscr, TRUE);
-        scroll(stdscr);
-        refresh();
-        endwin();
-    }
-    exit(1);
-}/* os_quit */
+	os_stop_sample(0);
+	ux_blorb_stop();
+	if (u_setup.curses_active) {
+		scrollok(stdscr, TRUE);
+		scroll(stdscr);
+		refresh();
+		endwin();
+	}
+	exit(1);
+} /* os_quit */
 
 
 /*
@@ -597,7 +598,8 @@ void os_quit(void)
  */
 void os_restart_game (int UNUSED (stage))
 {
-}
+	/* Nothing here yet */
+} /* os_restart_game */
 
 
 /*
@@ -609,13 +611,13 @@ void os_restart_game (int UNUSED (stage))
  */
 int os_random_seed (void)
 {
+	/* Use the epoch as seed value */
+	if (u_setup.random_seed == -1)
+		return (time(0) & 0x7fff);
+	else
+		return u_setup.random_seed;
+} /* os_random_seed */
 
-    if (u_setup.random_seed == -1)
-      /* Use the epoch as seed value */
-      return (time(0) & 0x7fff);
-    else return u_setup.random_seed;
-
-}/* os_random_seed */
 
 /*
  * os_path_open
@@ -625,35 +627,32 @@ int os_random_seed (void)
  * defined, search INFOCOM_PATH.
  *
  */
-
 FILE *os_path_open(const char *name, const char *mode)
 {
-        FILE *fp;
-        char *p;
+	FILE *fp;
+	char *p;
 
-        /* Let's see if the file is in the currect directory */
-        /* or if the user gave us a full path. */
-        if ((fp = fopen(name, mode))) {
-                return fp;
-        }
+	/* Let's see if the file is in the currect directory */
+	/* or if the user gave us a full path. */
+	if ((fp = fopen(name, mode)))
+		return fp;
 
-        /* If zcodepath is defined in a config file, check that path. */
-        /* If we find the file a match in that path, great. */
-        /* Otherwise, check some environmental variables. */
-        if (f_setup.zcode_path != NULL) {
-                if ((fp = pathopen(name, f_setup.zcode_path, mode)) != NULL) {
-                        return fp;
-                }
-        }
+	/* If zcodepath is defined in a config file, check that path. */
+	/* If we find the file a match in that path, great. */
+	/* Otherwise, check some environmental variables. */
+	if (f_setup.zcode_path != NULL) {
+		if ((fp = pathopen(name, f_setup.zcode_path, mode)) != NULL)
+			return fp;
+	}
 
-        if ( (p = getenv(PATH1) ) == NULL)
-                p = getenv(PATH2);
+	if ( (p = getenv(PATH1) ) == NULL)
+		p = getenv(PATH2);
 
-        if (p != NULL) {
-                fp = pathopen(name, p, mode);
-                return fp;
-        }
-        return NULL;    /* give up */
+	if (p != NULL) {
+		fp = pathopen(name, p, mode);
+		return fp;
+	}
+	return NULL;	/* give up */
 } /* os_path_open() */
 
 
@@ -671,31 +670,31 @@ FILE *os_path_open(const char *name, const char *mode)
  */
 FILE *os_load_story(void)
 {
-    FILE *fp;
+	FILE *fp;
 
-    switch (ux_blorb_init(f_setup.story_file)) {
+	switch (ux_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
-//	  printf("No blorb file found.\n\n");
-	  break;
-        case bb_err_Format:
-	  printf("Blorb file loaded, but unable to build map.\n\n");
-	  break;
+		/* printf("No blorb file found.\n\n"); */
+		break;
+	case bb_err_Format:
+		printf("Blorb file loaded, but unable to build map.\n\n");
+		break;
 	case bb_err_NotFound:
-	  printf("Blorb file loaded, but lacks ZCOD executable chunk.\n\n");
-	  break;
+		printf("Blorb file loaded, but lacks ZCOD executable chunk.\n\n");
+		break;
 	case bb_err_None:
-//	  printf("No blorb errors.\n\n");
-	  break;
-    }
+		/* printf("No blorb errors.\n\n"); */
+		break;
+	}
 
-    fp = os_path_open(f_setup.story_file, "rb");
+	fp = os_path_open(f_setup.story_file, "rb");
 
-    /* Is this a Blorb file containing Zcode? */
-    if (f_setup.exec_in_blorb)
-	fseek(fp, blorb_res.data.startpos, SEEK_SET);
+	/* Is this a Blorb file containing Zcode? */
+	if (f_setup.exec_in_blorb)
+		fseek(fp, blorb_res.data.startpos, SEEK_SET);
 
-    return fp;
-}
+	return fp;
+} /* os_load_story */
 
 
 /*
@@ -707,29 +706,24 @@ FILE *os_load_story(void)
  */
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
-    /* Is this a Blorb file containing Zcode? */
-    if (f_setup.exec_in_blorb)
-    {
-	switch (whence)
-	{
-	    case SEEK_END:
-		return fseek(fp, blorb_res.data.startpos + blorb_res.length + offset, SEEK_SET);
-		break;
-	    case SEEK_CUR:
-		return fseek(fp, offset, SEEK_CUR);
-		break;
-	    case SEEK_SET:
-	    default:
-		return fseek(fp, blorb_res.data.startpos + offset, SEEK_SET);
-		break;
-	}
-    }
-    else
-    {
-	return fseek(fp, offset, whence);
-    }
-
-}
+	/* Is this a Blorb file containing Zcode? */
+	if (f_setup.exec_in_blorb) {
+		switch (whence) {
+		case SEEK_END:
+			return fseek(fp, blorb_res.data.startpos + blorb_res.length + offset, SEEK_SET);
+			break;
+		case SEEK_CUR:
+			return fseek(fp, offset, SEEK_CUR);
+			break;
+		case SEEK_SET:
+			/* SEEK_SET falls through to default */
+		default:
+			return fseek(fp, blorb_res.data.startpos + offset, SEEK_SET);
+			break;
+		}
+	} else
+		return fseek(fp, offset, whence);
+} /* os_storyfile_seek */
 
 
 /*
@@ -741,17 +735,12 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
  */
 int os_storyfile_tell(FILE * fp)
 {
-    /* Is this a Blorb file containing Zcode? */
-    if (f_setup.exec_in_blorb)
-    {
-	return ftell(fp) - blorb_res.data.startpos;
-    }
-    else
-    {
-	return ftell(fp);
-    }
-
-}
+	/* Is this a Blorb file containing Zcode? */
+	if (f_setup.exec_in_blorb)
+		return ftell(fp) - blorb_res.data.startpos;
+	else
+		return ftell(fp);
+} /* os_storyfile_tell */
 
 
 /*
@@ -792,7 +781,7 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 	}
 	free(buf);
 	return NULL;
-} /* FILE *pathopen() */
+} /* pathopen */
 
 
 /*
@@ -941,12 +930,10 @@ static int getconfig(char *configfile)
 		else if (strcmp(varname, "zcode_path") == 0) {
 			f_setup.zcode_path = malloc(strlen(value) * sizeof(char) + 1);
 			strncpy(f_setup.zcode_path, value, strlen(value) * sizeof(char));
-		}
-
-		/* The big nasty if-else thingy is finished */
+		} /* The big nasty if-else thingy is finished */
 	} /* while */
 	return TRUE;
-} /* getconfig() */
+} /* getconfig */
 
 
 /*
@@ -974,7 +961,7 @@ static int getbool(char *value)
 		return TRUE;
 
 	return FALSE;
-} /* getbool() */
+} /* getbool */
 
 
 /*
@@ -1022,7 +1009,7 @@ static int getcolor(char *value)
 
 	return -1;
 
-} /* getcolor() */
+} /* getcolor */
 
 
 /*
@@ -1063,8 +1050,8 @@ static int geterrmode(char *value)
  */
 static void sigwinch_handler(int UNUSED(sig))
 {
-    terminal_resized = 1;
-    signal(SIGWINCH, sigwinch_handler);
+	terminal_resized = 1;
+	signal(SIGWINCH, sigwinch_handler);
 }
 
 
@@ -1076,14 +1063,15 @@ static void sigwinch_handler(int UNUSED(sig))
  */
 static void sigint_handler(int UNUSED(dummy))
 {
-    signal(SIGINT, sigint_handler);
+	signal(SIGINT, sigint_handler);
 
-    os_stop_sample(0);
-    scrollok(stdscr, TRUE); scroll(stdscr);
-    refresh(); endwin();
-
-    exit(1);
-}
+	os_stop_sample(0);
+	scrollok(stdscr, TRUE);
+	scroll(stdscr);
+	refresh();
+	endwin();
+	exit(1);
+} /* sigint_handler */
 
 
 void os_init_setup(void)
@@ -1143,8 +1131,8 @@ void os_init_setup(void)
 	/* u_setup.interpreter = INTERP_DEFAULT; */
 	u_setup.current_color = 0;
 	u_setup.color_enabled = FALSE;
+} /* os_init_setup */
 
-}
 
 #ifdef NO_STRRCHR
 /*
@@ -1153,72 +1141,72 @@ void os_init_setup(void)
  */
 char *my_strrchr(const char *s, int c)
 {
-    const char *save;
+	const char *save;
 
-    if (c == 0) return (char *)s + strlen(s);
-    save = 0;
-    while (*s) {
-	if (*s == c)
-	    save = s;
-	s++;
-    }
-    return (char *)save;
-}
+	if (c == 0) return (char *)s + strlen(s);
+		save = 0;
+	while (*s) {
+		if (*s == c)
+			save = s;
+		s++;
+	}
+	return (char *)save;
+} /* my_strrchr */
 #endif	/* NO_STRRCHR */
 
 
 /* A unix-like getopt, but with the names changed to avoid any problems. */
 static int zgetopt (int argc, char *argv[], const char *options)
 {
-    static int pos = 1;
-    const char *p;
-    if (zoptind >= argc || argv[zoptind][0] != '-' || argv[zoptind][1] == 0)
-	return EOF;
-    zoptopt = argv[zoptind][pos++];
-    zoptarg = NULL;
-    if (argv[zoptind][pos] == 0) {
-	pos = 1;
-	zoptind++;
-    }
-    p = strchr (options, zoptopt);
-    if (zoptopt == ':' || p == NULL) {
-	fputs ("illegal option -- ", stderr);
-	goto error;
-    } else if (p[1] == ':') {
-	if (zoptind >= argc) {
-	    fputs ("option requires an argument -- ", stderr);
-	    goto error;
-	} else {
-	    zoptarg = argv[zoptind];
-	    if (pos != 1)
-		zoptarg += pos;
-	    pos = 1; zoptind++;
+	static int pos = 1;
+	const char *p;
+	if (zoptind >= argc || argv[zoptind][0] != '-' || argv[zoptind][1] == 0)
+		return EOF;
+	zoptopt = argv[zoptind][pos++];
+	zoptarg = NULL;
+	if (argv[zoptind][pos] == 0) {
+		pos = 1;
+		zoptind++;
 	}
-    }
-    return zoptopt;
+	p = strchr (options, zoptopt);
+	if (zoptopt == ':' || p == NULL) {
+		fputs ("illegal option -- ", stderr);
+		goto error;
+	} else if (p[1] == ':') {
+		if (zoptind >= argc) {
+			fputs ("option requires an argument -- ", stderr);
+			goto error;
+		} else {
+			zoptarg = argv[zoptind];
+			if (pos != 1)
+				zoptarg += pos;
+			pos = 1; zoptind++;
+		}
+	}
+	return zoptopt;
 error:
-    fputc (zoptopt, stderr);
-    fputc ('\n', stderr);
-    return '?';
-}/* zgetopt */
+	fputc (zoptopt, stderr);
+	fputc ('\n', stderr);
+	return '?';
+} /* zgetopt */
 
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\tCurses interface.  ", VERSION);
+	printf("FROTZ V%s\tCurses interface.  ", VERSION);
 #ifndef NO_SOUND
-        printf("Audio output enabled.");
+	printf("Audio output enabled.");
 #else
 	printf("Audio output disabled.");
 #endif
-    printf("\nBuild date:\t%s\n", BUILD_DATE);
-    printf("Commit date:\t%s\n", GIT_DATE);
-    printf("Git commit:\t%s\n", GIT_HASH);
-    printf("Git branch:\t%s\n", GIT_BRANCH);
-    printf("  Frotz was originally written by Stefan Jokisch.\n");
-    printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
-    printf("  It was ported to Unix by Galen Hazelwood.\n");
-    printf("  The core and Unix port are currently maintained by David Griffith.\n");
-    printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
-    return;
-}
+	printf("\nBuild date:\t%s\n", BUILD_DATE);
+	printf("Commit date:\t%s\n", GIT_DATE);
+	printf("Git commit:\t%s\n", GIT_HASH);
+	printf("Git branch:\t%s\n", GIT_BRANCH);
+	printf("  Frotz was originally written by Stefan Jokisch.\n");
+	printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+	printf("  It was ported to Unix by Galen Hazelwood.\n");
+	printf("  The core and Unix port are currently maintained by David Griffith.\n");
+	printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
+	return;
+} /* print_version */
