@@ -25,10 +25,10 @@ typedef struct sampledata_struct {
  *
  */
 typedef struct {
-    bb_result_t bbres;
-    // ulong type;
-    unsigned long type;
-    FILE *fp;
+	bb_result_t bbres;
+	/* ulong type; */
+	unsigned long type;
+	FILE *fp;
 } myresource;
 
 extern bb_err_t		blorb_err;
