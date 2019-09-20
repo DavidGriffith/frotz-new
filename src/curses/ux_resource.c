@@ -22,29 +22,29 @@ bb_map_t *blorb_map;
  */
 int ux_getresource( int num, int ispic, int method, myresource * res)
 {
-    int st;
-    // ulong usage;
-    unsigned long usage;
+	int st;
+	/* ulong usage; */
+	unsigned long usage;
 
-    res->bbres.data.ptr = NULL;
-    res->fp = NULL;
+	res->bbres.data.ptr = NULL;
+	res->fp = NULL;
 
-    if (!blorb_map) return bb_err_NotFound;
+	if (!blorb_map) return bb_err_NotFound;
 
-    if (ispic)
-	usage = bb_ID_Pict;
-    else
-	usage = bb_ID_Snd;
+	if (ispic)
+		usage = bb_ID_Pict;
+	else
+		usage = bb_ID_Snd;
 
-    st = bb_load_resource(blorb_map, method, (bb_result_t *) res, usage, num);
+	st = bb_load_resource(blorb_map, method, (bb_result_t *) res, usage, num);
 
-    if (st == bb_err_None) {
-	res->type = blorb_map->chunks[res->bbres.chunknum].type;
-	if (method == bb_method_FilePos)
-	    res->fp = blorb_fp;
-    }
-    return st;
-}
+	if (st == bb_err_None) {
+		res->type = blorb_map->chunks[res->bbres.chunknum].type;
+		if (method == bb_method_FilePos)
+			res->fp = blorb_fp;
+	}
+	return st;
+} /* ux_getresource */
 
 
 /*
@@ -55,11 +55,11 @@ int ux_getresource( int num, int ispic, int method, myresource * res)
  */
 int ux_freeresource(myresource *res)
 {
-    if (res == NULL)
+	if (res == NULL)
+		return 0;
+
+	if (blorb_map != NULL)
+		return bb_unload_chunk(blorb_map, res->bbres.chunknum);
+
 	return 0;
-
-    if (blorb_map != NULL)
-	return bb_unload_chunk(blorb_map, res->bbres.chunknum);
-
-    return 0;
-}
+} /* ux_freeresource */
