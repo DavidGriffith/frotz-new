@@ -33,9 +33,10 @@
 #ifdef MACOS
 #include <dispatch/dispatch.h>
 struct ux_sema {
-    dispatch_semaphore_t dsem;
+	dispatch_semaphore_t dsem;
 };
 typedef struct ux_sema ux_sem_t;
+
 
 /*
  * Note that the current implementation does not check return codes
@@ -43,56 +44,63 @@ typedef struct ux_sema ux_sem_t;
  */
 static inline void  ux_sem_init(ux_sem_t *sem, int pshared, unsigned int value)
 {
-    dispatch_semaphore_t *sema = &sem->dsem;
-    (void) pshared;
+	dispatch_semaphore_t *sema = &sem->dsem;
+	(void) pshared;
 
-    *sema = dispatch_semaphore_create(value);
+	*sema = dispatch_semaphore_create(value);
 }
+
 
 static inline void  ux_sem_post(ux_sem_t *sem)
 {
-    if (sem->dsem != NULL)
-	dispatch_semaphore_signal(sem->dsem);
+	if (sem->dsem != NULL)
+		dispatch_semaphore_signal(sem->dsem);
 }
+
 
 static inline void ux_sem_wait(ux_sem_t *sem)
 {
-    if (sem->dsem != NULL)
-	dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_FOREVER);
+	if (sem->dsem != NULL)
+		dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_FOREVER);
 }
+
 
 static inline int ux_sem_trywait(ux_sem_t *sem)
 {
-    if (sem->dsem != NULL)
-	return (int) dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_NOW);
-    return -1;
+	if (sem->dsem != NULL)
+		return (int) dispatch_semaphore_wait(sem->dsem, DISPATCH_TIME_NOW);
+	return -1;
 }
 #else
 #include <semaphore.h>
 typedef sem_t ux_sem_t;
 
+
 /*
  * Note that the current implementation does not check return codes
  * so use void to make things simpler on the MAC side
  */
 static inline void  ux_sem_init(ux_sem_t *sem, int pshared, unsigned int value)
 {
-    (void) sem_init(sem, pshared, value);
+	(void) sem_init(sem, pshared, value);
 }
+
 
 static inline void  ux_sem_post(ux_sem_t *sem)
 {
-    (void) sem_post(sem);
+	(void) sem_post(sem);
 }
+
 
 static inline void ux_sem_wait(ux_sem_t *sem)
 {
-    (void) sem_wait(sem);
+	(void) sem_wait(sem);
 }
+
 
 static inline int ux_sem_trywait(ux_sem_t *sem)
 {
-    return sem_trywait(sem);
+	return sem_trywait(sem);
 }
 #endif
 
