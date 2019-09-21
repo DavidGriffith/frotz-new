@@ -132,11 +132,10 @@ long reserve_mem = 0;
  *	no zargs used
  *
  */
-void z_piracy (void)
+void z_piracy(void)
 {
-    branch (!f_setup.piracy);
-
-}/* z_piracy */
+	branch (!f_setup.piracy);
+} /* z_piracy */
 
 
 /*
@@ -145,36 +144,21 @@ void z_piracy (void)
  * Prepare and run the game.
  *
  */
-int cdecl main (int argc, char *argv[])
+int cdecl main(int argc, char *argv[])
 {
-    os_init_setup ();
-
-    os_process_arguments (argc, argv);
-
-    init_buffer ();
-
-    init_err ();
-
-    init_memory ();
-
-    init_process ();
-
-    init_sound ();
-
-    os_init_screen ();
-
-    init_undo ();
-
-    z_restart ();
-
-    interpret ();
-
-    reset_screen ();
-
-    reset_memory ();
-
-    os_reset_screen ();
-
-    return 0;
-
-}/* main */
+	os_init_setup();
+	os_process_arguments(argc, argv);
+	init_buffer();
+	init_err();
+	init_memory();
+	init_process();
+	init_sound();
+	os_init_screen();
+	init_undo();
+	z_restart();
+	interpret();
+	reset_screen();
+	reset_memory();
+	os_reset_screen();
+	return 0;
+} /* main */
