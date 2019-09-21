@@ -84,14 +84,14 @@ static FILE *story_fp = NULL;
 
 typedef struct undo_struct undo_t;
 struct undo_struct {
-    undo_t *next;
-    undo_t *prev;
-    long pc;
-    long diff_size;
-    zword frame_count;
-    zword stack_size;
-    zword frame_offset;
-    /* undo diff and stack data follow */
+	undo_t *next;
+	undo_t *prev;
+	long pc;
+	long diff_size;
+	zword frame_count;
+	zword stack_size;
+	zword frame_offset;
+	/* undo diff and stack data follow */
 };
 
 static undo_t *first_undo = NULL, *last_undo = NULL, *curr_undo = NULL;
@@ -106,20 +106,19 @@ static int undo_count = 0;
  * Read a value from the header extension (former mouse table).
  *
  */
-zword get_header_extension (int entry)
+zword get_header_extension(int entry)
 {
-    zword addr;
-    zword val;
+	zword addr;
+	zword val;
 
-    if (h_extension_table == 0 || entry > hx_table_size)
-	return 0;
+	if (h_extension_table == 0 || entry > hx_table_size)
+		return 0;
 
-    addr = h_extension_table + 2 * entry;
-    LOW_WORD (addr, val);
+	addr = h_extension_table + 2 * entry;
+	LOW_WORD(addr, val);
 
-    return val;
-
-}/* get_header_extension */
+	return val;
+} /* get_header_extension */
 
 
 /*
@@ -128,17 +127,16 @@ zword get_header_extension (int entry)
  * Set an entry in the header extension (former mouse table).
  *
  */
-void set_header_extension (int entry, zword val)
+void set_header_extension(int entry, zword val)
 {
-    zword addr;
+	zword addr;
 
-    if (h_extension_table == 0 || entry > hx_table_size)
-	return;
+	if (h_extension_table == 0 || entry > hx_table_size)
+		return;
 
-    addr = h_extension_table + 2 * entry;
-    SET_WORD (addr, val);
-
-}/* set_header_extension */
+	addr = h_extension_table + 2 * entry;
+	SET_WORD(addr, val);
+} /* set_header_extension */
 
 
 /*
@@ -147,57 +145,56 @@ void set_header_extension (int entry, zword val)
  * Set all header fields which hold information about the interpreter.
  *
  */
-void restart_header (void)
+void restart_header(void)
 {
-    zword screen_x_size;
-    zword screen_y_size;
-    zbyte font_x_size;
-    zbyte font_y_size;
+	zword screen_x_size;
+	zword screen_y_size;
+	zbyte font_x_size;
+	zbyte font_y_size;
 
-    int i;
+	int i;
 
-    SET_BYTE (H_CONFIG, h_config);
-    SET_WORD (H_FLAGS, h_flags);
+	SET_BYTE(H_CONFIG, h_config);
+	SET_WORD(H_FLAGS, h_flags);
 
-    if (h_version >= V4) {
-	SET_BYTE (H_INTERPRETER_NUMBER, h_interpreter_number);
-	SET_BYTE (H_INTERPRETER_VERSION, h_interpreter_version);
-	SET_BYTE (H_SCREEN_ROWS, h_screen_rows);
-	SET_BYTE (H_SCREEN_COLS, h_screen_cols);
-    }
+	if (h_version >= V4) {
+		SET_BYTE(H_INTERPRETER_NUMBER, h_interpreter_number);
+		SET_BYTE(H_INTERPRETER_VERSION, h_interpreter_version);
+		SET_BYTE(H_SCREEN_ROWS, h_screen_rows);
+		SET_BYTE(H_SCREEN_COLS, h_screen_cols);
+	}
 
-    /* It's less trouble to use font size 1x1 for V5 games, especially
-       because of a bug in the unreleased German version of "Zork 1" */
+	/* It's less trouble to use font size 1x1 for V5 games, especially
+	   because of a bug in the unreleased German version of "Zork 1" */
 
-    if (h_version != V6) {
-	screen_x_size = (zword) h_screen_cols;
-	screen_y_size = (zword) h_screen_rows;
-	font_x_size = 1;
-	font_y_size = 1;
-    } else {
-	screen_x_size = h_screen_width;
-	screen_y_size = h_screen_height;
-	font_x_size = h_font_width;
-	font_y_size = h_font_height;
-    }
+	if (h_version != V6) {
+		screen_x_size = (zword) h_screen_cols;
+		screen_y_size = (zword) h_screen_rows;
+		font_x_size = 1;
+		font_y_size = 1;
+	} else {
+		screen_x_size = h_screen_width;
+		screen_y_size = h_screen_height;
+		font_x_size = h_font_width;
+		font_y_size = h_font_height;
+	}
 
-    if (h_version >= V5) {
-	SET_WORD (H_SCREEN_WIDTH, screen_x_size);
-	SET_WORD (H_SCREEN_HEIGHT, screen_y_size);
-	SET_BYTE (H_FONT_HEIGHT, font_y_size);
-	SET_BYTE (H_FONT_WIDTH, font_x_size);
-	SET_BYTE (H_DEFAULT_BACKGROUND, h_default_background);
-	SET_BYTE (H_DEFAULT_FOREGROUND, h_default_foreground);
-    }
+	if (h_version >= V5) {
+		SET_WORD(H_SCREEN_WIDTH, screen_x_size);
+		SET_WORD(H_SCREEN_HEIGHT, screen_y_size);
+		SET_BYTE(H_FONT_HEIGHT, font_y_size);
+		SET_BYTE(H_FONT_WIDTH, font_x_size);
+		SET_BYTE(H_DEFAULT_BACKGROUND, h_default_background);
+		SET_BYTE(H_DEFAULT_FOREGROUND, h_default_foreground);
+	}
 
-    if (h_version == V6)
-	for (i = 0; i < 8; i++)
-	    storeb ((zword) (H_USER_NAME + i), h_user_name[i]);
+	if (h_version == V6)
+		for (i = 0; i < 8; i++)
+	storeb((zword) (H_USER_NAME + i), h_user_name[i]);
 
-    SET_BYTE (H_STANDARD_HIGH, h_standard_high);
-    SET_BYTE (H_STANDARD_LOW, h_standard_low);
-
-}/* restart_header */
+	SET_BYTE(H_STANDARD_HIGH, h_standard_high);
+	SET_BYTE(H_STANDARD_LOW, h_standard_low);
+} /* restart_header */
 
 
 /*
@@ -209,301 +206,275 @@ void restart_header (void)
  * and from https://eblong.com/infocom/
  *
  */
-void init_memory (void)
+void init_memory(void)
 {
-    long size;
-    zword addr;
-    unsigned n;
-    int i, j;
+	long size;
+	zword addr;
+	unsigned n;
+	int i, j;
 
-    static struct {
-	enum story story_id;
-	zword release;
-	zbyte serial[6];
-    } records[] = {
-	{	   ZORK1,   2, "AS000C" },
-	{	   ZORK1,   5, ""       },
-	{	   ZORK1,  15, "UG3AU5" },
-	{	   ZORK1,  20, ""       },
-	{	   ZORK1,  23, "820428" },
-	{	   ZORK1,  25, "820515" },
-	{	   ZORK1,  26, "820803" },
-	{	   ZORK1,  28, "821013" },
-	{	   ZORK1,  30, "830330" },
-	{	   ZORK1,  75, "830929" },
-	{	   ZORK1,  76, "840509" },
-	{	   ZORK1,  88, "840726" },
-	{	   ZORK1,  52, "871125" },
-	{	   ZORK1, 119, "880429" },
-	{	  ZORK1G,   3, "880113" },
-	{	  ZORK1G,  15, "890613" },
-	{	   ZORK2,   7, "UG3AU5" },
-	{	   ZORK2,  15, "820308" },
-	{	   ZORK2,  17, "820427" },
-	{	   ZORK2,  18, "820512" },
-	{	   ZORK2,  18, "820517" },
-	{	   ZORK2,  19, "820721" },
-	{	   ZORK2,  22, "830331" },
-	{	   ZORK2,  22, "840518" },
-	{	   ZORK2,  23, "830411" },
-	{	   ZORK2,  48, "840904" },
-	{	   ZORK2,  63, "860811" },
-	{	   ZORK3,  10, "820818" },
-	{	   ZORK3,  12, "821025" },
-	{	   ZORK3,  15, "830331" },
-	{	   ZORK3,  15, "840518" },
-	{	   ZORK3,  16, "830410" },
-	{	   ZORK3,  17, "840727" },
-	{	   ZORK3,  25, "860811" },
-	{	MINIZORK,   2, "840207" },
-	{	MINIZORK,  34, "871124" },
-	{	SAMPLER1,  26, "840731" },
-	{	SAMPLER1,  53, "850407" },
-	{	SAMPLER1,  55, "850823" },
-	{	SAMPLER2,  97, "870601" },
-	{      ENCHANTER,  10, "830810" },
-	{      ENCHANTER,  15, "831107" },
-	{      ENCHANTER,  16, "831118" },
-	{      ENCHANTER,  16, "840518" },
-	{      ENCHANTER,  24, "851118" },
-	{      ENCHANTER,  29, "860820" },
-	{	SORCERER,  67, "831208" },
-	{	SORCERER,  67, "0"      },
-	{	SORCERER,  85, "840106" },
-	{	SORCERER,   4, "840131" },
-	{	SORCERER,   6, "840508" },
-	{	SORCERER,  13, "851021" },
-	{	SORCERER,  15, "851108" },
-	{	SORCERER,  18, "860904" },
-	{	SORCERER,  63, "850916" },
-	{	SORCERER,  87, "860904" },
-	{   SPELLBREAKER,  63, "850916" },
-	{   SPELLBREAKER,  87, "860904" },
-	{     PLANETFALL,  20, "830708" },
-	{     PLANETFALL,  26, "831014" },
-	{     PLANETFALL,  29, "840118" },
-	{     PLANETFALL,  37, "851003" },
-	{     PLANETFALL,  39, "880501" },
-	{     PLANETFALL,  10, "880531" },
-	{    STATIONFALL,   1, "861017" },
-	{    STATIONFALL,  63, "870218" },
-	{    STATIONFALL,  87, "870326" },
-	{    STATIONFALL, 107, "870430" },
-	{	BALLYHOO,  97, "851218" },
-	{	BALLYHOO,  99, "861014" },
-	{    BORDER_ZONE,   9, "871008" },
-	{	    AMFV,   1, "841226" },
-	{	    AMFV,  47, "850313" },
-	{	    AMFV,  84, "850516" },
-	{	    AMFV, 131, "850628" },
-	{	    AMFV,  77, "850814" },
-	{	    AMFV,  79, "851122" },
-	{	    HHGG, 108, "840809" },
-	{	    HHGG, 119, "840822" },
-	{	    HHGG,  47, "840914" },
-	{	    HHGG,  56, "841221" },
-	{	    HHGG,  58, "851002" },
-	{	    HHGG,  59, "851108" },
-	{	    HHGG,  60, "861002" },
-	{	    HHGG,  31, "871119" },
-	{	    LGOP,   0, "BLOWN!" },
-	{	    LGOP,   1, "851008" },
-	{	    LGOP,  57, "860121" },
-	{	    LGOP, 118, "860325" },
-	{	    LGOP, 160, "860521" },
-	{	    LGOP,  50, "860711" },
-	{	    LGOP,  59, "860730" },
-	{	    LGOP,  59, "861114" },
-	{	    LGOP,   4, "880405" },
-	{	 SUSPECT,  14, "841005" },
-	{	 SUSPECT,  18, "850222" },
-	{       SHERLOCK,  97, "871026" },
-	{       SHERLOCK,  21, "871214" },
-	{       SHERLOCK,  22, "880112" },
-	{       SHERLOCK,  26, "880127" },
-	{       SHERLOCK,   4, "880324" },
-	{    BEYOND_ZORK,   1, "870412" },
-	{    BEYOND_ZORK,   1, "870715" },
-	{    BEYOND_ZORK,  47, "870915" },
-	{    BEYOND_ZORK,  49, "870917" },
-	{    BEYOND_ZORK,  51, "870923" },
-	{    BEYOND_ZORK,  57, "871221" },
-	{    BEYOND_ZORK,  60, "880610" },
-	{      ZORK_ZERO,   0, "870831" },
-	{      ZORK_ZERO,   1, "871030" },
-	{      ZORK_ZERO,  74, "880114" },
-	{      ZORK_ZERO,  96, "880224" },
-	{      ZORK_ZERO, 153, "880510" },
-	{      ZORK_ZERO, 242, "880830" },
-	{      ZORK_ZERO, 242, "880901" },
-	{      ZORK_ZERO, 296, "881019" },
-	{      ZORK_ZERO, 366, "890323" },
-	{      ZORK_ZERO, 383, "890602" },
-	{      ZORK_ZERO, 392, "890714" },
-	{      ZORK_ZERO, 393, "890714" },
-	{         SHOGUN, 292, "890314" },
-	{         SHOGUN, 295, "890321" },
-	{         SHOGUN, 311, "890510" },
-	{         SHOGUN, 320, "890627" },
-	{         SHOGUN, 321, "890629" },
-	{         SHOGUN, 322, "890706" },
-	{         ARTHUR,  40, "890502" },
-	{         ARTHUR,  41, "890504" },
-	{         ARTHUR,  54, "890606" },
-	{         ARTHUR,  63, "890622" },
-	{         ARTHUR,  74, "890714" },
-	{        JOURNEY,  46, "880603" },
-	{        JOURNEY,   2, "890303" },
-	{        JOURNEY,  26, "890316" },
-	{        JOURNEY,  30, "890322" },
-	{        JOURNEY,  51, "890522" },
-	{        JOURNEY,  54, "890526" },
-	{        JOURNEY,  77, "890616" },
-	{        JOURNEY,  79, "890627" },
-	{        JOURNEY,  83, "890706" },
-	{ LURKING_HORROR, 203, "870506" },
-	{ LURKING_HORROR, 219, "870912" },
-	{ LURKING_HORROR, 221, "870918" },
-	{    BUREAUCRACY,  86, "870212" },
-	{    BUREAUCRACY, 116, "870602" },
-	{    BUREAUCRACY, 160, "880521" },
-	{        TRINITY,   1, "851202" },
-	{        TRINITY,   1, "860221" },
-	{        TRINITY,  14, "860313" },
-	{        TRINITY,  11, "860509" },
-	{        TRINITY,  12, "860926" },
-	{        TRINITY,  15, "870628" },
-	{        UNKNOWN,   0, "------" }
-    };
+	/* INDENT-OFF */
+	static struct {
+		enum story story_id;
+		zword release;
+		zbyte serial[6];
+	} records[] = {
+		{	   ZORK1,   2, "AS000C" },
+		{	   ZORK1,   5, ""       },
+		{	   ZORK1,  15, "UG3AU5" },
+		{	   ZORK1,  20, ""       },
+		{	   ZORK1,  23, "820428" },
+		{	   ZORK1,  25, "820515" },
+		{	   ZORK1,  26, "820803" },
+		{	   ZORK1,  28, "821013" },
+		{	   ZORK1,  30, "830330" },
+		{	   ZORK1,  75, "830929" },
+		{	   ZORK1,  76, "840509" },
+		{	   ZORK1,  88, "840726" },
+		{	   ZORK1,  52, "871125" },
+		{	   ZORK1, 119, "880429" },
+		{	  ZORK1G,   3, "880113" },
+		{	  ZORK1G,  15, "890613" },
+		{	   ZORK2,   7, "UG3AU5" },
+		{	   ZORK2,  15, "820308" },
+		{	   ZORK2,  17, "820427" },
+		{	   ZORK2,  18, "820512" },
+		{	   ZORK2,  18, "820517" },
+		{	   ZORK2,  19, "820721" },
+		{	   ZORK2,  22, "830331" },
+		{	   ZORK2,  22, "840518" },
+		{	   ZORK2,  23, "830411" },
+		{	   ZORK2,  48, "840904" },
+		{	   ZORK2,  63, "860811" },
+		{	   ZORK3,  10, "820818" },
+		{	   ZORK3,  12, "821025" },
+		{	   ZORK3,  15, "830331" },
+		{	   ZORK3,  15, "840518" },
+		{	   ZORK3,  16, "830410" },
+		{	   ZORK3,  17, "840727" },
+		{	   ZORK3,  25, "860811" },
+		{	MINIZORK,   2, "840207" },
+		{	MINIZORK,  34, "871124" },
+		{	SAMPLER1,  26, "840731" },
+		{	SAMPLER1,  53, "850407" },
+		{	SAMPLER1,  55, "850823" },
+		{	SAMPLER2,  97, "870601" },
+		{      ENCHANTER,  10, "830810" },
+		{      ENCHANTER,  15, "831107" },
+		{      ENCHANTER,  16, "831118" },
+		{      ENCHANTER,  16, "840518" },
+		{      ENCHANTER,  24, "851118" },
+		{      ENCHANTER,  29, "860820" },
+		{	SORCERER,  67, "831208" },
+		{	SORCERER,  67, "0"      },
+		{	SORCERER,  85, "840106" },
+		{	SORCERER,   4, "840131" },
+		{	SORCERER,   6, "840508" },
+		{	SORCERER,  13, "851021" },
+		{	SORCERER,  15, "851108" },
+		{	SORCERER,  18, "860904" },
+		{	SORCERER,  63, "850916" },
+		{	SORCERER,  87, "860904" },
+		{   SPELLBREAKER,  63, "850916" },
+		{   SPELLBREAKER,  87, "860904" },
+		{     PLANETFALL,  20, "830708" },
+		{     PLANETFALL,  26, "831014" },
+		{     PLANETFALL,  29, "840118" },
+		{     PLANETFALL,  37, "851003" },
+		{     PLANETFALL,  39, "880501" },
+		{     PLANETFALL,  10, "880531" },
+		{    STATIONFALL,   1, "861017" },
+		{    STATIONFALL,  63, "870218" },
+		{    STATIONFALL,  87, "870326" },
+		{    STATIONFALL, 107, "870430" },
+		{	BALLYHOO,  97, "851218" },
+		{	BALLYHOO,  99, "861014" },
+		{    BORDER_ZONE,   9, "871008" },
+		{	    AMFV,   1, "841226" },
+		{	    AMFV,  47, "850313" },
+		{	    AMFV,  84, "850516" },
+		{	    AMFV, 131, "850628" },
+		{	    AMFV,  77, "850814" },
+		{	    AMFV,  79, "851122" },
+		{	    HHGG, 108, "840809" },
+		{	    HHGG, 119, "840822" },
+		{	    HHGG,  47, "840914" },
+		{	    HHGG,  56, "841221" },
+		{	    HHGG,  58, "851002" },
+		{	    HHGG,  59, "851108" },
+		{	    HHGG,  60, "861002" },
+		{	    HHGG,  31, "871119" },
+		{	    LGOP,   0, "BLOWN!" },
+		{	    LGOP,   1, "851008" },
+		{	    LGOP,  57, "860121" },
+		{	    LGOP, 118, "860325" },
+		{	    LGOP, 160, "860521" },
+		{	    LGOP,  50, "860711" },
+		{	    LGOP,  59, "860730" },
+		{	    LGOP,  59, "861114" },
+		{	    LGOP,   4, "880405" },
+		{	 SUSPECT,  14, "841005" },
+		{	 SUSPECT,  18, "850222" },
+		{       SHERLOCK,  97, "871026" },
+		{       SHERLOCK,  21, "871214" },
+		{       SHERLOCK,  22, "880112" },
+		{       SHERLOCK,  26, "880127" },
+		{       SHERLOCK,   4, "880324" },
+		{    BEYOND_ZORK,   1, "870412" },
+		{    BEYOND_ZORK,   1, "870715" },
+		{    BEYOND_ZORK,  47, "870915" },
+		{    BEYOND_ZORK,  49, "870917" },
+		{    BEYOND_ZORK,  51, "870923" },
+		{    BEYOND_ZORK,  57, "871221" },
+		{    BEYOND_ZORK,  60, "880610" },
+		{      ZORK_ZERO,   0, "870831" },
+		{      ZORK_ZERO,   1, "871030" },
+		{      ZORK_ZERO,  74, "880114" },
+		{      ZORK_ZERO,  96, "880224" },
+		{      ZORK_ZERO, 153, "880510" },
+		{      ZORK_ZERO, 242, "880830" },
+		{      ZORK_ZERO, 242, "880901" },
+		{      ZORK_ZERO, 296, "881019" },
+		{      ZORK_ZERO, 366, "890323" },
+		{      ZORK_ZERO, 383, "890602" },
+		{      ZORK_ZERO, 392, "890714" },
+		{      ZORK_ZERO, 393, "890714" },
+		{         SHOGUN, 292, "890314" },
+		{         SHOGUN, 295, "890321" },
+		{         SHOGUN, 311, "890510" },
+		{         SHOGUN, 320, "890627" },
+		{         SHOGUN, 321, "890629" },
+		{         SHOGUN, 322, "890706" },
+		{         ARTHUR,  40, "890502" },
+		{         ARTHUR,  41, "890504" },
+		{         ARTHUR,  54, "890606" },
+		{         ARTHUR,  63, "890622" },
+		{         ARTHUR,  74, "890714" },
+		{        JOURNEY,  46, "880603" },
+		{        JOURNEY,   2, "890303" },
+		{        JOURNEY,  26, "890316" },
+		{        JOURNEY,  30, "890322" },
+		{        JOURNEY,  51, "890522" },
+		{        JOURNEY,  54, "890526" },
+		{        JOURNEY,  77, "890616" },
+		{        JOURNEY,  79, "890627" },
+		{        JOURNEY,  83, "890706" },
+		{ LURKING_HORROR, 203, "870506" },
+		{ LURKING_HORROR, 219, "870912" },
+		{ LURKING_HORROR, 221, "870918" },
+		{    BUREAUCRACY,  86, "870212" },
+		{    BUREAUCRACY, 116, "870602" },
+		{    BUREAUCRACY, 160, "880521" },
+		{        TRINITY,   1, "851202" },
+		{        TRINITY,   1, "860221" },
+		{        TRINITY,  14, "860313" },
+		{        TRINITY,  11, "860509" },
+		{        TRINITY,  12, "860926" },
+		{        TRINITY,  15, "870628" },
+		{        UNKNOWN,   0, "------" }
+	};
+	/* INDENT-ON */
 
-    /* Open story file */
+	/* Open story file */
+	if ((story_fp = os_load_story()) == NULL)
+		os_fatal("Cannot open story file");
 
-    if ((story_fp = os_load_story()) == NULL)
-        os_fatal ("Cannot open story file");
+	/* Allocate memory for story header */
+	if ((zmp = (zbyte far *) malloc(64)) == NULL)
+		os_fatal("Out of memory");
 
-    /* Allocate memory for story header */
+	/* Load header into memory */
+	if (fread(zmp, 1, 64, story_fp) != 64)
+		os_fatal("Story file read error");
 
-    if ((zmp = (zbyte far *) malloc (64)) == NULL)
-	os_fatal ("Out of memory");
+	/* Copy header fields to global variables */
+	LOW_BYTE(H_VERSION, h_version);
+	if (h_version < V1 || h_version > V8)
+		os_fatal("Unknown Z-code version");
+	LOW_BYTE (H_CONFIG, h_config);
+	if (h_version == V3 && (h_config & CONFIG_BYTE_SWAPPED))
+		os_fatal("Byte swapped story file");
 
-    /* Load header into memory */
+	LOW_WORD(H_RELEASE, h_release);
+	LOW_WORD(H_RESIDENT_SIZE, h_resident_size);
+	LOW_WORD(H_START_PC, h_start_pc);
+	LOW_WORD(H_DICTIONARY, h_dictionary);
+	LOW_WORD(H_OBJECTS, h_objects);
+	LOW_WORD(H_GLOBALS, h_globals);
+	LOW_WORD(H_DYNAMIC_SIZE, h_dynamic_size);
+	LOW_WORD(H_FLAGS, h_flags);
 
-    if (fread (zmp, 1, 64, story_fp) != 64)
-	os_fatal ("Story file read error");
+	for (i = 0, addr = H_SERIAL; i < 6; i++, addr++)
+		LOW_BYTE(addr, h_serial[i]);
 
-    /* Copy header fields to global variables */
-
-    LOW_BYTE (H_VERSION, h_version);
-
-    if (h_version < V1 || h_version > V8)
-	os_fatal ("Unknown Z-code version");
-
-    LOW_BYTE (H_CONFIG, h_config);
-
-    if (h_version == V3 && (h_config & CONFIG_BYTE_SWAPPED))
-	os_fatal ("Byte swapped story file");
-
-    LOW_WORD (H_RELEASE, h_release);
-    LOW_WORD (H_RESIDENT_SIZE, h_resident_size);
-    LOW_WORD (H_START_PC, h_start_pc);
-    LOW_WORD (H_DICTIONARY, h_dictionary);
-    LOW_WORD (H_OBJECTS, h_objects);
-    LOW_WORD (H_GLOBALS, h_globals);
-    LOW_WORD (H_DYNAMIC_SIZE, h_dynamic_size);
-    LOW_WORD (H_FLAGS, h_flags);
-
-    for (i = 0, addr = H_SERIAL; i < 6; i++, addr++)
-	LOW_BYTE (addr, h_serial[i]);
-
-    /* Auto-detect buggy story files that need special fixes */
-
-    story_id = UNKNOWN;
-
-    for (i = 0; records[i].story_id != UNKNOWN; i++) {
-
-	if (h_release == records[i].release) {
-
-	    for (j = 0; j < 6; j++)
-		if (h_serial[j] != records[i].serial[j])
-		    goto no_match;
-
-	    story_id = records[i].story_id;
-
+	/* Auto-detect buggy story files that need special fixes */
+	story_id = UNKNOWN;
+	for (i = 0; records[i].story_id != UNKNOWN; i++) {
+		if (h_release == records[i].release) {
+			for (j = 0; j < 6; j++) {
+				if (h_serial[j] != records[i].serial[j])
+					goto no_match;
+			}
+			story_id = records[i].story_id;
+		}
+		no_match: ; /* null statement */
 	}
 
-    no_match: ; /* null statement */
+	LOW_WORD(H_ABBREVIATIONS, h_abbreviations);
+	LOW_WORD(H_FILE_SIZE, h_file_size);
 
-    }
+	/* Calculate story file size in bytes */
+	if (h_file_size != 0) {
+		story_size = (long) 2 * h_file_size;
 
-    LOW_WORD (H_ABBREVIATIONS, h_abbreviations);
-    LOW_WORD (H_FILE_SIZE, h_file_size);
+		if (h_version >= V4)
+			story_size *= 2;
+		if (h_version >= V6)
+			story_size *= 2;
+	} else { /* some old games lack the file size entry */
+		os_storyfile_seek(story_fp, 0, SEEK_END);
+		story_size = os_storyfile_tell(story_fp);
+		os_storyfile_seek(story_fp, 64, SEEK_SET);
+	}
 
-    /* Calculate story file size in bytes */
+	LOW_WORD(H_CHECKSUM, h_checksum);
+	LOW_WORD(H_ALPHABET, h_alphabet);
+	LOW_WORD(H_FUNCTIONS_OFFSET, h_functions_offset);
+	LOW_WORD(H_STRINGS_OFFSET, h_strings_offset);
+	LOW_WORD(H_TERMINATING_KEYS, h_terminating_keys);
+	LOW_WORD(H_EXTENSION_TABLE, h_extension_table);
 
-    if (h_file_size != 0) {
+	/* Zork Zero Macintosh doesn't have the graphics flag set */
+	if (story_id == ZORK_ZERO && h_release == 296)
+		h_flags |= GRAPHICS_FLAG;
 
-	story_size = (long) 2 * h_file_size;
+	/* Adjust opcode tables */
+	if (h_version <= V4) {
+		op0_opcodes[0x09] = z_pop;
+		op1_opcodes[0x0f] = z_not;
+	} else {
+		op0_opcodes[0x09] = z_catch;
+		op1_opcodes[0x0f] = z_call_n;
+	}
 
-	if (h_version >= V4)
-	    story_size *= 2;
-	if (h_version >= V6)
-	    story_size *= 2;
+	/* Allocate memory for story data */
+	if ((zmp = (zbyte far *) realloc(zmp, story_size)) == NULL)
+		os_fatal("Out of memory");
 
-    } else {		/* some old games lack the file size entry */
-	os_storyfile_seek (story_fp, 0, SEEK_END);
-	story_size = os_storyfile_tell (story_fp);
-	os_storyfile_seek (story_fp, 64, SEEK_SET);
-    }
+	/* Load story file in chunks of 32KB */
+	n = 0x8000;
+	for (size = 64; size < story_size; size += n) {
+		if (story_size - size < 0x8000)
+			n = (unsigned) (story_size - size);
+		SET_PC(size);
+		if (fread(pcp, 1, n, story_fp) != n)
+			os_fatal("Story file read error");
+	}
 
-    LOW_WORD (H_CHECKSUM, h_checksum);
-    LOW_WORD (H_ALPHABET, h_alphabet);
-    LOW_WORD (H_FUNCTIONS_OFFSET, h_functions_offset);
-    LOW_WORD (H_STRINGS_OFFSET, h_strings_offset);
-    LOW_WORD (H_TERMINATING_KEYS, h_terminating_keys);
-    LOW_WORD (H_EXTENSION_TABLE, h_extension_table);
-
-    /* Zork Zero Macintosh doesn't have the graphics flag set */
-
-    if (story_id == ZORK_ZERO && h_release == 296)
-	h_flags |= GRAPHICS_FLAG;
-
-    /* Adjust opcode tables */
-
-    if (h_version <= V4) {
-	op0_opcodes[0x09] = z_pop;
-	op1_opcodes[0x0f] = z_not;
-    } else {
-	op0_opcodes[0x09] = z_catch;
-	op1_opcodes[0x0f] = z_call_n;
-    }
-
-    /* Allocate memory for story data */
-
-    if ((zmp = (zbyte far *) realloc (zmp, story_size)) == NULL)
-	os_fatal ("Out of memory");
-
-    /* Load story file in chunks of 32KB */
-
-    n = 0x8000;
-
-    for (size = 64; size < story_size; size += n) {
-
-	if (story_size - size < 0x8000)
-	    n = (unsigned) (story_size - size);
-
-	SET_PC (size);
-
-	if (fread (pcp, 1, n, story_fp) != n)
-	    os_fatal ("Story file read error");
-
-    }
-
-    /* Read header extension table */
-
-    hx_table_size = get_header_extension (HX_TABLE_SIZE);
-    hx_unicode_table = get_header_extension (HX_UNICODE_TABLE);
-
-}/* init_memory */
+	/* Read header extension table */
+	hx_table_size = get_header_extension(HX_TABLE_SIZE);
+	hx_unicode_table = get_header_extension(HX_UNICODE_TABLE);
+} /* init_memory */
 
 
 /*
@@ -514,31 +485,31 @@ void init_memory (void)
  * during the game, e.g. for loading sounds or pictures.
  *
  */
-void init_undo (void)
+void init_undo(void)
 {
-    void far *reserved;
+	void far *reserved;
 
-    reserved = NULL;	/* makes compilers shut up */
+	reserved = NULL;	/* makes compilers shut up */
 
-    if (reserve_mem != 0) {
-	if ((reserved = malloc (reserve_mem)) == NULL)
-	    return;
-    }
+	if (reserve_mem != 0) {
+		if ((reserved = malloc(reserve_mem)) == NULL)
+			return;
+	}
 
-    /* Allocate h_dynamic_size bytes for previous dynamic zmp state
-       + 1.5 h_dynamic_size for Quetzal diff + 2. */
-    undo_mem = malloc ((h_dynamic_size * 5) / 2 + 2);
-    if (undo_mem != NULL) {
-	prev_zmp = undo_mem;
-	undo_diff = undo_mem + h_dynamic_size;
-	memmove (prev_zmp, zmp, h_dynamic_size);
-    } else
-	f_setup.undo_slots = 0;
+	/* Allocate h_dynamic_size bytes for previous dynamic
+	 * zmp state + 1.5 h_dynamic_size for Quetzal diff + 2.
+	 */
+	undo_mem = malloc((h_dynamic_size * 5) / 2 + 2);
+	if (undo_mem != NULL) {
+		prev_zmp = undo_mem;
+		undo_diff = undo_mem + h_dynamic_size;
+		memmove (prev_zmp, zmp, h_dynamic_size);
+	} else
+		f_setup.undo_slots = 0;
 
-    if (reserve_mem != 0)
-	free (reserved);
-
-}/* init_undo */
+	if (reserve_mem != 0)
+		free(reserved);
+} /* init_undo */
 
 
 /*
@@ -547,25 +518,25 @@ void init_undo (void)
  * Free count undo blocks from the beginning of the undo list.
  *
  */
-static void free_undo (int count)
+static void free_undo(int count)
 {
-    undo_t *p;
+	undo_t *p;
 
-    if (count > undo_count)
-	count = undo_count;
-    while (count--) {
-	p = first_undo;
-	if (curr_undo == first_undo)
-	    curr_undo = curr_undo->next;
-	first_undo = first_undo->next;
-	free (p);
-	undo_count--;
-    }
-    if (first_undo)
-	first_undo->prev = NULL;
-    else
-	last_undo = NULL;
-}/* free_undo */
+	if (count > undo_count)
+		count = undo_count;
+	while (count--) {
+		p = first_undo;
+		if (curr_undo == first_undo)
+			curr_undo = curr_undo->next;
+		first_undo = first_undo->next;
+		free (p);
+		undo_count--;
+	}
+	if (first_undo)
+		first_undo->prev = NULL;
+	else
+		last_undo = NULL;
+} /* free_undo */
 
 
 /*
@@ -574,24 +545,24 @@ static void free_undo (int count)
  * Close the story file and deallocate memory.
  *
  */
-void reset_memory (void)
+void reset_memory(void)
 {
-    if (story_fp != NULL)
-	fclose (story_fp);
-    story_fp = NULL;
+	if (story_fp != NULL)
+		fclose(story_fp);
+	story_fp = NULL;
 
-    if (undo_mem) {
-	free_undo (undo_count);
-	free (undo_mem);
-    }
+	if (undo_mem) {
+		free_undo(undo_count);
+		free(undo_mem);
+	}
 
-    undo_mem = NULL;
-    undo_count = 0;
+	undo_mem = NULL;
+	undo_count = 0;
 
-    if (zmp)
-	free (zmp);
-    zmp = NULL;
-}/* reset_memory */
+	if (zmp)
+		free(zmp);
+	zmp = NULL;
+} /* reset_memory */
 
 
 /*
@@ -600,31 +571,26 @@ void reset_memory (void)
  * Write a byte value to the dynamic Z-machine memory.
  *
  */
-void storeb (zword addr, zbyte value)
+void storeb(zword addr, zbyte value)
 {
-    if (addr >= h_dynamic_size)
-	runtime_error (ERR_STORE_RANGE);
+	if (addr >= h_dynamic_size)
+		runtime_error(ERR_STORE_RANGE);
 
-    if (addr == H_FLAGS + 1) {	/* flags register is modified */
+	if (addr == H_FLAGS + 1) {	/* flags register is modified */
+		h_flags &= ~(SCRIPTING_FLAG | FIXED_FONT_FLAG);
+		h_flags |= value & (SCRIPTING_FLAG | FIXED_FONT_FLAG);
 
-	h_flags &= ~(SCRIPTING_FLAG | FIXED_FONT_FLAG);
-	h_flags |= value & (SCRIPTING_FLAG | FIXED_FONT_FLAG);
-
-	if (value & SCRIPTING_FLAG) {
-	    if (!ostream_script)
-		script_open ();
-	} else {
-	    if (ostream_script)
-		script_close ();
+		if (value & SCRIPTING_FLAG) {
+			if (!ostream_script)
+				script_open();
+		} else {
+			if (ostream_script)
+				script_close();
+		}
+		refresh_text_style();
 	}
-
-	refresh_text_style ();
-
-    }
-
-    SET_BYTE (addr, value);
-
-}/* storeb */
+	SET_BYTE(addr, value);
+} /* storeb */
 
 
 /*
@@ -633,12 +599,11 @@ void storeb (zword addr, zbyte value)
  * Write a word value to the dynamic Z-machine memory.
  *
  */
-void storew (zword addr, zword value)
+void storew(zword addr, zword value)
 {
-    storeb ((zword) (addr + 0), hi (value));
-    storeb ((zword) (addr + 1), lo (value));
-
-}/* storew */
+	storeb((zword) (addr + 0), hi (value));
+	storeb((zword) (addr + 1), lo (value));
+} /* storew */
 
 
 /*
@@ -647,41 +612,35 @@ void storew (zword addr, zword value)
  * 	no zargs used
  *
  */
-void z_restart (void)
+void z_restart(void)
 {
-    static bool first_restart = TRUE;
+	static bool first_restart = TRUE;
 
-    flush_buffer ();
+	flush_buffer();
 
-    os_restart_game (RESTART_BEGIN);
+	os_restart_game(RESTART_BEGIN);
 
-    seed_random (0);
+	seed_random(0);
 
-    if (!first_restart) {
+	if (!first_restart) {
+		os_storyfile_seek(story_fp, 0, SEEK_SET);
+		if (fread(zmp, 1, h_dynamic_size, story_fp) != h_dynamic_size)
+			os_fatal ("Story file read error");
+	} else first_restart = FALSE;
 
-	os_storyfile_seek (story_fp, 0, SEEK_SET);
+	restart_header();
+	restart_screen();
 
-	if (fread (zmp, 1, h_dynamic_size, story_fp) != h_dynamic_size)
-	    os_fatal ("Story file read error");
+	sp = fp = stack + STACK_SIZE;
+	frame_count = 0;
 
-    } else first_restart = FALSE;
+	if (h_version != V6) {
+		long pc = (long) h_start_pc;
+		SET_PC(pc);
+	} else call(h_start_pc, 0, NULL, 0);
 
-    restart_header ();
-    restart_screen ();
-
-    sp = fp = stack + STACK_SIZE;
-    frame_count = 0;
-
-    if (h_version != V6) {
-
-	long pc = (long) h_start_pc;
-	SET_PC (pc);
-
-    } else call (h_start_pc, 0, NULL, 0);
-
-    os_restart_game (RESTART_END);
-
-}/* z_restart */
+	os_restart_game (RESTART_END);
+} /* z_restart */
 
 
 /*
@@ -691,40 +650,35 @@ void z_restart (void)
  * copy it to a string.
  *
  */
-static void get_default_name (char *default_name, zword addr)
+static void get_default_name(char *default_name, zword addr)
 {
-    if (addr != 0) {
+	if (addr != 0) {
+		zbyte len;
+		int i;
 
-	zbyte len;
-	int i;
+		LOW_BYTE(addr, len);
+		addr++;
 
-	LOW_BYTE (addr, len);
-	addr++;
+		for (i = 0; i < len; i++) {
+			zbyte c;
+			LOW_BYTE(addr, c);
+			addr++;
 
-	for (i = 0; i < len; i++) {
+			if (c >= 'A' && c <= 'Z')
+				c += 'a' - 'A';
 
-	    zbyte c;
+			default_name[i] = c;
+		}
+		default_name[i] = 0;
 
-	    LOW_BYTE (addr, c);
-	    addr++;
-
-	    if (c >= 'A' && c <= 'Z')
-		c += 'a' - 'A';
-
-	    default_name[i] = c;
-
+		if (strchr (default_name, '.') == NULL)
+			strncat(default_name, EXT_AUX,
+			    strlen(default_name) - strlen(EXT_AUX) + 1);
+	} else {
+		free(default_name);
+		default_name = strdup(f_setup.aux_name);
 	}
-
-	default_name[i] = 0;
-
-	if (strchr (default_name, '.') == NULL)
-	    strncat(default_name, EXT_AUX, strlen(default_name) - strlen(EXT_AUX) + 1);
-    } else {
-	free(default_name);
-	default_name = strdup(f_setup.aux_name);
-    }
-
-}/* get_default_name */
+} /* get_default_name */
 
 
 /*
@@ -735,108 +689,94 @@ static void get_default_name (char *default_name, zword addr)
  *	zargs[2] = address of suggested file name
  *
  */
-void z_restore (void)
+void z_restore(void)
 {
-    char *new_name;
-    char default_name[MAX_FILE_NAME + 1];
-    FILE *gfp = NULL;
+	char *new_name;
+	char default_name[MAX_FILE_NAME + 1];
+	FILE *gfp = NULL;
 
-    zword success = 0;
+	zword success = 0;
 
-    if (zargc != 0) {
+	if (zargc != 0) {
+		/* Get the file name */
+		get_default_name(default_name, (zargc >= 3) ? zargs[2] : 0);
 
-	/* Get the file name */
+		new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
+		if (new_name == NULL)
+			goto finished;
 
-	get_default_name (default_name, (zargc >= 3) ? zargs[2] : 0);
+		free(f_setup.aux_name);
+		f_setup.aux_name = strdup(default_name);
 
-	new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
-	if (new_name == NULL)
-	    goto finished;
+		/* Open auxilary file */
+		if ((gfp = fopen (new_name, "rb")) == NULL)
+			goto finished;
 
-	free(f_setup.aux_name);
-	f_setup.aux_name = strdup(default_name);
+		/* Load auxilary file */
+		success = fread (zmp + zargs[0], 1, zargs[1], gfp);
 
-	/* Open auxilary file */
-
-	if ((gfp = fopen (new_name, "rb")) == NULL)
-	    goto finished;
-
-	/* Load auxilary file */
-
-	success = fread (zmp + zargs[0], 1, zargs[1], gfp);
-
-	/* Close auxilary file */
-
-	fclose (gfp);
-
-    } else {
+		/* Close auxilary file */
+		fclose (gfp);
+	} else {
 
 //	long pc;
 //	zword release;
 //	zword addr;
 //	int i;
 
-	/* Get the file name */
+		/* Get the file name */
+		new_name = os_read_file_name(f_setup.save_name, FILE_RESTORE);
+		if (new_name == NULL)
+			goto finished;
+		free(f_setup.save_name);
+		f_setup.save_name = strdup(new_name);
 
-	new_name = os_read_file_name(f_setup.save_name, FILE_RESTORE);
-	if (new_name == NULL)
-	    goto finished;
+		/* Open game file */
+		if ((gfp = fopen(new_name, "rb")) == NULL)
+			goto finished;
+		success = restore_quetzal(gfp, story_fp);
+		if ((short) success >= 0) {
+			/* Close game file */
+			fclose (gfp);
+			if ((short) success > 0) {
+				zbyte old_screen_rows;
+				zbyte old_screen_cols;
 
-	free(f_setup.save_name);
-	f_setup.save_name = strdup(new_name);
+				/* In V3, reset the upper window. */
+				if (h_version == V3)
+				split_window(0);
 
-	/* Open game file */
+				LOW_BYTE (H_SCREEN_ROWS, old_screen_rows);
+				LOW_BYTE (H_SCREEN_COLS, old_screen_cols);
 
-	if ((gfp = fopen (new_name, "rb")) == NULL)
-	    goto finished;
+				/* Reload cached header fields. */
+				restart_header ();
 
-	success = restore_quetzal (gfp, story_fp);
-
-	if ((short) success >= 0) {
-
-	    /* Close game file */
-
-	    fclose (gfp);
-
-	    if ((short) success > 0) {
-		zbyte old_screen_rows;
-		zbyte old_screen_cols;
-
-		/* In V3, reset the upper window. */
-		if (h_version == V3)
-		    split_window (0);
-
-		LOW_BYTE (H_SCREEN_ROWS, old_screen_rows);
-		LOW_BYTE (H_SCREEN_COLS, old_screen_cols);
-
-		/* Reload cached header fields. */
-		restart_header ();
-
-		/*
-		 * Since QUETZAL files may be saved on many different machines,
-		 * the screen sizes may vary a lot. Erasing the status window
-		 * seems to cover up most of the resulting badness.
-		 */
-		if (h_version > V3 && h_version != V6
-		    && (h_screen_rows != old_screen_rows
-		    || h_screen_cols != old_screen_cols))
-		    erase_window (1);
-	    }
-	} else
-	    os_fatal ("Error reading save file");
-    }
+				/*
+				 * Since QUETZAL files may be saved on
+				 * many different machines, the screen sizes
+				 * may vary a lot. Erasing the status window
+				 * seems to cover up most of the
+				 * resulting badness.
+				 */
+				if (h_version > V3 && h_version != V6
+				    && (h_screen_rows != old_screen_rows
+				    || h_screen_cols != old_screen_cols))
+					erase_window (1);
+			}
+		} else
+			os_fatal ("Error reading save file");
+	}
 
 finished:
+	if (gfp == NULL && f_setup.restore_mode)
+		os_fatal ("Error reading save file");
 
-    if (gfp == NULL && f_setup.restore_mode)
-	os_fatal ("Error reading save file");
-
-    if (h_version <= V3)
-	branch (success);
-    else
-	store (success);
-
-}/* z_restore */
+	if (h_version <= V3)
+		branch(success);
+	else
+		store(success);
+} /* z_restore */
 
 
 /*
@@ -849,39 +789,39 @@ finished:
  * Returns the number of bytes copied to diff.
  *
  */
-static long mem_diff (zbyte *a, zbyte *b, zword mem_size, zbyte *diff)
+static long mem_diff(zbyte *a, zbyte *b, zword mem_size, zbyte *diff)
 {
-    unsigned size = mem_size;
-    zbyte *p = diff;
-    unsigned j;
-    zbyte c;
+	unsigned size = mem_size;
+	zbyte *p = diff;
+	unsigned j;
+	zbyte c;
 
-    for (;;) {
-	for (j = 0; size > 0 && (c = *a++ ^ *b++) == 0; j++)
-	    size--;
-	if (size == 0) break;
-	size--;
-	if (j > 0x8000) {
-	    *p++ = 0;
-	    *p++ = 0xff;
-	    *p++ = 0xff;
-	    j -= 0x8000;
+	for (;;) {
+		for (j = 0; size > 0 && (c = *a++ ^ *b++) == 0; j++)
+			size--;
+		if (size == 0) break;
+		size--;
+		if (j > 0x8000) {
+			*p++ = 0;
+			*p++ = 0xff;
+			*p++ = 0xff;
+			j -= 0x8000;
+		}
+		if (j > 0) {
+			*p++ = 0;
+			j--;
+			if (j <= 0x7f) {
+				*p++ = j;
+			} else {
+				*p++ = (j & 0x7f) | 0x80;
+				*p++ = (j & 0x7f80) >> 7;
+			}
+		}
+		*p++ = c;
+		*(b - 1) ^= c;
 	}
-	if (j > 0) {
-	    *p++ = 0;
-	    j--;
-	    if (j <= 0x7f) {
-		*p++ = j;
-	    } else {
-		*p++ = (j & 0x7f) | 0x80;
-		*p++ = (j & 0x7f80) >> 7;
-	    }
-	}
-	*p++ = c;
-	*(b - 1) ^= c;
-    }
-    return p - diff;
-}/* mem_diff */
+	return p - diff;
+} /* mem_diff */
 
 
 /*
@@ -890,34 +830,32 @@ static long mem_diff (zbyte *a, zbyte *b, zword mem_size, zbyte *diff)
  * Applies a quetzal-like diff to dest
  *
  */
-static void mem_undiff (zbyte *diff, long diff_length, zbyte *dest)
+static void mem_undiff(zbyte *diff, long diff_length, zbyte *dest)
 {
-    zbyte c;
+	zbyte c;
 
-    while (diff_length) {
-	c = *diff++;
-	diff_length--;
-	if (c == 0) {
-	    unsigned runlen;
-
-	    if (!diff_length)
-		return;  /* Incomplete run */
-	    runlen = *diff++;
-	    diff_length--;
-	    if (runlen & 0x80) {
-		if (!diff_length)
-		    return; /* Incomplete extended run */
+	while (diff_length) {
 		c = *diff++;
 		diff_length--;
-		runlen = (runlen & 0x7f) | (((unsigned) c) << 7);
-	    }
+		if (c == 0) {
+			unsigned runlen;
 
-	    dest += runlen + 1;
-	} else {
-	    *dest++ ^= c;
-	}
-    }
-}/* mem_undiff */
+			if (!diff_length)
+				return;  /* Incomplete run */
+			runlen = *diff++;
+			diff_length--;
+			if (runlen & 0x80) {
+				if (!diff_length)
+					return; /* Incomplete extended run */
+				c = *diff++;
+				diff_length--;
+				runlen = (runlen & 0x7f) | (((unsigned) c) << 7);
+			}
+			dest += runlen + 1;
+		} else
+			*dest++ ^= c;
+ 	}
+} /* mem_undiff */
 
 
 /*
@@ -926,37 +864,33 @@ static void mem_undiff (zbyte *diff, long diff_length, zbyte *dest)
  * This function does the dirty work for z_restore_undo.
  *
  */
-int restore_undo (void)
+int restore_undo(void)
 {
-    long pc = curr_undo->pc;
+	long pc = curr_undo->pc;
 
-    if (f_setup.undo_slots == 0)	/* undo feature unavailable */
+	/* undo feature unavailable */
+	if (f_setup.undo_slots == 0)
+		return -1;
 
-	return -1;
+	/* no saved game state */
+	if (curr_undo == NULL)
+		return 0;
 
-    if (curr_undo == NULL)		/* no saved game state */
+	/* undo possible */
+	memmove(zmp, prev_zmp, h_dynamic_size);
+	SET_PC(pc);
+	curr_undo->pc = pc;
+	sp = stack + STACK_SIZE - curr_undo->stack_size;
+	fp = stack + curr_undo->frame_offset;
+	frame_count = curr_undo->frame_count;
+	mem_undiff((zbyte *) (curr_undo + 1), curr_undo->diff_size, prev_zmp);
+	memmove (sp, (zbyte *)(curr_undo + 1) + curr_undo->diff_size,
+		curr_undo->stack_size * sizeof (*sp));
 
-	return 0;
-
-    /* undo possible */
-
-    memmove (zmp, prev_zmp, h_dynamic_size);
-    SET_PC (pc);
-    curr_undo->pc = pc;
-    sp = stack + STACK_SIZE - curr_undo->stack_size;
-    fp = stack + curr_undo->frame_offset;
-    frame_count = curr_undo->frame_count;
-    mem_undiff ((zbyte *) (curr_undo + 1), curr_undo->diff_size, prev_zmp);
-    memmove (sp, (zbyte *)(curr_undo + 1) + curr_undo->diff_size,
-	    curr_undo->stack_size * sizeof (*sp));
-
-    curr_undo = curr_undo->prev;
-
-    restart_header ();
-
-    return 2;
-
-}/* restore_undo */
+	curr_undo = curr_undo->prev;
+	restart_header();
+	return 2;
+} /* restore_undo */
 
 
 /*
@@ -965,11 +899,11 @@ int restore_undo (void)
  *	no zargs used
  *
  */
-void z_restore_undo (void)
+void z_restore_undo(void)
 {
-    store ((zword) restore_undo ());
+	store ((zword) restore_undo ());
 
-}/* z_restore_undo */
+} /* z_restore_undo */
 
 
 /*
@@ -980,41 +914,35 @@ void z_restore_undo (void)
  *	zargs[2] = address of suggested file name
  *
  */
-void z_save (void)
+void z_save(void)
 {
-    char *new_name;
-    char default_name[MAX_FILE_NAME + 1];
-    FILE *gfp;
+	char *new_name;
+	char default_name[MAX_FILE_NAME + 1];
+	FILE *gfp;
 
-    zword success = 0;
+	zword success = 0;
 
-    if (zargc != 0) {
+	if (zargc != 0) {
+		/* Get the file name */
+		get_default_name(default_name, (zargc >= 3) ? zargs[2] : 0);
+		new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
+		if (new_name == NULL)
+			goto finished;
 
-	/* Get the file name */
+		free(f_setup.aux_name);
+		f_setup.aux_name = strdup(default_name);
 
-	get_default_name (default_name, (zargc >= 3) ? zargs[2] : 0);
+		/* Open auxilary file */
+		if ((gfp = fopen(new_name, "wb")) == NULL)
+			goto finished;
 
-	new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
-	if (new_name == NULL)
-	    goto finished;
+		/* Write auxilary file */
+		success = fwrite(zmp + zargs[0], zargs[1], 1, gfp);
 
-	free(f_setup.aux_name);
-	f_setup.aux_name = strdup(default_name);
+		/* Close auxilary file */
+		fclose(gfp);
 
-	/* Open auxilary file */
-
-	if ((gfp = fopen (new_name, "wb")) == NULL)
-	    goto finished;
-
-	/* Write auxilary file */
-
-	success = fwrite (zmp + zargs[0], zargs[1], 1, gfp);
-
-	/* Close auxilary file */
-
-	fclose (gfp);
-
-    } else {
+	} else {
 
 //	long pc;
 //	zword addr;
@@ -1022,42 +950,37 @@ void z_save (void)
 //	int skip;
 //	int i;
 
-	/* Get the file name */
+		/* Get the file name */
+		new_name = os_read_file_name(f_setup.save_name, FILE_SAVE);
+		if (new_name == NULL)
+			goto finished;
 
-	new_name = os_read_file_name(f_setup.save_name, FILE_SAVE);
-	if (new_name == NULL)
-	    goto finished;
+		free(f_setup.save_name);
+		f_setup.save_name = strdup(new_name);
 
-	free(f_setup.save_name);
-	f_setup.save_name = strdup(new_name);
+		/* Open game file */
+		if ((gfp = fopen(new_name, "wb")) == NULL)
+			goto finished;
 
-	/* Open game file */
+		success = save_quetzal(gfp, story_fp);
 
-	if ((gfp = fopen (new_name, "wb")) == NULL)
-	    goto finished;
-
-	success = save_quetzal (gfp, story_fp);
-
-	/* Close game file and check for errors */
-
-	if (fclose (gfp) == EOF || ferror (story_fp)) {
-	    print_string ("Error writing save file\n");
-	    goto finished;
+		/* Close game file and check for errors */
+		if (fclose(gfp) == EOF || ferror(story_fp)) {
+			print_string("Error writing save file\n");
+			goto finished;
+		}
+		/* Success */
+		success = 1;
 	}
-
-	/* Success */
-
-	success = 1;
-    }
 
 finished:
 
-    if (h_version <= V3)
-	branch (success);
-    else
-	store (success);
+	if (h_version <= V3)
+		branch(success);
+	else
+		store(success);
 
-}/* z_save */
+} /* z_save */
 
 
 /*
@@ -1066,64 +989,63 @@ finished:
  * This function does the dirty work for z_save_undo.
  *
  */
-int save_undo (void)
+int save_undo(void)
 {
-    long diff_size;
-    zword stack_size;
-    undo_t *p;
-    long pc;
+	long diff_size;
+	zword stack_size;
+	undo_t *p;
+	long pc;
 
-    if (f_setup.undo_slots == 0)	/* undo feature unavailable */
-	return -1;
+	/* undo feature unavailable */
+	if (f_setup.undo_slots == 0)
+		return -1;
 
-    /* save undo possible */
+	/* save undo possible */
+	while (last_undo != curr_undo) {
+		p = last_undo;
+		last_undo = last_undo->prev;
+		free(p);
+		undo_count--;
+	}
+	if (last_undo)
+		last_undo->next = NULL;
+	else
+		first_undo = NULL;
 
-    while (last_undo != curr_undo) {
-	p = last_undo;
-	last_undo = last_undo->prev;
-	free (p);
-	undo_count--;
-    }
-    if (last_undo)
-	last_undo->next = NULL;
-    else
-	first_undo = NULL;
+	if (undo_count == f_setup.undo_slots)
+		free_undo(1);
 
-    if (undo_count == f_setup.undo_slots)
-	free_undo (1);
-
-    diff_size = mem_diff (zmp, prev_zmp, h_dynamic_size, undo_diff);
-    stack_size = stack + STACK_SIZE - sp;
-    do {
-	p = malloc (sizeof (undo_t) + diff_size + stack_size * sizeof (*sp));
+	diff_size = mem_diff(zmp, prev_zmp, h_dynamic_size, undo_diff);
+	stack_size = stack + STACK_SIZE - sp;
+	do {
+		p = malloc(sizeof (undo_t) + diff_size + stack_size * sizeof (*sp));
+		if (p == NULL)
+			free_undo(1);
+	} while (!p && undo_count);
 	if (p == NULL)
-	    free_undo (1);
-    } while (!p && undo_count);
-    if (p == NULL)
-	return -1;
-    pc = p->pc;
-    GET_PC (pc);	/* Turbo C doesn't like seeing p->pc here */
-    p->pc = pc;
-    p->frame_count = frame_count;
-    p->diff_size = diff_size;
-    p->stack_size = stack_size;
-    p->frame_offset = fp - stack;
-    memmove (p + 1, undo_diff, diff_size);
-    memmove ((zbyte *)(p + 1) + diff_size, sp, stack_size * sizeof (*sp));
+		return -1;
+	pc = p->pc;
+	GET_PC(pc);	/* Turbo C doesn't like seeing p->pc here */
+	p->pc = pc;
+	p->frame_count = frame_count;
+	p->diff_size = diff_size;
+	p->stack_size = stack_size;
+	p->frame_offset = fp - stack;
+	memmove(p + 1, undo_diff, diff_size);
+	memmove((zbyte *)(p + 1) + diff_size, sp, stack_size * sizeof (*sp));
 
-    if (!first_undo) {
-	p->prev = NULL;
-	first_undo = p;
-    } else {
-	last_undo->next = p;
-	p->prev = last_undo;
-    }
-    p->next = NULL;
-    curr_undo = last_undo = p;
-    undo_count++;
-    return 1;
-
-}/* save_undo */
+	if (!first_undo) {
+		p->prev = NULL;
+		first_undo = p;
+	} else {
+		last_undo->next = p;
+		p->prev = last_undo;
+	}
+	p->next = NULL;
+	curr_undo = last_undo = p;
+	undo_count++;
+	return 1;
+} /* save_undo */
 
 
 /*
@@ -1132,11 +1054,10 @@ int save_undo (void)
  *	no zargs used
  *
  */
-void z_save_undo (void)
+void z_save_undo(void)
 {
-    store ((zword) save_undo ());
-
-}/* z_save_undo */
+	store((zword) save_undo());
+} /* z_save_undo */
 
 
 /*
@@ -1147,18 +1068,14 @@ void z_save_undo (void)
  */
 void z_verify (void)
 {
-    zword checksum = 0;
-    long i;
+	zword checksum = 0;
+	long i;
 
-    /* Sum all bytes in story file except header bytes */
+	/* Sum all bytes in story file except header bytes */
+	os_storyfile_seek(story_fp, 64, SEEK_SET);
+	for (i = 64; i < story_size; i++)
+		checksum += fgetc(story_fp);
 
-    os_storyfile_seek (story_fp, 64, SEEK_SET);
-
-    for (i = 64; i < story_size; i++)
-	checksum += fgetc (story_fp);
-
-    /* Branch if the checksums are equal */
-
-    branch (checksum == h_checksum);
-
-}/* z_verify */
+	/* Branch if the checksums are equal */
+	branch(checksum == h_checksum);
+} /* z_verify */
