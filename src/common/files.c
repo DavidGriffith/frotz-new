@@ -61,46 +61,37 @@ static FILE *pfp = NULL;
  * name in V5+.
  *
  */
-
-void script_open (void)
+void script_open(void)
 {
-    static bool script_valid = FALSE;
+	static bool script_valid = FALSE;
 
-    char *new_name;
+	char *new_name;
 
-    h_flags &= ~SCRIPTING_FLAG;
+	h_flags &= ~SCRIPTING_FLAG;
 
-    if (h_version >= V5 || !script_valid) {
+	if (h_version >= V5 || !script_valid) {
+		new_name = os_read_file_name(f_setup.script_name, FILE_SCRIPT);
+		if (new_name == NULL)
+			goto done;
+		free(f_setup.script_name);
+		f_setup.script_name = strdup(new_name);
+	}
 
-	new_name = os_read_file_name(f_setup.script_name, FILE_SCRIPT);
-	if (new_name == NULL)
-	    goto done;
-
-	free(f_setup.script_name);
-	f_setup.script_name = strdup(new_name);
-    }
-
-    /* Opening in "at" mode doesn't work for script_erase_input... */
-
-    if ((sfp = fopen (f_setup.script_name, "r+t")) != NULL ||
-		(sfp = fopen (f_setup.script_name, "w+t")) != NULL) {
-
-	fseek (sfp, 0, SEEK_END);
-
-	h_flags |= SCRIPTING_FLAG;
-
-	script_valid = TRUE;
-	ostream_script = TRUE;
-
-	script_width = 0;
-
-    } else print_string ("Cannot open file\n");
+	/* Opening in "at" mode doesn't work for script_erase_input... */
+	if ((sfp = fopen (f_setup.script_name, "r+t")) != NULL ||
+	    (sfp = fopen(f_setup.script_name, "w+t")) != NULL) {
+		fseek (sfp, 0, SEEK_END);
+		h_flags |= SCRIPTING_FLAG;
+		script_valid = TRUE;
+		ostream_script = TRUE;
+		script_width = 0;
+	} else
+		print_string ("Cannot open file\n");
 
 done:
+	SET_WORD(H_FLAGS, h_flags);
+} /* script_open */
 
-    SET_WORD (H_FLAGS, h_flags);
-
-}/* script_open */
 
 /*
  * script_close
@@ -108,16 +99,14 @@ done:
  * Stop transcription.
  *
  */
-
-void script_close (void)
+void script_close(void)
 {
+	h_flags &= ~SCRIPTING_FLAG;
+	SET_WORD(H_FLAGS, h_flags);
+	fclose (sfp);
+	ostream_script = FALSE;
+} /* script_close */
 
-    h_flags &= ~SCRIPTING_FLAG;
-    SET_WORD (H_FLAGS, h_flags);
-
-    fclose (sfp); ostream_script = FALSE;
-
-}/* script_close */
 
 /*
  * script_new_line
@@ -125,16 +114,13 @@ void script_close (void)
  * Write a newline to the transcript file.
  *
  */
-
-void script_new_line (void)
+void script_new_line(void)
 {
+	if (fputc ('\n', sfp) == EOF)
+		script_close ();
+	script_width = 0;
+} /* script_new_line */
 
-    if (fputc ('\n', sfp) == EOF)
-	script_close ();
-
-    script_width = 0;
-
-}/* script_new_line */
 
 /*
  * script_char
@@ -142,52 +128,47 @@ void script_new_line (void)
  * Write a single character to the transcript file.
  *
  */
-
-void script_char (zchar c)
+void script_char(zchar c)
 {
+	if (c == ZC_INDENT && script_width != 0)
+		c = ' ';
 
-    if (c == ZC_INDENT && script_width != 0)
-	c = ' ';
+	if (c == ZC_INDENT) {
+		script_char(' ');
+		script_char (' ');
+		script_char (' ');
+		return;
+	}
 
-    if (c == ZC_INDENT)
-	{ script_char (' '); script_char (' '); script_char (' '); return; }
-    if (c == ZC_GAP)
-	{ script_char (' '); script_char (' '); return; }
+	if (c == ZC_GAP) {
+		script_char (' ');
+		script_char (' ');
+		return;
+	}
 
 #ifdef __MSDOS__
-    if (c > 0xff)
-	c = '?';
-    if (c >= ZC_LATIN1_MIN)
-	c = latin1_to_ibm[c - ZC_LATIN1_MIN];
-
-    fputc (c, sfp);
-    script_width++;
-
+	if (c > 0xff)
+		c = '?';
+	if (c >= ZC_LATIN1_MIN)
+		c = latin1_to_ibm[c - ZC_LATIN1_MIN];
+	fputc(c, sfp);
+	script_width++;
 #else
-
     /* Encode as UTF-8 */
+	if (c > 0x7ff) {
+		fputc(0xe0 | ((c >> 12) & 0xf), sfp);
+		fputc(0x80 | ((c >> 6) & 0x3f), sfp);
+		fputc(0x80 | (c & 0x3f), sfp);
+	} else if (c > 0x7f) {
+		fputc(0xc0 | ((c >> 6) & 0x1f), sfp);
+		fputc(0x80 | (c & 0x3f), sfp);
+	} else
+		fputc(c, sfp);
 
-    if (c > 0x7ff) {
-
-	fputc (0xe0 | ((c >> 12) & 0xf), sfp);
-	fputc (0x80 | ((c >> 6) & 0x3f), sfp);
-	fputc (0x80 | (c & 0x3f), sfp);
-
-    }
-    else if (c > 0x7f) {
-
-	fputc (0xc0 | ((c >> 6) & 0x1f), sfp);
-	fputc (0x80 | (c & 0x3f), sfp);
-
-    }
-    else
-
-	fputc (c, sfp);
-
-    script_width++;
-
+	script_width++;
 #endif
-}/* script_char */
+} /* script_char */
+
 
 /*
  * script_word
@@ -195,43 +176,38 @@ void script_char (zchar c)
  * Write a string to the transcript file.
  *
  */
-
-void script_word (const zchar *s)
+void script_word(const zchar *s)
 {
-    int width;
-    int i;
+	int width;
+	int i;
 
-    if (*s == ZC_INDENT && script_width != 0)
-	script_char (*s++);
+	if (*s == ZC_INDENT && script_width != 0)
+		script_char (*s++);
 
-    for (i = 0, width = 0; s[i] != 0; i++)
+	for (i = 0, width = 0; s[i] != 0; i++) {
+		if (s[i] == ZC_NEW_STYLE || s[i] == ZC_NEW_FONT)
+			i++;
+		else if (s[i] == ZC_GAP)
+			width += 3;
+		else if (s[i] == ZC_INDENT)
+			width += 2;
+		else
+			width += 1;
+	}
 
-	if (s[i] == ZC_NEW_STYLE || s[i] == ZC_NEW_FONT)
-	    i++;
-	else if (s[i] == ZC_GAP)
-	    width += 3;
-	else if (s[i] == ZC_INDENT)
-	    width += 2;
-	else
-	    width += 1;
+	if (f_setup.script_cols != 0 && script_width + width > f_setup.script_cols) {
+		if (*s == ' ' || *s == ZC_INDENT || *s == ZC_GAP)
+			s++;
+		script_new_line ();
+	}
+	for (i = 0; s[i] != 0; i++) {
+		if (s[i] == ZC_NEW_FONT || s[i] == ZC_NEW_STYLE)
+			i++;
+		else
+			script_char (s[i]);
+	}
+} /* script_word */
 
-    if (f_setup.script_cols != 0 && script_width + width > f_setup.script_cols) {
-
-	if (*s == ' ' || *s == ZC_INDENT || *s == ZC_GAP)
-	    s++;
-
-	script_new_line ();
-
-    }
-
-    for (i = 0; s[i] != 0; i++)
-
-	if (s[i] == ZC_NEW_FONT || s[i] == ZC_NEW_STYLE)
-	    i++;
-	else
-	    script_char (s[i]);
-
-}/* script_word */
 
 /*
  * script_write_input
@@ -239,25 +215,24 @@ void script_word (const zchar *s)
  * Send an input line to the transcript file.
  *
  */
-
-void script_write_input (const zchar *buf, zchar key)
+void script_write_input(const zchar *buf, zchar key)
 {
-    int width;
-    int i;
+	int width;
+	int i;
 
-    for (i = 0, width = 0; buf[i] != 0; i++)
-	width++;
+	for (i = 0, width = 0; buf[i] != 0; i++)
+		width++;
 
-    if (f_setup.script_cols != 0 && script_width + width > f_setup.script_cols)
-	script_new_line ();
+	if (f_setup.script_cols != 0 && script_width + width > f_setup.script_cols)
+		script_new_line();
 
-    for (i = 0; buf[i] != 0; i++)
-	script_char (buf[i]);
+	for (i = 0; buf[i] != 0; i++)
+		script_char(buf[i]);
 
-    if (key == ZC_RETURN)
-	script_new_line ();
+	if (key == ZC_RETURN)
+		script_new_line();
+} /* script_write_input */
 
-}/* script_write_input */
 
 /*
  * script_erase_input
@@ -265,18 +240,17 @@ void script_write_input (const zchar *buf, zchar key)
  * Remove an input line from the transcript file.
  *
  */
-
-void script_erase_input (const zchar *buf)
+void script_erase_input(const zchar *buf)
 {
-    int width;
-    int i;
+	int width;
+	int i;
 
-    for (i = 0, width = 0; buf[i] != 0; i++)
-	width++;
+	for (i = 0, width = 0; buf[i] != 0; i++)
+		width++;
 
-    fseek (sfp, -width, SEEK_CUR); script_width -= width;
+	fseek(sfp, -width, SEEK_CUR); script_width -= width;
+} /* script_erase_input */
 
-}/* script_erase_input */
 
 /*
  * script_mssg_on
@@ -284,16 +258,14 @@ void script_erase_input (const zchar *buf)
  * Start sending a "debugging" message to the transcript file.
  *
  */
-
-void script_mssg_on (void)
+void script_mssg_on(void)
 {
+	if (script_width != 0)
+		script_new_line();
 
-    if (script_width != 0)
-	script_new_line ();
+	script_char(ZC_INDENT);
+} /* script_mssg_on */
 
-    script_char (ZC_INDENT);
-
-}/* script_mssg_on */
 
 /*
  * script_mssg_off
@@ -301,13 +273,12 @@ void script_mssg_on (void)
  * Stop writing a "debugging" message.
  *
  */
-
-void script_mssg_off (void)
+void script_mssg_off(void)
 {
+	script_new_line();
 
-    script_new_line ();
+} /* script_mssg_off */
 
-}/* script_mssg_off */
 
 /*
  * record_open
@@ -315,25 +286,22 @@ void script_mssg_off (void)
  * Open a file to record the player's input.
  *
  */
-
-void record_open (void)
+void record_open(void)
 {
-    char *new_name;
+	char *new_name;
 
-    new_name = os_read_file_name(f_setup.command_name, FILE_RECORD);
-    if (new_name != NULL) {
+	new_name = os_read_file_name(f_setup.command_name, FILE_RECORD);
+	if (new_name != NULL) {
+		free(f_setup.command_name);
+		f_setup.command_name = strdup(new_name);
 
-	free(f_setup.command_name);
-	f_setup.command_name = strdup(new_name);
+		if ((rfp = fopen(new_name, "wt")) != NULL)
+			ostream_record = TRUE;
+		else
+			print_string("Cannot open file\n");
+	}
+} /* record_open */
 
-	if ((rfp = fopen (new_name, "wt")) != NULL)
-	    ostream_record = TRUE;
-	else
-	    print_string ("Cannot open file\n");
-
-    }
-
-}/* record_open */
 
 /*
  * record_close
@@ -341,13 +309,12 @@ void record_open (void)
  * Stop recording the player's input.
  *
  */
-
 void record_close (void)
 {
-
     fclose (rfp); ostream_record = FALSE;
 
 }/* record_close */
+
 
 /*
  * record_code
@@ -355,25 +322,23 @@ void record_close (void)
  * Helper function for record_char.
  *
  */
-
-static void record_code (int c, bool force_encoding)
+static void record_code(int c, bool force_encoding)
 {
+	if (force_encoding || c == '[' || c < 0x20 || c > 0x7e) {
+		int i;
 
-    if (force_encoding || c == '[' || c < 0x20 || c > 0x7e) {
+		fputc('[', rfp);
 
-	int i;
+		for (i = 10000; i != 0; i /= 10) {
+			if (c >= i || i == 1)
+				fputc('0' + (c / i) % 10, rfp);
+		}
+		fputc(']', rfp);
+	} else
+		fputc(c, rfp);
 
-	fputc ('[', rfp);
+} /* record_code */
 
-	for (i = 10000; i != 0; i /= 10)
-	    if (c >= i || i == 1)
-		fputc ('0' + (c / i) % 10, rfp);
-
-	fputc (']', rfp);
-
-    } else fputc (c, rfp);
-
-}/* record_code */
 
 /*
  * record_char
@@ -381,21 +346,20 @@ static void record_code (int c, bool force_encoding)
  * Write a character to the command file.
  *
  */
-
-static void record_char (zchar c)
+static void record_char(zchar c)
 {
+	if (c != ZC_RETURN) {
+		if (c < ZC_HKEY_MIN || c > ZC_HKEY_MAX) {
+			record_code (translate_to_zscii (c), FALSE);
+			if (c == ZC_SINGLE_CLICK || c == ZC_DOUBLE_CLICK) {
+				record_code (mouse_x, TRUE);
+				record_code (mouse_y, TRUE);
+			}
+		} else
+			record_code (1000 + c - ZC_HKEY_MIN, TRUE);
+	}
+} /* record_char */
 
-    if (c != ZC_RETURN) {
-	if (c < ZC_HKEY_MIN || c > ZC_HKEY_MAX) {
-	    record_code (translate_to_zscii (c), FALSE);
-	    if (c == ZC_SINGLE_CLICK || c == ZC_DOUBLE_CLICK) {
-		record_code (mouse_x, TRUE);
-		record_code (mouse_y, TRUE);
-	    }
-	} else record_code (1000 + c - ZC_HKEY_MIN, TRUE);
-    }
-
-}/* record_char */
 
 /*
  * record_write_key
@@ -403,16 +367,13 @@ static void record_char (zchar c)
  * Copy a keystroke to the command file.
  *
  */
-
-void record_write_key (zchar key)
+void record_write_key(zchar key)
 {
+	record_char(key);
+	if (fputc('\n', rfp) == EOF)
+		record_close();
+} /* record_write_key */
 
-    record_char (key);
-
-    if (fputc ('\n', rfp) == EOF)
-	record_close ();
-
-}/* record_write_key */
 
 /*
  * record_write_input
@@ -420,20 +381,17 @@ void record_write_key (zchar key)
  * Copy a line of input to a command file.
  *
  */
-
-void record_write_input (const zchar *buf, zchar key)
+void record_write_input(const zchar *buf, zchar key)
 {
-    zchar c;
+	zchar c;
 
-    while ((c = *buf++) != 0)
-	record_char (c);
+	while ((c = *buf++) != 0)
+		record_char(c);
+	record_char(key);
+	if (fputc('\n', rfp) == EOF)
+		record_close();
+} /* record_write_input */
 
-    record_char (key);
-
-    if (fputc ('\n', rfp) == EOF)
-	record_close ();
-
-}/* record_write_input */
 
 /*
  * replay_open
@@ -441,28 +399,23 @@ void record_write_input (const zchar *buf, zchar key)
  * Open a file of commands for playback.
  *
  */
-
-void replay_open (void)
+void replay_open(void)
 {
-    char *new_name;
+	char *new_name;
 
-    new_name = os_read_file_name(f_setup.command_name, FILE_PLAYBACK);
-    if (new_name != NULL) {
+	new_name = os_read_file_name(f_setup.command_name, FILE_PLAYBACK);
+	if (new_name != NULL) {
+		free(f_setup.command_name);
+		f_setup.command_name = strdup(new_name);
 
-	free(f_setup.command_name);
-	f_setup.command_name = strdup(new_name);
+		if ((pfp = fopen(new_name, "rt")) != NULL) {
+			set_more_prompts(read_yes_or_no("Do you want MORE prompts"));
+			istream_replay = TRUE;
+		} else
+			print_string("Cannot open file\n");
+	}
+} /* replay_open */
 
-	if ((pfp = fopen (new_name, "rt")) != NULL) {
-
-	    set_more_prompts (read_yes_or_no ("Do you want MORE prompts"));
-
-	    istream_replay = TRUE;
-
-	} else print_string ("Cannot open file\n");
-
-    }
-
-}/* replay_open */
 
 /*
  * replay_close
@@ -470,15 +423,13 @@ void replay_open (void)
  * Stop playback of commands.
  *
  */
-
-void replay_close (void)
+void replay_close(void)
 {
+	set_more_prompts(TRUE);
+	fclose (pfp);
+	istream_replay = FALSE;
+} /* replay_close */
 
-    set_more_prompts (TRUE);
-
-    fclose (pfp); istream_replay = FALSE;
-
-}/* replay_close */
 
 /*
  * replay_code
@@ -486,25 +437,22 @@ void replay_close (void)
  * Helper function for replay_key and replay_line.
  *
  */
-
-static int replay_code (void)
+static int replay_code(void)
 {
-    int c;
+	int c;
 
-    if ((c = fgetc (pfp)) == '[') {
+	if ((c = fgetc(pfp)) == '[') {
+		int c2;
 
-	int c2;
+		c = 0;
+		while ((c2 = fgetc(pfp)) != EOF && c2 >= '0' && c2 <= '9')
+			c = 10 * c + c2 - '0';
 
-	c = 0;
+		return (c2 == ']') ? c : EOF;
+	} else
+		return c;
+} /* replay_code */
 
-	while ((c2 = fgetc (pfp)) != EOF && c2 >= '0' && c2 <= '9')
-	    c = 10 * c + c2 - '0';
-
-	return (c2 == ']') ? c : EOF;
-
-    } else return c;
-
-}/* replay_code */
 
 /*
  * replay_char
@@ -512,36 +460,29 @@ static int replay_code (void)
  * Read a character from the command file.
  *
  */
-
 static zchar replay_char (void)
 {
-    int c;
+	int c;
 
-    if ((c = replay_code ()) != EOF) {
+	if ((c = replay_code()) != EOF) {
+		if (c != '\n') {
+			 if (c < 1000) {
+				c = translate_from_zscii (c);
+				if (c == ZC_SINGLE_CLICK || c == ZC_DOUBLE_CLICK) {
+					mouse_x = replay_code();
+					mouse_y = replay_code();
+				}
+				return c;
 
-	if (c != '\n') {
-
-	    if (c < 1000) {
-
-		c = translate_from_zscii (c);
-
-		if (c == ZC_SINGLE_CLICK || c == ZC_DOUBLE_CLICK) {
-		    mouse_x = replay_code ();
-		    mouse_y = replay_code ();
+			} else
+				return ZC_HKEY_MIN + c - 1000;
 		}
+		ungetc('\n', pfp);
+		return ZC_RETURN;
+	} else
+		return ZC_BAD;
+} /* replay_char */
 
-		return c;
-
-	    } else return ZC_HKEY_MIN + c - 1000;
-	}
-
-	ungetc ('\n', pfp);
-
-	return ZC_RETURN;
-
-    } else return ZC_BAD;
-
-}/* replay_char */
 
 /*
  * replay_read_key
@@ -549,21 +490,19 @@ static zchar replay_char (void)
  * Read a keystroke from a command file.
  *
  */
-
 zchar replay_read_key (void)
 {
-    zchar key;
+	zchar key;
 
-    key = replay_char ();
+	key = replay_char();
 
-    if (fgetc (pfp) != '\n') {
+	if (fgetc(pfp) != '\n') {
+		replay_close();
+		return ZC_BAD;
+	} else
+		return key;
+} /* replay_read_key */
 
-	replay_close ();
-	return ZC_BAD;
-
-    } else return key;
-
-}/* replay_read_key */
 
 /*
  * replay_read_input
@@ -571,29 +510,22 @@ zchar replay_read_key (void)
  * Read a line of input from a command file.
  *
  */
-
-zchar replay_read_input (zchar *buf)
+zchar replay_read_input(zchar *buf)
 {
-    zchar c;
+	zchar c;
 
-    for (;;) {
+	for (;;) {
+		c = replay_char();
+		if (c == ZC_BAD || is_terminator(c))
+			break;
+		*buf++ = c;
+	}
+	*buf = 0;
 
-	c = replay_char ();
+	if (fgetc(pfp) != '\n') {
+		replay_close();
+		return ZC_BAD;
+	} else
+		return c;
 
-	if (c == ZC_BAD || is_terminator (c))
-	    break;
-
-	*buf++ = c;
-
-    }
-
-    *buf = 0;
-
-    if (fgetc (pfp) != '\n') {
-
-	replay_close ();
-	return ZC_BAD;
-
-    } else return c;
-
-}/* replay_read_input */
+} /* replay_read_input */
