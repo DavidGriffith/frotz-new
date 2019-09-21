@@ -22,51 +22,43 @@ const char *optarg = NULL;
 
 int cdecl getopt (int argc, char *argv[], const char *options)
 {
-    static int pos = 1;
+	static int pos = 1;
+	const char *p;
 
-    const char *p;
+	if (optind >= argc || argv[optind][0] != '-' || argv[optind][1] == 0)
+		return EOF;
 
-    if (optind >= argc || argv[optind][0] != '-' || argv[optind][1] == 0)
-	return EOF;
+	optopt = argv[optind][pos++];
+	optarg = NULL;
 
-    optopt = argv[optind][pos++];
-    optarg = NULL;
-
-    if (argv[optind][pos] == 0)
-	{ pos = 1; optind++; }
-
-    p = strchr (options, optopt);
-
-    if (optopt == ':' || p == NULL) {
-
-	fputs ("illegal option -- ", stdout);
-	goto error;
-
-    } else if (p[1] == ':') {
-
-	if (optind >= argc) {
-
-	    fputs ("option requires an argument -- ", stdout);
-	    goto error;
-
-	} else {
-
-	    optarg = argv[optind];
-
-	    if (pos != 1)
-		optarg += pos;
-
-	    pos = 1; optind++;
-
+	if (argv[optind][pos] == 0) {
+		pos = 1;
+		optind++;
 	}
-    }
-    return optopt;
+
+	p = strchr(options, optopt);
+
+	if (optopt == ':' || p == NULL) {
+		fputs("illegal option -- ", stdout);
+		goto error;
+	} else if (p[1] == ':') {
+		if (optind >= argc) {
+			fputs("option requires an argument -- ", stdout);
+			goto error;
+		} else {
+			optarg = argv[optind];
+			if (pos != 1)
+				optarg += pos;
+			pos = 1;
+			optind++;
+		}
+	}
+	return optopt;
 
 error:
 
-    fputc (optopt, stdout);
-    fputc ('\n', stdout);
+	fputc(optopt, stdout);
+	fputc('\n', stdout);
 
-    return '?';
-
-}/* getopt */
+	return '?';
+} /* getopt */
