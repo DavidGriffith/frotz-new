@@ -2,7 +2,6 @@
  * Various status thingies for the interpreter and interface.
  *
  */
-
 typedef struct frotz_setup_struct {
 	int attribute_assignment;
 	int attribute_testing;
