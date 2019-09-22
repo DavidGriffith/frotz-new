@@ -58,55 +58,50 @@ typedef struct
 ** point to the start of the user supplied float array. The user supplied
 ** function must return the number of frames that **data points to.
 */
-
 typedef long (*src_callback_t) (void *cb_data, float **data) ;
 
 /*
-**	Standard initialisation function : return an anonymous pointer to the
-**	internal state of the converter. Choose a converter from the enums below.
-**	Error returned in *error.
+**	Standard initialisation function : return an anonymous pointer to
+**	the internal state of the converter. Choose a converter from the
+**	enums below.  Error returned in *error.
 */
-
 SRC_STATE* src_new (int converter_type, int channels, int *error) ;
 
 /*
-**	Initilisation for callback based API : return an anonymous pointer to the
-**	internal state of the converter. Choose a converter from the enums below.
-**	The cb_data pointer can point to any data or be set to NULL. Whatever the
-**	value, when processing, user supplied function "func" gets called with
-**	cb_data as first parameter.
+**	Initilisation for callback based API : return an anonymous pointer
+**	to the internal state of the converter. Choose a converter from
+**	the enums below.  The cb_data pointer can point to any data or be
+**	set to NULL. Whatever the value, when processing, user supplied
+**	function "func" gets called with cb_data as first parameter.
 */
-
-SRC_STATE* src_callback_new (src_callback_t func, int converter_type, int channels,
-				int *error, void* cb_data) ;
+SRC_STATE* src_callback_new (src_callback_t func, int converter_type,
+				int channels, int *error, void* cb_data) ;
 
 /*
 **	Cleanup all internal allocations.
 **	Always returns NULL.
 */
-
 SRC_STATE* src_delete (SRC_STATE *state) ;
 
 /*
 **	Standard processing function.
 **	Returns non zero on error.
 */
-
 int src_process (SRC_STATE *state, SRC_DATA *data) ;
 
 /*
 **	Callback based processing function. Read up to frames worth of data from
 **	the converter int *data and return frames read or -1 on error.
 */
-long src_callback_read (SRC_STATE *state, double src_ratio, long frames, float *data) ;
+long src_callback_read (SRC_STATE *state, double src_ratio, long frames,
+				float *data) ;
 
 /*
-**	Simple interface for performing a single conversion from input buffer to
-**	output buffer at a fixed conversion ratio.
-**	Simple interface does not require initialisation as it can only operate on
-**	a single buffer worth of audio.
+**	Simple interface for performing a single conversion from input
+**	buffer to output buffer at a fixed conversion ratio. Simple
+**	interface does not require initialisation as it can only operate
+**	on a single buffer worth of audio.
 */
-
 int src_simple (SRC_DATA *data, int converter_type, int channels) ;
 
 /*
@@ -117,7 +112,6 @@ int src_simple (SRC_DATA *data, int converter_type, int channels) ;
 ** sample rate converter or NULL if no sample rate converter exists for
 ** the given value. The converters are sequentially numbered from 0 to N.
 */
-
 const char *src_get_name (int converter_type) ;
 const char *src_get_description (int converter_type) ;
 const char *src_get_version (void) ;
@@ -127,7 +121,6 @@ const char *src_get_version (void) ;
 **	in the conversion ratio.
 **	Returns non zero on error.
 */
-
 int src_set_ratio (SRC_STATE *state, double new_ratio) ;
 
 /*
@@ -136,20 +129,16 @@ int src_set_ratio (SRC_STATE *state, double new_ratio) ;
 **	Does not free any memory allocations.
 **	Returns non zero on error.
 */
-
 int src_reset (SRC_STATE *state) ;
 
 /*
-** Return TRUE if ratio is a valid conversion ratio, FALSE
-** otherwise.
+** Return TRUE if ratio is a valid conversion ratio, FALSE otherwise.
 */
-
 int src_is_valid_ratio (double ratio) ;
 
 /*
 **	Return an error number.
 */
-
 int src_error (SRC_STATE *state) ;
 
 /*
@@ -161,30 +150,30 @@ const char* src_strerror (int error) ;
 ** The following enums can be used to set the interpolator type
 ** using the function src_set_converter().
 */
-
 enum
 {
-	SRC_SINC_BEST_QUALITY		= 0,
-	SRC_SINC_MEDIUM_QUALITY		= 1,
-	SRC_SINC_FASTEST			= 2,
-	SRC_ZERO_ORDER_HOLD			= 3,
-	SRC_LINEAR					= 4
+	SRC_SINC_BEST_QUALITY	= 0,
+	SRC_SINC_MEDIUM_QUALITY	= 1,
+	SRC_SINC_FASTEST	= 2,
+	SRC_ZERO_ORDER_HOLD	= 3,
+	SRC_LINEAR		= 4
 } ;
+
 
 /*
 ** Extra helper functions for converting from short to float and
 ** back again.
 */
-
 void src_short_to_float_array (const short *in, float *out, int len) ;
 void src_float_to_short_array (const float *in, short *out, int len) ;
 
 
 #ifdef __cplusplus
-}		/* extern "C" */
+}	/* extern "C" */
 #endif	/* __cplusplus */
 
 #endif	/* SAMPLERATE_H */
+
 
 /*
 ** Do not edit or modify anything in this comment block.
