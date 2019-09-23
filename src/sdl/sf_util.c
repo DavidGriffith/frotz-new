@@ -26,40 +26,44 @@ typedef struct cfstruct cfrec;
 
 static void print_version(void);
 
-enum {USAGE_NORMAL, USAGE_EXTENDED};
+enum { USAGE_NORMAL, USAGE_EXTENDED };
 
 struct cfstruct {
-  CLEANFUNC func;
-  cfrec *next;
-  const char *name;
-  };
+	CLEANFUNC func;
+	cfrec *next;
+	const char *name;
+};
 
 static cfrec *cflist = NULL;
 
-void sf_regcleanfunc( void *f, const char *p){
-  cfrec *n = calloc(1,sizeof(cfrec));
-  if (n)
-	{
-	if (!p) p = "";
-	n->func = (CLEANFUNC) f;
-	n->name = p;
-	n->next = cflist;
-	cflist = n;
+
+void sf_regcleanfunc(void *f, const char *p)
+{
+	cfrec *n = calloc(1, sizeof(cfrec));
+	if (n) {
+		if (!p)
+			p = "";
+		n->func = (CLEANFUNC) f;
+		n->name = p;
+		n->next = cflist;
+		cflist = n;
 	}
-  }
+}
+
 
 void sf_cleanup_all()
-  {
-  while (cflist)
-	{
-	cfrec *n = cflist->next;
+{
+	while (cflist) {
+		cfrec *n = cflist->next;
 //printf("cleanup c%p [%s] n%p\n",cflist,cflist->name,n);
-	if (cflist->func) cflist->func();
-	free(cflist);
-	cflist = n;
+		if (cflist->func)
+			cflist->func();
+		free(cflist);
+		cflist = n;
 	}
 //printf("Cleanup done.\n");
-  }
+}
+
 
 /*
  * os_reset_screen
@@ -68,28 +72,24 @@ void sf_cleanup_all()
  *
  */
 void os_reset_screen(void)
-  {
-  sf_flushdisplay();
-//	theWnd->FlushDisplay();
-//	theWnd->ResetOverhang();
+{
+	sf_flushdisplay();
+//      theWnd->FlushDisplay();
+//      theWnd->ResetOverhang();
 
-  if (m_exitPause)
-	{
-	const char *hit = sf_msgstring(IDS_HIT_KEY_EXIT);
-	os_set_font(TEXT_FONT);
-	os_set_text_style(0);
-	screen_new_line();
+	if (m_exitPause) {
+		const char *hit = sf_msgstring(IDS_HIT_KEY_EXIT);
+		os_set_font(TEXT_FONT);
+		os_set_text_style(0);
+		screen_new_line();
 
-	while (*hit)
-		os_display_char((*hit++));
-        sf_read_key(0, true, false, false);
+		while (*hit)
+			os_display_char((*hit++));
+		sf_read_key(0, true, false, false);
 	}
 
-  sf_cleanup_all();
-  }
-
-
-
+	sf_cleanup_all();
+}
 
 int user_background = -1;
 int user_foreground = -1;
@@ -106,16 +106,16 @@ int m_random_seed = -1;
 int m_fullscreen = -1;
 int m_reqW = 0, m_reqH = 0;
 int m_vga_fonts = 0;
-extern char * m_setupfile;
-extern char	m_names_format;
+extern char *m_setupfile;
+extern char m_names_format;
 static char user_names_format = 0;
 extern char *m_reslist_file;
 extern int option_scrollback_buffer;
 
 static char *info_header =
-	"FROTZ V%s\tSDL graphics and audio interface.\n"
-	"An interpreter for all Infocom and other Z-Machine games.\n\n"
-	"Syntax: sfrotz [options] story-file\n";
+    "FROTZ V%s\tSDL graphics and audio interface.\n"
+    "An interpreter for all Infocom and other Z-Machine games.\n\n"
+    "Syntax: sfrotz [options] story-file\n";
 
 static char *info[] = {
 	"-a   watch attribute setting",
@@ -143,13 +143,13 @@ static char *info[] = {
 	"-x   expand abbreviations g/x/z",
 	"-v   show version information",
 	"-Z # error checking (see below)",
-	NULL};
+	NULL
+};
 
 static char *info_footer =
-	"\nError checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.";
+    "\nError checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.";
 
-static char *extended_header =
-	"\nExtended Options\n";
+static char *extended_header = "\nExtended Options\n";
 
 static char *extended_options[] = {
 	"-@ <file> use resources in <file>",
@@ -159,52 +159,54 @@ static char *extended_options[] = {
 	"-N <mode> add date or number to save filename",
 	"-T        use in-game requests for filenames",
 	"-V        force VGA fonts",
-	NULL};
+	NULL
+};
 
 static char *footer =
-	"More options and information are in the manual page.  Type \"man sfrotz\".\n";
+    "More options and information are in the manual page.  Type \"man sfrotz\".\n";
+
 
 #define WIDCOL 40
 static void usage(int type)
-  {
-  char **p;
-  int i=0,len=0;
+{
+	char **p;
+	int i = 0, len = 0;
 
-  printf(info_header, VERSION);
+	printf(info_header, VERSION);
 
-  if (type == USAGE_NORMAL)
-    p = info;
-  else {
-    p = extended_options;
-    puts(extended_header);
-  }
-
-  while (*p)
-	{
-	if (i && type == USAGE_NORMAL)
-		{
-		while (len > 0){ fputc(' ',stdout); len--;}
-		puts(*p);
-		}
-	else
-		{
-		fputs("  ",stdout);
-		fputs(*p,stdout);
-		if (type == USAGE_NORMAL)
-			len = WIDCOL-strlen(*p)-2;
-		else
-			fputs("\n", stdout);
-		}
-	i = 1-i;
-	p++;
+	if (type == USAGE_NORMAL)
+		p = info;
+	else {
+		p = extended_options;
+		puts(extended_header);
 	}
-  if (i) fputc('\n',stdout);
 
-  if (type == USAGE_NORMAL)
-    puts (info_footer);
-  puts (footer);
+	while (*p) {
+		if (i && type == USAGE_NORMAL) {
+			while (len > 0) {
+				fputc(' ', stdout);
+				len--;
+			}
+			puts(*p);
+		} else {
+			fputs("  ", stdout);
+			fputs(*p, stdout);
+			if (type == USAGE_NORMAL)
+				len = WIDCOL - strlen(*p) - 2;
+			else
+				fputs("\n", stdout);
+		}
+		i = 1 - i;
+		p++;
+	}
+	if (i)
+		fputc('\n', stdout);
 
-  }
+	if (type == USAGE_NORMAL)
+		puts(info_footer);
+	puts(footer);
+
+}
 
 
 /*
@@ -222,120 +224,125 @@ extern int m_timerinterval;
 
 static char *options = "@:%aAb:B:c:f:Fh:HiI:l:L:m:N:oOPqr:s:S:tTu:vVw:xZ:";
 
-static int limit( int v, int m, int M)
-  {
-  if (v < m) return m;
-  if (v > M) return M;
-  return v;
-  }
+static int limit(int v, int m, int M)
+{
+	if (v < m)
+		return m;
+	if (v > M)
+		return M;
+	return v;
+}
 
-static void parse_options (int argc, char **argv)
-  {
-  int c;
 
-  do {
+static void parse_options(int argc, char **argv)
+{
+	int c;
 
-	int num = 0, copt = 0;;
+	do {
+		int num = 0, copt = 0;;
 
-	c = getopt (argc, argv, options);
+		c = getopt(argc, argv, options);
 
-	if (optarg != NULL)
-	    {
-	    num = atoi (optarg);
-	    copt = optarg[0];
-	    }
+		if (optarg != NULL) {
+			num = atoi(optarg);
+			copt = optarg[0];
+		}
 
-	if (c == '%')
-	    m_localfiles = true;
-	if (c == 'a')
-	    f_setup.attribute_assignment = 1;
-	if (c == 'A')
-	    f_setup.attribute_testing = 1;
-	if (c == 'b')
-	    user_background = num;
-	if (c == 'B')
-	    option_scrollback_buffer = num;
-	if (c == 'c')
-	    f_setup.context_lines = num;
-	if (c == 'm')
-	    m_timerinterval = limit(num,10,1000000);
-	if (c == 'N')
-	    user_names_format = copt;
-	if (c == '@')
-	    m_reslist_file = optarg;
-	if (c == 'I')
-	    m_setupfile = optarg;
-	if (c == 'f')
-	    user_foreground = num;
-	if (c == 'F')
-	    m_fullscreen = 1;
-	if (c == 'h')
-	    user_screen_height = num;
-	if (c == 'H') {
-	    usage(USAGE_EXTENDED);
-	    exit (EXIT_FAILURE);
-	}
-	if (c == 'i')
-	    f_setup.ignore_errors = 1;
-	if (c == 'I')
-	    f_setup.interpreter_number = num;
-	if (c == 'l')
-	    f_setup.left_margin = num;
-	if (c == 'L') {
-	    f_setup.restore_mode = TRUE;
-	    f_setup.tmp_save_name = strdup(optarg);
-	}
-	if (c == 'q')
-	    m_no_sound = 1;
-	if (c == 'o')
-	    f_setup.object_movement = 1;
-	if (c == 'O')
-	    f_setup.object_locating = 1;
-	if (c == 'P')
-	    f_setup.piracy = 1;
-	if (c == 'r')
-	    f_setup.right_margin = num;
-	if (c == 's')
-	    m_random_seed = num;
-	if (c == 'S')
-	    f_setup.script_cols = num;
-	if (c == 't')
-	    user_tandy_bit = 1;
-	if (c == 'T')
-	    sf_osdialog = NULL;
-	if (c == 'u')
-	    f_setup.undo_slots = num;
-	if (c == 'v')
-	    print_version();
-	if (c == 'V')
-	    m_vga_fonts = 1;
-	if (c == 'w')
-	    user_screen_width = num;
-	if (c == 'x')
-	    f_setup.expand_abbreviations = 1;
-	if (c == 'Z')
-	    if (num >= ERR_REPORT_NEVER && num <= ERR_REPORT_FATAL)
-	      f_setup.err_report_mode = num;
-	if (c == '?')
-		optind = argc;
+		if (c == '%')
+			m_localfiles = true;
+		if (c == 'a')
+			f_setup.attribute_assignment = 1;
+		if (c == 'A')
+			f_setup.attribute_testing = 1;
+		if (c == 'b')
+			user_background = num;
+		if (c == 'B')
+			option_scrollback_buffer = num;
+		if (c == 'c')
+			f_setup.context_lines = num;
+		if (c == 'm')
+			m_timerinterval = limit(num, 10, 1000000);
+		if (c == 'N')
+			user_names_format = copt;
+		if (c == '@')
+			m_reslist_file = optarg;
+		if (c == 'I')
+			m_setupfile = optarg;
+		if (c == 'f')
+			user_foreground = num;
+		if (c == 'F')
+			m_fullscreen = 1;
+		if (c == 'h')
+			user_screen_height = num;
+		if (c == 'H') {
+			usage(USAGE_EXTENDED);
+			exit(EXIT_FAILURE);
+		}
+		if (c == 'i')
+			f_setup.ignore_errors = 1;
+		if (c == 'I')
+			f_setup.interpreter_number = num;
+		if (c == 'l')
+			f_setup.left_margin = num;
+		if (c == 'L') {
+			f_setup.restore_mode = TRUE;
+			f_setup.tmp_save_name = strdup(optarg);
+		}
+		if (c == 'q')
+			m_no_sound = 1;
+		if (c == 'o')
+			f_setup.object_movement = 1;
+		if (c == 'O')
+			f_setup.object_locating = 1;
+		if (c == 'P')
+			f_setup.piracy = 1;
+		if (c == 'r')
+			f_setup.right_margin = num;
+		if (c == 's')
+			m_random_seed = num;
+		if (c == 'S')
+			f_setup.script_cols = num;
+		if (c == 't')
+			user_tandy_bit = 1;
+		if (c == 'T')
+			sf_osdialog = NULL;
+		if (c == 'u')
+			f_setup.undo_slots = num;
+		if (c == 'v')
+			print_version();
+		if (c == 'V')
+			m_vga_fonts = 1;
+		if (c == 'w')
+			user_screen_width = num;
+		if (c == 'x')
+			f_setup.expand_abbreviations = 1;
+		if (c == 'Z')
+			if (num >= ERR_REPORT_NEVER && num <= ERR_REPORT_FATAL)
+				f_setup.err_report_mode = num;
+		if (c == '?')
+			optind = argc;
 	} while (c != EOF && c != '?');
 
-  }/* parse_options */
+} /* parse_options */
+
 
 static void print_version(void)
 {
-    printf("FROTZ V%s\tSDL interface.\n", VERSION);
-    printf("Build date:\t%s\n", BUILD_DATE);
-    printf("Commit date:\t%s\n", GIT_DATE);
-    printf("Git commit:\t%s\n", GIT_HASH);
-    printf("Git branch:\t%s\n", GIT_BRANCH);
-    printf("  Frotz was originally written by Stefan Jokisch.\n");
-    printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
-    printf("  It was ported to Unix by Galen Hazelwood.\n");
-    printf("  The core and SDL port are currently maintained by David Griffith.\n");
-    printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
-    exit(2);
+	printf("FROTZ V%s\tSDL interface.\n", VERSION);
+	printf("Build date:\t%s\n", BUILD_DATE);
+	printf("Commit date:\t%s\n", GIT_DATE);
+	printf("Git commit:\t%s\n", GIT_HASH);
+	printf("Git branch:\t%s\n", GIT_BRANCH);
+	printf("  Frotz was originally written by Stefan Jokisch.\n");
+	printf
+	    ("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+	printf("  It was ported to Unix by Galen Hazelwood.\n");
+	printf
+	    ("  The core and SDL port are currently maintained by David Griffith.\n");
+	printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
+	exit(2);
 }
+
 
 /**
  * Like dirname except well defined.
@@ -343,10 +350,11 @@ static void print_version(void)
  */
 static char *new_dirname(const char *path)
 {
-    char *p = strdup(path), *p2 = strdup(dirname(p));
-    free(p);
-    return p2;
+	char *p = strdup(path), *p2 = strdup(dirname(p));
+	free(p);
+	return p2;
 }
+
 
 /**
  * Like basename except well defined.
@@ -354,10 +362,11 @@ static char *new_dirname(const char *path)
  */
 static char *new_basename(const char *path)
 {
-    char *p = strdup(path), *p2 = strdup(basename(p));
-    free(p);
-    return p2;
+	char *p = strdup(path), *p2 = strdup(basename(p));
+	free(p);
+	return p2;
 }
+
 
 /*
  * os_process_arguments
@@ -366,91 +375,110 @@ static char *new_basename(const char *path)
  * Some variables may be set to activate special features of Frotz.
  *
  */
-void os_process_arguments (int argc, char *argv[])
+void os_process_arguments(int argc, char *argv[])
 {
-  char *p;
+	char *p;
 
-  sf_installhandlers();
-  sf_readsettings();
-  parse_options(argc, argv);
+	sf_installhandlers();
+	sf_readsettings();
+	parse_options(argc, argv);
 
-  if (argv[optind] == NULL)
-	{
-	usage(USAGE_NORMAL);
-	exit (EXIT_FAILURE);
+	if (argv[optind] == NULL) {
+		usage(USAGE_NORMAL);
+		exit(EXIT_FAILURE);
 	}
-  f_setup.story_file = strdup(argv[optind]);
+	f_setup.story_file = strdup(argv[optind]);
 
-  if(argv[optind+1] != NULL)
-    f_setup.blorb_file = argv[optind+1];
+	if (argv[optind + 1] != NULL)
+		f_setup.blorb_file = argv[optind + 1];
 
-    /* Strip path and extension off the story file name */
-  f_setup.story_name = new_basename(f_setup.story_file);
+	/* Strip path and extension off the story file name */
+	f_setup.story_name = new_basename(f_setup.story_file);
 
-  /* Now strip off the extension. */
-  p = strrchr(f_setup.story_name, '.');
-  if ((p != NULL) &&
-      ((strcmp(p,EXT_BLORB2) == 0) ||
-       (strcmp(p,EXT_BLORB3) == 0) ||
-       (strcmp(p,EXT_BLORB4) == 0) ) ) {
-    //        blorb_ext = strdup(p);
-  }
-  else
-    //	blorb_ext = strdup(EXT_BLORB);
+	/* Now strip off the extension. */
+	p = strrchr(f_setup.story_name, '.');
+	if ((p != NULL) &&
+	    ((strcmp(p, EXT_BLORB2) == 0) ||
+	     (strcmp(p, EXT_BLORB3) == 0) || (strcmp(p, EXT_BLORB4) == 0))) {
+		//        blorb_ext = strdup(p);
+	} else
+		//  blorb_ext = strdup(EXT_BLORB);
 
-    /* Get rid of extensions with 1 to 6 character extensions. */
-    /* This will take care of an extension like ".zblorb". */
-    /* More than that, there might be something weird going on */
-    /* which is not our concern. */
-    if (p != NULL) {
-      if (strlen(p) >= 2 && strlen(p) <= 7) {
-        *p = '\0';      /* extension removed */
-      }
-    }
-  f_setup.story_path = new_dirname(argv[optind]);
+		/* Get rid of extensions with 1 to 6 character extensions. */
+		/* This will take care of an extension like ".zblorb". */
+		/* More than that, there might be something weird going on */
+		/* which is not our concern. */
+	if (p != NULL) {
+		if (strlen(p) >= 2 && strlen(p) <= 7) {
+			*p = '\0';	/* extension removed */
+		}
+	}
+	f_setup.story_path = new_dirname(argv[optind]);
 
-  /* Create nice default file names */
-  f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
-  strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-  strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
+	/* Create nice default file names */
+	f_setup.script_name =
+	    malloc((strlen(f_setup.story_name) +
+		    strlen(EXT_SCRIPT)) * sizeof(char) + 1);
+	strncpy(f_setup.script_name, f_setup.story_name,
+		strlen(f_setup.story_name) + 1);
+	strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
 
-  f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
-  strncpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-  strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
+	f_setup.command_name =
+	    malloc((strlen(f_setup.story_name) +
+		    strlen(EXT_COMMAND)) * sizeof(char) + 1);
+	strncpy(f_setup.command_name, f_setup.story_name,
+		strlen(f_setup.story_name) + 1);
+	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
-  if (!f_setup.restore_mode) {
-    f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-    strncpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-    strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-  } else {  /*Set our auto load save as the name_save*/
-    f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-    strncpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) + 1);
-    free(f_setup.tmp_save_name);
-  }
+	if (!f_setup.restore_mode) {
+		f_setup.save_name =
+		    malloc((strlen(f_setup.story_name) +
+			    strlen(EXT_SAVE)) * sizeof(char) + 1);
+		strncpy(f_setup.save_name, f_setup.story_name,
+			strlen(f_setup.story_name) + 1);
+		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
+	} else {		/* Set our auto load save as the name_save */
+		f_setup.save_name =
+		    malloc((strlen(f_setup.tmp_save_name) +
+			    strlen(EXT_SAVE)) * sizeof(char) + 1);
+		strncpy(f_setup.save_name, f_setup.tmp_save_name,
+			strlen(f_setup.tmp_save_name) + 1);
+		free(f_setup.tmp_save_name);
+	}
 
-  f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
-  strncpy(f_setup.aux_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
-  strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
+	f_setup.aux_name =
+	    malloc((strlen(f_setup.story_name) +
+		    strlen(EXT_AUX)) * sizeof(char) + 1);
+	strncpy(f_setup.aux_name, f_setup.story_name,
+		strlen(f_setup.story_name) + 1);
+	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
 
-  /* Save the executable file name */
+	/* Save the executable file name */
+	progname = argv[0];
 
-  progname = argv[0];
+	if (user_screen_width > 0)
+		AcWidth = user_screen_width;
+	if (user_screen_height > 0)
+		AcHeight = user_screen_height;
 
-  if (user_screen_width > 0) AcWidth = user_screen_width;
-  if (user_screen_height > 0) AcHeight = user_screen_height;
+	if (user_names_format)
+		m_names_format = user_names_format;
 
-  if (user_names_format) m_names_format = user_names_format;
+	if (user_background != -1)
+		m_defaultBack = sf_GetColour(user_background);
+	if (user_foreground != -1)
+		m_defaultFore = sf_GetColour(user_foreground);
+	if (user_tandy_bit != -1)
+		m_tandy = user_tandy_bit;
 
-  if (user_background != -1) m_defaultBack = sf_GetColour(user_background);
-  if (user_foreground != -1) m_defaultFore = sf_GetColour(user_foreground);
-  if (user_tandy_bit != -1) m_tandy = user_tandy_bit;
+	/* It's useless to test the retval, as in case of error it
+	 * does not return */
+	sf_load_resources(f_setup.story_file);
 
-  // it's useless to test the retval, as in case of error it does not return
-  sf_load_resources( f_setup.story_file);
+	sf_initfonts();
 
-  sf_initfonts();
+} /* os_process_arguments */
 
-}/* os_process_arguments */
 
 #ifdef WIN32
 #include <windows.h>
@@ -459,93 +487,100 @@ void os_process_arguments (int argc, char *argv[])
 #include <sys/time.h>
 #endif
 
-void sf_sleep( int msecs)
+void sf_sleep(int msecs)
 {
-  SDL_Delay(msecs);
+	SDL_Delay(msecs);
 }
 
 #ifdef WIN32
-
-unsigned long sf_ticks( void){
-  return (GetTickCount());
-  }
-
+unsigned long sf_ticks(void)
+{
+	return (GetTickCount());
+}
 #else
-
-unsigned long sf_ticks (void) {
-  struct timeval now;
-  static struct timeval start;
-  static int started = 0;
-  unsigned long ticks;
-  now.tv_sec = now.tv_usec = 0;
-  gettimeofday(&now, NULL);
-  if (!started){
-	started = 1;
-	start = now;
+unsigned long sf_ticks(void)
+{
+	struct timeval now;
+	static struct timeval start;
+	static int started = 0;
+	unsigned long ticks;
+	now.tv_sec = now.tv_usec = 0;
+	gettimeofday(&now, NULL);
+	if (!started) {
+		started = 1;
+		start = now;
 	}
-  ticks = (now.tv_sec-start.tv_sec)*1000 + (now.tv_usec-start.tv_usec)/1000;
+	ticks =
+	    (now.tv_sec - start.tv_sec) * 1000 + (now.tv_usec -
+						  start.tv_usec) / 1000;
 //  ticks = now.tv_sec*1000 + now.tv_usec/1000;
-  return ticks;
-  }
-
+	return ticks;
+}
 #endif
 
 
-static char *getextension( int flag)
-  {
-  char *ext = EXT_AUX;
+static char *getextension(int flag)
+{
+	char *ext = EXT_AUX;
 
-  if (flag == FILE_SAVE || flag == FILE_RESTORE)
-	ext = EXT_SAVE;
-  else if (flag == FILE_SCRIPT)
-	ext = EXT_SCRIPT;
-  else if (flag == FILE_RECORD || flag == FILE_PLAYBACK)
-	ext = EXT_COMMAND;
+	if (flag == FILE_SAVE || flag == FILE_RESTORE)
+		ext = EXT_SAVE;
+	else if (flag == FILE_SCRIPT)
+		ext = EXT_SCRIPT;
+	else if (flag == FILE_RECORD || flag == FILE_PLAYBACK)
+		ext = EXT_COMMAND;
 
-  return ext;
-  }
+	return ext;
+}
 
-static bool newfile( int flag)
-  {
-  if (flag == FILE_SAVE || flag == FILE_SAVE_AUX || flag == FILE_RECORD)
-	return true;
-  return false;
-  }
+
+static bool newfile(int flag)
+{
+	if (flag == FILE_SAVE || flag == FILE_SAVE_AUX || flag == FILE_RECORD)
+		return true;
+	return false;
+}
+
 
 static char buf[FILENAME_MAX];
 
-static const char *getnumbername( const char *def, char *ext)
-  {
-  int len, number = 0;
-  strcpy(buf,f_setup.story_name);
-  len = strlen(buf);
-  for (;;){
-	sprintf(buf+len,"%03d%s",number++,ext);
-	if (access(buf,F_OK)) break;
+static const char *getnumbername(const char *def, char *ext)
+{
+	int len, number = 0;
+	strcpy(buf, f_setup.story_name);
+	len = strlen(buf);
+	for (;;) {
+		sprintf(buf + len, "%03d%s", number++, ext);
+		if (access(buf, F_OK))
+			break;
 	}
-  return buf;
-  }
+	return buf;
+}
 
-static const char *getdatename( const char *def, char *ext)
-  {
-  int len;
 
-  time_t t; struct tm *tm;
-  time(&t);
-  tm = localtime(&t);
+static const char *getdatename(const char *def, char *ext)
+{
+	int len;
 
-  strcpy(buf,f_setup.story_name);
-  len = strlen(buf);
-  sprintf(buf+len,"%04d%02d%02d%02d%02d%s",
- 	tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	tm->tm_hour, tm->tm_min, ext);
-  return buf;
-  }
+	time_t t;
+	struct tm *tm;
+	time(&t);
+	tm = localtime(&t);
+
+	strcpy(buf, f_setup.story_name);
+	len = strlen(buf);
+	sprintf(buf + len, "%04d%02d%02d%02d%02d%s",
+		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+		tm->tm_hour, tm->tm_min, ext);
+	return buf;
+}
+
 
 // fdialog( existing, defname, filter, title, &resultstr)
-static int ingame_read_file_name (char *file_name, const char *default_name, int flag);
-static int dialog_read_file_name (char *file_name, const char *default_name, int flag);
-
+static int ingame_read_file_name(char *file_name, const char *default_name,
+				 int flag);
+static int dialog_read_file_name(char *file_name, const char *default_name,
+				 int flag);
 
 /*
  * os_read_file_name
@@ -567,148 +602,145 @@ static int dialog_read_file_name (char *file_name, const char *default_name, int
  *
  * Return value is NULL is there was a problem
  */
+char *os_read_file_name(const char *default_name, int flag)
+{
+	int st;
+	const char *initname = default_name;
+	char file_name[FILENAME_MAX + 1];
 
-char *os_read_file_name (const char *default_name, int flag)
-  {
-  int st;
-  const char *initname = default_name;
-  char file_name[FILENAME_MAX + 1];
+	if (newfile(flag)) {
+		char *ext = getextension(flag);
+		if (m_names_format == 'd')
+			initname = getdatename(initname, ext);
+		else if (m_names_format == 'n')
+			initname = getnumbername(initname, ext);
+	}
 
-  if (newfile(flag))
-    {
-    char *ext = getextension(flag);
-    if (m_names_format == 'd') initname = getdatename(initname,ext);
-    else if (m_names_format == 'n') initname = getnumbername(initname,ext);
-    }
+	/* If we're restoring a game before the interpreter starts,
+	 * and our filename is already provided with the -L flag,
+	 * just go ahead silently.
+	 */
+	if (f_setup.restore_mode) {
+		strncpy(file_name, f_setup.save_name, FILENAME_MAX);
+	} else {
+		st = dialog_read_file_name(file_name, initname, flag);
+		if (st == SF_NOTIMP)
+			st = ingame_read_file_name(file_name, initname, flag);
 
-  /* If we're restoring a game before the interpreter starts, and our
-   * filename is already provided with the -L flag, just go ahead silently.
-   */
-  if (f_setup.restore_mode) {
-    strncpy(file_name, f_setup.save_name, FILENAME_MAX);
-  } else {
-    st = dialog_read_file_name( file_name, initname, flag);
-    if (st == SF_NOTIMP)
-      st = ingame_read_file_name( file_name, initname, flag);
+		if (!st)
+			return NULL;
+	}
 
-    if (!st) return NULL;
-  }
+	return strdup(file_name);
+}
 
-  return strdup(file_name);
-  }
 
-static int ingame_read_file_name (char *file_name, const char *default_name, int flag)
-  {
-  char *extension;
-  FILE *fp;
-  bool terminal;
-  bool result;
+static int ingame_read_file_name(char *file_name, const char *default_name,
+				 int flag)
+{
+	char *extension;
+	FILE *fp;
+	bool terminal;
+	bool result;
 
-  bool saved_replay = istream_replay;
-  bool saved_record = ostream_record;
+	bool saved_replay = istream_replay;
+	bool saved_record = ostream_record;
 
-    /* Turn off playback and recording temporarily */
+	/* Turn off playback and recording temporarily */
+	istream_replay = FALSE;
+	ostream_record = FALSE;
 
-  istream_replay = FALSE;
-  ostream_record = FALSE;
+	/* Select appropriate extension */
+	extension = getextension(flag);
 
-    /* Select appropriate extension */
-
-  extension = getextension(flag);
-
-    /* Input file name (reserve four bytes for a file name extension) */
-
-  print_string ("Enter file name (\"");
-  print_string (extension);
-  print_string ("\" will be added).\nDefault is \"");
-  print_string (default_name);
-  print_string ("\": ");
+	/* Input file name (reserve four bytes for a file name extension) */
+	print_string("Enter file name (\"");
+	print_string(extension);
+	print_string("\" will be added).\nDefault is \"");
+	print_string(default_name);
+	print_string("\": ");
 
 #ifdef USE_UTF8
-  {
-    zchar z_name[FILENAME_MAX + 1];
-    zchar *zp;
-    int i = 0;
-    read_string (FILENAME_MAX - 4, z_name);
-    zp = z_name;
-    while (*zp) {
-      if(*zp <= 0x7f) {
-	if (i > FILENAME_MAX - 4) break;
-	file_name[i++] = *zp;
-      } else if(*zp > 0x7ff) {
-	if (i > FILENAME_MAX - 6) break;
-	file_name[i++] = 0xe0 | ((*zp >> 12) & 0xf);
-	file_name[i++] = 0x80 | ((*zp >> 6) & 0x3f);
-	file_name[i++] = 0x80 | (*zp & 0x3f);
-      } else {
-	if (i > FILENAME_MAX - 5) break;
-	file_name[i++] = 0xc0 | ((*zp >> 6) & 0x1f);
-	file_name[i++] = 0x80 | (*zp & 0x3f);
-      }
-      zp++;
-    }
-    file_name[i] = 0;
-  }
+	{
+		zchar z_name[FILENAME_MAX + 1];
+		zchar *zp;
+		int i = 0;
+		read_string(FILENAME_MAX - 4, z_name);
+		zp = z_name;
+		while (*zp) {
+			if (*zp <= 0x7f) {
+				if (i > FILENAME_MAX - 4)
+					break;
+				file_name[i++] = *zp;
+			} else if (*zp > 0x7ff) {
+				if (i > FILENAME_MAX - 6)
+					break;
+				file_name[i++] = 0xe0 | ((*zp >> 12) & 0xf);
+				file_name[i++] = 0x80 | ((*zp >> 6) & 0x3f);
+				file_name[i++] = 0x80 | (*zp & 0x3f);
+			} else {
+				if (i > FILENAME_MAX - 5)
+					break;
+				file_name[i++] = 0xc0 | ((*zp >> 6) & 0x1f);
+				file_name[i++] = 0x80 | (*zp & 0x3f);
+			}
+			zp++;
+		}
+		file_name[i] = 0;
+	}
 #else
-  read_string (MAX_FILE_NAME - 4, (zchar *) file_name);
+	read_string(MAX_FILE_NAME - 4, (zchar *) file_name);
 #endif
 
-    /* Use the default name if nothing was typed */
+	/* Use the default name if nothing was typed */
+	if (file_name[0] == 0)
+		strcpy(file_name, default_name);
+	if (strchr(file_name, '.') == NULL)
+		strcat(file_name, extension);
 
-  if (file_name[0] == 0)
-	strcpy (file_name, default_name);
-  if (strchr (file_name, '.') == NULL)
-	strcat (file_name, extension);
+	/* Make sure it is safe to use this file name */
+	result = TRUE;
 
-    /* Make sure it is safe to use this file name */
+	/* OK if the file is opened for reading */
+	if (!newfile(flag))
+		goto finished;
 
-  result = TRUE;
+	/* OK if the file does not exist */
+	if ((fp = fopen(file_name, "rb")) == NULL)
+		goto finished;
 
-    /* OK if the file is opened for reading */
+	/* OK if this is a pseudo-file (like PRN, CON, NUL) */
+	terminal = isatty(fileno(fp));
 
-  if (!newfile(flag))
-	goto finished;
+	fclose(fp);
 
-    /* OK if the file does not exist */
+	if (terminal)
+		goto finished;
 
-  if ((fp = fopen (file_name, "rb")) == NULL)
-	goto finished;
+	/* OK if user wants to overwrite */
+	result = read_yes_or_no("Overwrite existing file");
 
-    /* OK if this is a pseudo-file (like PRN, CON, NUL) */
+ finished:
 
-  terminal = isatty(fileno(fp));
+	/* Restore state of playback and recording */
+	istream_replay = saved_replay;
+	ostream_record = saved_record;
 
-  fclose (fp);
+	return result;
+} /* os_read_file_name */
 
-  if (terminal)
-	goto finished;
 
-    /* OK if user wants to overwrite */
+static int dialog_read_file_name(char *file_name, const char *default_name,
+				 int flag)
+{
+	int filter = 0;
+	int title = 0, st;
+	char *res;
 
-  result = read_yes_or_no ("Overwrite existing file");
+	sf_flushdisplay();
+//      theWnd->ResetOverhang();
 
-finished:
-
-    /* Restore state of playback and recording */
-
-  istream_replay = saved_replay;
-  ostream_record = saved_record;
-
-  return result;
-
-  }/* os_read_file_name */
-
-static int dialog_read_file_name(char *file_name, const char *default_name, int flag)
-  {
-  int filter = 0;
-  int title = 0, st;
-  char *res;
-
-  sf_flushdisplay();
-//	theWnd->ResetOverhang();
-
-  switch (flag)
-	{
+	switch (flag) {
 	case FILE_SAVE:
 		filter = IDS_SAVE_FILTER;
 		title = IDS_SAVE_TITLE;
@@ -743,61 +775,69 @@ static int dialog_read_file_name(char *file_name, const char *default_name, int 
 
 // fdialog( existing, defname, filter, title, &resultstr)
 // returns 0 if OK
-  st = sf_user_fdialog( !newfile(flag), default_name, sf_msgstring(filter), sf_msgstring(title), &res);
-  if (st == SF_NOTIMP) return st;
-  if (st == 0)
-	{
-	strncpy(file_name,res,MAX_FILE_NAME);
-	file_name[MAX_FILE_NAME-1] = 0;
-	return 1;
+	st = sf_user_fdialog(!newfile(flag), default_name, sf_msgstring(filter),
+			     sf_msgstring(title), &res);
+	if (st == SF_NOTIMP)
+		return st;
+	if (st == 0) {
+		strncpy(file_name, res, MAX_FILE_NAME);
+		file_name[MAX_FILE_NAME - 1] = 0;
+		return 1;
 	}
-  return 0;
-  }
+	return 0;
+}
+
 
 typedef struct {
-  void *link;
-  char *str;
-  } Dynstr;
+	void *link;
+	char *str;
+} Dynstr;
 
-static Dynstr * strings = NULL;
+static Dynstr *strings = NULL;
 
 static void freestrings()
-  {
-  while (strings)
-	{
-	Dynstr *r = strings->link;
-	if (strings->str) free(strings->str);
-	free(strings);
-	strings = r;
+{
+	while (strings) {
+		Dynstr *r = strings->link;
+		if (strings->str)
+			free(strings->str);
+		free(strings);
+		strings = r;
 	}
-  }
+}
 
-static char *mystrdup( char *p)
-  {
-  Dynstr *r;
-  if (!p) return p;
-  p = strdup(p);
-  if (!p) return p;
-  r = calloc(1,sizeof(Dynstr));
-  if (r)
-	{
-	if (!strings) CLEANREG(freestrings);
-	r->link = strings;
-	r->str = p;
-	strings = r;
+
+static char *mystrdup(char *p)
+{
+	Dynstr *r;
+	if (!p)
+		return p;
+	p = strdup(p);
+	if (!p)
+		return p;
+	r = calloc(1, sizeof(Dynstr));
+	if (r) {
+		if (!strings)
+			CLEANREG(freestrings);
+		r->link = strings;
+		r->str = p;
+		strings = r;
 	}
-  return p;
-  }
+	return p;
+}
 
 static char *rc = NULL;
 
+
 void sf_FinishProfile()
-  {
+{
 //printf("finishprofile\n");
-  if (!rc) return;
-  free(rc);
-  rc = NULL;
-  }
+	if (!rc)
+		return;
+	free(rc);
+	rc = NULL;
+}
+
 
 #ifdef WIN32
 #define HOMEDIR "USERPROFILE"
@@ -805,145 +845,174 @@ void sf_FinishProfile()
 #define HOMEDIR "HOME"
 #endif
 
-void sf_InitProfile( const char *fn)
-  {
-  FILE *f; int size; char *s, *d;
-  char my_fn[FILENAME_MAX+1];
+void sf_InitProfile(const char *fn)
+{
+	FILE *f;
+	int size;
+	char *s, *d;
+	char my_fn[FILENAME_MAX + 1];
 
-  if (!fn) return;
+	if (!fn)
+		return;
 
-  strncpy(my_fn,getenv(HOMEDIR),FILENAME_MAX);
-  strncat(my_fn, "/", 2);
-  strncat(my_fn, fn, strlen(fn) + 1);
+	strncpy(my_fn, getenv(HOMEDIR), FILENAME_MAX);
+	strncat(my_fn, "/", 2);
+	strncat(my_fn, fn, strlen(fn) + 1);
 
-  f = fopen(fn,"rb");
-  if (!f) {
-    f = fopen(my_fn,"rb");
-    if (!f) return;
-  }
-  fseek(f,0,SEEK_END);
-  size = ftell(f);
-  if (!size) { fclose(f); return;}
-  rc = malloc(size+1);
-  if (!rc) { fclose(f); return;}
-  fseek(f,0,0);
-  fread(rc,1,size,f);
-  fclose(f);
-  rc[size] = 0;
-
-  s = d = rc;
-
-  while (*s)
-    {
-    if (*s == '#')
-	{
-	while ((*s) && (*s != '\n')) s++;
-	if (!*s) break;
+	f = fopen(fn, "rb");
+	if (!f) {
+		f = fopen(my_fn, "rb");
+		if (!f)
+			return;
 	}
-    else
-	*d++ = *s++;
-    }
-  *d = 0;
+	fseek(f, 0, SEEK_END);
+	size = ftell(f);
+	if (!size) {
+		fclose(f);
+		return;
+	}
+	rc = malloc(size + 1);
+	if (!rc) {
+		fclose(f);
+		return;
+	}
+	fseek(f, 0, 0);
+	fread(rc, 1, size, f);
+	fclose(f);
+	rc[size] = 0;
 
-  CLEANREG(sf_FinishProfile);
-  }
+	s = d = rc;
+
+	while (*s) {
+		if (*s == '#') {
+			while ((*s) && (*s != '\n'))
+				s++;
+			if (!*s)
+				break;
+		} else
+			*d++ = *s++;
+	}
+	*d = 0;
+
+	CLEANREG(sf_FinishProfile);
+}
 
 
-static char * findsect( const char *sect)
-  {
-  int ns = strlen(sect);
-  char *r = rc;
-  while (r)
-    {
+static char *findsect(const char *sect)
+{
+	int ns = strlen(sect);
+	char *r = rc;
+	while (r) {
 //printf("{%s}\n",r);
-    r = strchr(r,'[');
-    if (!r) return NULL;
-    r++;
-    if (strncmp(r,sect,ns)) continue;
-    return (r+ns);
-    }
-  return NULL;
-  }
+		r = strchr(r, '[');
+		if (!r)
+			return NULL;
+		r++;
+		if (strncmp(r, sect, ns))
+			continue;
+		return (r + ns);
+	}
+	return NULL;
+}
 
-static char * findid( const char *sect, const char *id)
-  {
-  int nid = strlen(id);
-  char *r, *sav, *rq, *fnd = NULL;
-  r = findsect(sect);
+
+static char *findid(const char *sect, const char *id)
+{
+	int nid = strlen(id);
+	char *r, *sav, *rq, *fnd = NULL;
+	r = findsect(sect);
 //printf("findsect(%s) %p\n",sect,r);
-  if (!r) return NULL;
-  sav = strchr(r,'['); if (sav) *sav = 0;
-  while (r)
-	{
-	r = strstr(r,id);
-	if (!r) break;
-	rq = r+nid;
-	if ((*(byte *)(r-1) <= ' ') && ((*rq == ' ') || (*rq == '=')))
-		{
-		while (*rq) if (*rq++ == '=') break;
-		if (*rq) { fnd = rq; break;}
-		}
-	r = rq;
-	}
-  if (sav) *sav = '[';
-  return fnd;
-  }
-
-int sf_GetProfileInt( const char *sect, const char *id, int def)
-  {
-  if (rc)
-	{
-	char *p = findid(sect,id);
-	if (p) def = atoi(p);
-	}
-  return def;
-  }
-
-double sf_GetProfileDouble( const char *sect, const char *id, double def)
-  {
-  if (rc)
-	{
-	char *p = findid(sect,id);
-	if (p) def = atof(p);
-	}
-  return def;
-  }
-
-char * sf_GetProfileString( const char *sect, const char *id, char * def)
-  {
-  char *q=NULL, sav=0;
-  if (rc)
-    {
-    char *p = findid(sect,id);
-//printf("findid(%s,%s) %p\n",sect,id,p);
-    if (p)
-	{
-	int quoted = 0;
-	for (; *p; p++)
-		{
-		if (*p == '\"') { quoted = 1; p++; break;}
-		if ((byte)(*p) > ' ') break;
-		}
-	if (*p)
-		{
-		if (quoted) q = strchr(p,'\"');
-		if (!q)
-			{
-			q = p;
-			while (*q > ' ') q++;
-			sav = *q; *q = 0;
+	if (!r)
+		return NULL;
+	sav = strchr(r, '[');
+	if (sav)
+		*sav = 0;
+	while (r) {
+		r = strstr(r, id);
+		if (!r)
+			break;
+		rq = r + nid;
+		if ((*(byte *) (r - 1) <= ' ')
+		    && ((*rq == ' ') || (*rq == '='))) {
+			while (*rq)
+				if (*rq++ == '=')
+					break;
+			if (*rq) {
+				fnd = rq;
+				break;
 			}
 		}
-	def = p;
+		r = rq;
 	}
-    }
-  if (def) def = mystrdup(def);
-  if (sav) *q = sav;
-  return def;
-  }
+	if (sav)
+		*sav = '[';
+	return fnd;
+}
+
+
+int sf_GetProfileInt(const char *sect, const char *id, int def)
+{
+	if (rc) {
+		char *p = findid(sect, id);
+		if (p)
+			def = atoi(p);
+	}
+	return def;
+}
+
+
+double sf_GetProfileDouble(const char *sect, const char *id, double def)
+{
+	if (rc) {
+		char *p = findid(sect, id);
+		if (p)
+			def = atof(p);
+	}
+	return def;
+}
+
+
+char *sf_GetProfileString(const char *sect, const char *id, char *def)
+{
+	char *q = NULL, sav = 0;
+	if (rc) {
+		char *p = findid(sect, id);
+//printf("findid(%s,%s) %p\n",sect,id,p);
+		if (p) {
+			int quoted = 0;
+			for (; *p; p++) {
+				if (*p == '\"') {
+					quoted = 1;
+					p++;
+					break;
+				}
+				if ((byte) (*p) > ' ')
+					break;
+			}
+			if (*p) {
+				if (quoted)
+					q = strchr(p, '\"');
+				if (!q) {
+					q = p;
+					while (*q > ' ')
+						q++;
+					sav = *q;
+					*q = 0;
+				}
+			}
+			def = p;
+		}
+	}
+	if (def)
+		def = mystrdup(def);
+	if (sav)
+		*q = sav;
+	return def;
+}
+
 
 //  A.  Local file header:
-// 
+//
 //         local file header signature   0  4 bytes  (0x04034b50)
 //         version needed to extract     4  2 bytes
 //         general purpose bit flag      6  2 bytes
@@ -955,7 +1024,7 @@ char * sf_GetProfileString( const char *sect, const char *id, char * def)
 //         uncompressed size            22  4 bytes
 //         file name length             26  2 bytes
 //         extra field length           28  2 bytes
-// 
+//
 //         file name (variable size)
 //         extra field (variable size)
 
@@ -964,74 +1033,92 @@ char * sf_GetProfileString( const char *sect, const char *id, char * def)
 
 #define pshort( b) (((int)((b)[1]) << 8) + (int)((b)[0]))
 
-static unsigned myin( void *d, byte **b){return 0;}
-static int myout( void *udata, byte *b, unsigned n)
-  {
-  memmove(udata,b,n); udata += n;
-  return 0;
-  }
 
-static int myunzip( int csize, byte *cdata, byte *udata)
-  {
-  byte window[32768];
-  z_stream z;
-  int st;
+static unsigned myin(void *d, byte ** b)
+{
+	return 0;
+}
 
-  memset(&z,0,sizeof(z));
 
-  st = inflateBackInit( &z, 15, window);
-  if (st) return st;
+static int myout(void *udata, byte * b, unsigned n)
+{
+	memmove(udata, b, n);
+	udata += n;
+	return 0;
+}
 
-  z.next_in = cdata;
-  z.avail_in = csize;
 
-  for (;;){
-	st = inflateBack( &z, myin, NULL, myout, udata);
-	if (st == Z_STREAM_END) break;
-	if (st) return st;
+static int myunzip(int csize, byte * cdata, byte * udata)
+{
+	byte window[32768];
+	z_stream z;
+	int st;
+
+	memset(&z, 0, sizeof(z));
+
+	st = inflateBackInit(&z, 15, window);
+	if (st)
+		return st;
+
+	z.next_in = cdata;
+	z.avail_in = csize;
+
+	for (;;) {
+		st = inflateBack(&z, myin, NULL, myout, udata);
+		if (st == Z_STREAM_END)
+			break;
+		if (st)
+			return st;
 	}
 
-  st = inflateBackEnd(&z);
-  return st;
-  }
+	st = inflateBackEnd(&z);
+	return st;
+}
 
-int sf_pkread( FILE *f, int foffs,  void ** out, int *size)
-  {
-  byte hd[30];
-  byte *data, *cdata;
-  int csize, usize, cmet, skip, st;
 
-  fseek(f,foffs,SEEK_SET);
-  fread(hd,1,30,f);
-  cmet = pshort(hd+8);
-  if (cmet != 8) return -10;
-  csize = plong(hd+18);
-  usize = plong(hd+22);
-  if (csize <= 0) return -11;
-  if (usize <= 0) return -12;
-  data = malloc(usize);
-  if (!data) return -13;
-  cdata = malloc(csize);
-  if (!cdata){ free(data); return -14;}
-  skip = pshort(hd+26) + pshort(hd+28);
-  fseek(f,foffs+30+skip,SEEK_SET);
-  fread(cdata,1,csize,f);
+int sf_pkread(FILE * f, int foffs, void **out, int *size)
+{
+	byte hd[30];
+	byte *data, *cdata;
+	int csize, usize, cmet, skip, st;
+
+	fseek(f, foffs, SEEK_SET);
+	fread(hd, 1, 30, f);
+	cmet = pshort(hd + 8);
+	if (cmet != 8)
+		return -10;
+	csize = plong(hd + 18);
+	usize = plong(hd + 22);
+	if (csize <= 0)
+		return -11;
+	if (usize <= 0)
+		return -12;
+	data = malloc(usize);
+	if (!data)
+		return -13;
+	cdata = malloc(csize);
+	if (!cdata) {
+		free(data);
+		return -14;
+	}
+	skip = pshort(hd + 26) + pshort(hd + 28);
+	fseek(f, foffs + 30 + skip, SEEK_SET);
+	fread(cdata, 1, csize, f);
 //printf("%02x csize %d usize %d skip %d\n",cdata[0],csize,usize,skip);
 
-  st = myunzip(csize,cdata,data);
+	st = myunzip(csize, cdata, data);
 
-  free(cdata);
-  if (st)
-	{
-	free(data);
-	return st;
+	free(cdata);
+	if (st) {
+		free(data);
+		return st;
 	}
-  *out = (void *)data;
-  *size = usize;
-  return st;
-  }
+	*out = (void *)data;
+	*size = usize;
+	return st;
+}
 
-//////////////////////////
+/************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1047,4 +1134,3 @@ int sf_pkread( FILE *f, int foffs,  void ** out, int *size)
 #ifndef WIN32
 #define _stat stat
 #endif
-
