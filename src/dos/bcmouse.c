@@ -29,16 +29,13 @@
  * Return true if a mouse driver is present.
  *
  */
-
-bool detect_mouse (void)
+bool detect_mouse(void)
 {
+	asm xor ax, ax
+	asm int 0x33
+	return _AX;
+} /* detect_mouse */
 
-    asm xor ax,ax
-    asm int 0x33
-
-    return _AX;
-
-}/* detect_mouse */
 
 /*
  * read_mouse
@@ -47,43 +44,36 @@ bool detect_mouse (void)
  * click or 0 if there was no mouse activity at all.
  *
  */
-
-int read_mouse (void)
+int read_mouse(void)
 {
-    int click;
+	int click;
 
-    /* Read the current mouse status */
+	/* Read the current mouse status */
+	for (click = 0; click < 2; click++) {
+		if (click == 1)
+			delay(222);
 
-    for (click = 0; click < 2; click++) {
+		asm mov ax, 6
+		asm xor bx, bx
+		asm int 0x33
+		if (_BX == 0)
+			break;
 
-	if (click == 1)
-	    delay (222);
+		mouse_x = _CX;
+		mouse_y = _DX;
 
-	asm mov ax,6
-	asm xor bx,bx
-	asm int 0x33
+		if (display <= _TEXT_) {
+			mouse_x /= 8;
+			mouse_y /= 8;
+		}
 
-	if (_BX == 0)
-	    break;
+		if (display == _MCGA_)
+			mouse_x /= 2;
 
-	mouse_x = _CX;
-	mouse_y = _DX;
-
-	if (display <= _TEXT_) {
-	    mouse_x /= 8;
-	    mouse_y /= 8;
+		mouse_x++;
+		mouse_y++;
 	}
 
-	if (display == _MCGA_)
-	    mouse_x /= 2;
-
-	mouse_x++;
-	mouse_y++;
-
-    }
-
-    /* Return single or double click */
-
-    return click;
-
-}/* read_mouse */
+	/* Return single or double click */
+	return click;
+} /* read_mouse */
