@@ -59,56 +59,56 @@ typedef int bb_err_t;
 
 /* bb_result_t: Result when you try to load a chunk. */
 typedef struct bb_result_struct {
-    int chunknum; /* The chunk number (for use in bb_unload_chunk(), etc.) */
-    union {
-        void *ptr; /* A pointer to the data (if you used bb_method_Memory) */
-	uint32 startpos; /* The position in the file (if you used bb_method_FilePos) */
-    } data;
-    uint32 length; /* The length of the data */
+	int chunknum;		/* The chunk number (for use in bb_unload_chunk(), etc.) */
+	union {
+		void *ptr;	 /* A pointer to the data (if you used bb_method_Memory) */
+		uint32 startpos; /* The position in the file (if you used bb_method_FilePos) */
+	} data;
+	uint32 length;		/* The length of the data */
 } bb_result_t;
 
 /* bb_aux_sound_t: Extra data which may be associated with a sound. */
 typedef struct bb_aux_sound_struct {
-    char repeats;
+	char repeats;
 } bb_aux_sound_t;
 
 /* bb_aux_pict_t: Extra data which may be associated with an image. */
 typedef struct bb_aux_pict_struct {
-    uint32 ratnum, ratden;
-    uint32 minnum, minden;
-    uint32 maxnum, maxden;
+	uint32 ratnum, ratden;
+	uint32 minnum, minden;
+	uint32 maxnum, maxden;
 } bb_aux_pict_t;
 
 /* bb_resolution_t: The global resolution data. */
 typedef struct bb_resolution_struct {
-    uint32 px, py;
-    uint32 minx, miny;
-    uint32 maxx, maxy;
+	uint32 px, py;
+	uint32 minx, miny;
+	uint32 maxx, maxy;
 } bb_resolution_t;
 
 /* bb_color_t: Guess what. */
 typedef struct bb_color_struct {
-    unsigned char red, green, blue;
+	unsigned char red, green, blue;
 } bb_color_t;
 
 /* bb_palette_t: The palette data. */
 typedef struct bb_palette_struct {
-    int isdirect;
-    union {
-	int depth; /* The depth (if isdirect is TRUE). Either 16 or 32. */
-        struct {
-            int numcolors;
-            bb_color_t *colors;
-        } table; /* The list of colors (if isdirect is FALSE). */
-    } data;
+	int isdirect;
+	union {
+		int depth;	/* The depth (if isdirect is TRUE). Either 16 or 32. */
+		struct {
+			int numcolors;
+			bb_color_t *colors;
+		} table;	/* The list of colors (if isdirect is FALSE). */
+	} data;
 } bb_palette_t;
 
 /* bb_zheader_t: Information to identify a Z-code file. */
 typedef struct bb_zheader_struct {
-    uint16 releasenum; /* Bytes $2-3 of header. */
-    char serialnum[6]; /* Bytes $12-17 of header. */
-    uint16 checksum; /* Bytes $1C-1D of header. */
-    /* The initpc field is not used by Blorb. */
+	uint16 releasenum;	/* Bytes $2-3 of header. */
+	char serialnum[6];	/* Bytes $12-17 of header. */
+	uint16 checksum;	/* Bytes $1C-1D of header. */
+	/* The initpc field is not used by Blorb. */
 } bb_zheader_t;
 
 /* bb_map_t: Holds the complete description of an open Blorb file.
@@ -118,32 +118,35 @@ typedef struct bb_map_struct bb_map_t;
 /* Function declarations. These functions are of fairly general use;
     they would apply to any Blorb file. */
 
-extern bb_err_t bb_create_map(FILE *file, bb_map_t **newmap);
-extern bb_err_t bb_destroy_map(bb_map_t *map);
+extern bb_err_t bb_create_map(FILE * file, bb_map_t ** newmap);
+extern bb_err_t bb_destroy_map(bb_map_t * map);
 
 extern char *bb_err_to_string(bb_err_t err);
 
-extern bb_err_t bb_load_chunk_by_type(bb_map_t *map, int method,
-    bb_result_t *res, uint32 chunktype, int count);
-extern bb_err_t bb_load_chunk_by_number(bb_map_t *map, int method,
-    bb_result_t *res, int chunknum);
-extern bb_err_t bb_unload_chunk(bb_map_t *map, int chunknum);
+extern bb_err_t bb_load_chunk_by_type(bb_map_t * map, int method,
+				      bb_result_t * res, uint32 chunktype,
+				      int count);
+extern bb_err_t bb_load_chunk_by_number(bb_map_t * map, int method,
+					bb_result_t * res, int chunknum);
+extern bb_err_t bb_unload_chunk(bb_map_t * map, int chunknum);
 
-extern bb_err_t bb_load_resource(bb_map_t *map, int method,
-    bb_result_t *res, uint32 usage, int resnum);
-extern bb_err_t bb_count_resources(bb_map_t *map, uint32 usage,
-    int *num, int *min, int *max);
+extern bb_err_t bb_load_resource(bb_map_t * map, int method,
+				 bb_result_t * res, uint32 usage, int resnum);
+extern bb_err_t bb_count_resources(bb_map_t * map, uint32 usage,
+				   int *num, int *min, int *max);
 
 /* More function declarations. These functions are more or less
     specific to the Z-machine's use of Blorb. */
 
-extern uint16 bb_get_release_num(bb_map_t *map);
-extern bb_zheader_t *bb_get_zheader(bb_map_t *map);
-extern bb_resolution_t *bb_get_resolution(bb_map_t *map);
-extern bb_err_t bb_get_palette(bb_map_t *map, bb_palette_t **res);
-extern bb_err_t bb_load_resource_pict(bb_map_t *map, int method,
-    bb_result_t *res, int resnum, bb_aux_pict_t **auxdata);
-extern bb_err_t bb_load_resource_snd(bb_map_t *map, int method,
-    bb_result_t *res, int resnum, bb_aux_sound_t **auxdata);
+extern uint16 bb_get_release_num(bb_map_t * map);
+extern bb_zheader_t *bb_get_zheader(bb_map_t * map);
+extern bb_resolution_t *bb_get_resolution(bb_map_t * map);
+extern bb_err_t bb_get_palette(bb_map_t * map, bb_palette_t ** res);
+extern bb_err_t bb_load_resource_pict(bb_map_t * map, int method,
+				      bb_result_t * res, int resnum,
+				      bb_aux_pict_t ** auxdata);
+extern bb_err_t bb_load_resource_snd(bb_map_t * map, int method,
+				     bb_result_t * res, int resnum,
+				     bb_aux_sound_t ** auxdata);
 
 #endif /* BLORB_H */
