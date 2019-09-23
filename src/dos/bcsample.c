@@ -20,20 +20,20 @@
 #define READ_DSP(v)	{while(!inportb(sound_adr+14)&0x80);v=inportb(sound_adr+10);}
 #define WRITE_DSP(v)	{while(inportb(sound_adr+12)&0x80);outportb(sound_adr+12,v);}
 
-extern void end_of_sound (void);
+extern void end_of_sound(void);
 
 static struct {
-    word prefix;
-    byte repeats;
-    byte base_note;
-    word frequency;
-    word unused;
-    word length;
+	word prefix;
+	byte repeats;
+	byte base_note;
+	word frequency;
+	word unused;
+	word length;
 } sheader;
 
 static current_sample = 0;
 
-static void interrupt (*vect) (void) = NULL;
+static void interrupt(*vect) (void) = NULL;
 
 static play_part = 0;
 static play_count = 0;
@@ -57,34 +57,31 @@ static word sample_len2 = 0;
  * Start the DMA transfer to the sound board.
  *
  */
-
-static void start_of_dma (long address, unsigned length)
+static void start_of_dma(long address, unsigned length)
 {
-    static unsigned dma_page_port[] = {
-	0x87, 0x83, 0x81, 0x82
-    };
+	static unsigned dma_page_port[] = {
+		0x87, 0x83, 0x81, 0x82
+	};
 
-    length--;
+	length--;
 
-    /* Set up DMA chip */
+	/* Set up DMA chip */
+	outportb(0x0a, 0x04 | sound_dma);
+	outportb(0x0c, 0x00);
+	outportb(0x0b, 0x48 | sound_dma);
+	outportb(2 * sound_dma, byte0(address));
+	outportb(2 * sound_dma, byte1(address));
+	outportb(dma_page_port[sound_dma], byte2(address));
+	outportb(2 * sound_dma + 1, byte0(length));
+	outportb(2 * sound_dma + 1, byte1(length));
+	outportb(0x0a, sound_dma);
 
-    outportb (0x0a, 0x04 | sound_dma);
-    outportb (0x0c, 0x00);
-    outportb (0x0b, 0x48 | sound_dma);
-    outportb (2 * sound_dma, byte0 (address));
-    outportb (2 * sound_dma, byte1 (address));
-    outportb (dma_page_port[sound_dma], byte2 (address));
-    outportb (2 * sound_dma + 1, byte0 (length));
-    outportb (2 * sound_dma + 1, byte1 (length));
-    outportb (0x0a, sound_dma);
+	/* Play 8-bit mono sample */
+	WRITE_DSP(0x14)
+	    WRITE_DSP(byte0(length))
+	    WRITE_DSP(byte1(length))
+} /* start_of_dma */
 
-    /* Play 8-bit mono sample */
-
-    WRITE_DSP (0x14)
-    WRITE_DSP (byte0 (length))
-    WRITE_DSP (byte1 (length))
-
-}/* start_of_dma */
 
 /*
  * end_of_dma
@@ -95,33 +92,28 @@ static void start_of_dma (long address, unsigned length)
  * end_of_sound function when we are finished.
  *
  */
-
-static void interrupt end_of_dma (void)
+static void interrupt end_of_dma(void)
 {
+	/* Play the second half, play another cycle or finish */
+	if (play_part == 1 && sample_len2 != 0) {
+		play_part = 2;
+		start_of_dma(sample_adr2, sample_len2);
+	} else if (play_count == 255 || --play_count != 0) {
+		play_part = 1;
+		start_of_dma(sample_adr1, sample_len1);
+	} else {
+		play_part = 0;
+		end_of_sound();
+	}
 
-    /* Play the second half, play another cycle or finish */
+	/* Tell interrupt controller(s) + sound board we are done */
+	outportb(0x20, 0x20);
 
-    if (play_part == 1 && sample_len2 != 0) {
-	play_part = 2;
-	start_of_dma (sample_adr2, sample_len2);
-    } else if (play_count == 255 || --play_count != 0) {
-	play_part = 1;
-	start_of_dma (sample_adr1, sample_len1);
-    } else {
-	play_part = 0;
-	end_of_sound ();
-    }
+	if (sound_irq >= 8)
+		outportb(0xa0, 0x20);
 
-    /* Tell interrupt controller(s) + sound board we are done */
-
-    outportb (0x20, 0x20);
-
-    if (sound_irq >= 8)
-	outportb (0xa0, 0x20);
-
-    inportb (sound_adr + 14);
-
-}/* end_of_dma */
+	inportb(sound_adr + 14);
+} /* end_of_dma */
 
 
 /*
@@ -146,73 +138,67 @@ void os_init_sound(void)
  * Initialise the sound board and various sound related variables.
  *
  */
-
-bool dos_init_sound (void)
+bool dos_init_sound(void)
 {
-    const char *settings;
-    word irc_mask_port;
+	const char *settings;
+	word irc_mask_port;
 
-    /* Read the IRQ, port address, DMA channel and SB version */
+	/* Read the IRQ, port address, DMA channel and SB version */
+	if ((settings = getenv("BLASTER")) == NULL)
+		return FALSE;
 
-    if ((settings = getenv ("BLASTER")) == NULL)
-	return FALSE;
+	sound_irq = dectoi(strchr(settings, 'I') + 1);
+	sound_adr = hextoi(strchr(settings, 'A') + 1);
+	sound_dma = dectoi(strchr(settings, 'D') + 1);
+	sound_ver = dectoi(strchr(settings, 'T') + 1);
 
-    sound_irq = dectoi (strchr (settings, 'I') + 1);
-    sound_adr = hextoi (strchr (settings, 'A') + 1);
-    sound_dma = dectoi (strchr (settings, 'D') + 1);
-    sound_ver = dectoi (strchr (settings, 'T') + 1);
+	/* Reset mixer chip and DSP */
+	outportb(sound_adr + 4, 0);
+	outportb(sound_adr + 5, 0);
 
-    /* Reset mixer chip and DSP */
+	outportb(sound_adr + 6, 1);
+	inportb(sound_adr + 6);
+	inportb(sound_adr + 6);
+	inportb(sound_adr + 6);
+	outportb(sound_adr + 6, 0);
 
-    outportb (sound_adr + 4, 0);
-    outportb (sound_adr + 5, 0);
+	/* Turn on speakers */
+	WRITE_DSP(0xd1)
+	    /* Install the end_of_dma interrupt */
+	    if (sound_irq < 8) {
+		irc_mask_port = 0x21;
+		sound_int = 0x08 + sound_irq;
+	} else {
+		irc_mask_port = 0xa1;
+		sound_int = 0x68 + sound_irq;
+	}
 
-    outportb (sound_adr + 6, 1);
-    inportb (sound_adr + 6);
-    inportb (sound_adr + 6);
-    inportb (sound_adr + 6);
-    outportb (sound_adr + 6, 0);
+	vect = getvect(sound_int);
+	setvect(sound_int, end_of_dma);
 
-    /* Turn on speakers */
+	/* Allocate 64KB RAM for sample data */
+	if ((sample_data = (byte far *) farmalloc(0x10000L)) == NULL)
+		return FALSE;
 
-    WRITE_DSP (0xd1)
+	word0(sample_adr1) = FP_OFF(sample_data) | (FP_SEG(sample_data) << 4);
+	word1(sample_adr1) = FP_SEG(sample_data) >> 12;
+	word0(sample_adr2) = 0;
+	word1(sample_adr2) = word1(sample_adr1) + 1;
 
-    /* Install the end_of_dma interrupt */
+	/* Enable the end_of_dma interrupt */
+	outportb(0x20, 0x20);
 
-    if (sound_irq < 8) {
-	irc_mask_port = 0x21;
-	sound_int = 0x08 + sound_irq;
-    } else {
-	irc_mask_port = 0xa1;
-	sound_int = 0x68 + sound_irq;
-    }
+	if (sound_irq >= 8)
+		outportb(0xa0, 0x20);
 
-    vect = getvect (sound_int); setvect (sound_int, end_of_dma);
+	outportb(irc_mask_port,
+		 inportb(irc_mask_port) & ~(1 << (sound_irq & 7)));
 
-    /* Allocate 64KB RAM for sample data */
+	/* Indicate success */
+	return TRUE;
 
-    if ((sample_data = (byte far *) farmalloc (0x10000L)) == NULL)
-	return FALSE;
+} /* init_sound */
 
-    word0 (sample_adr1) = FP_OFF (sample_data) | (FP_SEG (sample_data) << 4);
-    word1 (sample_adr1) = FP_SEG (sample_data) >> 12;
-    word0 (sample_adr2) = 0;
-    word1 (sample_adr2) = word1 (sample_adr1) + 1;
-
-    /* Enable the end_of_dma interrupt */
-
-    outportb (0x20, 0x20);
-
-    if (sound_irq >= 8)
-	outportb (0xa0, 0x20);
-
-    outportb (irc_mask_port, inportb (irc_mask_port) & ~(1 << (sound_irq & 7)));
-
-    /* Indicate success */
-
-    return TRUE;
-
-}/* init_sound */
 
 /*
  * dos_reset_sound
@@ -220,24 +206,23 @@ bool dos_init_sound (void)
  * Free resources allocated for playing samples.
  *
  */
-
-void dos_reset_sound (void)
+void dos_reset_sound(void)
 {
+	os_stop_sample();
 
-    os_stop_sample ();
+	if (sample_data != NULL) {
+		farfree(sample_data);
+		sample_data = NULL;
+	}
+	if (sound_adr != 0) {
+		setvect(sound_int, vect);
+		sound_adr = 0;
+	}
 
-    if (sample_data != NULL) {
-	farfree (sample_data);
-	sample_data = NULL;
-    }
-    if (sound_adr != 0) {
-	setvect (sound_int, vect);
-	sound_adr = 0;
-    }
-
-}/* dos_reset_sound */
+} /* dos_reset_sound */
 
 #endif /* SOUND_SUPPORT */
+
 
 /*
  * os_beep
@@ -246,21 +231,20 @@ void dos_reset_sound (void)
  * or low-pitched (number == 2).
  *
  */
-
-void os_beep (int number)
+void os_beep(int number)
 {
-    word T = 888 * number;
+	word T = 888 * number;
 
-    outportb (0x43, 0xb6);
-    outportb (0x42, lo (T));
-    outportb (0x42, hi (T));
-    outportb (0x61, inportb (0x61) | 3);
+	outportb(0x43, 0xb6);
+	outportb(0x42, lo(T));
+	outportb(0x42, hi(T));
+	outportb(0x61, inportb(0x61) | 3);
 
-    delay (75);
+	delay(75);
 
-    outportb (0x61, inportb (0x61) & ~3);
+	outportb(0x61, inportb(0x61) & ~3);
+} /* os_beep */
 
-}/* os_beep */
 
 /*
  * os_prepare_sample
@@ -268,72 +252,64 @@ void os_beep (int number)
  * Load the sample from the disk.
  *
  */
-
-void os_prepare_sample (int number)
+void os_prepare_sample(int number)
 {
 #ifdef SOUND_SUPPORT
 
-    os_stop_sample ();
+	os_stop_sample();
 
-    /* Exit if the sound board isn't set up properly */
+	/* Exit if the sound board isn't set up properly */
+	if (sample_data == NULL)
+		return;
+	if (sound_adr == 0)
+		return;
 
-    if (sample_data == NULL)
-	return;
-    if (sound_adr == 0)
-	return;
+	/* Continue only if the desired sample is not already present */
+	if (current_sample != number) {
 
-    /* Continue only if the desired sample is not already present */
+		char sample_name[MAX_FILE_NAME + 1];
+		char numstr[2];
+		FILE *fp;
 
-    if (current_sample != number) {
+		/* Build sample file name */
+		strcpy(sample_name, "sound/");
 
-	char sample_name[MAX_FILE_NAME + 1];
-	char numstr[2];
-	FILE *fp;
+		numstr[0] = '0' + number / 10;
+		numstr[1] = '0' + number % 10;
 
-	/* Build sample file name */
+		strncat(sample_name, f_setup.story_name, 6);
+		strncat(sample_name, numstr, 2);
+		strncat(sample_name, ".snd", 4);
 
-	strcpy (sample_name, "sound/");
+		/* Open sample file */
+		if ((fp = fopen(sample_name, "rb")) == NULL)
+			return;
 
-	numstr[0] = '0' + number / 10;
-	numstr[1] = '0' + number % 10;
+		/* Load header and sample data */
+		fread(&sheader, sizeof(sheader), 1, fp);
 
-	strncat (sample_name, f_setup.story_name, 6);
-	strncat (sample_name, numstr, 2);
-	strncat (sample_name, ".snd", 4);
+		SWAP_BYTES(sheader.frequency)
+		    SWAP_BYTES(sheader.length)
+		    fread(sample_data, 1, sheader.length, fp);
 
-	/* Open sample file */
+		sample_len1 = -word0(sample_adr1);
 
-	if ((fp = fopen (sample_name, "rb")) == NULL)
-	    return;
+		if (sample_len1 > sheader.length || sample_len1 == 0)
+			sample_len1 = sheader.length;
 
-	/* Load header and sample data */
+		sample_len2 = sheader.length - sample_len1;
 
-	fread (&sheader, sizeof (sheader), 1, fp);
+		WRITE_DSP(0x40)
+		    WRITE_DSP(256 - 1000000L / sheader.frequency)
+		    current_sample = number;
 
-	SWAP_BYTES (sheader.frequency)
-	SWAP_BYTES (sheader.length)
+		/* Close sample file */
+		fclose(fp);
 
-	fread (sample_data, 1, sheader.length, fp);
-
-	sample_len1 = -word0 (sample_adr1);
-
-	if (sample_len1 > sheader.length || sample_len1 == 0)
-	    sample_len1 = sheader.length;
-
-	sample_len2 = sheader.length - sample_len1;
-
-	WRITE_DSP (0x40)
-	WRITE_DSP (256 - 1000000L / sheader.frequency)
-
-	current_sample = number;
-
-	/* Close sample file */
-
-	fclose (fp);
-
-    }
+	}
 #endif /* SOUND_SUPPORT */
-}/* os_prepare_sample */
+} /* os_prepare_sample */
+
 
 /*
  * os_start_sample
@@ -344,65 +320,53 @@ void os_prepare_sample (int number)
  * function is called as soon as the sound finishes.
  *
  */
-
-void os_start_sample (int number, int volume, int repeats, zword eos)
+void os_start_sample(int number, int volume, int repeats, zword eos)
 {
 #ifdef SOUND_SUPPORT
+	eos = eos;		/* not used in DOS Frotz */
 
-    eos=eos;	/* not used in DOS Frotz */
+	os_stop_sample();
 
-    os_stop_sample ();
+	/* Exit if the sound board isn't set up properly */
+	if (sample_data == NULL)
+		return;
+	if (sound_adr == 0)
+		return;
 
-    /* Exit if the sound board isn't set up properly */
+	/* Load new sample */
+	os_prepare_sample(number);
 
-    if (sample_data == NULL)
-	return;
-    if (sound_adr == 0)
-	return;
+	/* Continue only if the sample's in memory now */
+	if (current_sample == number) {
+		play_count = repeats;
 
-    /* Load new sample */
+		if (sound_ver < 6) {	/* Set up SB pro mixer chip */
+			volume = (volume != 255) ? 7 + volume : 15;
+			outportb(sound_adr + 4, 0x04);
+			outportb(sound_adr + 5, (volume << 4) | volume);
+			outportb(sound_adr + 4, 0x22);
+			outportb(sound_adr + 5, 0xff);
+		} else {	/* Set up SB16 mixer chip */
+			/* Many thanks to Linards Ticmanis for writing this part! */
+			volume = (volume != 255) ? 127 + 16 * volume : 255;
+			outportb(sound_adr + 4, 0x32);
+			outportb(sound_adr + 5, volume);
+			outportb(sound_adr + 4, 0x33);
+			outportb(sound_adr + 5, volume);
+			outportb(sound_adr + 4, 0x30);
+			outportb(sound_adr + 5, 0xff);
+			outportb(sound_adr + 4, 0x31);
+			outportb(sound_adr + 5, 0xff);
+		}
 
-    os_prepare_sample (number);
-
-    /* Continue only if the sample's in memory now */
-
-    if (current_sample == number) {
-
-	play_count = repeats;
-
-	if (sound_ver < 6) {	/* Set up SB pro mixer chip */
-
-	    volume = (volume != 255) ? 7 + volume : 15;
-
-	    outportb (sound_adr + 4, 0x04);
-	    outportb (sound_adr + 5, (volume << 4) | volume);
-	    outportb (sound_adr + 4, 0x22);
-	    outportb (sound_adr + 5, 0xff);
-
-	} else {		/* Set up SB16 mixer chip */
-
-	    /* Many thanks to Linards Ticmanis for writing this part! */
-
-	    volume = (volume != 255) ? 127 + 16 * volume : 255;
-
-	    outportb (sound_adr + 4, 0x32);
-	    outportb (sound_adr + 5, volume);
-	    outportb (sound_adr + 4, 0x33);
-	    outportb (sound_adr + 5, volume);
-	    outportb (sound_adr + 4, 0x30);
-	    outportb (sound_adr + 5, 0xff);
-	    outportb (sound_adr + 4, 0x31);
-	    outportb (sound_adr + 5, 0xff);
+		play_part = 1;
+		start_of_dma(sample_adr1, sample_len1);
 
 	}
 
-	play_part = 1;
-	start_of_dma (sample_adr1, sample_len1);
-
-    }
-
 #endif /* SOUND_SUPPORT */
-}/* os_start_sample */
+} /* os_start_sample */
+
 
 /*
  * os_stop_sample
@@ -410,26 +374,22 @@ void os_start_sample (int number, int volume, int repeats, zword eos)
  * Turn off the current sample.
  *
  */
-
-void os_stop_sample (void)
+void os_stop_sample(void)
 {
 #ifdef SOUND_SUPPORT
+	play_part = 0;
 
-    play_part = 0;
+	/* Exit if the sound board isn't set up properly */
+	if (sample_data == NULL)
+		return;
+	if (sound_adr == 0)
+		return;
 
-    /* Exit if the sound board isn't set up properly */
-
-    if (sample_data == NULL)
-	return;
-    if (sound_adr == 0)
-	return;
-
-    /* Tell DSP to stop the current sample */
-
-    WRITE_DSP (0xd0)
-
+	/* Tell DSP to stop the current sample */
+	WRITE_DSP(0xd0)
 #endif /* SOUND_SUPPORT */
-}/* os_stop_sample */
+} /* os_stop_sample */
+
 
 /*
  * os_finish_with_sample
@@ -437,12 +397,11 @@ void os_stop_sample (void)
  * Remove the current sample from memory (if any).
  *
  */
-
-void os_finish_with_sample (void)
+void os_finish_with_sample(void)
 {
 #ifdef SOUND_SUPPORT
 
-    os_stop_sample ();		/* we keep 64KB allocated all the time */
+	os_stop_sample();	/* we keep 64KB allocated all the time */
 
 #endif /* SOUND_SUPPORT */
-}/* os_finish_with_sample */
+} /* os_finish_with_sample */
