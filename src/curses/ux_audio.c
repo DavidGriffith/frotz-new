@@ -43,6 +43,7 @@
 #include "ux_audio.h"
 
 f_setup_t f_setup;
+z_header_t z_header;
 
 #ifndef NO_SOUND
 

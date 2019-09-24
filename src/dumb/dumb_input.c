@@ -293,7 +293,7 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 				current_page = next_page = runtime_usage;
 				for (;;) {
 					int i;
-					for (i = 0; (i < h_screen_rows - 2) && *next_page; i++)
+					for (i = 0; (i < z_header.screen_rows - 2) && *next_page; i++)
 						next_page = strchr(next_page, '\n') + 1;
 					/* next_page - current_page is width */
 					printf("%.*s", (int) (next_page - current_page), current_page);
@@ -564,11 +564,11 @@ void os_more_prompt (void)
 
 void dumb_init_input(void)
 {
-	if ((h_version >= V4) && (speed != 0))
-		h_config |= CONFIG_TIMEDINPUT;
+	if ((z_header.version >= V4) && (speed != 0))
+		z_header.config |= CONFIG_TIMEDINPUT;
 
-	if (h_version >= V5)
-		h_flags &= ~(MOUSE_FLAG | MENU_FLAG);
+	if (z_header.version >= V5)
+		z_header.flags &= ~(MOUSE_FLAG | MENU_FLAG);
 }
 
 

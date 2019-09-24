@@ -75,6 +75,8 @@ zbyte far *pcp = NULL;
 
 static FILE *story_fp = NULL;
 
+z_header_t z_header;
+
 /*
  * Data for the undo mechanism.
  * This undo mechanism is based on the scheme used in Evin Robertson's
@@ -111,10 +113,10 @@ zword get_header_extension(int entry)
 	zword addr;
 	zword val;
 
-	if (h_extension_table == 0 || entry > hx_table_size)
+	if (z_header.extension_table == 0 || entry > z_header.x_table_size)
 		return 0;
 
-	addr = h_extension_table + 2 * entry;
+	addr = z_header.extension_table + 2 * entry;
 	LOW_WORD(addr, val);
 
 	return val;
@@ -131,10 +133,10 @@ void set_header_extension(int entry, zword val)
 {
 	zword addr;
 
-	if (h_extension_table == 0 || entry > hx_table_size)
+	if (z_header.extension_table == 0 || entry > z_header.x_table_size)
 		return;
 
-	addr = h_extension_table + 2 * entry;
+	addr = z_header.extension_table + 2 * entry;
 	SET_WORD(addr, val);
 } /* set_header_extension */
 
@@ -154,47 +156,54 @@ void restart_header(void)
 
 	int i;
 
-	SET_BYTE(H_CONFIG, h_config);
-	SET_WORD(H_FLAGS, h_flags);
+	SET_BYTE(H_CONFIG, z_header.config);
+	SET_WORD(H_FLAGS, z_header.flags);
 
-	if (h_version >= V4) {
-		SET_BYTE(H_INTERPRETER_NUMBER, h_interpreter_number);
-		SET_BYTE(H_INTERPRETER_VERSION, h_interpreter_version);
-		SET_BYTE(H_SCREEN_ROWS, h_screen_rows);
-		SET_BYTE(H_SCREEN_COLS, h_screen_cols);
+	if (z_header.version >= V4) {
+		SET_BYTE(H_INTERPRETER_NUMBER, z_header.interpreter_number);
+		SET_BYTE(H_INTERPRETER_VERSION, z_header.interpreter_version);
+		SET_BYTE(H_SCREEN_ROWS, z_header.screen_rows);
+		SET_BYTE(H_SCREEN_COLS, z_header.screen_cols);
 	}
 
 	/* It's less trouble to use font size 1x1 for V5 games, especially
 	   because of a bug in the unreleased German version of "Zork 1" */
 
-	if (h_version != V6) {
-		screen_x_size = (zword) h_screen_cols;
-		screen_y_size = (zword) h_screen_rows;
+	if (z_header.version != V6) {
+		screen_x_size = (zword) z_header.screen_cols;
+		screen_y_size = (zword) z_header.screen_rows;
 		font_x_size = 1;
 		font_y_size = 1;
 	} else {
-		screen_x_size = h_screen_width;
-		screen_y_size = h_screen_height;
-		font_x_size = h_font_width;
-		font_y_size = h_font_height;
+		screen_x_size = z_header.screen_width;
+		screen_y_size = z_header.screen_height;
+		font_x_size = z_header.font_width;
+		font_y_size = z_header.font_height;
 	}
 
-	if (h_version >= V5) {
+	if (z_header.version >= V5) {
 		SET_WORD(H_SCREEN_WIDTH, screen_x_size);
 		SET_WORD(H_SCREEN_HEIGHT, screen_y_size);
 		SET_BYTE(H_FONT_HEIGHT, font_y_size);
 		SET_BYTE(H_FONT_WIDTH, font_x_size);
-		SET_BYTE(H_DEFAULT_BACKGROUND, h_default_background);
-		SET_BYTE(H_DEFAULT_FOREGROUND, h_default_foreground);
+		SET_BYTE(H_DEFAULT_BACKGROUND, z_header.default_background);
+		SET_BYTE(H_DEFAULT_FOREGROUND, z_header.default_foreground);
 	}
 
-	if (h_version == V6)
+	if (z_header.version == V6)
 		for (i = 0; i < 8; i++)
-	storeb((zword) (H_USER_NAME + i), h_user_name[i]);
+	storeb((zword) (H_USER_NAME + i), z_header.user_name[i]);
 
-	SET_BYTE(H_STANDARD_HIGH, h_standard_high);
-	SET_BYTE(H_STANDARD_LOW, h_standard_low);
+	SET_BYTE(H_STANDARD_HIGH, z_header.standard_high);
+	SET_BYTE(H_STANDARD_LOW, z_header.standard_low);
 } /* restart_header */
+
+
+void init_header(void)
+{
+	memset(&z_header, 0, sizeof(z_header));
+	z_header.standard_high = 1;
+}
 
 
 /*
@@ -388,31 +397,31 @@ void init_memory(void)
 		os_fatal("Story file read error");
 
 	/* Copy header fields to global variables */
-	LOW_BYTE(H_VERSION, h_version);
-	if (h_version < V1 || h_version > V8)
+	LOW_BYTE(H_VERSION, z_header.version);
+	if (z_header.version < V1 || z_header.version > V8)
 		os_fatal("Unknown Z-code version");
-	LOW_BYTE (H_CONFIG, h_config);
-	if (h_version == V3 && (h_config & CONFIG_BYTE_SWAPPED))
+	LOW_BYTE (H_CONFIG, z_header.config);
+	if (z_header.version == V3 && (z_header.config & CONFIG_BYTE_SWAPPED))
 		os_fatal("Byte swapped story file");
 
-	LOW_WORD(H_RELEASE, h_release);
-	LOW_WORD(H_RESIDENT_SIZE, h_resident_size);
-	LOW_WORD(H_START_PC, h_start_pc);
-	LOW_WORD(H_DICTIONARY, h_dictionary);
-	LOW_WORD(H_OBJECTS, h_objects);
-	LOW_WORD(H_GLOBALS, h_globals);
-	LOW_WORD(H_DYNAMIC_SIZE, h_dynamic_size);
-	LOW_WORD(H_FLAGS, h_flags);
+	LOW_WORD(H_RELEASE, z_header.release);
+	LOW_WORD(H_RESIDENT_SIZE, z_header.resident_size);
+	LOW_WORD(H_START_PC, z_header.start_pc);
+	LOW_WORD(H_DICTIONARY, z_header.dictionary);
+	LOW_WORD(H_OBJECTS, z_header.objects);
+	LOW_WORD(H_GLOBALS, z_header.globals);
+	LOW_WORD(H_DYNAMIC_SIZE, z_header.dynamic_size);
+	LOW_WORD(H_FLAGS, z_header.flags);
 
 	for (i = 0, addr = H_SERIAL; i < 6; i++, addr++)
-		LOW_BYTE(addr, h_serial[i]);
+		LOW_BYTE(addr, z_header.serial[i]);
 
 	/* Auto-detect buggy story files that need special fixes */
 	story_id = UNKNOWN;
 	for (i = 0; records[i].story_id != UNKNOWN; i++) {
-		if (h_release == records[i].release) {
+		if (z_header.release == records[i].release) {
 			for (j = 0; j < 6; j++) {
-				if (h_serial[j] != records[i].serial[j])
+				if (z_header.serial[j] != records[i].serial[j])
 					goto no_match;
 			}
 			story_id = records[i].story_id;
@@ -420,16 +429,16 @@ void init_memory(void)
 		no_match: ; /* null statement */
 	}
 
-	LOW_WORD(H_ABBREVIATIONS, h_abbreviations);
-	LOW_WORD(H_FILE_SIZE, h_file_size);
+	LOW_WORD(H_ABBREVIATIONS, z_header.abbreviations);
+	LOW_WORD(H_FILE_SIZE, z_header.file_size);
 
 	/* Calculate story file size in bytes */
-	if (h_file_size != 0) {
-		story_size = (long) 2 * h_file_size;
+	if (z_header.file_size != 0) {
+		story_size = (long) 2 * z_header.file_size;
 
-		if (h_version >= V4)
+		if (z_header.version >= V4)
 			story_size *= 2;
-		if (h_version >= V6)
+		if (z_header.version >= V6)
 			story_size *= 2;
 	} else { /* some old games lack the file size entry */
 		os_storyfile_seek(story_fp, 0, SEEK_END);
@@ -437,19 +446,19 @@ void init_memory(void)
 		os_storyfile_seek(story_fp, 64, SEEK_SET);
 	}
 
-	LOW_WORD(H_CHECKSUM, h_checksum);
-	LOW_WORD(H_ALPHABET, h_alphabet);
-	LOW_WORD(H_FUNCTIONS_OFFSET, h_functions_offset);
-	LOW_WORD(H_STRINGS_OFFSET, h_strings_offset);
-	LOW_WORD(H_TERMINATING_KEYS, h_terminating_keys);
-	LOW_WORD(H_EXTENSION_TABLE, h_extension_table);
+	LOW_WORD(H_CHECKSUM, z_header.checksum);
+	LOW_WORD(H_ALPHABET, z_header.alphabet);
+	LOW_WORD(H_FUNCTIONS_OFFSET, z_header.functions_offset);
+	LOW_WORD(H_STRINGS_OFFSET, z_header.strings_offset);
+	LOW_WORD(H_TERMINATING_KEYS, z_header.terminating_keys);
+	LOW_WORD(H_EXTENSION_TABLE, z_header.extension_table);
 
 	/* Zork Zero Macintosh doesn't have the graphics flag set */
-	if (story_id == ZORK_ZERO && h_release == 296)
-		h_flags |= GRAPHICS_FLAG;
+	if (story_id == ZORK_ZERO && z_header.release == 296)
+		z_header.flags |= GRAPHICS_FLAG;
 
 	/* Adjust opcode tables */
-	if (h_version <= V4) {
+	if (z_header.version <= V4) {
 		op0_opcodes[0x09] = z_pop;
 		op1_opcodes[0x0f] = z_not;
 	} else {
@@ -472,8 +481,8 @@ void init_memory(void)
 	}
 
 	/* Read header extension table */
-	hx_table_size = get_header_extension(HX_TABLE_SIZE);
-	hx_unicode_table = get_header_extension(HX_UNICODE_TABLE);
+	z_header.x_table_size = get_header_extension(HX_TABLE_SIZE);
+	z_header.x_unicode_table = get_header_extension(HX_UNICODE_TABLE);
 } /* init_memory */
 
 
@@ -496,14 +505,14 @@ void init_undo(void)
 			return;
 	}
 
-	/* Allocate h_dynamic_size bytes for previous dynamic
-	 * zmp state + 1.5 h_dynamic_size for Quetzal diff + 2.
+	/* Allocate z_header.dynamic_size bytes for previous dynamic
+	 * zmp state + 1.5 z_header.dynamic_size for Quetzal diff + 2.
 	 */
-	undo_mem = malloc((h_dynamic_size * 5) / 2 + 2);
+	undo_mem = malloc((z_header.dynamic_size * 5) / 2 + 2);
 	if (undo_mem != NULL) {
 		prev_zmp = undo_mem;
-		undo_diff = undo_mem + h_dynamic_size;
-		memmove (prev_zmp, zmp, h_dynamic_size);
+		undo_diff = undo_mem + z_header.dynamic_size;
+		memmove (prev_zmp, zmp, z_header.dynamic_size);
 	} else
 		f_setup.undo_slots = 0;
 
@@ -573,12 +582,12 @@ void reset_memory(void)
  */
 void storeb(zword addr, zbyte value)
 {
-	if (addr >= h_dynamic_size)
+	if (addr >= z_header.dynamic_size)
 		runtime_error(ERR_STORE_RANGE);
 
 	if (addr == H_FLAGS + 1) {	/* flags register is modified */
-		h_flags &= ~(SCRIPTING_FLAG | FIXED_FONT_FLAG);
-		h_flags |= value & (SCRIPTING_FLAG | FIXED_FONT_FLAG);
+		z_header.flags &= ~(SCRIPTING_FLAG | FIXED_FONT_FLAG);
+		z_header.flags |= value & (SCRIPTING_FLAG | FIXED_FONT_FLAG);
 
 		if (value & SCRIPTING_FLAG) {
 			if (!ostream_script)
@@ -624,7 +633,7 @@ void z_restart(void)
 
 	if (!first_restart) {
 		os_storyfile_seek(story_fp, 0, SEEK_SET);
-		if (fread(zmp, 1, h_dynamic_size, story_fp) != h_dynamic_size)
+		if (fread(zmp, 1, z_header.dynamic_size, story_fp) != z_header.dynamic_size)
 			os_fatal ("Story file read error");
 	} else first_restart = FALSE;
 
@@ -634,10 +643,10 @@ void z_restart(void)
 	sp = fp = stack + STACK_SIZE;
 	frame_count = 0;
 
-	if (h_version != V6) {
-		long pc = (long) h_start_pc;
+	if (z_header.version != V6) {
+		long pc = (long) z_header.start_pc;
 		SET_PC(pc);
-	} else call(h_start_pc, 0, NULL, 0);
+	} else call(z_header.start_pc, 0, NULL, 0);
 
 	os_restart_game (RESTART_END);
 } /* z_restart */
@@ -743,7 +752,7 @@ void z_restore(void)
 				zbyte old_screen_cols;
 
 				/* In V3, reset the upper window. */
-				if (h_version == V3)
+				if (z_header.version == V3)
 				split_window(0);
 
 				LOW_BYTE (H_SCREEN_ROWS, old_screen_rows);
@@ -759,9 +768,9 @@ void z_restore(void)
 				 * seems to cover up most of the
 				 * resulting badness.
 				 */
-				if (h_version > V3 && h_version != V6
-				    && (h_screen_rows != old_screen_rows
-				    || h_screen_cols != old_screen_cols))
+				if (z_header.version > V3 && z_header.version != V6
+				    && (z_header.screen_rows != old_screen_rows
+				    || z_header.screen_cols != old_screen_cols))
 					erase_window (1);
 			}
 		} else
@@ -772,7 +781,7 @@ finished:
 	if (gfp == NULL && f_setup.restore_mode)
 		os_fatal ("Error reading save file");
 
-	if (h_version <= V3)
+	if (z_header.version <= V3)
 		branch(success);
 	else
 		store(success);
@@ -877,7 +886,7 @@ int restore_undo(void)
 		return 0;
 
 	/* undo possible */
-	memmove(zmp, prev_zmp, h_dynamic_size);
+	memmove(zmp, prev_zmp, z_header.dynamic_size);
 	SET_PC(pc);
 	curr_undo->pc = pc;
 	sp = stack + STACK_SIZE - curr_undo->stack_size;
@@ -975,7 +984,7 @@ void z_save(void)
 
 finished:
 
-	if (h_version <= V3)
+	if (z_header.version <= V3)
 		branch(success);
 	else
 		store(success);
@@ -1015,7 +1024,7 @@ int save_undo(void)
 	if (undo_count == f_setup.undo_slots)
 		free_undo(1);
 
-	diff_size = mem_diff(zmp, prev_zmp, h_dynamic_size, undo_diff);
+	diff_size = mem_diff(zmp, prev_zmp, z_header.dynamic_size, undo_diff);
 	stack_size = stack + STACK_SIZE - sp;
 	do {
 		p = malloc(sizeof (undo_t) + diff_size + stack_size * sizeof (*sp));
@@ -1077,5 +1086,5 @@ void z_verify (void)
 		checksum += fgetc(story_fp);
 
 	/* Branch if the checksums are equal */
-	branch(checksum == h_checksum);
+	branch(checksum == z_header.checksum);
 } /* z_verify */

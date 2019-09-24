@@ -67,8 +67,8 @@ void init_sound(void)
 		break;
 	}
 
-	if ((h_flags & SOUND_FLAG)
-	    || (h_version == V3 && (h_flags & OLD_SOUND_FLAG))) {
+	if ((z_header.flags & SOUND_FLAG)
+	    || (z_header.version == V3 && (z_header.flags & OLD_SOUND_FLAG))) {
 		f_setup.sound_flag = TRUE;
 		locked = FALSE;
 		playing = FALSE;

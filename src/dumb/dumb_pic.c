@@ -23,6 +23,7 @@
 #include "dumb_blorb.h"
 
 f_setup_t f_setup;
+z_header_t z_header;
 
 #define PIC_FILE_HEADER_FLAGS 1
 #define PIC_FILE_HEADER_NUM_IMAGES 4
@@ -136,8 +137,8 @@ bool dumb_init_pictures (void)
 			} /* if */
 		} /* if */
 
-		pict_info[i].height = round_div(pict_info[i].orig_height * h_screen_rows, y_scale);
-		pict_info[i].width = round_div(pict_info[i].orig_width * h_screen_cols, x_scale);
+		pict_info[i].height = round_div(pict_info[i].orig_height * z_header.screen_rows, y_scale);
+		pict_info[i].width = round_div(pict_info[i].orig_width * z_header.screen_cols, x_scale);
 
 		/* Don't let dimensions get rounded to nothing. */
 		if (pict_info[i].orig_height && !pict_info[i].height)
@@ -148,8 +149,8 @@ bool dumb_init_pictures (void)
 		success = TRUE;
 	} /* for */
 
-	if (success) h_config |= CONFIG_PICTURES;
-	else h_flags &= ~GRAPHICS_FLAG;
+	if (success) z_header.config |= CONFIG_PICTURES;
+	else z_header.flags &= ~GRAPHICS_FLAG;
 
 	return success;
 }

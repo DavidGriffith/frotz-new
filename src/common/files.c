@@ -67,9 +67,9 @@ void script_open(void)
 
 	char *new_name;
 
-	h_flags &= ~SCRIPTING_FLAG;
+	z_header.flags &= ~SCRIPTING_FLAG;
 
-	if (h_version >= V5 || !script_valid) {
+	if (z_header.version >= V5 || !script_valid) {
 		new_name = os_read_file_name(f_setup.script_name, FILE_SCRIPT);
 		if (new_name == NULL)
 			goto done;
@@ -81,7 +81,7 @@ void script_open(void)
 	if ((sfp = fopen (f_setup.script_name, "r+t")) != NULL ||
 	    (sfp = fopen(f_setup.script_name, "w+t")) != NULL) {
 		fseek (sfp, 0, SEEK_END);
-		h_flags |= SCRIPTING_FLAG;
+		z_header.flags |= SCRIPTING_FLAG;
 		script_valid = TRUE;
 		ostream_script = TRUE;
 		script_width = 0;
@@ -89,7 +89,7 @@ void script_open(void)
 		print_string ("Cannot open file\n");
 
 done:
-	SET_WORD(H_FLAGS, h_flags);
+	SET_WORD(H_FLAGS, z_header.flags);
 } /* script_open */
 
 
@@ -101,8 +101,8 @@ done:
  */
 void script_close(void)
 {
-	h_flags &= ~SCRIPTING_FLAG;
-	SET_WORD(H_FLAGS, h_flags);
+	z_header.flags &= ~SCRIPTING_FLAG;
+	SET_WORD(H_FLAGS, z_header.flags);
 	fclose (sfp);
 	ostream_script = FALSE;
 } /* script_close */

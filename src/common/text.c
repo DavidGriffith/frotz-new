@@ -65,13 +65,13 @@ zchar translate_from_zscii(zbyte c)
 
 	if (c >= 0x9b && story_id != BEYOND_ZORK) {
 
-		if (hx_unicode_table != 0) {	/* game has its own Unicode table */
+		if (z_header.x_unicode_table != 0) {	/* game has its own Unicode table */
 			zbyte N;
 
-			LOW_BYTE(hx_unicode_table, N)
+			LOW_BYTE(z_header.x_unicode_table, N)
 			if (c - 0x9b < N) {
 				zword addr =
-				    hx_unicode_table + 1 + 2 * (c - 0x9b);
+				    z_header.x_unicode_table + 1 + 2 * (c - 0x9b);
 				zword unicode;
 
 				LOW_WORD(addr, unicode)
@@ -107,14 +107,14 @@ zbyte unicode_to_zscii(zchar c)
 
 	if (c >= ZC_LATIN1_MIN) {
 		/* game has its own Unicode table */
-		if (hx_unicode_table != 0) {
+		if (z_header.x_unicode_table != 0) {
 			zbyte N;
 			int i;
 
-			LOW_BYTE(hx_unicode_table, N)
+			LOW_BYTE(z_header.x_unicode_table, N)
 			for (i = 0x9b; i < 0x9b + N; i++) {
 				zword addr =
-					hx_unicode_table + 1 + 2 * (i - 0x9b);
+					z_header.x_unicode_table + 1 + 2 * (i - 0x9b);
 				zword unicode;
 
 				LOW_WORD(addr, unicode)
@@ -168,11 +168,11 @@ zbyte translate_to_zscii(zchar c)
  */
 static zchar alphabet(int set, int index)
 {
-	if (h_alphabet != 0) {	/* game uses its own alphabet */
+	if (z_header.alphabet != 0) {	/* game uses its own alphabet */
 
 		zbyte c;
 
-		zword addr = h_alphabet + 26 * set + index;
+		zword addr = z_header.alphabet + 26 * set + index;
 		LOW_BYTE(addr, c)
 		return translate_from_zscii(c);
 
@@ -180,7 +180,7 @@ static zchar alphabet(int set, int index)
 		return 'a' + index;
 	else if (set == 1)
 		return 'A' + index;
-	else if (h_version == V1)
+	else if (z_header.version == V1)
 		return " 0123456789.,!?_#'\"/\\<-:()"[index];
 	else
 		return " ^0123456789.,!?_#'\"/\\-:()"[index];
@@ -195,7 +195,7 @@ static zchar alphabet(int set, int index)
  */
 static void load_string(zword addr, zword length)
 {
-	int resolution = (h_version <= V3) ? 2 : 3;
+	int resolution = (z_header.version <= V3) ? 2 : 3;
 	int i = 0;
 
 	while (i < 3 * resolution) {
@@ -237,7 +237,7 @@ static void encode_text(int padding)
 	zbyte zchars[12];
 	const zchar *ptr = decoded;
 	zchar c;
-	int resolution = (h_version <= V3) ? 2 : 3;
+	int resolution = (z_header.version <= V3) ? 2 : 3;
 	int i = 0;
 
 	/* Expand abbreviations that some old Infocom games lack */
@@ -279,7 +279,7 @@ letter_found:
 
 			/* Character found, store its index */
 			if (set != 0)
-				zchars[i++] = ((h_version <= V2) ? 1 : 3) + set;
+				zchars[i++] = ((z_header.version <= V2) ? 1 : 3) + set;
 
 			zchars[i++] = index + 6;
 		} else
@@ -393,14 +393,14 @@ static void decode_text(enum string_type st, zword addr)
 
 	else if (st == HIGH_STRING) {
 
-		if (h_version <= V3)
+		if (z_header.version <= V3)
 			byte_addr = (long)addr << 1;
-		else if (h_version <= V5)
+		else if (z_header.version <= V5)
 			byte_addr = (long)addr << 2;
-		else if (h_version <= V7)
+		else if (z_header.version <= V7)
 			byte_addr =
-			    ((long)addr << 2) + ((long)h_strings_offset << 3);
-		else		/* (h_version == V8) */
+			    ((long)addr << 2) + ((long)z_header.strings_offset << 3);
+		else		/* (z_header.version == V8) */
 			byte_addr = (long)addr << 3;
 
 		if (byte_addr >= story_size)
@@ -435,9 +435,9 @@ static void decode_text(enum string_type st, zword addr)
 			case 0:	/* normal operation */
 				if (shift_state == 2 && c == 6)
 					status = 2;
-				else if (h_version == V1 && c == 1)
+				else if (z_header.version == V1 && c == 1)
 					new_line();
-				else if (h_version >= V2
+				else if (z_header.version >= V2
 					 && shift_state == 2 && c == 7)
 					new_line();
 				else if (c >= 6)
@@ -445,15 +445,15 @@ static void decode_text(enum string_type st, zword addr)
 						(shift_state, c - 6));
 				else if (c == 0)
 					outchar(' ');
-				else if (h_version >= V2 && c == 1)
+				else if (z_header.version >= V2 && c == 1)
 					status = 1;
-				else if (h_version >= V3 && c <= 3)
+				else if (z_header.version >= V3 && c <= 3)
 					status = 1;
 				else {
 					shift_state =
 					    (shift_lock + (c & 1) +
 					     1) % 3;
-					if (h_version <= V2 && c >= 4)
+					if (z_header.version <= V2 && c >= 4)
 						shift_lock =
 						    shift_state;
 					break;
@@ -462,7 +462,7 @@ static void decode_text(enum string_type st, zword addr)
 				break;
 			case 1:	/* abbreviation */
 				ptr_addr =
-				    h_abbreviations + 64 * (prev_c -
+				    z_header.abbreviations + 64 * (prev_c -
 						    1) + 2 * c;
 				LOW_WORD(ptr_addr, abbr_addr)
 				    decode_text(ABBREVIATION,
@@ -730,7 +730,7 @@ static zword lookup_text(int padding, zword dct)
 	zword addr;
 	zbyte entry_len;
 	zbyte sep_count;
-	int resolution = (h_version <= V3) ? 2 : 3;
+	int resolution = (z_header.version <= V3) ? 2 : 3;
 	int entry_number;
 	int lower, upper;
 	int i;
@@ -845,7 +845,7 @@ void tokenise_line(zword text, zword token, zword dct, bool flag)
 
 	/* Use standard dictionary if the given dictionary is zero */
 	if (dct == 0)
-		dct = h_dictionary;
+		dct = z_header.dictionary;
 
 	/* Remove all tokens before inserting new ones */
 	storeb((zword) (token + 1), 0);
@@ -858,7 +858,7 @@ void tokenise_line(zword text, zword token, zword dct, bool flag)
 	addr1 = text;
 	addr2 = 0;
 
-	if (h_version >= V5) {
+	if (z_header.version >= V5) {
 		addr1++;
 		LOW_BYTE(addr1, length)
 	}
@@ -872,7 +872,7 @@ void tokenise_line(zword text, zword token, zword dct, bool flag)
 
 		addr1++;
 
-		if (h_version >= V5 && addr1 == text + 2 + length)
+		if (z_header.version >= V5 && addr1 == text + 2 + length)
 			c = 0;
 		else
 			LOW_BYTE(addr1, c)
@@ -974,8 +974,8 @@ int completion(const zchar * buffer, zchar * result)
 	decoded[len] = 0;
 
 	/* Search the dictionary for first and last possible extensions */
-	minaddr = lookup_text(0x00, h_dictionary);
-	maxaddr = lookup_text(0x1f, h_dictionary);
+	minaddr = lookup_text(0x00, z_header.dictionary);
+	maxaddr = lookup_text(0x1f, z_header.dictionary);
 
 	if (minaddr == 0 || maxaddr == 0 || minaddr > maxaddr)
 		return 2;

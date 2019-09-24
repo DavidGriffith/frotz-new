@@ -151,9 +151,9 @@ bool unix_init_pictures (void)
 			}
 		} /* for */
 
-		pict_info[i].height = round_div(pict_info[i].orig_height * h_screen_rows, y_scale);
+		pict_info[i].height = round_div(pict_info[i].orig_height * z_header.screen_rows, y_scale);
 		pict_info[i].width = round_div(pict_info[i].orig_width *
-		h_screen_cols, x_scale);
+		z_header.screen_cols, x_scale);
 
 		/* Don't let dimensions get rounded to nothing. */
 		if (pict_info[i].orig_height && !pict_info[i].height)
@@ -164,8 +164,8 @@ bool unix_init_pictures (void)
 		success = TRUE;
 	} /* for */
 
-	if (success) h_config |= CONFIG_PICTURES;
-	else h_flags &= ~GRAPHICS_FLAG;
+	if (success) z_header.config |= CONFIG_PICTURES;
+	else z_header.flags &= ~GRAPHICS_FLAG;
 
 	return success;
 } /* unix_init_pictures */
@@ -218,7 +218,7 @@ int os_picture_data(int num, int *height, int *width)
  */
 static void safe_mvaddch(int y, int x, int ch)
 {
-	if ((y < h_screen_rows) && (x < h_screen_cols))
+	if ((y < z_header.screen_rows) && (x < z_header.screen_cols))
 		mvaddch(y, x, ch);
 } /* safe_mvaddch */
 
@@ -229,10 +229,10 @@ static void safe_mvaddch(int y, int x, int ch)
  */
 static void safe_scrnset(int y, int x, int ch, int n)
 {
-	if ((y < h_screen_rows) && (x < h_screen_cols)) {
+	if ((y < z_header.screen_rows) && (x < z_header.screen_cols)) {
 		move(y, x);
-		if (x + n > h_screen_cols)
-			n = h_screen_cols - x;
+		if (x + n > z_header.screen_cols)
+			n = z_header.screen_cols - x;
 		while (n--)
 			addch(ch);
 	}
@@ -363,6 +363,6 @@ int os_peek_colour(void)
 #endif /* COLOR_SUPPORT */
   	} else {
    		 return (inch() & A_REVERSE) ?
-			h_default_foreground : h_default_background;
+			z_header.default_foreground : z_header.default_background;
 	}
 } /* os_peek_colour */

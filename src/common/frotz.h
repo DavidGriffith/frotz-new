@@ -482,49 +482,6 @@ extern zbyte *zmp;
 #endif
 
 
-/*** Story file header data ***/
-extern zbyte h_version;
-extern zbyte h_config;
-extern zword h_release;
-extern zword h_resident_size;
-extern zword h_start_pc;
-extern zword h_dictionary;
-extern zword h_objects;
-extern zword h_globals;
-extern zword h_dynamic_size;
-extern zword h_flags;
-extern zbyte h_serial[6];
-extern zword h_abbreviations;
-extern zword h_file_size;
-extern zword h_checksum;
-extern zbyte h_interpreter_number;
-extern zbyte h_interpreter_version;
-extern zbyte h_screen_rows;
-extern zbyte h_screen_cols;
-extern zword h_screen_width;
-extern zword h_screen_height;
-extern zbyte h_font_height;
-extern zbyte h_font_width;
-extern zword h_functions_offset;
-extern zword h_strings_offset;
-extern zbyte h_default_background;
-extern zbyte h_default_foreground;
-extern zword h_terminating_keys;
-extern zword h_line_width;
-extern zbyte h_standard_high;
-extern zbyte h_standard_low;
-extern zword h_alphabet;
-extern zword h_extension_table;
-extern zbyte h_user_name[8];
-
-extern zword hx_table_size;
-extern zword hx_mouse_x;
-extern zword hx_mouse_y;
-extern zword hx_unicode_table;
-extern zword hx_flags;
-extern zword hx_fore_colour;
-extern zword hx_back_colour;
-
 /*** Various data ***/
 
 extern enum story story_id;
@@ -744,6 +701,7 @@ void	runtime_error(int);
 #define ERR_DEFAULT_REPORT_MODE ERR_REPORT_ONCE
 
 /*** Assorted initialization functions ***/
+void   init_header(void);
 void   init_buffer(void);
 void   init_process(void);
 void   init_sound(void);

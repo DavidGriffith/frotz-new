@@ -135,12 +135,12 @@ static bool hot_key_undo(void)
 {
 	print_string("Undo one turn\n");
 	if (restore_undo()) {
-		if (h_version >= V5) {		/* for V5+ games we must */
+		if (z_header.version >= V5) {		/* for V5+ games we must */
 			store(2);		/* store 2 (for success) */
 			return TRUE;		/* and abort the input   */
 		}
 
-		if (h_version <= V3) {		/* for V3- games we must */
+		if (z_header.version <= V3) {		/* for V3- games we must */
 			z_show_status();	/* draw the status line  */
 			return FALSE;		/* and continue input    */
 		}

@@ -38,7 +38,7 @@ static char latin1_to_ascii[] =
 	"th  n   o   o   o   o   oe  :   o   u   u   u   ue  y   th  y   "
 ;
 
-/* h_screen_rows * h_screen_cols */
+/* z_header.screen_rows * z_header.screen_cols */
 static int screen_cells;
 
 /* The in-memory state of the screen.  */
@@ -85,13 +85,13 @@ static char rv_blank_char = ' ';
 
 static cell *dumb_row(int r)
 {
-	return screen_data + r * h_screen_cols;
+	return screen_data + r * z_header.screen_cols;
 }
 
 
 static char *dumb_changes_row(int r)
 {
-    return screen_changes + r * h_screen_cols;
+    return screen_changes + r * z_header.screen_cols;
 }
 
 
@@ -130,8 +130,8 @@ int os_string_width (const zchar *s)
 void os_set_cursor(int row, int col)
 {
 	cursor_row = row - 1; cursor_col = col - 1;
-	if (cursor_row >= h_screen_rows)
-		cursor_row = h_screen_rows - 1;
+	if (cursor_row >= z_header.screen_rows)
+		cursor_row = z_header.screen_rows - 1;
 }
 
 
@@ -177,8 +177,8 @@ void os_set_text_style(int x)
 static void dumb_display_char(zchar c)
 {
 	dumb_set_cell(cursor_row, cursor_col, make_cell(current_style, c));
-	if (++cursor_col == h_screen_cols) {
-		if (cursor_row == h_screen_rows - 1)
+	if (++cursor_col == z_header.screen_cols) {
+		if (cursor_row == z_header.screen_rows - 1)
 			cursor_col--;
 		else {
 			cursor_row++;
@@ -394,7 +394,7 @@ static void show_row(int r)
 		/* Don't print spaces at end of line.  */
 		/* (Saves bandwidth and printhead wear.)  */
 		/* TODO: compress spaces to tabs.  */
-		for (last = h_screen_cols - 1; last >= 0; last--) {
+		for (last = z_header.screen_cols - 1; last >= 0; last--) {
 			if (!will_print_blank(dumb_row(r)[last]))
 				break;
 		}
@@ -448,7 +448,7 @@ void dumb_show_screen(bool show_cursor)
 
 	/* Easy case */
 	if (compression_mode == COMPRESSION_NONE) {
-		for (r = hide_lines; r < h_screen_rows; r++)
+		for (r = hide_lines; r < z_header.screen_rows; r++)
 			show_row(r);
 		mark_all_unchanged();
 		return;
@@ -456,14 +456,14 @@ void dumb_show_screen(bool show_cursor)
 
 	/* Check which rows changed, and where the first and last change is.  */
 	first = last = -1;
-	memset(changed_rows, 0, h_screen_rows);
-	for (r = hide_lines; r < h_screen_rows; r++) {
-		for (c = 0; c < h_screen_cols; c++) {
+	memset(changed_rows, 0, z_header.screen_rows);
+	for (r = hide_lines; r < z_header.screen_rows; r++) {
+		for (c = 0; c < z_header.screen_cols; c++) {
 			if (dumb_changes_row(r)[c] && !is_blank(dumb_row(r)[c]))
 				break;
 		}
 
-		changed_rows[r] = (c != h_screen_cols);
+		changed_rows[r] = (c != z_header.screen_cols);
 		if (changed_rows[r]) {
 			first = (first != -1) ? first : r;
 			last = r;
@@ -475,11 +475,11 @@ void dumb_show_screen(bool show_cursor)
 
 	/* The show_cursor rule described above */
 	if (show_cursor && (cursor_row == last)) {
-		for (c = cursor_col; c < h_screen_cols; c++) {
+		for (c = cursor_col; c < z_header.screen_cols; c++) {
 			if (!is_blank(dumb_row(last)[c]))
 				break;
 		}
-		if (c == h_screen_cols)
+		if (c == z_header.screen_cols)
 			last--;
 	}
 
@@ -511,7 +511,7 @@ void dumb_show_screen(bool show_cursor)
 void dumb_dump_screen(void)
 {
 	int r;
-	for (r = 0; r < h_screen_height; r++)
+	for (r = 0; r < z_header.screen_height; r++)
 		show_row(r);
 }
 
@@ -630,26 +630,26 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 
 void dumb_init_output(void)
 {
-	if (h_version == V3) {
-		h_config |= CONFIG_SPLITSCREEN;
-		h_flags &= ~OLD_SOUND_FLAG;
+	if (z_header.version == V3) {
+		z_header.config |= CONFIG_SPLITSCREEN;
+		z_header.flags &= ~OLD_SOUND_FLAG;
 	}
 
-	if (h_version >= V5) {
-		h_flags &= ~SOUND_FLAG;
+	if (z_header.version >= V5) {
+		z_header.flags &= ~SOUND_FLAG;
 	}
 
-	h_screen_height = h_screen_rows;
-	h_screen_width = h_screen_cols;
-	screen_cells = h_screen_rows * h_screen_cols;
+	z_header.screen_height = z_header.screen_rows;
+	z_header.screen_width = z_header.screen_cols;
+	screen_cells = z_header.screen_rows * z_header.screen_cols;
 
-	h_font_width = 1; h_font_height = 1;
+	z_header.font_width = 1; z_header.font_height = 1;
 
 	if (show_line_types == -1)
-		show_line_types = h_version > 3;
+		show_line_types = z_header.version > 3;
 
 	screen_data = malloc(screen_cells * sizeof(cell));
 	screen_changes = malloc(screen_cells);
-	os_erase_area(1, 1, h_screen_rows, h_screen_cols, -2);
+	os_erase_area(1, 1, z_header.screen_rows, z_header.screen_cols, -2);
 	memset(screen_changes, 0, screen_cells);
 }

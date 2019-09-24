@@ -67,10 +67,10 @@ Zwindow *curwinrec()
  */
 static zword winarg0(void)
 {
-	if (h_version == V6 && (short)zargs[0] == -3)
+	if (z_header.version == V6 && (short)zargs[0] == -3)
 		return cwin;
 
-	if (zargs[0] >= ((h_version == V6) ? 8 : 2))
+	if (zargs[0] >= ((z_header.version == V6) ? 8 : 2))
 		runtime_error(ERR_ILL_WIN);
 
 	return zargs[0];
@@ -120,7 +120,7 @@ static void reset_cursor(zword win)
 {
 	int lines = 0;
 
-	if (h_version <= V4 && win == 0)
+	if (z_header.version <= V4 && win == 0)
 		lines = wp[0].y_size / hi(wp[0].font_size) - 1;
 
 	wp[win].y_cursor = hi(wp[0].font_size) * lines + 1;
@@ -179,7 +179,7 @@ static int units_left(void)
  */
 zword get_max_width(zword win)
 {
-	if (h_version == V6) {
+	if (z_header.version == V6) {
 		if (win >= 8)
 			runtime_error(ERR_ILL_WIN);
 		return wp[win].x_size - wp[win].left - wp[win].right;
@@ -216,8 +216,8 @@ void screen_new_line(void)
 		return;
 
 	/* Handle newline interrupts at the start (for most cases) */
-	if (h_interpreter_number != INTERP_MSDOS || story_id != ZORK_ZERO
-	    || h_release != 393)
+	if (z_header.interpreter_number != INTERP_MSDOS || story_id != ZORK_ZERO
+	    || z_header.release != 393)
 		countdown();
 
 	/* Check whether the last input line gets destroyed */
@@ -259,8 +259,8 @@ void screen_new_line(void)
 	}
 
 	/* Handle newline interrupts at the end for Zork Zero under DOS */
-	if (h_interpreter_number == INTERP_MSDOS && story_id == ZORK_ZERO
-	    && h_release == 393)
+	if (z_header.interpreter_number == INTERP_MSDOS && story_id == ZORK_ZERO
+	    && z_header.release == 393)
 		countdown();
 } /* screen_new_line */
 
@@ -471,10 +471,10 @@ static void update_attributes(void)
 
 	/* Some story files forget to select wrapping for printing hints */
 
-	if (story_id == ZORK_ZERO && h_release == 366)
+	if (story_id == ZORK_ZERO && z_header.release == 366)
 		if (cwin == 0)
 			enable_wrapping = TRUE;
-	if (story_id == SHOGUN && h_release <= 295)
+	if (story_id == SHOGUN && z_header.release <= 295)
 		if (cwin == 0)
 			enable_wrapping = TRUE;
 } /* update_attributes */
@@ -492,10 +492,10 @@ void refresh_text_style(void)
 {
 	zword style;
 
-	if (h_version != V6) {
+	if (z_header.version != V6) {
 		style = wp[0].style;
 
-		if (cwin != 0 || h_flags & FIXED_FONT_FLAG)
+		if (cwin != 0 || z_header.flags & FIXED_FONT_FLAG)
 			style |= FIXED_WIDTH_STYLE;
 	} else
 		style = cwp->style;
@@ -525,7 +525,7 @@ static void set_window(zword win)
 
 	update_attributes();
 
-	if (h_version == V6) {
+	if (z_header.version == V6) {
 		os_set_colour(lo(cwp->colour), hi(cwp->colour));
 
 		if (os_font_data(cwp->font, &font_height, &font_width))
@@ -535,7 +535,7 @@ static void set_window(zword win)
 	} else
 		refresh_text_style();
 
-	if (h_version != V6 && win != 0) {
+	if (z_header.version != V6 && win != 0) {
 		wp[win].y_cursor = 1;
 		wp[win].x_cursor = 1;
 	}
@@ -555,15 +555,15 @@ void erase_window(zword win)
 	zword y = wp[win].y_pos;
 	zword x = wp[win].x_pos;
 
-	if (h_version == V6 && win != cwin
-	    && h_interpreter_number != INTERP_AMIGA)
+	if (z_header.version == V6 && win != cwin
+	    && z_header.interpreter_number != INTERP_AMIGA)
 		os_set_colour(lo(wp[win].colour), hi(wp[win].colour));
 
 	os_erase_area(y,
 		      x, y + wp[win].y_size - 1, x + wp[win].x_size - 1, win);
 
-	if (h_version == V6 && win != cwin
-	    && h_interpreter_number != INTERP_AMIGA)
+	if (z_header.version == V6 && win != cwin
+	    && z_header.interpreter_number != INTERP_AMIGA)
 		os_set_colour(lo(cwp->colour), hi(cwp->colour));
 
 	reset_cursor(win);
@@ -586,10 +586,10 @@ void split_window(zword height)
 	flush_buffer();
 
 	/* Calculate height of status line and upper window */
-	if (h_version != V6)
+	if (z_header.version != V6)
 		height *= hi(wp[1].font_size);
 
-	if (h_version <= V3)
+	if (z_header.version <= V3)
 		stat_height = hi(wp[7].font_size);
 
 	/* Cursor of upper window mustn't be swallowed by the lower window */
@@ -605,13 +605,13 @@ void split_window(zword height)
 	wp[0].y_cursor += wp[0].y_pos - 1 - stat_height - height;
 
 	wp[0].y_pos = 1 + stat_height + height;
-	wp[0].y_size = h_screen_height - stat_height - height;
+	wp[0].y_size = z_header.screen_height - stat_height - height;
 
 	if ((short)wp[0].y_cursor < 1)
 		reset_cursor(0);
 
 	/* Erase the upper window in V3 only */
-	if (h_version == V3 && height != 0)
+	if (z_header.version == V3 && height != 0)
 		erase_window(1);
 
 } /* split_window */
@@ -627,7 +627,7 @@ static void erase_screen(zword win)
 {
 	int i;
 
-	os_erase_area(1, 1, h_screen_height, h_screen_width, -2);
+	os_erase_area(1, 1, z_header.screen_height, z_header.screen_width, -2);
 
 	if ((short)win == -1) {
 		split_window(0);
@@ -651,22 +651,22 @@ void resize_screen(void)
 {
 	/* V6 games are asked to redraw.  Other versions have no means for that
 	   so we do what we can. */
-	if (h_version == V6)
-		h_flags |= REFRESH_FLAG;
+	if (z_header.version == V6)
+		z_header.flags |= REFRESH_FLAG;
 	else {
 		int scroll, h;
 
-		wp[0].x_size = h_screen_width;
-		if (wp[0].x_cursor > h_screen_width)
-			wp[0].x_cursor = h_screen_width;
-		wp[1].x_size = h_screen_width;
-		if (wp[1].x_cursor > h_screen_width)
-			wp[1].x_cursor = h_screen_width;
-		wp[7].x_size = h_screen_width;
-		if (wp[7].x_cursor > h_screen_width)
-			wp[7].x_cursor = h_screen_width;
+		wp[0].x_size = z_header.screen_width;
+		if (wp[0].x_cursor > z_header.screen_width)
+			wp[0].x_cursor = z_header.screen_width;
+		wp[1].x_size = z_header.screen_width;
+		if (wp[1].x_cursor > z_header.screen_width)
+			wp[1].x_cursor = z_header.screen_width;
+		wp[7].x_size = z_header.screen_width;
+		if (wp[7].x_cursor > z_header.screen_width)
+			wp[7].x_cursor = z_header.screen_width;
 
-		h = h_screen_height - wp[1].y_size - wp[7].y_size;
+		h = z_header.screen_height - wp[1].y_size - wp[7].y_size;
 		if (h > 0) {
 			wp[0].y_size = h;
 			scroll = wp[0].y_cursor - wp[0].y_size;
@@ -675,8 +675,8 @@ void resize_screen(void)
 			/*XXX We should probably adjust the other windows.  But how? */
 			wp[0].y_size = 1;
 			scroll =
-			    wp[0].y_pos + wp[0].y_cursor - h_screen_height - 1;
-			wp[0].y_pos = h_screen_height;
+			    wp[0].y_pos + wp[0].y_cursor - z_header.screen_height - 1;
+			wp[0].y_pos = z_header.screen_height;
 		}
 		if (scroll > 0) {
 			wp[0].y_cursor = wp[0].y_size;
@@ -697,7 +697,7 @@ void resize_screen(void)
 void restart_screen(void)
 {
 	/* Use default settings */
-	os_set_colour(h_default_foreground, h_default_background);
+	os_set_colour(z_header.default_foreground, z_header.default_background);
 
 	if (os_font_data(TEXT_FONT, &font_height, &font_width))
 		os_set_font(TEXT_FONT);
@@ -721,7 +721,7 @@ void restart_screen(void)
 		cwp->nl_countdown = 0;
 		cwp->style = 0;
 		cwp->colour =
-		    (h_default_background << 8) | h_default_foreground;
+		    (z_header.default_background << 8) | z_header.default_foreground;
 		cwp->font = TEXT_FONT;
 		cwp->font_size = (font_height << 8) | font_width;
 		cwp->attribute = 8;
@@ -733,11 +733,11 @@ void restart_screen(void)
 	wp[0].left = f_setup.left_margin;
 	wp[0].right = f_setup.right_margin;
 
-	wp[0].x_size = h_screen_width;
-	wp[1].x_size = h_screen_width;
+	wp[0].x_size = z_header.screen_width;
+	wp[1].x_size = z_header.screen_width;
 
-	if (h_version <= V3)
-		wp[7].x_size = h_screen_width;
+	if (z_header.version <= V3)
+		wp[7].x_size = z_header.screen_width;
 
 	os_restart_game(RESTART_WPROP_SET);
 
@@ -765,26 +765,26 @@ bool validate_click(void)
 		    || mouse_x >= wp[mwin].x_pos + wp[mwin].x_size)
 			return FALSE;
 
-		hx_mouse_y = mouse_y - wp[mwin].y_pos + 1;
-		hx_mouse_x = mouse_x - wp[mwin].x_pos + 1;
+		z_header.x_mouse_y = mouse_y - wp[mwin].y_pos + 1;
+		z_header.x_mouse_x = mouse_x - wp[mwin].x_pos + 1;
 	} else {
-		if (mouse_y < 1 || mouse_y > h_screen_height)
+		if (mouse_y < 1 || mouse_y > z_header.screen_height)
 			return FALSE;
-		if (mouse_x < 1 || mouse_x > h_screen_width)
+		if (mouse_x < 1 || mouse_x > z_header.screen_width)
 			return FALSE;
 
-		hx_mouse_y = mouse_y;
-		hx_mouse_x = mouse_x;
+		z_header.x_mouse_y = mouse_y;
+		z_header.x_mouse_x = mouse_x;
 
 	}
 
-	if (h_version != V6) {
-		hx_mouse_y = (hx_mouse_y - 1) / h_font_height + 1;
-		hx_mouse_x = (hx_mouse_x - 1) / h_font_width + 1;
+	if (z_header.version != V6) {
+		z_header.x_mouse_y = (z_header.x_mouse_y - 1) / z_header.font_height + 1;
+		z_header.x_mouse_x = (z_header.x_mouse_x - 1) / z_header.font_width + 1;
 	}
 
-	set_header_extension(HX_MOUSE_Y, hx_mouse_y);
-	set_header_extension(HX_MOUSE_X, hx_mouse_x);
+	set_header_extension(HX_MOUSE_Y, z_header.x_mouse_y);
+	set_header_extension(HX_MOUSE_X, z_header.x_mouse_x);
 
 	return TRUE;
 } /* validate_click */
@@ -844,7 +844,7 @@ void z_buffer_mode(void)
 	   off word wrapping, V6 games use the window_style opcode instead.)
 	   Today we can afford to ignore buffer_mode in V6. */
 
-	if (h_version != V6) {
+	if (z_header.version != V6) {
 		flush_buffer();
 		wp[0].attribute &= ~8;
 
@@ -900,7 +900,7 @@ void z_draw_picture(void)
 			os_picture_data(mapper[i].pic2, &height2, &width2);
 
 			if (story_id == ARTHUR && pic == 54)
-				delta = h_screen_width / 160;
+				delta = z_header.screen_width / 160;
 
 			os_draw_picture(mapper[i].pic1, y + height1, x + delta);
 			os_draw_picture(mapper[i].pic2, y + height1,
@@ -915,7 +915,7 @@ void z_draw_picture(void)
 			int height, width;
 
 			os_picture_data(59, &height, &width);
-			os_draw_picture(59, y, h_screen_width - width + 1);
+			os_draw_picture(59, y, z_header.screen_width - width + 1);
 		}
 } /* z_draw_picture */
 
@@ -1009,9 +1009,9 @@ void z_get_cursor(void)
 	y = cwp->y_cursor;
 	x = cwp->x_cursor;
 
-	if (h_version != V6) {	/* convert to grid positions */
-		y = (y - 1) / h_font_height + 1;
-		x = (x - 1) / h_font_width + 1;
+	if (z_header.version != V6) {	/* convert to grid positions */
+		y = (y - 1) / z_header.font_height + 1;
+		x = (x - 1) / z_header.font_width + 1;
 	}
 
 	storew((zword) (zargs[0] + 0), y);
@@ -1158,7 +1158,7 @@ void z_print_table(void)
 
 	for (i = 0; i < zargs[2]; i++) {
 		if (i != 0) {
-			if (h_version != V6 && cwin == 0) {
+			if (z_header.version != V6 && cwin == 0) {
 				new_line();
 			} else {
 				flush_buffer();
@@ -1215,7 +1215,7 @@ void z_scroll_window(void)
 	flush_buffer();
 
 	/* Use the correct set of colours when scrolling the window */
-	if (win != cwin && h_interpreter_number != INTERP_AMIGA)
+	if (win != cwin && z_header.interpreter_number != INTERP_AMIGA)
 		os_set_colour(lo(wp[win].colour), hi(wp[win].colour));
 
 	y = wp[win].y_pos;
@@ -1226,7 +1226,7 @@ void z_scroll_window(void)
 		       y + wp[win].y_size - 1,
 		       x + wp[win].x_size - 1, (short)zargs[1]);
 
-	if (win != cwin && h_interpreter_number != INTERP_AMIGA)
+	if (win != cwin && z_header.interpreter_number != INTERP_AMIGA)
 		os_set_colour(lo(cwp->colour), hi(cwp->colour));
 } /* z_scroll_window */
 
@@ -1241,7 +1241,7 @@ void z_scroll_window(void)
  */
 void z_set_colour(void)
 {
-	zword win = (h_version == V6) ? winarg2() : 0;
+	zword win = (z_header.version == V6) ? winarg2() : 0;
 
 	zword fg = zargs[0];
 	zword bg = zargs[1];
@@ -1259,11 +1259,11 @@ void z_set_colour(void)
 		bg = hi(wp[win].colour);
 
 	if (fg == 1)		/* colour 1 is the system default colour */
-		fg = h_default_foreground;
+		fg = z_header.default_foreground;
 	if (bg == 1)
-		bg = h_default_background;
+		bg = z_header.default_background;
 
-	if (h_version == V6 && h_interpreter_number == INTERP_AMIGA)
+	if (z_header.version == V6 && z_header.interpreter_number == INTERP_AMIGA)
 		/* Changing colours of window 0 affects the entire screen */
 		if (win == 0) {
 			int i;
@@ -1286,7 +1286,7 @@ void z_set_colour(void)
 
 	wp[win].colour = (bg << 8) | fg;
 
-	if (win == cwin || h_version != V6)
+	if (win == cwin || z_header.version != V6)
 		os_set_colour(fg, bg);
 } /* z_set_colour */
 
@@ -1299,7 +1299,7 @@ void z_set_colour(void)
  */
 void z_set_font(void)
 {
-	zword win = (h_version == V6) ? cwin : 0;
+	zword win = (z_header.version == V6) ? cwin : 0;
 	zword font = zargs[0];
 
 	if (font != 0) {
@@ -1332,7 +1332,7 @@ void z_set_font(void)
  */
 void z_set_cursor(void)
 {
-	zword win = (h_version == V6) ? winarg2() : 1;
+	zword win = (z_header.version == V6) ? winarg2() : 1;
 
 	zword y = zargs[0];
 	zword x = zargs[1];
@@ -1353,11 +1353,11 @@ void z_set_cursor(void)
 	}
 
 	/* Convert grid positions to screen units if this is not V6 */
-	if (h_version != V6) {
+	if (z_header.version != V6) {
 		if (cwin == 0)
 			return;
-		y = (y - 1) * h_font_height + 1;
-		x = (x - 1) * h_font_width + 1;
+		y = (y - 1) * z_header.font_height + 1;
+		x = (x - 1) * z_header.font_width + 1;
 	}
 
 	/* Protect the margins */
@@ -1414,7 +1414,7 @@ void z_set_margins(void)
  */
 void z_set_text_style(void)
 {
-	zword win = (h_version == V6) ? cwin : 0;
+	zword win = (z_header.version == V6) ? cwin : 0;
 	zword style = zargs[0];
 
 	wp[win].style |= style;
@@ -1476,12 +1476,12 @@ void z_show_status(void)
 
 	/* One V5 game (Wishbringer Solid Gold) contains this opcode by
 	   accident, so just return if the version number does not fit */
-	if (h_version >= V4)
+	if (z_header.version >= V4)
 		return;
 
 	/* Read all relevant global variables from the memory of the
 	   Z-machine into local variables */
-	addr = h_globals;
+	addr = z_header.globals;
 	LOW_WORD(addr, global0)
 	addr += 2;
 	LOW_WORD(addr, global1)
@@ -1496,7 +1496,7 @@ void z_show_status(void)
 
 	/* If the screen width is below 55 characters then we have to use
 	   the brief status line format */
-	if (h_screen_cols < 55)
+	if (z_header.screen_cols < 55)
 		brief = TRUE;
 
 	/* Print the object description for the global variable 0 */
@@ -1505,7 +1505,7 @@ void z_show_status(void)
 
 	/* A header flag tells us whether we have to display the current
 	   time or the score/moves information */
-	if (h_config & CONFIG_TIME) {	/* print hours and minutes */
+	if (z_header.config & CONFIG_TIME) {	/* print hours and minutes */
 		zword hours = (global1 + 11) % 12 + 1;
 		pad_status_line(brief ? 15 : 20);
 		print_string("Time: ");
@@ -1638,8 +1638,8 @@ zword get_window_font(zword win)
 	zword font = wp[win].font;
 
 	if (font == TEXT_FONT) {
-		if (h_version != V6) {
-			if (win != 0 || h_flags & FIXED_FONT_FLAG)
+		if (z_header.version != V6) {
+			if (win != 0 || z_header.flags & FIXED_FONT_FLAG)
 				font = FIXED_WIDTH_FONT;
 		} else {
 			if (wp[win].style & FIXED_WIDTH_STYLE)
@@ -1658,7 +1658,7 @@ zword get_window_font(zword win)
  */
 int colour_in_use(zword colour)
 {
-	int max = (h_version == V6) ? 8 : 2;
+	int max = (z_header.version == V6) ? 8 : 2;
 	int i;
 
 	for (i = 0; i < max; i++) {

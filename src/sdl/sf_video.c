@@ -26,6 +26,8 @@ static void sf_quitconf();
 static bool ApplyPalette(sf_picture *);
 static ulong screen_palette[16];
 
+z_header_t z_header;
+
 /* clipping region */
 static int xmin, xmax, ymin, ymax;
 
@@ -473,7 +475,7 @@ void sf_initvideo(int W, int H, int full)
 	Uint32 initflags = SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO;
 
 	sprintf(banner, "SDL Frotz v%s - %s (z%d)",
-		VERSION, f_setup.story_name, h_version);
+		VERSION, f_setup.story_name, z_header.version);
 
 	if (SDL_Init(initflags) < 0) {
 		os_fatal("Couldn't initialize SDL: %s", SDL_GetError());

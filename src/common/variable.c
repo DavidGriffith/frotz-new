@@ -36,7 +36,7 @@ void z_dec(void)
 	else if (zargs[0] < 16)
 		(*(fp - zargs[0]))--;
 	else {
-		zword addr = h_globals + 2 * (zargs[0] - 16);
+		zword addr = z_header.globals + 2 * (zargs[0] - 16);
 		LOW_WORD(addr, value)
 		value--;
 		SET_WORD(addr, value)
@@ -60,7 +60,7 @@ void z_dec_chk(void)
 	else if (zargs[0] < 16)
 		value = --(*(fp - zargs[0]));
 	else {
-		zword addr = h_globals + 2 * (zargs[0] - 16);
+		zword addr = z_header.globals + 2 * (zargs[0] - 16);
 		LOW_WORD(addr, value)
 		value--;
 		SET_WORD(addr, value)
@@ -84,7 +84,7 @@ void z_inc(void)
 	else if (zargs[0] < 16)
 		(*(fp - zargs[0]))++;
 	else {
-		zword addr = h_globals + 2 * (zargs[0] - 16);
+		zword addr = z_header.globals + 2 * (zargs[0] - 16);
 		LOW_WORD(addr, value)
 		    value++;
 		SET_WORD(addr, value)
@@ -109,7 +109,7 @@ void z_inc_chk(void)
 	else if (zargs[0] < 16)
 		value = ++(*(fp - zargs[0]));
 	else {
-		zword addr = h_globals + 2 * (zargs[0] - 16);
+		zword addr = z_header.globals + 2 * (zargs[0] - 16);
 		LOW_WORD(addr, value)
 		value++;
 		SET_WORD(addr, value)
@@ -133,7 +133,7 @@ void z_load(void)
 	else if (zargs[0] < 16)
 		value = *(fp - zargs[0]);
 	else {
-		zword addr = h_globals + 2 * (zargs[0] - 16);
+		zword addr = z_header.globals + 2 * (zargs[0] - 16);
 		LOW_WORD(addr, value)
 	}
 	store(value);
@@ -190,14 +190,14 @@ void z_pull(void)
 {
 	zword value;
 
-	if (h_version != V6) {	/* not a V6 game, pop stack and write */
+	if (z_header.version != V6) {	/* not a V6 game, pop stack and write */
 		value = *sp++;
 		if (zargs[0] == 0)
 			*sp = value;
 		else if (zargs[0] < 16)
 			*(fp - zargs[0]) = value;
 		else {
-			zword addr = h_globals + 2 * (zargs[0] - 16);
+			zword addr = z_header.globals + 2 * (zargs[0] - 16);
 			SET_WORD(addr, value)
 		}
 	} else {		/* it's V6, but is there a user stack? */
@@ -268,7 +268,7 @@ void z_store(void)
 	else if (zargs[0] < 16)
 		*(fp - zargs[0]) = value;
 	else {
-		zword addr = h_globals + 2 * (zargs[0] - 16);
+		zword addr = z_header.globals + 2 * (zargs[0] - 16);
 		SET_WORD(addr, value)
 	}
 } /* z_store */

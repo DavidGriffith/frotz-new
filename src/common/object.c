@@ -44,7 +44,7 @@
 static zword object_address(zword obj)
 {
 	/* Check object number */
-	if (obj > ((h_version <= V3) ? 255 : MAX_OBJECT)) {
+	if (obj > ((z_header.version <= V3) ? 255 : MAX_OBJECT)) {
 		print_string("@Attempt to address illegal object ");
 		print_num(obj);
 		print_string(".  This is normally fatal.");
@@ -53,10 +53,10 @@ static zword object_address(zword obj)
 	}
 
 	/* Return object address */
-	if (h_version <= V3)
-		return h_objects + ((obj - 1) * O1_SIZE + 62);
+	if (z_header.version <= V3)
+		return z_header.objects + ((obj - 1) * O1_SIZE + 62);
 	else
-		return h_objects + ((obj - 1) * O4_SIZE + 126);
+		return z_header.objects + ((obj - 1) * O4_SIZE + 126);
 } /* object_address */
 
 
@@ -74,7 +74,7 @@ zword object_name(zword object)
 	obj_addr = object_address(object);
 
 	/* The object name address is found at the start of the properties */
-	if (h_version <= V3)
+	if (z_header.version <= V3)
 		obj_addr += O1_PROPERTY_OFFSET;
 	else
 		obj_addr += O4_PROPERTY_OFFSET;
@@ -123,7 +123,7 @@ static zword next_property(zword prop_addr)
 
 	/* Calculate the length of this property */
 
-	if (h_version <= V3)
+	if (z_header.version <= V3)
 		value >>= 5;
 	else if (!(value & 0x80))
 		value >>= 6;
@@ -157,7 +157,7 @@ static void unlink_object(zword object)
 
 	obj_addr = object_address (object);
 
-	if (h_version <= V3) {
+	if (z_header.version <= V3) {
 		zbyte parent;
 		zbyte younger_sibling;
 		zbyte older_sibling;
@@ -247,7 +247,7 @@ void z_clear_attr(void)
 		if (zargs[1] == 48)
 			return;
 
-	if (zargs[1] > ((h_version <= V3) ? 31 : 47))
+	if (zargs[1] > ((z_header.version <= V3) ? 31 : 47))
 		runtime_error(ERR_ILL_ATTR);
 
 	/* If we are monitoring attribute assignment display a short note */
@@ -305,7 +305,7 @@ void z_jin(void)
 
 	obj_addr = object_address(zargs[0]);
 
-	if (h_version <= V3) {
+	if (z_header.version <= V3) {
 		zbyte parent;
 
 		/* Get parent id from object */
@@ -354,7 +354,7 @@ void z_get_child(void)
 
 	obj_addr = object_address (zargs[0]);
 
-	if (h_version <= V3) {
+	if (z_header.version <= V3) {
 		zbyte child;
 
 		/* Get child id from object */
@@ -398,7 +398,7 @@ void z_get_next_prop(void)
 	}
 
 	/* Property id is in bottom five (six) bits */
-	mask = (h_version <= V3) ? 0x1f : 0x3f;
+	mask = (z_header.version <= V3) ? 0x1f : 0x3f;
 
 	/* Load address of first property */
 	prop_addr = first_property(zargs[0]);
@@ -448,7 +448,7 @@ void z_get_parent(void)
 
 	obj_addr = object_address (zargs[0]);
 
-	if (h_version <= V3) {
+	if (z_header.version <= V3) {
 		zbyte parent;
 
 		/* Get parent id from object */
@@ -492,7 +492,7 @@ void z_get_prop(void)
 	}
 
 	/* Property id is in bottom five (six) bits */
-	mask = (h_version <= V3) ? 0x1f : 0x3f;
+	mask = (z_header.version <= V3) ? 0x1f : 0x3f;
 
 	/* Load address of first property */
 	prop_addr = first_property(zargs[0]);
@@ -508,15 +508,15 @@ void z_get_prop(void)
 	if ((value & mask) == zargs[1]) { 	/* property found */
 		/* Load property (byte or word sized) */
 		prop_addr++;
-		if ((h_version <= V3 && !(value & 0xe0)) ||
-		    (h_version >= V4 && !(value & 0xc0))) {
+		if ((z_header.version <= V3 && !(value & 0xe0)) ||
+		    (z_header.version >= V4 && !(value & 0xc0))) {
 			LOW_BYTE(prop_addr, bprop_val)
 			wprop_val = bprop_val;
 		} else
 			LOW_WORD(prop_addr, wprop_val)
 	} else {	/* property not found */
 		/* Load default value */
-		prop_addr = h_objects + 2 * (zargs[1] - 1);
+		prop_addr = z_header.objects + 2 * (zargs[1] - 1);
 		LOW_WORD(prop_addr, wprop_val)
 	}
 	/* Store the property value */
@@ -551,7 +551,7 @@ void z_get_prop_addr(void)
 	}
 
 	/* Property id is in bottom five (six) bits */
-	mask = (h_version <= V3) ? 0x1f : 0x3f;
+	mask = (z_header.version <= V3) ? 0x1f : 0x3f;
 
 	/* Load address of first property */
 	prop_addr = first_property(zargs[0]);
@@ -566,7 +566,7 @@ void z_get_prop_addr(void)
 
 	/* Calculate the property address or return zero */
 	if ((value & mask) == zargs[1]) {
-		if (h_version >= V4 && (value & 0x80))
+		if (z_header.version >= V4 && (value & 0x80))
 			prop_addr++;
 		store ((zword) (prop_addr + 1));
 	} else
@@ -595,7 +595,7 @@ void z_get_prop_len(void)
 	LOW_BYTE(addr, value)
 
 	/* Calculate length of property */
-	if (h_version <= V3)
+	if (z_header.version <= V3)
 		value = (value >> 5) + 1;
 	else if (!(value & 0x80))
 		value = (value >> 6) + 1;
@@ -628,7 +628,7 @@ void z_get_sibling(void)
 
 	obj_addr = object_address(zargs[0]);
 
-	if (h_version <= V3) {
+	if (z_header.version <= V3) {
 		zbyte sibling;
 
 		/* Get sibling id from object */
@@ -695,7 +695,7 @@ void z_insert_obj(void)
 	unlink_object(obj1);
 
 	/* Make object 1 first child of object 2 */
-	if (h_version <= V3) {
+	if (z_header.version <= V3) {
 		zbyte child;
 
 		obj1_addr += O1_PARENT;
@@ -739,7 +739,7 @@ void z_put_prop(void)
 	}
 
 	/* Property id is in bottom five or six bits */
-	mask = (h_version <= V3) ? 0x1f : 0x3f;
+	mask = (z_header.version <= V3) ? 0x1f : 0x3f;
 
 	/* Load address of first property */
 	prop_addr = first_property(zargs[0]);
@@ -759,8 +759,8 @@ void z_put_prop(void)
 	/* Store the new property value (byte or word sized) */
 	prop_addr++;
 
-	if ((h_version <= V3 && !(value & 0xe0)) ||
-	    (h_version >= V4 && !(value & 0xc0))) {
+	if ((z_header.version <= V3 && !(value & 0xe0)) ||
+	    (z_header.version >= V4 && !(value & 0xc0))) {
 		zbyte v = zargs[2];
 		SET_BYTE(prop_addr, v)
 	} else {
@@ -807,7 +807,7 @@ void z_set_attr(void)
 		if (zargs[1] == 48)
 			return;
 
-	if (zargs[1] > ((h_version <= V3) ? 31 : 47))
+	if (zargs[1] > ((z_header.version <= V3) ? 31 : 47))
 		runtime_error(ERR_ILL_ATTR);
 
 	/* If we are monitoring attribute assignment display a short note */
@@ -851,7 +851,7 @@ void z_test_attr(void)
 	zword obj_addr;
 	zbyte value;
 
-	if (zargs[1] > ((h_version <= V3) ? 31 : 47))
+	if (zargs[1] > ((z_header.version <= V3) ? 31 : 47))
 		runtime_error(ERR_ILL_ATTR);
 
 	/* If we are monitoring attribute testing display a short note */

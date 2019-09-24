@@ -260,7 +260,7 @@ continue_input:
 
 	/* Handle hot keys */
 	if (hot_keys && key >= ZC_HKEY_MIN && key <= ZC_HKEY_MAX) {
-		if (h_version == V4 && key == ZC_HKEY_UNDO)
+		if (z_header.version == V4 && key == ZC_HKEY_UNDO)
 			goto continue_input;
 		if (!handle_hot_key(key))
 			goto continue_input;

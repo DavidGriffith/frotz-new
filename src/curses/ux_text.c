@@ -133,8 +133,8 @@ static int unix_convert(int color)
  */
 void os_set_colour (int new_foreground, int new_background)
 {
-	if (new_foreground == 1) new_foreground = h_default_foreground;
-	if (new_background == 1) new_background = h_default_background;
+	if (new_foreground == 1) new_foreground = z_header.default_foreground;
+	if (new_background == 1) new_background = z_header.default_background;
 	if (u_setup.color_enabled) {
 #ifdef COLOR_SUPPORT
 		static int colorspace[10][10];
@@ -148,8 +148,8 @@ void os_set_colour (int new_foreground, int new_background)
 		u_setup.current_color = COLOR_PAIR(colorspace[new_foreground][new_background]);
 #endif
 	} else
-		u_setup.current_color = (((new_foreground == h_default_background)
-			&& (new_background == h_default_foreground))
+		u_setup.current_color = (((new_foreground == z_header.default_background)
+			&& (new_background == z_header.default_foreground))
 			? A_REVERSE : 0);
 	os_set_text_style(u_setup.current_text_style);
 } /* os_set_colour */

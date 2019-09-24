@@ -38,11 +38,9 @@ typedef struct frotz_setup_struct {
 	bool use_blorb;
 	bool exec_in_blorb;
 } f_setup_t;
-
 extern f_setup_t f_setup;
 
 /*** Story file header data ***/
-/*
 typedef struct zcode_header_struct {
 	zbyte version;
 	zbyte config;
@@ -78,10 +76,12 @@ typedef struct zcode_header_struct {
 	zword extension_table;
 	zbyte user_name[8];
 
-	zword hx_table_size;
-	zword hx_mouse_x;
-	zword hx_mouse_y;
-	zword hx_unicode_table;
+	zword x_table_size;
+	zword x_mouse_x;
+	zword x_mouse_y;
+	zword x_unicode_table;
+	zword x_flags;
+	zword x_fore_colour;
+	zword x_back_colour;
 } z_header_t;
 extern z_header_t z_header;
-*/

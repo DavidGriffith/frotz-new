@@ -650,7 +650,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 {
 	int ch, y, x, len = zcharstrlen(buf);
 	int res;
-	const int margin = MAX(h_screen_width - width, 0);
+	const int margin = MAX(z_header.screen_width - width, 0);
 
 	/* These are static to allow input continuation to work smoothly. */
 	static int scrpos = 0, searchpos = -1, insert_flag = 1;
@@ -684,7 +684,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 			ch = unix_read_char(1);
 		getyx(stdscr, y, x2);
 		x2++;
-		width = h_screen_width - margin;
+		width = z_header.screen_width - margin;
 		max = MIN(width, bufmax);
 		/* The screen has shrunk and input no longer fits.  Chop. */
 		if (len > max) {

@@ -45,9 +45,9 @@ bool is_terminator(zchar key)
 	if (key >= ZC_HKEY_MIN && key <= ZC_HKEY_MAX)
 		return TRUE;
 
-	if (h_terminating_keys != 0) {
+	if (z_header.terminating_keys != 0) {
 		if (key >= ZC_ARROW_MIN && key <= ZC_MENU_CLICK) {
-			zword addr = h_terminating_keys;
+			zword addr = z_header.terminating_keys;
 			zbyte c;
 			do {
 				LOW_BYTE(addr, c);
@@ -169,13 +169,13 @@ void z_read(void)
 	/* Get maximum input size */
 	addr = zargs[0];
 	LOW_BYTE (addr, max);
-	if (h_version <= V4)
+	if (z_header.version <= V4)
 		max--;
 	if (max >= INPUT_BUFFER_SIZE)
 		max = INPUT_BUFFER_SIZE - 1;
 
 	/* Get initial input size */
-	if (h_version >= V5) {
+	if (z_header.version >= V5) {
 		addr++;
 		LOW_BYTE(addr, size);
 	} else size = 0;
@@ -189,7 +189,7 @@ void z_read(void)
 	buffer[i] = 0;
 
 	/* Draw status line for V1 to V3 games */
-	if (h_version <= V3)
+	if (z_header.version <= V3)
 		z_show_status();
 
 	/* Read input from current input stream */
@@ -198,13 +198,13 @@ void z_read(void)
 		zargs[2],		/* timeout value   */
 		zargs[3],		/* timeout routine */
 		TRUE,	        	/* enable hot keys */
-		h_version == V6);	/* no script in V6 */
+		z_header.version == V6);	/* no script in V6 */
 
 	if (key == ZC_BAD)
 		return;
 
 	/* Perform save_undo for V1 to V4 games */
-	if (h_version <= V4)
+	if (z_header.version <= V4)
 		save_undo();
 
 	/* Copy local buffer back to dynamic memory */
@@ -214,12 +214,12 @@ void z_read(void)
 		}
 		if (truncate_question_mark() && buffer[i] == '?')
 			buffer[i] = ' ';
-		storeb((zword) (zargs[0] + ((h_version <= V4) ? 1 : 2) + i),
+		storeb((zword) (zargs[0] + ((z_header.version <= V4) ? 1 : 2) + i),
 		    translate_to_zscii (buffer[i]));
 	}
 
 	/* Add null character (V1-V4) or write input length into 2nd byte */
-	if (h_version <= V4)
+	if (z_header.version <= V4)
 		storeb((zword) (zargs[0] + 1 + i), 0);
 	else
 		storeb((zword) (zargs[0] + 1), i);
@@ -229,7 +229,7 @@ void z_read(void)
 		tokenise_line (zargs[0], zargs[1], 0, FALSE);
 
 	/* Store key */
-	if (h_version >= V5)
+	if (z_header.version >= V5)
 		store(translate_to_zscii (key));
 } /* z_read */
 
@@ -289,11 +289,11 @@ void z_read_mouse(void)
 	/* Read the mouse position and which buttons are down */
 /*
 	btn = os_read_mouse ();
-	hx_mouse_y = mouse_y;
-	hx_mouse_x = mouse_x;
+	z_header.x_mouse_y = mouse_y;
+	z_header.x_mouse_x = mouse_x;
 */
-	storew((zword) (zargs[0] + 0), hx_mouse_y);
-	storew((zword) (zargs[0] + 2), hx_mouse_x);
+	storew((zword) (zargs[0] + 0), z_header.x_mouse_y);
+	storew((zword) (zargs[0] + 2), z_header.x_mouse_x);
 	storew((zword) (zargs[0] + 4), btn);	/* mouse button bits */
 	storew((zword) (zargs[0] + 6), 0);	/* menu selection */
 

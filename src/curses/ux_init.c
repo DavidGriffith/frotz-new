@@ -52,6 +52,9 @@
 #include <locale.h>
 #endif
 
+f_setup_t f_setup;
+z_header_t z_header;
+
 volatile sig_atomic_t terminal_resized = 0;
 
 static void sigwinch_handler(int);
@@ -384,26 +387,26 @@ void unix_get_terminal_size()
 
 	/* 255 disables paging entirely. */
 	if (u_setup.screen_height != -1)
-		h_screen_rows = u_setup.screen_height;
+		z_header.screen_rows = u_setup.screen_height;
 	else
-		h_screen_rows = MIN(254, y);
+		z_header.screen_rows = MIN(254, y);
 
 	if (u_setup.screen_width != -1)
-		h_screen_cols = u_setup.screen_width;
+		z_header.screen_cols = u_setup.screen_width;
 	else
-		h_screen_cols = MIN(255, x);
+		z_header.screen_cols = MIN(255, x);
 
-	if (h_screen_cols < 1) {
+	if (z_header.screen_cols < 1) {
 		endwin();
 		u_setup.curses_active = FALSE;
 		os_fatal("Invalid screen width. Must be between 1 and 255.");
 	}
 
-	h_font_width = 1;
-	h_font_height = 1;
+	z_header.font_width = 1;
+	z_header.font_height = 1;
 
-	h_screen_width = h_screen_cols;
-	h_screen_height = h_screen_rows;
+	z_header.screen_width = z_header.screen_cols;
+	z_header.screen_height = z_header.screen_rows;
 } /* unix_get_terminal */
 
 
@@ -414,19 +417,19 @@ void unix_get_terminal_size()
  * (mouse, sound board). Set various OS depending story file header
  * entries:
  *
- *     h_config (aka flags 1)
- *     h_flags (aka flags 2)
- *     h_screen_cols (aka screen width in characters)
- *     h_screen_rows (aka screen height in lines)
- *     h_screen_width
- *     h_screen_height
- *     h_font_height (defaults to 1)
- *     h_font_width (defaults to 1)
- *     h_default_foreground
- *     h_default_background
- *     h_interpreter_number
- *     h_interpreter_version
- *     h_user_name (optional; not used by any game)
+ *     z_header.config (aka flags 1)
+ *     z_header.flags (aka flags 2)
+ *     z_header.screen_cols (aka screen width in characters)
+ *     z_header.screen_rows (aka screen height in lines)
+ *     z_header.screen_width
+ *     z_header.screen_height
+ *     z_header.font_height (defaults to 1)
+ *     z_header.font_width (defaults to 1)
+ *     z_header.default_foreground
+ *     z_header.default_background
+ *     z_header.interpreter_number
+ *     z_header.interpreter_version
+ *     z_header.user_name (optional; not used by any game)
  *
  * Finally, set reserve_mem to the amount of memory (in bytes) that
  * should not be used for multiple undo and reserved for later use.
@@ -455,58 +458,58 @@ void os_init_screen (void)
 	keypad(stdscr, TRUE);		/* Enable the keypad and function keys */
 	scrollok(stdscr, FALSE);	/* No scrolling unless explicitly asked for */
 
-	if (h_version == V3 && u_setup.tandy_bit != 0)
-		h_config |= CONFIG_TANDY;
+	if (z_header.version == V3 && u_setup.tandy_bit != 0)
+		z_header.config |= CONFIG_TANDY;
 
-	if (h_version == V3)
-		h_config |= CONFIG_SPLITSCREEN;
+	if (z_header.version == V3)
+		z_header.config |= CONFIG_SPLITSCREEN;
 
-	if (h_version >= V4)
-		h_config |= CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED | CONFIG_TIMEDINPUT;
+	if (z_header.version >= V4)
+		z_header.config |= CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED | CONFIG_TIMEDINPUT;
 
-	if (h_version >= V5)
-		h_flags &= ~(GRAPHICS_FLAG | MOUSE_FLAG | MENU_FLAG);
+	if (z_header.version >= V5)
+		z_header.flags &= ~(GRAPHICS_FLAG | MOUSE_FLAG | MENU_FLAG);
 
 #ifdef NO_SOUND
-	if (h_version >= V5)
-		h_flags &= ~SOUND_FLAG;
+	if (z_header.version >= V5)
+		z_header.flags &= ~SOUND_FLAG;
 
-	if (h_version == V3)
-		h_flags &= ~OLD_SOUND_FLAG;
+	if (z_header.version == V3)
+		z_header.flags &= ~OLD_SOUND_FLAG;
 #else
-	if ((h_version >= 5) && (h_flags & SOUND_FLAG))
-		h_flags |= SOUND_FLAG;
+	if ((z_header.version >= 5) && (z_header.flags & SOUND_FLAG))
+		z_header.flags |= SOUND_FLAG;
 
-	if ((h_version == 3) && (h_flags & OLD_SOUND_FLAG))
-		h_flags |= OLD_SOUND_FLAG;
+	if ((z_header.version == 3) && (z_header.flags & OLD_SOUND_FLAG))
+		z_header.flags |= OLD_SOUND_FLAG;
 
-	if ((h_version == 6) && (f_setup.sound != 0))
-		h_config |= CONFIG_SOUND;
+	if ((z_header.version == 6) && (f_setup.sound != 0))
+		z_header.config |= CONFIG_SOUND;
 #endif
 
-	if (h_version >= V5 && (h_flags & UNDO_FLAG)) {
+	if (z_header.version >= V5 && (z_header.flags & UNDO_FLAG)) {
 		if (f_setup.undo_slots == 0)
-			h_flags &= ~UNDO_FLAG;
+			z_header.flags &= ~UNDO_FLAG;
 	}
 
 	unix_get_terminal_size();
 
 	/* Must be after screen dimensions are computed.  */
-	if (h_version == V6) {
+	if (z_header.version == V6) {
 		if (unix_init_pictures())
-			h_config |= CONFIG_PICTURES;
+			z_header.config |= CONFIG_PICTURES;
 		else
-			h_flags &= ~GRAPHICS_FLAG;
+			z_header.flags &= ~GRAPHICS_FLAG;
 	}
 
 	/* Use the ms-dos interpreter number for v6, because that's the
 	 * kind of graphics files we understand.  Otherwise, use DEC.  */
 	if (f_setup.interpreter_number == INTERP_DEFAULT)
-		h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
+		z_header.interpreter_number = z_header.version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
 	else
-		h_interpreter_number = f_setup.interpreter_number;
+		z_header.interpreter_number = f_setup.interpreter_number;
 
-	h_interpreter_version = 'F';
+	z_header.interpreter_version = 'F';
 
 #ifdef COLOR_SUPPORT
 	/* Enable colors if the terminal supports them, the user did not
@@ -514,7 +517,7 @@ void os_init_screen (void)
 	 * requests them by specifying a foreground or background.
 	 */
 	u_setup.color_enabled = (has_colors() && !u_setup.disable_color
-		&& (((h_version >= 5) && (h_flags & COLOUR_FLAG))
+		&& (((z_header.version >= 5) && (z_header.flags & COLOUR_FLAG))
 		|| (u_setup.foreground_color != -1)
 		|| (u_setup.background_color != -1)));
 
@@ -526,23 +529,23 @@ void os_init_screen (void)
 		u_setup.color_enabled = TRUE;
 
 	if (u_setup.color_enabled) {
-		h_config |= CONFIG_COLOUR;
-		h_flags |= COLOUR_FLAG; /* FIXME: beyond zork handling? */
+		z_header.config |= CONFIG_COLOUR;
+		z_header.flags |= COLOUR_FLAG; /* FIXME: beyond zork handling? */
 		start_color();
-		h_default_foreground = (u_setup.foreground_color == -1)
+		z_header.default_foreground = (u_setup.foreground_color == -1)
 			? FOREGROUND_DEF : u_setup.foreground_color;
-		h_default_background = (u_setup.background_color ==-1)
+		z_header.default_background = (u_setup.background_color ==-1)
 			? BACKGROUND_DEF : u_setup.background_color;
 	} else
 #endif /* COLOR_SUPPORT */
 	{
 		/* Set these per spec 8.3.2. */
-		h_default_foreground = WHITE_COLOUR;
-		h_default_background = BLACK_COLOUR;
-		if (h_flags & COLOUR_FLAG) h_flags &= ~COLOUR_FLAG;
+		z_header.default_foreground = WHITE_COLOUR;
+		z_header.default_background = BLACK_COLOUR;
+		if (z_header.flags & COLOUR_FLAG) z_header.flags &= ~COLOUR_FLAG;
 	}
-	os_set_colour(h_default_foreground, h_default_background);
-	os_erase_area(1, 1, h_screen_rows, h_screen_cols, 0);
+	os_set_colour(z_header.default_foreground, z_header.default_background);
+	os_erase_area(1, 1, z_header.screen_rows, z_header.screen_cols, 0);
 } /* os_init_screen */
 
 

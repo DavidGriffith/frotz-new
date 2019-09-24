@@ -16,6 +16,8 @@ typedef struct {
 
 char *m_fontfiles[9];
 
+z_header_t z_header;
+
 static char s[1026];
 
 static char *starts(char *s, char *id)
@@ -430,7 +432,7 @@ static int styleidx(int zfont, int style)
 		zfont = FIXED_WIDTH_FONT;
 	if (style & FIXED_WIDTH_STYLE)
 		zfont = FIXED_WIDTH_FONT;
-	if (h_flags & FIXED_FONT_FLAG)
+	if (z_header.flags & FIXED_FONT_FLAG)
 		zfont = FIXED_WIDTH_FONT;
 	if (zfont != TEXT_FONT)
 		k += 4;

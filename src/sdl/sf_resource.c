@@ -18,6 +18,8 @@ zword hx_flags;
 zword hx_fore_colour;
 zword hx_back_colour;
 
+z_header_t z_header;
+
 /* various data */
 bool m_tandy = 0;
 int m_v6scale;
@@ -463,10 +465,10 @@ void sf_readsettings(void)
 	ResSnd = sf_GetProfileString("Resources", "Snd", ResSnd);
 
 	if (f_setup.interpreter_number == 0) {
-		h_interpreter_number =
+		z_header.interpreter_number =
 		    sf_GetProfileInt("Interpreter", "Number", INTERP_AMIGA);
 	} else
-		h_interpreter_number = f_setup.interpreter_number;
+		z_header.interpreter_number = f_setup.interpreter_number;
 
 	f_setup.err_report_mode =
 	    sf_GetProfileInt("Interpreter", "Error Reporting", ERR_REPORT_ONCE);
@@ -643,19 +645,19 @@ zword os_to_true_colour(int index)
  * (mouse, sound card). Set various OS depending story file header
  * entries:
  *
- *     h_config (aka flags 1)
- *     h_flags (aka flags 2)
- *     h_screen_cols (aka screen width in characters)
- *     h_screen_rows (aka screen height in lines)
- *     h_screen_width
- *     h_screen_height
- *     h_font_height (defaults to 1)
- *     h_font_width (defaults to 1)
- *     h_default_foreground
- *     h_default_background
- *     h_interpreter_number
- *     h_interpreter_version
- *     h_user_name (optional; not used by any game)
+ *     z_header.config (aka flags 1)
+ *     z_header.flags (aka flags 2)
+ *     z_header.screen_cols (aka screen width in characters)
+ *     z_header.screen_rows (aka screen height in lines)
+ *     z_header.screen_width
+ *     z_header.screen_height
+ *     z_header.font_height (defaults to 1)
+ *     z_header.font_width (defaults to 1)
+ *     z_header.default_foreground
+ *     z_header.default_background
+ *     z_header.interpreter_number
+ *     z_header.interpreter_version
+ *     z_header.user_name (optional; not used by any game)
  *
  * Finally, set reserve_mem to the amount of memory (in bytes) that
  * should not be used for multiple undo and reserved for later use.
@@ -673,38 +675,38 @@ void os_init_screen(void)
 		m_gfxScale = 1;
 
 	/* Set the configuration */
-	if (h_version == V3) {
-		h_config |= CONFIG_SPLITSCREEN;
-		h_config |= CONFIG_PROPORTIONAL;
+	if (z_header.version == V3) {
+		z_header.config |= CONFIG_SPLITSCREEN;
+		z_header.config |= CONFIG_PROPORTIONAL;
 		if (m_tandy)
-			h_config |= CONFIG_TANDY;
+			z_header.config |= CONFIG_TANDY;
 		else
-			h_config &= ~CONFIG_TANDY;
+			z_header.config &= ~CONFIG_TANDY;
 	}
-	if (h_version >= V4) {
-		h_config |= CONFIG_BOLDFACE;
-		h_config |= CONFIG_EMPHASIS;
-		h_config |= CONFIG_FIXED;
-		h_config |= CONFIG_TIMEDINPUT;
+	if (z_header.version >= V4) {
+		z_header.config |= CONFIG_BOLDFACE;
+		z_header.config |= CONFIG_EMPHASIS;
+		z_header.config |= CONFIG_FIXED;
+		z_header.config |= CONFIG_TIMEDINPUT;
 	}
-	if (h_version >= V5)
-		h_config |= CONFIG_COLOUR;
-	if (h_version == V6) {
+	if (z_header.version >= V5)
+		z_header.config |= CONFIG_COLOUR;
+	if (z_header.version == V6) {
 		if (bmap) {
-			h_config |= CONFIG_PICTURES;
-			h_config |= CONFIG_SOUND;
+			z_header.config |= CONFIG_PICTURES;
+			z_header.config |= CONFIG_SOUND;
 		}
 	}
 
-	h_interpreter_version = 'F';
-	if (h_version == V6) {
-		h_default_foreground =
+	z_header.interpreter_version = 'F';
+	if (z_header.version == V6) {
+		z_header.default_foreground =
 		    sf_GetColourIndex(sf_GetDefaultColour(true));
-		h_default_background =
+		z_header.default_background =
 		    sf_GetColourIndex(sf_GetDefaultColour(false));
 	} else {
-		h_default_foreground = 1;
-		h_default_background = 1;
+		z_header.default_foreground = 1;
+		z_header.default_background = 1;
 	}
 
 	os_set_font(FIXED_WIDTH_FONT);
@@ -713,29 +715,29 @@ void os_init_screen(void)
 	{
 		int H, W;
 		os_font_data(FIXED_WIDTH_FONT, &H, &W);
-		h_font_width = (zbyte) W;
-		h_font_height = (zbyte) H;
+		z_header.font_width = (zbyte) W;
+		z_header.font_height = (zbyte) H;
 	}
 
-	h_screen_width = (zword) AcWidth;
-	h_screen_height = (zword) AcHeight;
-	h_screen_cols = (zbyte) (h_screen_width / h_font_width);
-	h_screen_rows = (zbyte) (h_screen_height / h_font_height);
+	z_header.screen_width = (zword) AcWidth;
+	z_header.screen_height = (zword) AcHeight;
+	z_header.screen_cols = (zbyte) (z_header.screen_width / z_header.font_width);
+	z_header.screen_rows = (zbyte) (z_header.screen_height / z_header.font_height);
 
 	/* Check for sound */
-	if ((h_version == V3) && (h_flags & OLD_SOUND_FLAG)) {
+	if ((z_header.version == V3) && (z_header.flags & OLD_SOUND_FLAG)) {
 		if (((bmap == NULL) && (m_localfiles == 0))
 		    || (!sf_initsound()))
-			h_flags &= ~OLD_SOUND_FLAG;
-	} else if ((h_version >= V4) && (h_flags & SOUND_FLAG)) {
+			z_header.flags &= ~OLD_SOUND_FLAG;
+	} else if ((z_header.version >= V4) && (z_header.flags & SOUND_FLAG)) {
 		if (((bmap == NULL) && (m_localfiles == 0))
 		    || (!sf_initsound()))
-			h_flags &= ~SOUND_FLAG;
+			z_header.flags &= ~SOUND_FLAG;
 	}
 
-	if (h_version >= V5) {
+	if (z_header.version >= V5) {
 		zword mask = 0;
-		if (h_version == V6)
+		if (z_header.version == V6)
 			mask |= TRANSPARENT_FLAG;
 
 		/* Mask out any unsupported bits in the extended flags */
