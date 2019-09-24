@@ -567,6 +567,20 @@ OpenBSD console on an x86 or amd64, the default value of $TERM is
 A FreeBSD console's $TERM is "xterm" and will support color.  Color on
 text consoles on machines other than x86 or amd64 is untested.
 
+On some operating systems, Xterm will not change the cursor color to
+match that of the text.  To fix this, add the following line to your
+.B .Xresources
+file and type
+.B xrdb -merge $HOME/.Xresources
+
+xterm*cursorColor:      *XtDefaultForeground
+
+This can also be added to a systemwide file such as
+.B /etc/X11/Xresources/x11-common
+or
+.B /etc/X11/app-defaults/XTerm.
+The names and locations of the system-wide files can vary from OS to OS.
+
 .SH UNICODE
 .B Frotz
 supports Unicode glyphs by way of UTF-8 if the terminal used supports
