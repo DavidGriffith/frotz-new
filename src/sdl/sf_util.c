@@ -792,47 +792,7 @@ static int dialog_read_file_name(char *file_name, const char *default_name,
 	return 0;
 }
 
-
-typedef struct {
-	void *link;
-	char *str;
-} Dynstr;
-
-static Dynstr *strings = NULL;
-
-static void freestrings()
-{
-	while (strings) {
-		Dynstr *r = strings->link;
-		if (strings->str)
-			free(strings->str);
-		free(strings);
-		strings = r;
-	}
-}
-
-
-static char *mystrdup(char *p)
-{
-	Dynstr *r;
-	if (!p)
-		return p;
-	p = strdup(p);
-	if (!p)
-		return p;
-	r = calloc(1, sizeof(Dynstr));
-	if (r) {
-		if (!strings)
-			CLEANREG(freestrings);
-		r->link = strings;
-		r->str = p;
-		strings = r;
-	}
-	return p;
-}
-
 static char *rc = NULL;
-
 
 void sf_FinishProfile()
 {
@@ -1009,7 +969,7 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 		}
 	}
 	if (def)
-		def = mystrdup(def);
+		def = strdup(def);
 	if (sav)
 		*q = sav;
 	return def;
