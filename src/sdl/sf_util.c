@@ -218,8 +218,11 @@ static void usage(int type)
 
 static const char *progname = NULL;
 
+/*
 extern char *optarg;
 extern int optind;
+*/
+
 extern int m_timerinterval;
 
 static char *options = "@:%aAb:B:c:f:Fh:HiI:l:L:m:N:oOPqr:s:S:tTu:vVw:xZ:";
@@ -241,11 +244,11 @@ static void parse_options(int argc, char **argv)
 	do {
 		int num = 0, copt = 0;;
 
-		c = getopt(argc, argv, options);
+		c = zgetopt(argc, argv, options);
 
-		if (optarg != NULL) {
-			num = atoi(optarg);
-			copt = optarg[0];
+		if (zoptarg != NULL) {
+			num = atoi(zoptarg);
+			copt = zoptarg[0];
 		}
 
 		if (c == '%')
@@ -265,9 +268,9 @@ static void parse_options(int argc, char **argv)
 		if (c == 'N')
 			user_names_format = copt;
 		if (c == '@')
-			m_reslist_file = optarg;
+			m_reslist_file = zoptarg;
 		if (c == 'I')
-			m_setupfile = optarg;
+			m_setupfile = zoptarg;
 		if (c == 'f')
 			user_foreground = num;
 		if (c == 'F')
@@ -286,7 +289,7 @@ static void parse_options(int argc, char **argv)
 			f_setup.left_margin = num;
 		if (c == 'L') {
 			f_setup.restore_mode = TRUE;
-			f_setup.tmp_save_name = strdup(optarg);
+			f_setup.tmp_save_name = strdup(zoptarg);
 		}
 		if (c == 'q')
 			m_no_sound = 1;
@@ -320,7 +323,7 @@ static void parse_options(int argc, char **argv)
 			if (num >= ERR_REPORT_NEVER && num <= ERR_REPORT_FATAL)
 				f_setup.err_report_mode = num;
 		if (c == '?')
-			optind = argc;
+			zoptind = argc;
 	} while (c != EOF && c != '?');
 
 } /* parse_options */
@@ -379,18 +382,20 @@ void os_process_arguments(int argc, char *argv[])
 {
 	char *p;
 
+	zoptarg = NULL;
+
 	sf_installhandlers();
 	sf_readsettings();
 	parse_options(argc, argv);
 
-	if (argv[optind] == NULL) {
+	if (argv[zoptind] == NULL) {
 		usage(USAGE_NORMAL);
 		exit(EXIT_FAILURE);
 	}
-	f_setup.story_file = strdup(argv[optind]);
+	f_setup.story_file = strdup(argv[zoptind]);
 
-	if (argv[optind + 1] != NULL)
-		f_setup.blorb_file = argv[optind + 1];
+	if (argv[zoptind + 1] != NULL)
+		f_setup.blorb_file = argv[zoptind + 1];
 
 	/* Strip path and extension off the story file name */
 	f_setup.story_name = new_basename(f_setup.story_file);
@@ -413,7 +418,7 @@ void os_process_arguments(int argc, char *argv[])
 			*p = '\0';	/* extension removed */
 		}
 	}
-	f_setup.story_path = new_dirname(argv[optind]);
+	f_setup.story_path = new_dirname(argv[zoptind]);
 
 	/* Create nice default file names */
 	f_setup.script_name =

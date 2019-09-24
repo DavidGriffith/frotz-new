@@ -564,6 +564,9 @@ extern char *option_zcode_path;	/* dg */
 
 extern long reserve_mem;
 
+extern int zoptind;
+extern int zoptopt;
+extern char *zoptarg;
 
 /*** Z-machine opcodes ***/
 void 	z_add(void);
@@ -775,6 +778,12 @@ void read_string(int max, zchar *buffer);
 bool read_yes_or_no(const char *);
 
 void screen_new_line(void);
+
+#ifndef MSDOS_16BIT
+#define cdecl
+#endif
+
+int cdecl zgetopt(int, char **, const char *);
 
 /*** returns the current window ***/
 Zwindow * curwinrec(void);

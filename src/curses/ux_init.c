@@ -91,11 +91,6 @@ u_setup_t u_setup;
 static void sigint_handler(int);
 /* static void redraw(void); */
 
-static int zgetopt (int, char **, const char *);
-static int zoptind = 1;
-static int zoptopt = 0;
-static char *zoptarg = NULL;
-
 static void	print_version(void);
 static int	getconfig(char *);
 static int	getbool(char *);
@@ -204,6 +199,8 @@ void os_process_arguments (int argc, char *argv[])
  */
 	char *home;
 	char configfile[FILENAME_MAX + 1];
+
+	zoptarg = NULL;
 
 #ifndef WIN32
 	if ((getuid() == 0) || (geteuid() == 0)) {
@@ -1153,42 +1150,6 @@ char *my_strrchr(const char *s, int c)
 	return (char *)save;
 } /* my_strrchr */
 #endif	/* NO_STRRCHR */
-
-
-/* A unix-like getopt, but with the names changed to avoid any problems. */
-static int zgetopt (int argc, char *argv[], const char *options)
-{
-	static int pos = 1;
-	const char *p;
-	if (zoptind >= argc || argv[zoptind][0] != '-' || argv[zoptind][1] == 0)
-		return EOF;
-	zoptopt = argv[zoptind][pos++];
-	zoptarg = NULL;
-	if (argv[zoptind][pos] == 0) {
-		pos = 1;
-		zoptind++;
-	}
-	p = strchr (options, zoptopt);
-	if (zoptopt == ':' || p == NULL) {
-		fputs ("illegal option -- ", stderr);
-		goto error;
-	} else if (p[1] == ':') {
-		if (zoptind >= argc) {
-			fputs ("option requires an argument -- ", stderr);
-			goto error;
-		} else {
-			zoptarg = argv[zoptind];
-			if (pos != 1)
-				zoptarg += pos;
-			pos = 1; zoptind++;
-		}
-	}
-	return zoptopt;
-error:
-	fputc (zoptopt, stderr);
-	fputc ('\n', stderr);
-	return '?';
-} /* zgetopt */
 
 
 static void print_version(void)

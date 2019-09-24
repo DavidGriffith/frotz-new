@@ -48,51 +48,12 @@ For more options and explanations, please read the manual page.\n\n\
 While running, enter \"\\help\" to list the runtime escape sequences.\n"
 
 
-/* A unix-like getopt, but with the names changed to avoid any problems.  */
-static int zoptind = 1;
-static int zoptopt = 0;
-static char *zoptarg = NULL;
-static int zgetopt (int argc, char *argv[], const char *options)
-{
-	static int pos = 1;
-	const char *p;
-
-	if (zoptind >= argc || argv[zoptind][0] != '-' ||
-				argv[zoptind][1] == 0)
-		return EOF;
-	zoptopt = argv[zoptind][pos++];
-	zoptarg = NULL;
-	if (argv[zoptind][pos] == 0) {
-		pos = 1;
-		zoptind++;
-	}
-	p = strchr (options, zoptopt);
-	if (zoptopt == ':' || p == NULL) {
-		fputs ("illegal option -- ", stderr);
-		goto error;
-	} else if (p[1] == ':') {
-		if (zoptind >= argc) {
-			fputs ("option requires an argument -- ", stderr);
-			goto error;
-		} else {
-			zoptarg = argv[zoptind];
-			if (pos != 1)
-				zoptarg += pos;
-			pos = 1; zoptind++;
-		}
-	}
-	return zoptopt;
-error:
-	fputc (zoptopt, stderr);
-	fputc ('\n', stderr);
-	return '?';
-}/* zgetopt */
-
 static int user_screen_width = 75;
 static int user_screen_height = 24;
 static int user_random_seed = -1;
 static int user_tandy_bit = 0;
 static bool plain_ascii = FALSE;
+
 
 /*
  * os_process_arguments
@@ -105,6 +66,8 @@ void os_process_arguments(int argc, char *argv[])
 {
 	int c;
 	char *p = NULL;
+
+	zoptarg = NULL;
 
 	do_more_prompts = TRUE;
 	/* Parse the options */
