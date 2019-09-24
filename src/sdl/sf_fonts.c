@@ -5,21 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-// font handling
-
-/*
-struct sfontstruct {
-  int refcount;
-  void (*destroy)(SFONT *);
-  int (*height)(SFONT *);
-  int (*ascent)(SFONT *);
-  int (*descent)(SFONT *);
-  int (*minchar)(SFONT *);
-  int (*maxchar)(SFONT *);
-  int (*hasglyph)(SFONT *,int,int);
-  SF_glyph *(*getglyph)(SFONT *,int,int);
-  };
-*/
+/* font handling */
 
 typedef struct {
 	int refcount;
@@ -160,7 +146,6 @@ static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 			if (!hasenc)
 				ERRET(-10)
 				sscanf(p, "%d %d", wh, wh + 1);
-/* printf("c%d %d\n",k,((wh[0]+7)/8)*wh[1] + sizeof(SF_glyph)); */
 			if (k <= MAXCHAR) {
 				totb +=
 				    ((wh[0] + 7) / 8) * wh[1] +
@@ -170,34 +155,20 @@ static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 			hasenc = 0;
 		}
 	}
-//printf("nchars=%d minch=%d maxch=%d\n",nchars,minch,maxch);
-//printf("sizeof(SF_glyph)=%d\n",sizeof(SF_glyph));
-//  printf("<%s>\n",fontname);
-//  printf("<%s>\n",copyright);
-//  printf("dc%d a%d d%d %d..%d exp%d read%d totb%d\n",
-//      defchar,ascent,descent,minch,maxch,nchars,i,totb);
 	if (ascent < 0 || descent < 0 || nchars != i)
 		ERRET(-2)
-//    errorexit(99,"??? dc%d a%d d%d %d..%d exp%d read%d\n",
-//      defchar,ascent,descent,minch,maxch,nchars,k);
 		if (defchar < minch || defchar > maxch) {
-//      printf("WARNING: defchar=%d, set to",defchar);
 			if (defchar < minch)
 				defchar = minch;
 			if (defchar > maxch)
 				defchar = maxch;
-//      printf(" %d\n",defchar);
 		}
-//  nchars = i;
 	totb +=
 	    (maxch - minch + 1) * sizeof(int) + sizeof(SF_bdffont) +
 	    strlen(fontname) + strlen(copyright) + 2;
-//  printf("totb %d\n",totb);
 	font = calloc(1, totb);
 	if (!font)
-		ERRET(-3)	// errorexit(99,"malloc()\n");
-//printf("allocated: %p-%p\n",font,((byte *)font)+totb);
-//  memmove(&(font->magic[0]),"gBDX",4);
+		ERRET(-3)
 	font->minchar = minch;
 	font->maxchar = maxch;
 	font->defchar = defchar;
@@ -230,7 +201,7 @@ static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 		for (;;) {
 			fgets(s, 1024, f);
 			if (feof(f))
-				ERRET(-81) /* errorexit(99,"unexpected EOF c=%d\n",i); */
+				ERRET(-81)
 				if ((p = starts(s, "ENCODING "))) {
 					i = atoi(p);
 					i &= 0xffff;
@@ -264,16 +235,14 @@ static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 				bg->xof = wh[2];
 				bg->yof = wh[3];
 				po = (byte *) (&(bg->bitmap[0]));
-//printf("k=%d ch=%d delta=%d\n",k,i,po-(byte *)bg);
 				for (j = 0; j < h; j++) {
 					fgets(s, 1024, f);
 					if (feof(f))
-						ERRET(-91)	// errorexit(99,"unexpected EOF c=%d (B)\n",i);
+						ERRET(-91)
 						    gethex(s, po, w);
 					po += w;
 				}
 			}
-//printf("used %d nextpo %p\n",po-pbeg-font->glyphs[i-minch],po);
 	}
 	*err = 0;
 	*size = totb;
@@ -434,18 +403,19 @@ static SFONT *loadfont(char *fname, int *err, int *size)
 }
 
 
-// these are the 8 fonts needed
-// PROPORTIONAL FONT
-//   ROMAN
-//   ROMAN BOLD
-//   ITALIC
-//   ITALIC BOLD
-// FIXED FONT
-//   ROMAN
-//   ROMAN BOLD
-//   ITALIC
-//   ITALIC BOLD
-
+/*
+ * these are the 8 fonts needed
+ * PROPORTIONAL FONT
+ *   ROMAN
+ *   ROMAN BOLD
+ *   ITALIC
+ *   ITALIC BOLD
+ * FIXED FONT
+ *   ROMAN
+ *   ROMAN BOLD
+ *   ITALIC
+ *   ITALIC BOLD
+ */
 #define NUMFONTS 9
 
 static SFONT *myfonts[9] =
@@ -573,10 +543,7 @@ int os_char_width(zchar c)
 static void setfont(int zfont)
 {
 	int k = styleidx(zfont, current.style);
-//printf("%d.",k);
 	current.font = myfonts[k];
-//  if (k < 4) zfont = TEXT_FONT;
-//  else zfont = FIXED_WIDTH_FONT;
 	current.zfontnum = zfont;
 	current.proportional = (k < 4);
 }
@@ -638,7 +605,6 @@ int os_font_data(int font, int *height, int *width)
  */
 void os_set_font(int new_font)
 {
-//printf("os_set_font(%d)\n",new_font);
 	sf_flushtext();
 	setfont(new_font);
 }
@@ -740,9 +706,7 @@ void os_display_char(zchar c)
 		SF_glyph *g;
 		setfont(current.zfontnum);
 		g = current.font->getglyph(current.font, c, 1);
-//printf("{%c}%d.%p/%p",c,current.zfontnum,current.font,g);
 		if (g) {
-//printf("[%c]\n",c); fflush(stdout);
 			sf_writeglyph(g);
 			m_exitPause = true;
 		}
@@ -800,7 +764,6 @@ void os_window_height(int win, int height)
 void os_set_cursor(int row, int col)
 {
 	sf_flushtext();
-//      theWnd->ResetOverhang();
 	current.cx = col - 1;
 	current.cy = row - 1;
 }
@@ -871,16 +834,15 @@ void sf_initfonts()
 	SFONT *Norm, *Emph = NULL, *Bold = NULL, *Bemp = NULL;
 
 	norm = SF_defaultfont;
-//dumpfont(norm);
 	sf_VGA_SFONT = Norm = makefont(norm);
 	if (!Norm)
 		os_fatal("malloc() failure in initfonts()");
 	Norm->destroy = destroySFonly;
 
-	// get size of default font
+	/* get size of default font */
 	size = SF_defaultfontsize;
 
-	// copy norm to emphasized
+	/* copy norm to emphasized */
 	emph = malloc(size);
 	if (!emph)
 		os_fatal("malloc() failure in initfonts()");
@@ -888,7 +850,7 @@ void sf_initfonts()
 	if (!Emph)
 		os_fatal("malloc() failure in initfonts()");
 	memmove(emph, norm, size);
-	// emphasize (underline)...
+	/* emphasize (underline)... */
 	cfont = (byte *) emph;
 	for (i = norm->minchar; i <= norm->maxchar; i++) {
 		int m = norm->glyphs[i - norm->minchar];
@@ -898,7 +860,7 @@ void sf_initfonts()
 		bmp = (byte *) (&(g->bitmap[0]));
 		bmp[g->h - 2] = 0xff;
 	}
-	// make a copy for bold
+	/* make a copy for bold */
 	bold = malloc(size);
 	if (!bold)
 		os_fatal("malloc() failure in initfonts()");
@@ -906,7 +868,7 @@ void sf_initfonts()
 	if (!Bold)
 		os_fatal("malloc() failure in initfonts()");
 	memmove(bold, norm, size);
-	// boldify...
+	/* boldify... */
 	cfont = (byte *) bold;
 	for (i = norm->minchar; i <= norm->maxchar; i++) {
 		int h, m = norm->glyphs[i - norm->minchar];
@@ -948,9 +910,6 @@ void sf_initfonts()
 	myfonts[3] = myfonts[7] = Bemp;
 	bemp->refcount = 2;
 
-//  for (i=0;i<8;i++) myfonts[i] = SF_defaultfont;
-//  SF_defaultfont->refcount = 9;
-
 	CLEANREG(cleanfonts);
 
 	if (!m_vga_fonts) {
@@ -979,8 +938,6 @@ void sf_initfonts()
 		else
 			myfonts[8] = SF_font3double;
 	}
-//for (i=0;i<8;i++){ SFONT *s = myfonts[i]; printf("%d %p %d %d %d %d %d\n",
-//i,s,s->minchar(s),s->maxchar(s),s->ascent(s),s->descent(s),s->height(s));}
 }
 
 
@@ -1010,7 +967,6 @@ char *sf_searchfile(char *fn, int fnlen, char *buf, char *paths)
 		plen = strlen(buf);
 		strncpy(buf + plen, fn, fnlen);
 		buf[plen + fnlen] = 0;
-//printf("try[%s]\n",buf);
 		if (access(buf, F_OK) == 0)
 			return buf;
 		if (p)

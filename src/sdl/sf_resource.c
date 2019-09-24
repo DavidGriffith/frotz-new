@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// for access()
+/* for access() */
 #include <unistd.h>
 
 #include <stdarg.h>
@@ -18,13 +18,8 @@ zword hx_flags;
 zword hx_fore_colour;
 zword hx_back_colour;
 
-// various data
-
+/* various data */
 bool m_tandy = 0;
-//      CRect m_wndSize;
-//      CString m_propFontName;
-//      CString m_fixedFontName;
-//      int m_fontSize;
 int m_v6scale;
 int m_gfxScale = 1;
 ulong m_defaultFore;
@@ -35,13 +30,7 @@ int m_nonStdIndex;
 bool m_exitPause = 0;
 bool m_lineInput = 0;
 bool m_IsInfocomV6 = false;
-//      bool m_fastScroll;
 bool m_morePrompts = 1;
-//      int m_leftMargin;
-//      int m_rightMargin;
-//      FILE* m_blorbFile;
-//      bb_map_t* m_blorbMap;
-//      GameInfo m_gameInfo;
 bool m_localfiles = false;
 char *m_fontdir = NULL;
 bool m_aafonts = 0;
@@ -76,8 +65,7 @@ static void checkwidths()
 	bb_resolution_t *reso;
 	reso = bb_get_resolution(bmap);
 	if (reso) {
-//printf("get_resolution: %dx%d\n",reso->px,reso->py);
-		// ignore small resolution hints
+		/* ignore small resolution hints */
 		if ((reso->px) && (reso->px >= AcWidth))
 			AcWidth = reso->px;
 		if ((reso->py) && (reso->py >= AcHeight))
@@ -150,10 +138,9 @@ static int checkfile(char *fn, char *ofn)
 }
 
 
-// must be called as soon as possible (i.e. by os_process_arguments())
+/* must be called as soon as possible (i.e. by os_process_arguments()) */
 static int load_resources(char *givenfn)
 {
-
 	char buf[FILENAME_MAX + 1], *p;
 	int st;
 	FILE *f;
@@ -161,31 +148,32 @@ static int load_resources(char *givenfn)
 
 	CLEANREG(sf_cleanup_resources);
 
-	// first check whether file exists
+	/* first check whether file exists */
 	st = checkfile(givenfn, buf);
 	if (st)
 		os_fatal("File not found");
 
-	// check whether it is a story file
+	/* check whether it is a story file */
 	f = fopen(buf, "rb");
 	if (!f)
 		os_fatal("File open failed");
 
 	fread(hd2, 1, 2, f);
 
-	// blorb file ?
+	/* blorb file ? */
 	if (hd2[0] == 'F' && hd2[1] == 'O') {
 		bb_result_t result;
 		fclose(f);
 		if (tryloadblorb(buf))
 			os_fatal("File is neither Zcode nor Blorb");
-		// Look for an executable chunk
+		/* Look for an executable chunk */
 		if (bb_load_resource
 		    (bmap, bb_method_FilePos, &result, bb_ID_Exec, 0)
 		    == bb_err_None) {
 			unsigned int id = bmap->chunks[result.chunknum].type;
 			if (id == bb_ID_ZCOD) {
-				// If this is a Z-code game, set the file pointer and return
+				/* If this is a Z-code game,
+				 * set the file pointer and return */
 				zoffset = result.data.startpos;
 				zsize = result.length;
 				zcodeinblorb = 1;
@@ -194,25 +182,25 @@ static int load_resources(char *givenfn)
 				os_fatal(sf_msgstring(IDS_BLORB_GLULX));
 			}
 		}
-		// we are given a blorb file with no executable chunck
-		// Tell the user that there was no game in the Blorb file
+		/* we are given a blorb file with no executable chunck
+		 * Tell the user that there was no game in the Blorb file */
 		os_fatal(sf_msgstring(IDS_BLORB_NOEXEC));
 	}
-	// check if possibly Zcode
+	/* check if possibly Zcode */
 	if (hd2[0] < 1 || hd2[0] > 8)
 		os_fatal("Not a Zcode file (or wrong version)");
 
-	// OK, assume a bona fide Z code file
+	/* OK, assume a bona fide Z code file */
 	zfile = f;
 	fseek(f, 0, SEEK_END);
 	zsize = ftell(f);
 	zoffset = 0;
 
-	// See if the user explicitly provided a blorb file
+	/* See if the user explicitly provided a blorb file */
 	if (f_setup.blorb_file != NULL) {
 		tryloadblorb(f_setup.blorb_file);
 	} else {
-		// No?  Let's see if we can find one.
+		/* No?  Let's see if we can find one. */
 		p = malloc(strlen(f_setup.story_name) +
 			   strlen(EXT_BLORB4) * sizeof(char));
 		strncpy(p, f_setup.story_name, strlen(f_setup.story_name) + 1);
@@ -234,7 +222,7 @@ static int load_resources(char *givenfn)
 
 static void load_local_resources();
 
-// must be called as soon as possible (i.e. by os_process_arguments())
+/* must be called as soon as possible (i.e. by os_process_arguments()) */
 int sf_load_resources(char *givenfn)
 {
 	int st;
@@ -257,12 +245,12 @@ int sf_load_resources(char *givenfn)
 }
 
 
-// this routine is only used for the Z code, so we can safely
-// ignore its args
-// NOTE that there is an extra argument (as in WindowsFrotz version)
+/* this routine is only used for the Z code, so we can safely
+ * ignore its args
+ * NOTE that there is an extra argument (as in WindowsFrotz version)
+ */
 FILE *os_path_open(const char *name, const char *mode, long *size)
 {
-
 	FILE *f = NULL;
 
 	*size = zsize;
@@ -305,7 +293,6 @@ int os_picture_data(int picture, int *height, int *width)
 			}
 		}
 	}
-
 	*height = 0;
 	*width = 0;
 	return 0;
@@ -344,21 +331,19 @@ void os_menu(int action, int menu, const zword * text)
  * Return an appropriate random seed value in the range from 0 to
  * 32767, possibly by using the current system time.
  *
+ * this is a provisional workaround (time granularity is at best 1s)
  */
-// this is a provisional workaround (time granularity is at best 1s)
 #include <time.h>
 int os_random_seed(void)
 {
-//  return ::GetTickCount() & 32767;
 	if (m_random_seed == -1) {
 		return ((int)(time(NULL))) & 32767;
 	}
 	return m_random_seed;
 }
 
-// The following assumes Unicode
 
-
+/* The following assumes Unicode */
 /*
  * os_scrollback_char
  *
@@ -367,17 +352,15 @@ int os_random_seed(void)
  */
 void os_scrollback_char(zword c)
 {
-//      theApp.ScrollbackChar(c);
 	if (option_scrollback_buffer == 0)
 		return;
 	if (c == 13)
 		c = 10;
-	if (option_scrollback_buffer == 1)	// latin-1
-	{
+	if (option_scrollback_buffer == 1) {	/* Latin-1 */
 		if (c > 255)
 			c = '?';
 		putchar(c);
-	} else {		// UTF8
+	} else {		/* UTF8 */
 		if (c < 0x80)
 			putchar(c);
 		else {
@@ -399,7 +382,6 @@ void os_scrollback_erase(int erase)
 	if (option_scrollback_buffer)
 		while (erase--)
 			putchar(8);
-//      theApp.ScrollbackRemove(erase);
 }
 
 
@@ -416,7 +398,7 @@ void os_scrollback_erase(int erase)
  */
 void os_restart_game(int stage)
 {
-	// Show Beyond Zork's title screen
+	/* Show Beyond Zork's title screen */
 	if ((stage == RESTART_END) && (story_id == BEYOND_ZORK)) {
 		int w, h;
 		if (os_picture_data(1, &h, &w)) {
@@ -437,18 +419,18 @@ void sf_initcolours()
 
 	sf_setgamma(m_gamma);
 
-	// Standard Z-Machine colours
-	m_colours[0] = RGB5ToTrue(0x0000);	// black
-	m_colours[1] = RGB5ToTrue(0x001D);	// red
-	m_colours[2] = RGB5ToTrue(0x0340);	// green
-	m_colours[3] = RGB5ToTrue(0x03BD);	// yellow
-	m_colours[4] = RGB5ToTrue(0x59A0);	// blue
-	m_colours[5] = RGB5ToTrue(0x7C1F);	// magenta
-	m_colours[6] = RGB5ToTrue(0x77A0);	// cyan
-	m_colours[7] = RGB5ToTrue(0x7FFF);	// white
-	m_colours[8] = RGB5ToTrue(0x5AD6);	// light grey
-	m_colours[9] = RGB5ToTrue(0x4631);	// medium grey
-	m_colours[10] = RGB5ToTrue(0x2D6B);	// dark grey
+	/* Standard Z-Machine colours */
+	m_colours[0]  = RGB5ToTrue(0x0000);	/* black */
+	m_colours[1]  = RGB5ToTrue(0x001D);	/* red */
+	m_colours[2]  = RGB5ToTrue(0x0340);	/* green */
+	m_colours[3]  = RGB5ToTrue(0x03BD);	/* yellow */
+	m_colours[4]  = RGB5ToTrue(0x59A0);	/* blue */
+	m_colours[5]  = RGB5ToTrue(0x7C1F);	/* magenta */
+	m_colours[6]  = RGB5ToTrue(0x77A0);	/* cyan */
+	m_colours[7]  = RGB5ToTrue(0x7FFF);	/* white */
+	m_colours[8]  = RGB5ToTrue(0x5AD6);	/* light grey */
+	m_colours[9]  = RGB5ToTrue(0x4631);	/* medium grey */
+	m_colours[10] = RGB5ToTrue(0x2D6B);	/* dark grey */
 
 	for (i = 0; i < NON_STD_COLS; i++)
 		m_nonStdColours[i] = 0xFFFFFFFF;
@@ -457,7 +439,7 @@ void sf_initcolours()
 }
 
 
-// Read in settings
+/* Read in settings */
 void sf_readsettings(void)
 {
 	char *p;
@@ -480,11 +462,10 @@ void sf_readsettings(void)
 	ResPict = sf_GetProfileString("Resources", "Pict", ResPict);
 	ResSnd = sf_GetProfileString("Resources", "Snd", ResSnd);
 
-//printf("sf_readsettings\n");
-	if (f_setup.interpreter_number == 0)
+	if (f_setup.interpreter_number == 0) {
 		h_interpreter_number =
 		    sf_GetProfileInt("Interpreter", "Number", INTERP_AMIGA);
-	else
+	} else
 		h_interpreter_number = f_setup.interpreter_number;
 
 	f_setup.err_report_mode =
@@ -505,58 +486,33 @@ void sf_readsettings(void)
 	AcHeight = sf_GetProfileInt("Window", "AcHeight", AcHeight);
 
 	m_frequency = sf_GetProfileInt("Audio", "Frequency", m_frequency);
-
-//  m_filename = sf_GetProfileString("Files","Initial Game","");
-//  m_register = sf_GetProfileInt("Files","Register File Types",0) ? true : false;
-
-/*	m_wndSize.left = sf_GetProfileInt("Window","Left",0);
-	m_wndSize.top = sf_GetProfileInt("Window","Top",0);
-	m_wndSize.right = sf_GetProfileInt("Window","Right",0);
-	m_wndSize.bottom = sf_GetProfileInt("Window","Bottom",0);
-	m_wndState = sf_GetProfileInt("Window","State",SW_SHOWNORMAL);
-
-	m_toolBar = sf_GetProfileInt("Window","Toolbar",1) ? true : false;
-	m_statusBar = sf_GetProfileInt("Window","Status Bar",1) ? true : false;
-	m_notifyFull = sf_GetProfileInt("Window","Notify Full Screen",1) ? true : false;
-
-	m_propFontName = sf_GetProfileString("Display","Proportional Font Name",
-		GetDefaultFont());
-	m_fixedFontName = sf_GetProfileString("Display","Fixed Font Name",
-		"Courier New");
-	m_fontSize = sf_GetProfileInt("Display","Font Size",10);*/
-
 	m_v6scale = sf_GetProfileInt("Display", "Infocom V6 Scaling", 2);
 	m_gfxScale = 1;
 	m_defaultFore = (sf_GetProfileInt("Display", "Foreground", 0xffffff));
 	m_defaultBack = (sf_GetProfileInt("Display", "Background", 0x800000));
-//printf("mdff%d mdfb%d\n",m_defaultFore,m_defaultBack);
-//  m_fastScroll = sf_GetProfileInt("Display","Fast Scrolling",0) ? true : false;
 	m_morePrompts =
 	    sf_GetProfileInt("Display", "Show More Prompts", 1) ? true : false;
-//  m_leftMargin = sf_GetProfileInt("Display","Left Margin",0);
-//  m_rightMargin = sf_GetProfileInt("Display","Right Margin",0);
 	m_gamma = sf_GetProfileDouble("Display", "Gamma", DEFAULT_GAMMA);
 	sf_initcolours();
 
 	sf_FinishProfile();
-
 }
 
 
-// Get a colour
+/* Get a colour */
 ulong sf_GetColour(int colour)
 {
-	// Standard colours
+	/* Standard colours */
 	if ((colour >= BLACK_COLOUR) && (colour <= DARKGREY_COLOUR))
 		return m_colours[colour - BLACK_COLOUR];
 
-	// Default colours
+	/* Default colours */
 	if (colour == 16)
 		return m_defaultFore;
 	if (colour == 17)
 		return m_defaultBack;
 
-	// Non standard colours
+	/* Non standard colours */
 	if ((colour >= 18) && (colour < 256)) {
 		if (m_nonStdColours[colour - 18] != 0xFFFFFFFF)
 			return m_nonStdColours[colour - 18];
@@ -565,7 +521,7 @@ ulong sf_GetColour(int colour)
 }
 
 
-// Get a default colour
+/* Get a default colour */
 ulong sf_GetDefaultColour(bool fore)
 {
 	if (m_IsInfocomV6)
@@ -574,29 +530,29 @@ ulong sf_GetDefaultColour(bool fore)
 }
 
 
-// Get an index for a non-standard colour
+/* Get an index for a non-standard colour */
 int sf_GetColourIndex(ulong colour)
 {
 	int i, index = -1;
-	// Is this a standard colour?
+	/* Is this a standard colour? */
 	for (i = 0; i < 11; i++) {
 		if (m_colours[i] == colour)
 			return i + BLACK_COLOUR;
 	}
 
-	// Is this a default colour?
+	/* Is this a default colour? */
 	if (m_defaultFore == colour)
 		return 16;
 	if (m_defaultBack == colour)
 		return 17;
 
-	// Is this colour already in the table?
+	/* Is this colour already in the table? */
 	for (i = 0; i < NON_STD_COLS; i++) {
 		if (m_nonStdColours[i] == colour)
 			return i + 18;
 	}
 
-	// Find a free colour index
+	/* Find a free colour index */
 	while (index == -1) {
 		if (colour_in_use(m_nonStdIndex + 18) == 0) {
 			m_nonStdColours[m_nonStdIndex] = colour;
@@ -641,8 +597,6 @@ void os_set_colour(int new_foreground, int new_background)
 {
 	SF_textsetting *ts = sf_curtextsetting();
 	sf_flushtext();
-//      theWnd->ResetOverhang();
-//printf("os_set_colour %d %d\n",new_foreground,new_background);
 	if (new_foreground == 1)
 		ts->fore = sf_GetDefaultColour(true);
 	else if (new_foreground < 256)
@@ -655,9 +609,6 @@ void os_set_colour(int new_foreground, int new_background)
 		ts->back = sf_GetColour(new_background);
 	ts->backDefault = (new_background == 1);
 	ts->backTransparent = (new_background == 15);
-
-//printf("os_set_colour %d %d %x %x\n",new_foreground,new_background,ts->fore,ts->back);
-//      theWnd->ApplyTextSettings();
 }
 
 
@@ -715,13 +666,13 @@ void os_init_screen(void)
 
 	sf_initvideo(AcWidth, AcHeight, (m_fullscreen != -1));
 
-	// Set the graphics scaling
+	/* Set the graphics scaling */
 	if (sf_IsInfocomV6() || (story_id == BEYOND_ZORK))
 		m_gfxScale = m_v6scale;
 	else
 		m_gfxScale = 1;
 
-	// Set the configuration
+	/* Set the configuration */
 	if (h_version == V3) {
 		h_config |= CONFIG_SPLITSCREEN;
 		h_config |= CONFIG_PROPORTIONAL;
@@ -759,8 +710,6 @@ void os_init_screen(void)
 	os_set_font(FIXED_WIDTH_FONT);
 	os_set_text_style(0);
 
-/*	theWnd->ApplyTextSettings(
-		FrotzWnd::TextSettings(0,FIXED_WIDTH_FONT));*/
 	{
 		int H, W;
 		os_font_data(FIXED_WIDTH_FONT, &H, &W);
@@ -773,7 +722,7 @@ void os_init_screen(void)
 	h_screen_cols = (zbyte) (h_screen_width / h_font_width);
 	h_screen_rows = (zbyte) (h_screen_height / h_font_height);
 
-	// Check for sound
+	/* Check for sound */
 	if ((h_version == V3) && (h_flags & OLD_SOUND_FLAG)) {
 		if (((bmap == NULL) && (m_localfiles == 0))
 		    || (!sf_initsound()))
@@ -789,7 +738,7 @@ void os_init_screen(void)
 		if (h_version == V6)
 			mask |= TRANSPARENT_FLAG;
 
-		// Mask out any unsupported bits in the extended flags
+		/* Mask out any unsupported bits in the extended flags */
 		hx_flags &= mask;
 
 		hx_fore_colour = TrueToRGB5(sf_GetDefaultColour(true));
@@ -807,8 +756,6 @@ void os_init_screen(void)
 void os_fatal(const char *s, ...)
 {
 	va_list m;
-//      if (theWnd != NULL)
-//              theWnd->FlushDisplay();
 
 	fprintf(stderr, "\n%s: ", sf_msgstring(IDS_FATAL));
 	va_start(m, s);
@@ -846,13 +793,10 @@ void os_fatal(const char *s, ...)
 	}
 	sf_cleanup_all();
 	exit(EXIT_FAILURE);
-
-//      ::MessageBox(AfxGetMainWnd()->GetSafeHwnd(),s,CResString(IDS_FATAL),MB_ICONERROR|MB_OK);
-//      throw FrotzApp::AbortFrotz();
 }
 
 
-// If true, running one of Infocom's V6 games
+/* If true, running one of Infocom's V6 games */
 bool sf_IsInfocomV6()
 {
 	switch (story_id) {
@@ -868,7 +812,7 @@ bool sf_IsInfocomV6()
 }
 
 
-// If true, this picture has an adaptive palette
+/* If true, this picture has an adaptive palette */
 bool sf_IsAdaptive(int picture)
 {
 	bb_result_t result;
@@ -1014,7 +958,7 @@ int sf_getresource(int num, int ispic, int method, myresource * res)
 		usage = bb_ID_Pict;
 	else
 		usage = bb_ID_Snd;
-	//XXX Should use bb_load_resource_{pict,snd} with auxdata?
+	/* XXX Should use bb_load_resource_{pict,snd} with auxdata? */
 	st = bb_load_resource(bmap, method, (bb_result_t *) res, usage, num);
 	if (st == bb_err_None) {
 		res->type = bmap->chunks[res->bbres.chunknum].type;
@@ -1024,7 +968,7 @@ int sf_getresource(int num, int ispic, int method, myresource * res)
 	return st;
 }
 
-/////////////////
+/***************/
 
 typedef struct {
 	void *next;

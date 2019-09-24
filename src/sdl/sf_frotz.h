@@ -4,13 +4,9 @@
 #include "../common/frotz.h"
 #include "../blorb/blorb.h"
 
-// typedef unsigned char byte;
-// typedef unsigned short word;
-// typedef unsigned long ulong;
 #include <stdint.h>
 typedef uint8_t byte;
 typedef uint16_t word;
-// typedef uint32_t ulong;
 #define ulong uint32_t
 
 typedef struct {
@@ -57,10 +53,6 @@ int colour_in_use(zword colour);
 
 /*  various data */
 extern bool m_tandy;
-//      CRect m_wndSize;
-//      CString m_propFontName;
-//      CString m_fixedFontName;
-//      int m_fontSize;
 extern int m_v6scale;
 extern int m_gfxScale;
 extern ulong m_defaultFore;
@@ -70,14 +62,7 @@ extern ulong m_nonStdColours[NON_STD_COLS];
 extern int m_nonStdIndex;
 extern bool m_exitPause;
 extern bool m_lineInput;
-//extern bool   m_IsInfocomV6;
-//      bool m_fastScroll;
 extern bool m_morePrompts;
-//      int m_leftMargin;
-//      int m_rightMargin;
-//      FILE* m_blorbFile;
-//      bb_map_t* m_blorbMap;
-//      GameInfo m_gameInfo;
 extern int AcWidth;
 extern int AcHeight;
 extern int m_random_seed;
@@ -97,13 +82,13 @@ extern double m_gamma;
 
 extern bool sdl_active;
 
-// sf_resource.c
+/* sf_resource.c */
 
-// must be called as soon as possible (i.e. by os_process_arguments())
+/* must be called as soon as possible (i.e. by os_process_arguments()) */
 int sf_load_resources(char *givenfn);
 
 typedef struct {
-	int number;		// 0 means unallocated
+	int number;	/* 0 means unallocated */
 	int width, height;
 	byte *pixels;
 	ulong palette[16];
@@ -117,7 +102,6 @@ typedef struct {
 
 void sf_setgamma(double gamma);
 
-//int sf_loadpic( int num, sf_picture *gfx);
 
 /* get pointer from cache */
 sf_picture *sf_getpic(int num);
@@ -286,27 +270,3 @@ struct CONVstruct {
 };
 
 #endif
-
-/*** screen window ***/
-/*
-typedef struct {
-    zword y_pos;
-    zword x_pos;
-    zword y_size;
-    zword x_size;
-    zword y_cursor;
-    zword x_cursor;
-    zword left;
-    zword right;
-    zword nl_routine;
-    zword nl_countdown;
-    zword style;
-    zword colour;
-    zword font;
-    zword font_size;
-    zword attribute;
-    zword line_count;
-    zword true_fore;
-    zword true_back;
-} Zwindow;
-*/

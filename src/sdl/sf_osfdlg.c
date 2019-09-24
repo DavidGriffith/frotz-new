@@ -204,14 +204,12 @@ STATIC void writetext(ulong color, const char *s, int x, int y, int w,
 	int ox, oy, ow, oh;
 	int wtext, htext;
 	os_font_data(0, &htext, &wtext);
-//printf("W %p [%s]\n",s,s ? s : "??");
 	if (!s)
 		return;
 	if (!s[0])
 		return;
 	sf_getclip(&ox, &oy, &ow, &oh);
 	sf_setclip(x, y, w, htext);
-//printf("1\n");
 	if (center) {
 #ifdef USE_UTF8
 		int wt = wtext * utf8_len(s);
@@ -220,11 +218,9 @@ STATIC void writetext(ulong color, const char *s, int x, int y, int w,
 #endif
 		x += (w - wt) / 2;
 	}
-//printf("2 ts %p\n",ts); fflush(stdout); if (ts < 1000){sf_flushdisplay(); getchar();}
 	ts->cx = x;
 	ts->cy = y;
 	ts->fore = color;
-//printf("3\n"); fflush(stdout);
 #ifndef USE_UTF8
 	while (*s)
 		sf_writeglyph(ts->font->
@@ -236,9 +232,7 @@ STATIC void writetext(ulong color, const char *s, int x, int y, int w,
 		sf_writeglyph(ts->font->getglyph(ts->font, ch, 1));
 	}
 #endif
-//printf("4\n");
 	sf_setclip(ox, oy, ow, oh);
-//printf("5\n");
 }
 
 
@@ -360,7 +354,7 @@ STATIC int myosdialog(bool existing, const char *def, const char *filt,
 	zword c = 0;
 	int wtext, htext, buttw;
 
-	// allow system-specific dialog if not fullscreen
+	/* Allow system-specific dialog if not fullscreen */
 	if (isfull == 0)
 		if (sf_sysdialog)
 			return sf_sysdialog(existing, def, filt, tit, res);
@@ -368,8 +362,6 @@ STATIC int myosdialog(bool existing, const char *def, const char *filt,
 	ts = sf_curtextsetting();
 	if (!ts)
 		return SF_NOTIMP;
-
-//printf("0 ts %p (%p)\n",ts,&ts);
 
 	if (!def)
 		def = "";
@@ -423,7 +415,7 @@ STATIC int myosdialog(bool existing, const char *def, const char *filt,
 	X = (ew - W) / 2;
 	Y = (eh - H) / 2;
 
-	// internal!!
+	/* Internal!! */
 	xdlg = X + SPC + 2 * BFRAME;
 	ydlg = Y + 2 * SPC + 4 * BFRAME + htext + htext;
 
@@ -433,7 +425,6 @@ STATIC int myosdialog(bool existing, const char *def, const char *filt,
 	if (!saved)
 		return SF_NOTIMP;
 
-//printf("saved: %p %d %d %d %d\n",saved,saved[0],saved[1],saved[2],saved[3]);
 	sf_pushtextsettings();
 #ifndef USE_UTF8
 	ts->font = sf_VGA_SFONT;
@@ -446,7 +437,6 @@ STATIC int myosdialog(bool existing, const char *def, const char *filt,
 	ts->backTransparent = 1;
 
 	sf_fillrect(O_GRAY2, X, Y, W, H);
-//  frame_upframe(X,Y,W,H);
 	sf_rect(FRAMECOLOR, X, Y, W, H);
 	sf_rect(FRAMECOLOR, X + 1, Y + 1, W - 2, H - 2);
 	sf_fillrect(FRAMECOLOR, X, Y + 2, W, htext);
@@ -510,7 +500,6 @@ STATIC int myosdialog(bool existing, const char *def, const char *filt,
 	cleanlist(curdir);
 	curdir = NULL;
 
-//printf("2saved: %p %d %d %d %d\n",saved,saved[0],saved[1],saved[2],saved[3]);
 	sf_restoreareaandfree(saved);
 
 	if (c == ZC_ESCAPE)
@@ -525,6 +514,7 @@ STATIC int myosdialog(bool existing, const char *def, const char *filt,
 
 	return SF_NOTIMP;
 }
+
 
 void sf_setdialog(void)
 {
@@ -544,7 +534,6 @@ void sf_setdialog(void)
 #endif
 #include <unistd.h>
 #include <dirent.h>
-//#include <fnmatch.h>
 #include <sys/stat.h>
 
 
@@ -675,13 +664,10 @@ STATIC ENTRY *dodir(char *dirname, char *pattern, char *resdir, int size,
 	struct stat fst;
 	int n;
 
-//printf("\ndodir\n");
 	if (!resolvedir(dirname, resdir, size))
 		return NULL;
 	resdend = resdir + strlen(resdir);
 
-//printf("[%s]\n",resdir);
-	// MinGW opendir() does not like the final slash
 #ifdef WIN32
 	n = strlen(resdir);
 	if (n > 2 && (resdir[n - 2] != ':'))
@@ -694,7 +680,6 @@ STATIC ENTRY *dodir(char *dirname, char *pattern, char *resdir, int size,
 	if (!dir)
 		return NULL;
 
-//printf("opened [%s]\n",resdir);
 	for (;;) {
 		d = readdir(dir);
 		if (!d)
@@ -705,14 +690,11 @@ STATIC ENTRY *dodir(char *dirname, char *pattern, char *resdir, int size,
 		if (strcmp(p, "..") == 0)
 			continue;
 		strcpy(resdend, p);
-//printf("-%s\n",resdir);
 		if (stat(resdir, &fst))
 			continue;
-//printf("--mode %x\n",fst.st_mode);
 		if (S_ISDIR(fst.st_mode))
 			addentry(p, &dirs);
 		else {
-//printf("--fnmatch: %d\n",fnmatch(pattern,p,0));
 			if (myfnmatch(pattern, p, 0) == 0)
 				addentry(p, &files);
 		}

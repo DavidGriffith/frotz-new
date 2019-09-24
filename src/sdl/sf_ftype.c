@@ -189,19 +189,13 @@ static void setglyph(MYFONT * f, FT_Face face, int ch)
 	res = calloc(1, sizeof(SF_glyph) + nbypr * bitmap->rows);
 	if (!res)
 		return;
-	for (i = 0; i < bitmap->rows; i++)
-		for (j = 0; j < nbypr; j++)
+	for (i = 0; i < bitmap->rows; i++) {
+		for (j = 0; j < nbypr; j++) {
 			res->bitmap[i * nbypr + j] =
 			    bitmap->buffer[i * bitmap->pitch + j];
+		}
+	}
 
-//printf("%c %d %p  w%d\n",ch,bitmap->pitch,res,bitmap->width);
-//{
-//int i,j; unsigned char *p = &(res->bitmap[0]);
-//for (i=0;i<bitmap->rows;i++){
-//  for (j=0;j<nbypr;j++) printf("%02x",*p++);
-//  printf("\n");
-//  }
-//}
 	res->w = bitmap->width;
 	res->h = bitmap->rows;
 	res->dx = slot->advance.x / 64;

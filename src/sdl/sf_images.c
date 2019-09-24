@@ -13,7 +13,6 @@
 
 #include "../blorb/blorblow.h"
 
-// static double m_gamma = DEFAULT_GAMMA;
 static byte toLinear[256];
 static byte fromLinear[256];
 
@@ -201,6 +200,7 @@ struct JPEGErrorInfo {
 	jmp_buf errorJump;
 };
 
+
 static void errorJPEGExit(j_common_ptr cinfo)
 {
 	struct JPEGErrorInfo *error = (struct JPEGErrorInfo *)cinfo->err;
@@ -208,16 +208,18 @@ static void errorJPEGExit(j_common_ptr cinfo)
 	longjmp(error->errorJump, 1);
 }
 
+
 static void outputJPEGMessage(j_common_ptr cinfo)
 {
 	char buffer[JMSG_LENGTH_MAX];
 	(*cinfo->err->format_message) (cinfo, buffer);
-//  TRACE("JPEG: %s\n",buffer);
 }
+
 
 /* Memory Data Source */
 static void memJPEGInit(j_decompress_ptr unused)
 {
+	/* Nothing here */
 }
 
 
@@ -241,6 +243,7 @@ static void memJPEGSkipInput(j_decompress_ptr cinfo, long num_bytes)
 
 static void memJPEGTerm(j_decompress_ptr unused)
 {
+	/* Nothing here */
 }
 
 
