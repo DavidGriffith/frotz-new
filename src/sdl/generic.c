@@ -246,7 +246,8 @@ void os_warn(const char *s, ...)
 	char buf[1024];
 	int len;
 
-	//XXX Too lazy to do this right (try again with a bigger buf if necessary).
+	/* XXX Too lazy to do this right
+	 * (try again with a bigger buf if necessary). */
 	va_start(va, s);
 	len = vsnprintf(buf, sizeof(buf), s, va);
 	va_end(va);

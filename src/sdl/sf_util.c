@@ -55,13 +55,11 @@ void sf_cleanup_all()
 {
 	while (cflist) {
 		cfrec *n = cflist->next;
-//printf("cleanup c%p [%s] n%p\n",cflist,cflist->name,n);
 		if (cflist->func)
 			cflist->func();
 		free(cflist);
 		cflist = n;
 	}
-//printf("Cleanup done.\n");
 }
 
 
@@ -74,8 +72,6 @@ void sf_cleanup_all()
 void os_reset_screen(void)
 {
 	sf_flushdisplay();
-//      theWnd->FlushDisplay();
-//      theWnd->ResetOverhang();
 
 	if (m_exitPause) {
 		const char *hit = sf_msgstring(IDS_HIT_KEY_EXIT);
@@ -100,7 +96,6 @@ int user_reverse_fg = -1;
 int user_screen_height = -1;
 int user_screen_width = -1;
 int user_tandy_bit = -1;
-//int user_random_seed = -1;
 int user_font = 1;
 int m_random_seed = -1;
 int m_fullscreen = -1;
@@ -405,9 +400,9 @@ void os_process_arguments(int argc, char *argv[])
 	if ((p != NULL) &&
 	    ((strcmp(p, EXT_BLORB2) == 0) ||
 	     (strcmp(p, EXT_BLORB3) == 0) || (strcmp(p, EXT_BLORB4) == 0))) {
-		//        blorb_ext = strdup(p);
+		/*  blorb_ext = strdup(p); */
 	} else
-		//  blorb_ext = strdup(EXT_BLORB);
+		/*  blorb_ext = strdup(EXT_BLORB); */
 
 		/* Get rid of extensions with 1 to 6 character extensions. */
 		/* This will take care of an extension like ".zblorb". */
@@ -518,7 +513,6 @@ unsigned long sf_ticks(void)
 	ticks =
 	    (now.tv_sec - start.tv_sec) * 1000 + (now.tv_usec -
 						  start.tv_usec) / 1000;
-//  ticks = now.tv_sec*1000 + now.tv_usec/1000;
 	return ticks;
 }
 #endif
@@ -581,7 +575,6 @@ static const char *getdatename(const char *def, char *ext)
 }
 
 
-// fdialog( existing, defname, filter, title, &resultstr)
 static int ingame_read_file_name(char *file_name, const char *default_name,
 				 int flag);
 static int dialog_read_file_name(char *file_name, const char *default_name,
@@ -743,7 +736,6 @@ static int dialog_read_file_name(char *file_name, const char *default_name,
 	char *res;
 
 	sf_flushdisplay();
-//      theWnd->ResetOverhang();
 
 	switch (flag) {
 	case FILE_SAVE:
@@ -778,8 +770,6 @@ static int dialog_read_file_name(char *file_name, const char *default_name,
 		return 0;
 	}
 
-// fdialog( existing, defname, filter, title, &resultstr)
-// returns 0 if OK
 	st = sf_user_fdialog(!newfile(flag), default_name, sf_msgstring(filter),
 			     sf_msgstring(title), &res);
 	if (st == SF_NOTIMP)
@@ -796,7 +786,6 @@ static char *rc = NULL;
 
 void sf_FinishProfile()
 {
-//printf("finishprofile\n");
 	if (!rc)
 		return;
 	free(rc);
@@ -868,7 +857,6 @@ static char *findsect(const char *sect)
 	int ns = strlen(sect);
 	char *r = rc;
 	while (r) {
-//printf("{%s}\n",r);
 		r = strchr(r, '[');
 		if (!r)
 			return NULL;
@@ -886,7 +874,6 @@ static char *findid(const char *sect, const char *id)
 	int nid = strlen(id);
 	char *r, *sav, *rq, *fnd = NULL;
 	r = findsect(sect);
-//printf("findsect(%s) %p\n",sect,r);
 	if (!r)
 		return NULL;
 	sav = strchr(r, '[');
@@ -942,7 +929,6 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 	char *q = NULL, sav = 0;
 	if (rc) {
 		char *p = findid(sect, id);
-//printf("findid(%s,%s) %p\n",sect,id,p);
 		if (p) {
 			int quoted = 0;
 			for (; *p; p++) {
@@ -976,22 +962,23 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 }
 
 
-//  A.  Local file header:
-//
-//         local file header signature   0  4 bytes  (0x04034b50)
-//         version needed to extract     4  2 bytes
-//         general purpose bit flag      6  2 bytes
-//         compression method            8  2 bytes
-//         last mod file time           10  2 bytes
-//         last mod file date           12  2 bytes
-//         crc-32                       14  4 bytes
-//         compressed size              18  4 bytes
-//         uncompressed size            22  4 bytes
-//         file name length             26  2 bytes
-//         extra field length           28  2 bytes
-//
-//         file name (variable size)
-//         extra field (variable size)
+/*  A.  Local file header:
+ *
+ *         local file header signature   0  4 bytes  (0x04034b50)
+ *         version needed to extract     4  2 bytes
+ *         general purpose bit flag      6  2 bytes
+ *         compression method            8  2 bytes
+ *         last mod file time           10  2 bytes
+ *         last mod file date           12  2 bytes
+ *         crc-32                       14  4 bytes
+ *         compressed size              18  4 bytes
+ *         uncompressed size            22  4 bytes
+ *         file name length             26  2 bytes
+ *         extra field length           28  2 bytes
+ *
+ *         file name (variable size)
+ *         extra field (variable size)
+ */
 
 #define plong( b) (((int)((b)[3]) << 24) + ((int)((b)[2]) << 16) +\
 	((int)((b)[1]) << 8) + (int)((b)[0]))
@@ -1069,7 +1056,6 @@ int sf_pkread(FILE * f, int foffs, void **out, int *size)
 	skip = pshort(hd + 26) + pshort(hd + 28);
 	fseek(f, foffs + 30 + skip, SEEK_SET);
 	fread(cdata, 1, csize, f);
-//printf("%02x csize %d usize %d skip %d\n",cdata[0],csize,usize,skip);
 
 	st = myunzip(csize, cdata, data);
 

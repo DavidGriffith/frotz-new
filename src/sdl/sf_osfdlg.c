@@ -27,7 +27,7 @@ static zword pushed = 0;
 static int wentry;
 
 static ulong *sbuffer = NULL;
-static int sbpitch;		// in longs
+static int sbpitch;		/* in longs */
 static int ewidth, eheight;
 static int X, Y, W, H, xdlg, ydlg, wdlg, hdlg;
 
@@ -53,7 +53,7 @@ STATIC void updatelist()
 
 STATIC void goright();
 STATIC void goleft();
-// assumes a / at end
+/* assumes a / at end */
 STATIC void goup()
 {
 	char *p;
@@ -69,7 +69,7 @@ STATIC void goup()
 }
 
 typedef struct {
-	int x, y, w, h;		// internal
+	int x, y, w, h;		/* internal */
 	 zword(*click) (int, int);
 	ulong back;
 	int isbutton;
@@ -336,7 +336,6 @@ STATIC zword inputkey(bool text)
 			break;
 		}
 	}
-//    if (os_read_mouse() != 1) c = 0;
 	return c;
 }
 

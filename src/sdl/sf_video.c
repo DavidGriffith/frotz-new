@@ -3,9 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <signal.h>
-
-//#define STATIC
 
 #include <SDL.h>
 
@@ -235,7 +232,6 @@ void sf_writeglyph(SF_glyph * g)
 	x += dxpre;
 	y += dypre;
 
-//printf("\n");
 	for (i = 0; i < h; i++) {
 		int xx = 0;
 		if (ts->font->antialiased) {
@@ -275,8 +271,6 @@ void sf_fillrect(unsigned long color, int x, int y, int w, int h)
 {
 	ulong *dst;
 	int i;
-//printf("fillrect %x %d %d %d %d\n",color,x,y,w,h);
-//printf("dst%p sbpitch%d\n",dst,sbpitch);
 	if (x < xmin) {
 		w += x - xmin;
 		x = xmin;
@@ -336,7 +330,6 @@ void os_erase_area(int top, int left, int bottom, int right, int win)
 	sf_flushtext();
 	sf_fillrect((sf_curtextsetting())->back, left - 1, top - 1,
 		    right - left + 1, bottom - top + 1);
-//      theWnd->FillBackground(CRect(left-1,top-1,right,bottom));
 }
 
 
@@ -418,7 +411,6 @@ bool sf_flushdisplay()
 void os_scroll_area(int top, int left, int bottom, int right, int units)
 {
 	sf_flushtext();
-//      theWnd->ResetOverhang();
 
 	scroll(left - 1, top - 1, right - left + 1, bottom - top + 1, units);
 	if (units > 0)
@@ -427,17 +419,13 @@ void os_scroll_area(int top, int left, int bottom, int right, int units)
 	else if (units < 0)
 		sf_fillrect((sf_curtextsetting())->back, left - 1, top - 1,
 			    right - left + 1, units);
-
-//  if (theApp.GetFastScrolling() == false)
-//  sf_flushdisplay();
-//              theWnd->FlushDisplay();
 }
 
 
 bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
 		       int ysize, int xsize)
 {
-	//TODO
+	/* TODO */
 	return FALSE;
 }
 
@@ -521,14 +509,9 @@ void sf_initvideo(int W, int H, int full)
 					  SDL_TEXTUREACCESS_STREAMING, W, H)))
 		os_fatal("Failed to create texture: %s", SDL_GetError());
 
-//    printf("setvideo: gm %dx%d rq %dx%d(f%d)\n",W,H,reqW,reqH,full);
-
 	sbuffer = calloc(W * H, sizeof(ulong));
 	if (!sbuffer)
 		os_fatal("Could not create gc");
-
-	//  SDL_EnableUNICODE(1);
-	//  SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
 	SDL_AddTimer(SFdticks, mytimer, NULL);
 
@@ -559,7 +542,7 @@ void os_draw_picture(int picture, int y, int x)
 	if (!pic)
 		return;
 	if (!pic->pixels)
-		return;		// TODO: rect
+		return;
 	src = (ulong *) pic->pixels;
 
 	x--;
@@ -567,20 +550,20 @@ void os_draw_picture(int picture, int y, int x)
 	ew = m_gfxScale * pic->width;
 	eh = m_gfxScale * pic->height;
 
-	// this takes care of the fact that x, y are really 16 bit values
+	/* this takes care of the fact that x, y are really 16 bit values */
 	if (x & 0x8000)
 		x |= 0xffff0000;
 	if (y & 0x8000)
 		y |= 0xffff0000;
 
-	// get current window rect
+	/* get current window rect */
 	sf_getclip(&ox, &oy, &ow, &oh);
 	winpars = curwinrec();
 	sf_setclip(winpars->x_pos - 1, winpars->y_pos - 1, winpars->x_size,
 		   winpars->y_size);
 
-	// clip taking into account possible origin
-	// outside the clipping rect
+	/* clip taking into account possible origin
+	 * outside the clipping rect */
 	if (x < xmin) {
 		d = xmin - x;
 		ew -= d;
@@ -717,11 +700,9 @@ static zword goodzkey(SDL_Event * e, int allowed)
 	switch (e->type) {
 	case SDL_QUIT:
 		sf_quitconf();
-//      if (allowed) return ZC_HKEY_QUIT;
 		return 0;
 	case SDL_MOUSEBUTTONDOWN:
-//        printf("down %d\n",e->button.button);
-		if (true) {	//(e->button.button == SDL_BUTTON_LEFT)
+		if (true) {
 			mouse_button = e->button.button;
 			set_mouse_xy(e->button.x, e->button.y);
 			return ZC_SINGLE_CLICK;
@@ -836,7 +817,7 @@ static zword goodzkey(SDL_Event * e, int allowed)
 		case SDLK_F12:
 			return ZC_FKEY_F12;
 		}
-		//XXX Maybe we should just always have text input on.
+		/* XXX Maybe we should just always have text input on. */
 		if (!SDL_IsTextInputActive()) {
 			c = e->key.keysym.sym;
 			if (c >= 32 && c <= 126)
@@ -862,22 +843,17 @@ zword sf_read_key(int timeout, bool cursor, bool allowed, bool text)
 	zword inch = 0;
 
 	sf_flushtext();
-//      theWnd->ResetOverhang();
-//      theWnd->UpdateMenus();
 	if (cursor)
 		sf_drawcursor(true);
 	sf_flushdisplay();
 
 	if (timeout)
 		mytimeout = sf_ticks() + m_timerinterval * timeout;
-//      InputTimer timer(timeout);
-//      FrotzWnd::Input input;
 	if (text)
 		SDL_StartTextInput();
 	while (true) {
-		// Get the next input
+		/* Get the next input */
 		while (SDL_PollEvent(&event)) {
-//          if (event.type == SDL_QUIT) printf("got SDL_QUIT\n");
 			if ((inch = goodzkey(&event, allowed)))
 				break;
 		}
@@ -965,13 +941,7 @@ zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
 	int len = mywcslen(buf);
 	SF_textsetting *ts = sf_curtextsetting();
 	SDL_Event event;
-
-	//printf("os_read_line mx%d buf[0]%d tm%d w%d c%d\n",max,buf[0],timeout,width,continued);
-	//  LineInput line;
 	sf_flushtext();
-	//  theWnd->ResetOverhang();
-	//  theWnd->UpdateMenus();
-	//  theWnd->RecaseInput(buf);
 
 	/* Better be careful here or it might segv.  I wonder if we should just
 	   ignore 'continued' and check for len > 0 instead?  Might work better
@@ -984,20 +954,17 @@ zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
 	/* Draw the input line */
 	ptx = ts->cx;
 	pty = ts->cy;
-	//  CPoint point = theWnd->GetTextPoint();
-	ptx -= os_string_width(buf);	//theWnd->GetTextWidth(buf,mywcslen(buf));
+	ptx -= os_string_width(buf);
 	sf_DrawInput(buf, pos, ptx, pty, width, true);
 
 	if (timeout)
 		mytimeout = sf_ticks() + m_timerinterval * timeout;
-	//  InputTimer timer(timeout);
 	SDL_StartTextInput();
 	while (true) {
 		/* Get the next input */
 		while (SDL_PollEvent(&event)) {
 			zword c;
 			if ((c = goodzkey(&event, 1))) {
-				//printf("goodzk %4x\n",c);
 				switch (c) {
 				case ZC_BACKSPACE:
 					/* Delete the character to the left of the cursor */
@@ -1121,7 +1088,6 @@ zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
 						   mouse_y = input.mousey+1; */
 					} else if (c == ZC_RETURN)
 						gen_add_to_history(buf);
-					//                      theWnd->SetLastInput(buf);
 					SDL_StopTextInput();
 					return c;
 				}
@@ -1143,7 +1109,6 @@ void sf_DrawInput(zchar * buffer, int pos, int ptx, int pty, int width,
 	int height;
 	SF_textsetting *ts = sf_curtextsetting();
 
-//printf("DrawInput (%d)[%d] %d x%d y%d w%d %d\n",mywcslen(buffer),os_string_width(buffer),pos,ptx,pty,width,cursor);
 
 	height = ts->font->height(ts->font);
 
@@ -1151,7 +1116,6 @@ void sf_DrawInput(zchar * buffer, int pos, int ptx, int pty, int width,
 	sf_fillrect(ts->back, ptx, pty, width, height);
 
 	/* Display the input */
-//  sf_pushtextsettings();
 	ts->cx = ptx;
 	ts->cy = pty;
 	os_display_string(buffer);
@@ -1162,39 +1126,9 @@ void sf_DrawInput(zchar * buffer, int pos, int ptx, int pty, int width,
 			wid += sf_charwidth(buffer[i++], &oh);
 		drawthecursor(ptx + wid, pty, 1);
 	}
-//  sf_poptextsettings();
-/*
-	SetTextPoint(point);
-	WriteText(buffer,mywcslen(buffer));
 
-	if (cursor)
-	{
-		int x = point.x + GetTextWidth(buffer,pos);
-		int cx = GetCharWidth('0');
-		if (*(buffer+pos) != 0)
-			cx = GetCharWidth(*(buffer+pos));
-
-		// Invert colours
-		COLORREF fore = m_dc.GetTextColor();
-		m_dc.SetTextColor(m_dc.GetBkColor());
-		m_dc.SetBkColor(fore);
-
-		// Draw a cursor
-		m_dc.MoveTo(x,point.y);
-		CRect rect(x,point.y,x+cx,point.y+height);
-		if (*(buffer+pos) != 0)
-			::ExtTextOutW(m_dc.GetSafeHdc(),0,0,ETO_OPAQUE,rect,buffer+pos,1,NULL);
-		else
-			::ExtTextOutW(m_dc.GetSafeHdc(),0,0,ETO_OPAQUE,rect,NULL,0,NULL);
-
-		// Put colours back
-		m_dc.SetBkColor(m_dc.GetTextColor());
-		m_dc.SetTextColor(fore);
-	}*/
-
-	// Update the window
+	/* Update the window */
 	sf_flushdisplay();
-//      Invalidate();
 }
 
 
@@ -1211,14 +1145,14 @@ zword os_read_mouse(void)
 	byte c;
 	int x, y;
 	zword btn = 0;
-	// Get the mouse position
+	/* Get the mouse position */
 	SDL_PumpEvents();
 	c = SDL_GetMouseState(&x, &y);
 	set_mouse_xy(x, y);
-	// Get the last selected menu item
-//      menu_selected = theWnd->GetMenuClick();
-//printf("%04x\n",c);
-	// Get the mouse buttons
+	/* Get the last selected menu item */
+	/* menu_selected = theWnd->GetMenuClick();*/
+
+	/* Get the mouse buttons */
 	if (c & SDL_BUTTON_LMASK)
 		btn |= 1;
 	if (c & SDL_BUTTON_RMASK)
@@ -1244,7 +1178,6 @@ void os_more_prompt(void)
 		int x, y, h;
 		const char *p = sf_msgstring(IDS_MORE);
 		sf_flushtext();
-//              theWnd->ResetOverhang();
 
 		/* Save the current text position */
 		sf_pushtextsettings();
@@ -1255,15 +1188,11 @@ void os_more_prompt(void)
 		/* Show a [More] prompt */
 		while (*p)
 			os_display_char((zchar) (*p++));
-//              theWnd->WriteText(CResString(IDS_MORE));
-//      sf_drawcursor(true);
-//      sf_flushdisplay();
 
 		/* Wait for a key press */
 		sf_read_key(0, true, false, false);
 		/* Remove the [More] prompt */
 		sf_fillrect(ts->back, x, y, ts->cx - x, h);
-//      sf_drawcursor(false);
 
 		/* Restore the current text position */
 		sf_poptextsettings();
@@ -1309,7 +1238,6 @@ ulong *sf_savearea(int x, int y, int w, int h)
 		p += w;
 		s += sbpitch;
 	}
-// printf("savearea %d %d %d %d\n",x,y,w,h); fflush(stdout);
 	return r;
 }
 
@@ -1326,7 +1254,6 @@ void sf_restoreareaandfree(ulong * s)
 	y = *p++;
 	w = *p++;
 	h = *p++;
-// printf("restorearea %d %d %d %d\n",x,y,w,h); fflush(stdout);
 
 	d = sbuffer + x + y * sbpitch;
 	for (i = 0; i < h; i++) {

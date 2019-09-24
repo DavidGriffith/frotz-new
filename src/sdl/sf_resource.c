@@ -113,7 +113,7 @@ static int checkfile(char *fn, char *ofn)
 		strcpy(ofn, fn);
 		return 0;
 	}
-	// if qualified path, don't do anything else
+	/* if qualified path, don't do anything else */
 	if ((strchr(fn, '\\')) || (strchr(fn, '/')))
 		return -1;
 

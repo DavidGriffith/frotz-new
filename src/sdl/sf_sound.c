@@ -34,8 +34,7 @@ typedef struct EFFECT {
 	ulong endtime;
 } EFFECT;
 
-// no effects cache
-
+/* no effects cache */
 static EFFECT *e_sfx = NULL;
 static EFFECT *e_mod = NULL;
 
@@ -45,11 +44,12 @@ int m_no_sound = 0;
 int m_frequency = 44100;
 
 static int audio_rate, audio_channels;
-		// set this to any of 512,1024,2048,4096
-		// the higher it is, the more FPS shown and CPU needed
+
+/* set this to any of 512,1024,2048,4096
+ * the higher it is, the more FPS shown and CPU needed
+ */
 static int audio_buffers = 512;
 static Uint16 audio_format;
-//static int volume = SDL_MIX_MAXVOLUME;
 static int bits;
 
 static void finishaudio()
@@ -59,8 +59,7 @@ static void finishaudio()
 	os_stop_sample(0);
 	SFaudiorunning = 0;
 
-	// flush cache
-//printf("Flushing sound cache\n");
+	/* flush cache */
 	if (e_sfx)
 		e_sfx->destroy(e_sfx);
 	if (e_mod)
@@ -91,7 +90,7 @@ int sf_initsound()
 		return 0;
 	SFaudiorunning = 1;
 
-	// initialize sdl mixer, open up the audio device
+	/* initialize sdl mixer, open up the audio device */
 	if (Mix_OpenAudio(m_frequency, MIX_DEFAULT_FORMAT, 2, audio_buffers) <
 	    0) {
 		SFaudiorunning = 0;
@@ -101,14 +100,13 @@ int sf_initsound()
 	Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
 	bits = audio_format & 0xFF;
 
-	// hook for end-of-music
+	/* hook for end-of-music */
 	Mix_HookMusicFinished(music_finished);
-	// hook for end-of-sfx
+	/* hook for end-of-sfx */
 	Mix_ChannelFinished(channel_finished);
 
 	Mix_AllocateChannels(1);
 	CLEANREG(finishaudio);
-//  sf_initresample();
 	return 1;
 }
 
@@ -180,8 +178,6 @@ static void stopmodule()
 	if (!e_mod)
 		return;
 	e_mod->active = 0;
-//  Player_Mute(MUTE_INCLUSIVE,0,64);
-//  Player_SetVolume(0);        // bug??
 	Mix_HaltMusic();
 	e_mod->ended = 0;
 }
@@ -193,18 +189,8 @@ static void startsample()
 		return;
 	Mix_PlayChannel(0, e_sfx->sam, e_sfx->repeats);
 	Mix_Volume(0, e_sfx->volume);
-//  Voice_SetPanning(v,PAN_CENTER);
-//  while (Voice_Stopped(v)){ 
-//      MikMod_Update(); sf_sleep(10);
-//      }
-//  e_sfx->voice = v;
 	e_sfx->active = 1;
 }
-
-//static int samplefinished(){
-//  if (!Voice_Stopped(e_sfx->voice)) return 0;
-//  return (sf_ticks() >= e_sfx->endtime);
-//  }
 
 
 static void startmodule()
@@ -230,7 +216,6 @@ static EFFECT *getaiff(FILE * f, size_t pos, int len, int num)
 		res->destroy(res);
 		return NULL;
 	}
-//printf("AIFF loaded\n");
 	return res;
 }
 
@@ -253,7 +238,6 @@ static EFFECT *getmodule(FILE * f, size_t pos, int len, int num)
 		void *data;
 		int st = sf_pkread(f, pos, &data, &size);
 		if (st) {
-//printf("Error %d from sf_pkread()\n",st);
 			res->destroy(res);
 			return NULL;
 		}
@@ -263,11 +247,9 @@ static EFFECT *getmodule(FILE * f, size_t pos, int len, int num)
 		res->mod = Mix_LoadMUS_RW(SDL_RWFromFP(f, false), true);
 	}
 	if (!res->mod) {
-//printf("Player_Load failure: %s\n",MikMod_strerror(MikMod_errno));
 		res->destroy(res);
 		return NULL;
 	}
-//printf("Module loaded\n");
 	return res;
 }
 
@@ -336,7 +318,6 @@ void os_finish_with_sample(int number)
 	if (!SFaudiorunning)
 		return;
 	os_stop_sample(number);
-//      FrotzSound::Stop(number);
 }
 
 
@@ -370,9 +351,8 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 	if (!SFaudiorunning)
 		return;
 
-//printf("start %d vol %d rep %d\n",number,volume,repeats);
 
-	// NOTE: geteffect may return an already loaded effect
+	/* NOTE: geteffect may return an already loaded effect */
 	e = geteffect(number);
 	if (!e)
 		return;
@@ -427,8 +407,6 @@ void os_stop_sample(int number)
 		stopsample();
 	if ((e_mod) && (e_mod->number == number))
 		stopmodule();
-
-//      FrotzSound::Stop(number);
 }
 
 

@@ -38,7 +38,6 @@ static void myhandler(int s)
 
 void sf_installhandlers()
 {
-//  CLEANREG(resethandlers);
 	signal(SIGINT, myhandler);
 	signal(SIGFPE, myhandler);
 	signal(SIGSEGV, myhandler);
@@ -92,7 +91,6 @@ static void bt_sighandler(int sig, siginfo_t * info, void *secret)
 	void *trace[16];
 	char *nam;
 	int i, trace_size = 0;
-//  ucontext_t *uc = (ucontext_t *)secret;
 
 	if (sig == SIGINT) {
 		fprintf(stderr, "Emergency Exit (Signal SIGITNT received)\n");
@@ -105,7 +103,6 @@ static void bt_sighandler(int sig, siginfo_t * info, void *secret)
 	printf("\nInterpreter bug!\nSignal %d ", sig);
 	if ((nam = getsigname(sig)))
 		printf("[%s] ", nam);
-//  printf("from %p", (void *)uc->uc_mcontext.gregs[_PROG_COUNTER]);
 
 	if (sig == SIGSEGV)
 		printf(" [faulty address is %p]", info->si_addr);
@@ -114,13 +111,10 @@ static void bt_sighandler(int sig, siginfo_t * info, void *secret)
 
 	trace_size = backtrace(trace, 16);
 	/* overwrite sigaction with caller's address */
-//  trace[1] = (void *) uc->uc_mcontext.gregs[_PROG_COUNTER];
+	/* trace[1] = (void *) uc->uc_mcontext.gregs[_PROG_COUNTER]; */
 
 	/* skip first stack frame (points here) */
 	printf("Backtrace:\n");
-//   messages = backtrace_symbols(trace, trace_size);
-//   for (i=1; i<trace_size; ++i)
-//         printf("[bt] %s\n", messages[i]);
 
 	for (i = 1; i < trace_size; i++) {
 		printf("  ");
