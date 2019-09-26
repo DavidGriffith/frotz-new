@@ -307,34 +307,7 @@ int os_storyfile_tell(FILE * fp)
 
 void os_init_setup(void)
 {
-	f_setup.attribute_assignment = 0;
-	f_setup.attribute_testing = 0;
-	f_setup.context_lines = 0;
-	f_setup.object_locating = 0;
-	f_setup.object_movement = 0;
-	f_setup.left_margin = 0;
-	f_setup.right_margin = 0;
-	f_setup.ignore_errors = 0;
-	f_setup.piracy = 0;
-	f_setup.undo_slots = MAX_UNDO_SLOTS;
-	f_setup.expand_abbreviations = 0;
-	f_setup.script_cols = 80;
-	f_setup.sound = 1;
-	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
-	f_setup.restore_mode = 0;
-
-	f_setup.blorb_file = NULL;
-	f_setup.story_file = NULL;
-	f_setup.story_name = NULL;
-	f_setup.story_base = NULL;
-	f_setup.script_name = NULL;
-	f_setup.command_name = NULL;
-	f_setup.save_name = NULL;
-	f_setup.tmp_save_name = NULL;
-	f_setup.aux_name = NULL;
-	f_setup.story_path = NULL;
-	f_setup.zcode_path = NULL;
-	f_setup.restricted_path = NULL;
+	/* Nothing here */
 }
 
 

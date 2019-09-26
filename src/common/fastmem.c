@@ -206,6 +206,27 @@ void init_header(void)
 }
 
 
+void init_setup(void)
+{
+	memset(&f_setup, 0, sizeof(f_setup));
+	f_setup.undo_slots = MAX_UNDO_SLOTS;
+	f_setup.script_cols = 80;
+	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
+	f_setup.blorb_file = NULL;
+	f_setup.story_file = NULL;
+	f_setup.story_name = NULL;
+	f_setup.story_base = NULL;
+	f_setup.script_name = NULL;
+	f_setup.command_name = NULL;
+	f_setup.save_name = NULL;
+	f_setup.tmp_save_name = NULL;
+	f_setup.aux_name = NULL;
+	f_setup.story_path = NULL;
+	f_setup.zcode_path = NULL;
+	f_setup.restricted_path = NULL;
+}
+
+
 /*
  * init_memory
  *

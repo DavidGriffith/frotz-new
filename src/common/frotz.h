@@ -702,6 +702,7 @@ void	runtime_error(int);
 
 /*** Assorted initialization functions ***/
 void   init_header(void);
+void   init_setup(void);
 void   init_buffer(void);
 void   init_process(void);
 void   init_sound(void);

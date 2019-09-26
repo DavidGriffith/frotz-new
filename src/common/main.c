@@ -103,8 +103,9 @@ void z_piracy(void)
  */
 int cdecl main(int argc, char *argv[])
 {
-	os_init_setup();
 	init_header();
+	init_setup();
+	os_init_setup();
 	os_process_arguments(argc, argv);
 	init_buffer();
 	init_err();
