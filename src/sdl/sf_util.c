@@ -264,8 +264,6 @@ static void parse_options(int argc, char **argv)
 			user_names_format = copt;
 		if (c == '@')
 			m_reslist_file = zoptarg;
-		if (c == 'I')
-			m_setupfile = zoptarg;
 		if (c == 'f')
 			user_foreground = num;
 		if (c == 'F')
