@@ -36,6 +36,8 @@ struct cfstruct {
 
 static cfrec *cflist = NULL;
 
+static int getcolor(char *);
+
 
 void sf_regcleanfunc(void *f, const char *p)
 {
@@ -115,9 +117,9 @@ static char *info_header =
 static char *info[] = {
 	"-a   watch attribute setting",
 	"-A   watch attribute testing",
-	"-b # background colour",
+	"-b <colourname> background colour",
 	"-c # context lines",
-	"-f # foreground colour",
+	"-f <colorname> foreground colour",
 	"-F   fullscreen mode",
 	"-h # screen height",
 	"-H   show extended options",
@@ -253,7 +255,7 @@ static void parse_options(int argc, char **argv)
 		if (c == 'A')
 			f_setup.attribute_testing = 1;
 		if (c == 'b')
-			user_background = num;
+			user_background = getcolor(zoptarg);
 		if (c == 'B')
 			option_scrollback_buffer = num;
 		if (c == 'c')
@@ -265,7 +267,7 @@ static void parse_options(int argc, char **argv)
 		if (c == '@')
 			m_reslist_file = zoptarg;
 		if (c == 'f')
-			user_foreground = num;
+			user_foreground = getcolor(zoptarg);
 		if (c == 'F')
 			m_fullscreen = 1;
 		if (c == 'h')
@@ -1066,6 +1068,54 @@ int sf_pkread(FILE * f, int foffs, void **out, int *size)
 	*size = usize;
 	return st;
 }
+
+
+/*
+ * getcolor
+ *
+ * Figure out what color this string might indicate and returns an integer
+ * corresponding to the color macros defined in frotz.h.
+ *
+ */
+static int getcolor(char *value)
+{
+	int num;
+
+	/* Be case-insensitive */
+	for (num = 0; value[num] !=0; num++)
+		value[num] = tolower((int) value[num]);
+
+	if (strcmp(value, "black") == 0)
+		return BLACK_COLOUR;
+	if (strcmp(value, "red") == 0)
+		return RED_COLOUR;
+	if (strcmp(value, "green") == 0)
+		return GREEN_COLOUR;
+	if (strcmp(value, "blue") == 0)
+		return BLUE_COLOUR;
+	if (strcmp(value, "magenta") == 0)
+		return MAGENTA_COLOUR;
+	if (strcmp(value, "cyan") == 0)
+		return CYAN_COLOUR;
+	if (strcmp(value, "white") == 0)
+		return WHITE_COLOUR;
+	if (strcmp(value, "yellow") == 0)
+		return YELLOW_COLOUR;
+
+	if (strcmp(value, "purple") == 0)
+		return MAGENTA_COLOUR;
+	if (strcmp(value, "violet") == 0)
+		return MAGENTA_COLOUR;
+	if (strcmp(value, "aqua") == 0)
+		return CYAN_COLOUR;
+
+	/* If we can't tell what that string means,
+	 * we tell caller to use the default.
+	 */
+
+	return -1;
+} /* getcolor */
+
 
 /************************/
 
