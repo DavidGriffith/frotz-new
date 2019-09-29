@@ -121,8 +121,7 @@ static char *info[] = {
 	"-c # context lines",
 	"-f <colorname> foreground colour",
 	"-F   fullscreen mode",
-	"-h # screen height",
-	"-H   show extended options",
+	"-H # screen height",
 	"-i   ignore runtime errors",
 	"-I # interpreter number",
 	"-l # left margin",
@@ -136,8 +135,9 @@ static char *info[] = {
 	"-S # transcript width",
 	"-t   set Tandy bit",
 	"-u # slots for multiple undo",
-	"-w # screen width",
+	"-W # screen width",
 	"-x   expand abbreviations g/x/z",
+	"-X   show extended options",
 	"-v   show version information",
 	"-Z # error checking (see below)",
 	NULL
@@ -222,7 +222,7 @@ extern int optind;
 
 extern int m_timerinterval;
 
-static char *options = "@:%aAb:B:c:f:Fh:HiI:l:L:m:N:oOPqr:s:S:tTu:vVw:xZ:";
+static char *options = "@:%aAb:B:c:f:FH:iI:l:L:m:N:oOPqr:s:S:tTu:vVW:xXZ:";
 
 static int limit(int v, int m, int M)
 {
@@ -270,12 +270,8 @@ static void parse_options(int argc, char **argv)
 			user_foreground = getcolor(zoptarg);
 		if (c == 'F')
 			m_fullscreen = 1;
-		if (c == 'h')
+		if (c == 'H')
 			user_screen_height = num;
-		if (c == 'H') {
-			usage(USAGE_EXTENDED);
-			exit(EXIT_FAILURE);
-		}
 		if (c == 'i')
 			f_setup.ignore_errors = 1;
 		if (c == 'I')
@@ -310,10 +306,14 @@ static void parse_options(int argc, char **argv)
 			print_version();
 		if (c == 'V')
 			m_vga_fonts = 1;
-		if (c == 'w')
+		if (c == 'W')
 			user_screen_width = num;
 		if (c == 'x')
 			f_setup.expand_abbreviations = 1;
+		if (c == 'X') {
+			usage(USAGE_EXTENDED);
+			exit(EXIT_FAILURE);
+		}
 		if (c == 'Z')
 			if (num >= ERR_REPORT_NEVER && num <= ERR_REPORT_FATAL)
 				f_setup.err_report_mode = num;

@@ -6,7 +6,7 @@
 -e   enable sound
 -f <colorname> foreground color
 -F   Force color mode
--h # screen height
+-h # text height
 -i   ignore fatal errors
 -I # interpreter number
 -l # left margin
@@ -23,6 +23,6 @@
 -t   set Tandy bit
 -u # slots for multiple undo
 -v   show version information
--w # screen width
+-w # text width
 -x   expand abbreviations g/x/z
 -Z # error checking (see below)

@@ -34,12 +34,12 @@ An interpreter for all Infocom and other Z-Machine games.\n\
 Syntax: dfrotz [options] story-file\n\
   -a   watch attribute setting    \t -P   alter piracy opcode\n\
   -A   watch attribute testing    \t -R <path> restricted read/write\n\
-  -h # screen height              \t -s # random number seed value\n\
+  -h # text height                \t -s # random number seed value\n\
   -i   ignore fatal errors        \t -S # transcript width\n\
   -I # interpreter number         \t -t   set Tandy bit\n\
   -o   watch object movement      \t -u # slots for multiple undo\n\
   -O   watch object locating      \t -v   show version information\n\
-  -L <file> load this save file   \t -w # screen width\n\
+  -L <file> load this save file   \t -w # text width\n\
   -m   turn off MORE prompts      \t -x   expand abbreviations g/x/z\n\
   -p   plain ASCII output only    \t -Z # error checking (see below)\n"
 
@@ -49,8 +49,8 @@ For more options and explanations, please read the manual page.\n\n\
 While running, enter \"\\help\" to list the runtime escape sequences.\n"
 
 
-static int user_screen_width = 75;
-static int user_screen_height = 24;
+static int user_text_width = 75;
+static int user_text_height = 24;
 static int user_random_seed = -1;
 static int user_tandy_bit = 0;
 static bool plain_ascii = FALSE;
@@ -82,7 +82,7 @@ void os_process_arguments(int argc, char *argv[])
 			f_setup.attribute_testing = 1;
 			break;
 		case 'h':
-			user_screen_height = atoi(zoptarg);
+			user_text_height = atoi(zoptarg);
 			break;
 		case 'i':
 			f_setup.ignore_errors = 1;
@@ -132,7 +132,7 @@ void os_process_arguments(int argc, char *argv[])
 			exit(2);
 			break;
 		case 'w':
-			user_screen_width = atoi(zoptarg);
+			user_text_width = atoi(zoptarg);
 			break;
 		case 'x':
 			f_setup.expand_abbreviations = 1;
@@ -210,8 +210,8 @@ void os_init_screen(void)
 	if (z_header.version >= V5 && f_setup.undo_slots == 0)
 		z_header.flags &= ~UNDO_FLAG;
 
-	z_header.screen_rows = user_screen_height;
-	z_header.screen_cols = user_screen_width;
+	z_header.screen_rows = user_text_height;
+	z_header.screen_cols = user_text_width;
 
 	/* Use the ms-dos interpreter number for v6, because that's the
 	 * kind of graphics files we understand.  Otherwise, use DEC.  */

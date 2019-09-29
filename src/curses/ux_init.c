@@ -70,10 +70,10 @@ Syntax: frotz [options] story-file\n\
   -e   enable sound               \t -R <path> restricted read/write\n\
   -f <colorname> foreground color \t -s # random number seed value\n\
   -F   Force color mode           \t -S # transcript width\n\
-  -h # screen height              \t -t   set Tandy bit\n\
+  -h # text height                \t -t   set Tandy bit\n\
   -i   ignore fatal errors        \t -u # slots for multiple undo\n\
   -I # interpreter number         \t -v   show version information\n\
-  -l # left margin                \t -w # screen width\n\
+  -l # left margin                \t -w # text width\n\
   -L <file> load this save file   \t -x   expand abbreviations g/x/z\n\
   -o   watch object movement      \t -Z # error checking (see below)\n"
 

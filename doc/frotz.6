@@ -102,7 +102,7 @@ Frotz to display colors, use this.
 
 .TP
 .B \-h N
-Manually sets the screen height.  Though most curses libraries are intelligent
+Manually sets the text height.  Though most curses libraries are intelligent
 enough to determine the current width from the terminal, it may sometimes
 be necessary to use this option to override the default.
 
@@ -191,7 +191,7 @@ key Alt\-S does not really help).
 .TP
 .B \-S N
 Set the transcript width.  By default your transcript files are formatted
-to a width of 80 columns per line, regardless of the current screen width.
+to a width of 80 columns per line, regardless of the current text width.
 This switch allows you to change this setting. In particular, use \-S 0
 to deactivate automatic line splitting in transcript files.
 
@@ -212,7 +212,7 @@ with limited memory.
 
 .TP
 .B \-w N
-Manually sets the screen width.  Again, this should not be necessary
+Manually sets the text width.  Again, this should not be necessary
 except in special circumstances.
 
 .TP
@@ -499,18 +499,18 @@ Set the right margin.  This is for those who might have special formatting
 needs.
 
 .PP
-.BR screen_height
+.BR text_height
 \ \ <integer>
 .br
-Manually set screen height.  Most curses libraries are intelligent enough
+Manually set text height.  Most curses libraries are intelligent enough
 to determine the current width of the terminal.  You may need to use this
 option to override the default.
 
 .PP
-.BR screen_width
+.BR text_width
 \ \ <integer>
 .br
-Manually set screen width.  Again, this should not be necessary except in
+Manually set text width.  Again, this should not be necessary except in
 special circumstances.
 
 .PP
@@ -518,7 +518,7 @@ special circumstances.
 \ \ <integer>
 .br
 Set the transcript width.  Default is 80 columns per line, regardless of
-the current screen width.  This switch allows you to change this setting.
+the current text width.  This switch allows you to change this setting.
 You may set this to "0" to deactivate automatic line-splitting in
 transcript files.
 
@@ -670,7 +670,7 @@ repositories.
 .SH CAVEATS
 .PP
 The Z Machine itself has trouble with the concept of resizing a terminal.
-It assumes that once the screen height and width are set, they will never
+It assumes that once the text height and width are set, they will never
 change; even across saves.  This made sense when 24x80 terminals were the
 norm and graphical user interfaces were mostly unknown.  I'm fairly sure
 there's a way around this problem, but for now, don't resize an xterm in
