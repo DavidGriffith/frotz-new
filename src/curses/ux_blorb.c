@@ -151,6 +151,8 @@ void ux_blorb_stop(void)
 	if (blorb_fp != NULL)
 		fclose(blorb_fp);
 	blorb_fp = NULL;
+	bb_destroy_map(blorb_map);
+	blorb_map = NULL;
 }
 
 
