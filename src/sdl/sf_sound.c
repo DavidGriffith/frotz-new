@@ -205,7 +205,7 @@ static void startmodule()
 
 static EFFECT *getaiff(FILE * f, size_t pos, int len, int num)
 {
-	EFFECT *res;
+	EFFECT *res = NULL;
 
 	res = new_effect(SFX_TYPE, num);
 	if (!res)

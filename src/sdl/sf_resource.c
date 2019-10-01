@@ -19,6 +19,10 @@ zword hx_fore_colour;
 zword hx_back_colour;
 
 z_header_t z_header;
+bb_map_t *blorb_map;
+
+extern FILE *blorb_fp;
+
 
 /* various data */
 bool m_tandy = 0;
@@ -54,18 +58,10 @@ static char *ResSnd = "SND%d";
 int AcWidth = 640, AcHeight = 400;
 int option_scrollback_buffer = 0;
 
-static FILE *bfile = NULL;
-static FILE *zfile = NULL;
-static bb_map_t *bmap = NULL;
-static long zoffset;
-static long zsize;
-static int zcodeinblorb = 0;
-
-
 static void checkwidths()
 {
 	bb_resolution_t *reso;
-	reso = bb_get_resolution(bmap);
+	reso = bb_get_resolution(blorb_map);
 	if (reso) {
 		/* ignore small resolution hints */
 		if ((reso->px) && (reso->px >= AcWidth))
@@ -76,168 +72,33 @@ static void checkwidths()
 }
 
 
-static int tryloadblorb(char *bfn)
+static void sf_cleanup_resources(void)
 {
-	bb_err_t err;
-	bfile = fopen(bfn, "rb");
-	if (!bfile)
-		return -1;
-	err = bb_create_map(bfile, &bmap);
-	if (err) {
-		bmap = NULL;
-		fclose(bfile);
-		bfile = NULL;
-		return err;
-	}
-	return 0;
+	if (blorb_map)
+		bb_destroy_map(blorb_map);
+	blorb_map = NULL;
+	if (blorb_fp)
+		fclose(blorb_fp);
+	blorb_fp = NULL;
 }
 
+static void load_local_resources(void);
 
-static void sf_cleanup_resources()
+/*
+ * sf_load_resources
+ *
+ * Perform additional resource loading after the blorb map is built.
+ *
+ */
+int sf_load_resources(void)
 {
-	if (zfile)
-		fclose(zfile);
-	zfile = NULL;
-	if (bmap)
-		bb_destroy_map(bmap);
-	bmap = NULL;
-	if (bfile)
-		fclose(bfile);
-	bfile = NULL;
-}
-
-
-static int checkfile(char *fn, char *ofn)
-{
-	char *p, *bp, lastch;
-
-	if (access(fn, F_OK) == 0) {
-		strcpy(ofn, fn);
-		return 0;
-	}
-	/* if qualified path, don't do anything else */
-	if ((strchr(fn, '\\')) || (strchr(fn, '/')))
-		return -1;
-
-	if ((p = getenv("ZCODE_PATH")) == NULL)
-		p = getenv("INFOCOM_PATH");
-	if (p != NULL) {
-		while (*p) {
-			bp = ofn;
-			while (*p && *p != OS_PATHSEP)
-				lastch = *bp++ = *p++;
-			if (lastch != '\\' && lastch != '/')
-				*bp++ = '\\';
-			strcpy(bp, fn);
-			if (access(ofn, F_OK) == 0)
-				return 0;
-			if (*p)
-				p++;
-		}
-	}
-
-	return -1;
-}
-
-
-/* must be called as soon as possible (i.e. by os_process_arguments()) */
-static int load_resources(char *givenfn)
-{
-	char buf[FILENAME_MAX + 1], *p;
-	int st;
-	FILE *f;
-	unsigned char hd2[2];
-
 	CLEANREG(sf_cleanup_resources);
 
-	/* first check whether file exists */
-	st = checkfile(givenfn, buf);
-	if (st)
-		os_fatal("File not found");
-
-	/* check whether it is a story file */
-	f = fopen(buf, "rb");
-	if (!f)
-		os_fatal("File open failed");
-
-	fread(hd2, 1, 2, f);
-
-	/* blorb file ? */
-	if (hd2[0] == 'F' && hd2[1] == 'O') {
-		bb_result_t result;
-		fclose(f);
-		if (tryloadblorb(buf))
-			os_fatal("File is neither Zcode nor Blorb");
-		/* Look for an executable chunk */
-		if (bb_load_resource
-		    (bmap, bb_method_FilePos, &result, bb_ID_Exec, 0)
-		    == bb_err_None) {
-			unsigned int id = bmap->chunks[result.chunknum].type;
-			if (id == bb_ID_ZCOD) {
-				/* If this is a Z-code game,
-				 * set the file pointer and return */
-				zoffset = result.data.startpos;
-				zsize = result.length;
-				zcodeinblorb = 1;
-				return 0;
-			} else if (id == bb_ID_GLUL) {
-				os_fatal(sf_msgstring(IDS_BLORB_GLULX));
-			}
-		}
-		/* we are given a blorb file with no executable chunck
-		 * Tell the user that there was no game in the Blorb file */
-		os_fatal(sf_msgstring(IDS_BLORB_NOEXEC));
-	}
-	/* check if possibly Zcode */
-	if (hd2[0] < 1 || hd2[0] > 8)
-		os_fatal("Not a Zcode file (or wrong version)");
-
-	/* OK, assume a bona fide Z code file */
-	zfile = f;
-	fseek(f, 0, SEEK_END);
-	zsize = ftell(f);
-	zoffset = 0;
-
-	/* See if the user explicitly provided a blorb file */
-	if (f_setup.blorb_file != NULL) {
-		tryloadblorb(f_setup.blorb_file);
-	} else {
-		/* No?  Let's see if we can find one. */
-		p = malloc(strlen(f_setup.story_name) +
-			   strlen(EXT_BLORB4) * sizeof(char));
-		strncpy(p, f_setup.story_name, strlen(f_setup.story_name) + 1);
-		strncat(p, EXT_BLORB3, strlen(EXT_BLORB3) + 1);
-
-		if (tryloadblorb(p) != bb_err_None) {	/* Trying foo.blorb */
-			free(p);
-			p = malloc(strlen(f_setup.story_name) +
-				   strlen(EXT_BLORB4) * sizeof(char));
-			strncpy(p, f_setup.story_name,
-				strlen(f_setup.story_name) + 1);
-			strncat(p, EXT_BLORB, strlen(EXT_BLORB) + 1);
-			tryloadblorb(p);	/* Trying foo.blb */
-		}
-	}
-	return 0;
-}
-
-
-static void load_local_resources();
-
-/* must be called as soon as possible (i.e. by os_process_arguments()) */
-int sf_load_resources(char *givenfn)
-{
-	int st;
-
-	st = load_resources(givenfn);
-	if (st)
-		return st;
-
-	if (bmap) {
+	if (blorb_map) {
 		checkwidths();
-		bb_count_resources(bmap, bb_ID_Pict, &countedpics, NULL,
+		bb_count_resources(blorb_map, bb_ID_Pict, &countedpics, NULL,
 				   &maxlegalpic);
-		releaseno = bb_get_release_num(bmap);
+		releaseno = bb_get_release_num(blorb_map);
 	}
 
 	if ((m_reslist_file))
@@ -247,26 +108,81 @@ int sf_load_resources(char *givenfn)
 }
 
 
-/* this routine is only used for the Z code, so we can safely
- * ignore its args
- * NOTE that there is an extra argument (as in WindowsFrotz version)
+/*
+ * pathopen
+ *
+ * Given a standard Unix-style path and a filename, search the path for
+ * that file.  If found, return a pointer to that file
+ *
+ */
+static FILE *pathopen(const char *name, const char *path, const char *mode)
+{
+	FILE *fp;
+	char *buf;
+	char *bp, lastch;
+
+	lastch = 'a';	/* makes compiler shut up */
+
+	/*
+	 * If the path variable doesn't end in a "/" a "/"
+	 * will be added, so the buffer needs to be long enough
+	 * for the path + / + name + \0
+	 */
+	buf = malloc(strlen(path) + strlen(name) + 2);
+
+	while (*path) {
+		bp = buf;
+		while (*path && *path != OS_PATHSEP)
+			lastch = *bp++ = *path++;
+		if (lastch != OS_DIRSEP)
+			*bp++ = OS_DIRSEP;
+		strncpy(bp, name, strlen(name) + 1);
+		if ((fp = fopen(buf, mode)) != NULL) {
+			free(buf);
+			return fp;
+		}
+		if (*path)
+			path++;
+	}
+	free(buf);
+	return NULL;
+} /* pathopen */
+
+
+/*
+ * os_path_open
+ *
+ * Open a file in the current directory.  If this fails, then search the
+ * directories in the ZCODE_PATH environmental variable.  If that's not
+ * defined, search INFOCOM_PATH.
+ *
  */
 FILE *os_path_open(const char *name, const char *mode, long *size)
 {
-	FILE *f = NULL;
+	FILE *fp;
+	char *p;
 
-	*size = zsize;
+	/* Let's see if the file is in the currect directory */
+	/* or if the user gave us a full path. */
+	if ((fp = fopen(name, mode)))
+		return fp;
 
-	if (zcodeinblorb)
-		f = bfile;
-	else
-		f = zfile;
+	/* If zcodepath is defined in a config file, check that path. */
+	/* If we find the file a match in that path, great. */
+	/* Otherwise, check some environmental variables. */
+	if (f_setup.zcode_path != NULL) {
+		if ((fp = pathopen(name, f_setup.zcode_path, mode)) != NULL)
+			return fp;
+	}
+	if ( (p = getenv(PATH1) ) == NULL)
+		p = getenv(PATH2);
 
-	if (f)
-		fseek(f, zoffset, SEEK_SET);
-
-	return f;
-}
+	if (p != NULL) {
+		fp = pathopen(name, p, mode);
+		return fp;
+	}
+	return NULL;	/* give up */
+} /* os_path_open() */
 
 
 /*
@@ -284,7 +200,7 @@ int os_picture_data(int picture, int *height, int *width)
 	if (maxlegalpic) {
 		if (picture == 0) {
 			*height = maxlegalpic;
-			*width = releaseno;
+			*width = bb_get_release_num(blorb_map);
 			return 1;
 		} else {
 			sf_picture *res = sf_getpic(picture);
@@ -667,6 +583,7 @@ void os_init_screen(void)
 {
 
 	sf_initvideo(AcWidth, AcHeight, (m_fullscreen != -1));
+	sf_load_resources();
 
 	/* Set the graphics scaling */
 	if (sf_IsInfocomV6() || (story_id == BEYOND_ZORK))
@@ -692,7 +609,7 @@ void os_init_screen(void)
 	if (z_header.version >= V5)
 		z_header.config |= CONFIG_COLOUR;
 	if (z_header.version == V6) {
-		if (bmap) {
+		if (blorb_map) {
 			z_header.config |= CONFIG_PICTURES;
 			z_header.config |= CONFIG_SOUND;
 		}
@@ -726,11 +643,11 @@ void os_init_screen(void)
 
 	/* Check for sound */
 	if ((z_header.version == V3) && (z_header.flags & OLD_SOUND_FLAG)) {
-		if (((bmap == NULL) && (m_localfiles == 0))
+		if (((blorb_map == NULL) && (m_localfiles == 0))
 		    || (!sf_initsound()))
 			z_header.flags &= ~OLD_SOUND_FLAG;
 	} else if ((z_header.version >= V4) && (z_header.flags & SOUND_FLAG)) {
-		if (((bmap == NULL) && (m_localfiles == 0))
+		if (((blorb_map == NULL) && (m_localfiles == 0))
 		    || (!sf_initsound()))
 			z_header.flags &= ~SOUND_FLAG;
 	}
@@ -821,7 +738,7 @@ bool sf_IsAdaptive(int picture)
 	bool adaptive = FALSE;
 
 	if (bb_load_chunk_by_type
-	    (bmap, bb_method_Memory, &result, bb_ID_APal, 0) == bb_err_None) {
+	    (blorb_map, bb_method_Memory, &result, bb_ID_APal, 0) == bb_err_None) {
 		for (int i = 0; i < (int)result.length; i += 4) {
 			unsigned char *data =
 			    ((unsigned char *)result.data.ptr) + i;
@@ -834,7 +751,7 @@ bool sf_IsAdaptive(int picture)
 			}
 		}
 	}
-	bb_unload_chunk(bmap, result.chunknum);
+	bb_unload_chunk(blorb_map, result.chunknum);
 	return adaptive;
 }
 
@@ -862,8 +779,8 @@ void sf_freeresource(myresource * res)
 		return;
 	}
 
-	if ((bmap) && (cnu >= 0))
-		bb_unload_chunk(bmap, cnu);
+	if ((blorb_map) && (cnu >= 0))
+		bb_unload_chunk(blorb_map, cnu);
 }
 
 
@@ -949,11 +866,11 @@ int sf_getresource(int num, int ispic, int method, myresource * res)
 	res->bbres.data.ptr = NULL;
 	res->file = NULL;
 
-	if (m_localfiles)
-		if ((st = loadlocal(num, ispic, method, res)) == bb_err_None)
-			return st;
+        if (m_localfiles)
+                if ((st = loadlocal(num, ispic, method, res)) == bb_err_None)
+                        return st;
 
-	if (!bmap)
+	if (!blorb_map)
 		return bb_err_NotFound;
 
 	if (ispic)
@@ -961,11 +878,11 @@ int sf_getresource(int num, int ispic, int method, myresource * res)
 	else
 		usage = bb_ID_Snd;
 	/* XXX Should use bb_load_resource_{pict,snd} with auxdata? */
-	st = bb_load_resource(bmap, method, (bb_result_t *) res, usage, num);
+	st = bb_load_resource(blorb_map, method, (bb_result_t *) res, usage, num);
 	if (st == bb_err_None) {
-		res->type = bmap->chunks[res->bbres.chunknum].type;
+		res->type = blorb_map->chunks[res->bbres.chunknum].type;
 		if (method == bb_method_FilePos)
-			res->file = bfile;
+			res->file = blorb_fp;
 	}
 	return st;
 }
@@ -1044,7 +961,7 @@ static int parseline(char *s)
 }
 
 
-static void load_local_resources()
+static void load_local_resources(void)
 {
 	FILE *f;
 	LLENTRY *e;

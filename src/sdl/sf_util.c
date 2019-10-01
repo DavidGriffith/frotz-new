@@ -471,12 +471,7 @@ void os_process_arguments(int argc, char *argv[])
 	if (user_tandy_bit != -1)
 		m_tandy = user_tandy_bit;
 
-	/* It's useless to test the retval, as in case of error it
-	 * does not return */
-	sf_load_resources(f_setup.story_file);
-
 	sf_initfonts();
-
 } /* os_process_arguments */
 
 

@@ -28,6 +28,10 @@ bool sf_IsAdaptive(int picture);
 
 #define NON_STD_COLS 238
 
+/* Paths where z-files may be found */
+#define PATH1		"ZCODE_PATH"
+#define PATH2		"INFOCOM_PATH"
+
 /* this assumes RGBA with lsb = R */
 static inline ulong RGB5ToTrue(word w)
 {
@@ -85,7 +89,7 @@ extern bool sdl_active;
 /* sf_resource.c */
 
 /* must be called as soon as possible (i.e. by os_process_arguments()) */
-int sf_load_resources(char *givenfn);
+int sf_load_resources(void);
 
 typedef struct {
 	int number;	/* 0 means unallocated */
@@ -241,8 +245,10 @@ void sf_FinishProfile(void);
 
 #ifdef WIN32
 #define OS_PATHSEP ';'
+#define OS_DIRSEP '\\'
 #else
 #define OS_PATHSEP ':'
+#define OS_DIRSEP '/'
 #endif
 
 #define DEFSIZE 14
