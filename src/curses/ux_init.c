@@ -477,13 +477,13 @@ void os_init_screen (void)
 	if (z_header.version == V3)
 		z_header.flags &= ~OLD_SOUND_FLAG;
 #else
-	if ((z_header.version >= 5) && (z_header.flags & SOUND_FLAG))
+	if ((z_header.version >= V5) && (z_header.flags & SOUND_FLAG))
 		z_header.flags |= SOUND_FLAG;
 
-	if ((z_header.version == 3) && (z_header.flags & OLD_SOUND_FLAG))
+	if ((z_header.version == V3) && (z_header.flags & OLD_SOUND_FLAG))
 		z_header.flags |= OLD_SOUND_FLAG;
 
-	if ((z_header.version == 6) && (f_setup.sound != 0))
+	if ((z_header.version == V6) && (f_setup.sound != 0))
 		z_header.config |= CONFIG_SOUND;
 #endif
 
@@ -505,7 +505,7 @@ void os_init_screen (void)
 	/* Use the ms-dos interpreter number for v6, because that's the
 	 * kind of graphics files we understand.  Otherwise, use DEC.  */
 	if (f_setup.interpreter_number == INTERP_DEFAULT)
-		z_header.interpreter_number = z_header.version == 6 ? INTERP_MSDOS : INTERP_DEC_20;
+		z_header.interpreter_number = z_header.version == V6 ? INTERP_MSDOS : INTERP_DEC_20;
 	else
 		z_header.interpreter_number = f_setup.interpreter_number;
 
@@ -517,7 +517,7 @@ void os_init_screen (void)
 	 * requests them by specifying a foreground or background.
 	 */
 	u_setup.color_enabled = (has_colors() && !u_setup.disable_color
-		&& (((z_header.version >= 5) && (z_header.flags & COLOUR_FLAG))
+		&& (((z_header.version >= V5) && (z_header.flags & COLOUR_FLAG))
 		|| (u_setup.foreground_color != -1)
 		|| (u_setup.background_color != -1)));
 
