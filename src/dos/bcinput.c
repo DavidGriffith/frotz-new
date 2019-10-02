@@ -216,7 +216,7 @@ static int get_key(bool cursor)
 	if (cursor)
 		switch_cursor(TRUE);
 
-	if (h_flags & MOUSE_FLAG) {
+	if (z_header.flags & MOUSE_FLAG) {
 		asm mov ax,1
 		asm int 0x33
 	}
@@ -290,7 +290,7 @@ static int get_key(bool cursor)
 
 exit_loop:
 
-	if (h_flags & MOUSE_FLAG) {
+	if (z_header.flags & MOUSE_FLAG) {
 		asm mov ax,2
 		asm int 0x33
 	}
@@ -435,7 +435,7 @@ static void input_move(zchar newc, zchar oldc)
 		os_erase_area (
 		    cursor_y + 1,
 		    cursor_x + 1,
-		    cursor_y + h_font_height,
+		    cursor_y + z_header.font_height,
 		    cursor_x + oldwidth - newwidth,
 		    -1);
 	}

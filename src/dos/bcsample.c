@@ -208,7 +208,7 @@ bool dos_init_sound(void)
  */
 void dos_reset_sound(void)
 {
-	os_stop_sample();
+	os_stop_sample(0);
 
 	if (sample_data != NULL) {
 		farfree(sample_data);
@@ -256,7 +256,7 @@ void os_prepare_sample(int number)
 {
 #ifdef SOUND_SUPPORT
 
-	os_stop_sample();
+	os_stop_sample(0);
 
 	/* Exit if the sound board isn't set up properly */
 	if (sample_data == NULL)
@@ -325,7 +325,7 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 #ifdef SOUND_SUPPORT
 	eos = eos;		/* not used in DOS Frotz */
 
-	os_stop_sample();
+	os_stop_sample(0);
 
 	/* Exit if the sound board isn't set up properly */
 	if (sample_data == NULL)
@@ -374,7 +374,7 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
  * Turn off the current sample.
  *
  */
-void os_stop_sample(void)
+void os_stop_sample(int UNUSED(id))
 {
 #ifdef SOUND_SUPPORT
 	play_part = 0;
@@ -397,11 +397,11 @@ void os_stop_sample(void)
  * Remove the current sample from memory (if any).
  *
  */
-void os_finish_with_sample(void)
+void os_finish_with_sample(int UNUSED(id))
 {
 #ifdef SOUND_SUPPORT
 
-	os_stop_sample();	/* we keep 64KB allocated all the time */
+	os_stop_sample(0);	/* we keep 64KB allocated all the time */
 
 #endif /* SOUND_SUPPORT */
 } /* os_finish_with_sample */

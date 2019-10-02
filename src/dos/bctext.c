@@ -122,8 +122,8 @@ void load_fonts(void)
 int os_font_data(int font, int *height, int *width)
 {
 	/* All fonts of this interface have the same size */
-	*height = h_font_height;
-	*width = h_font_width;
+	*height = z_header.font_height;
+	*width = z_header.font_width;
 
 	/* Not every font is available in every mode */
 	if (font == TEXT_FONT)
@@ -215,7 +215,7 @@ static void adjust_style(void)
 	   of window 0 have changed. DAC register #79 holds the foreground,
 	   DAC register #64 the background colour. */
 
-	if (display == _AMIGA_ && h_version == V6 && cwin == 0) {
+	if (display == _AMIGA_ && z_header.version == V6 && cwin == 0) {
 		if (fg < 16 && fg != palette_fg) {
 			byte R = amiga_palette[fg - 2][0];
 			byte G = amiga_palette[fg - 2][1];
@@ -253,7 +253,7 @@ static void adjust_style(void)
 	if (fg < 16) {
 		if (display == _MONO_)
 			fg = (fg == WHITE_COLOUR) ? LIGHTGRAY : BLACK;
-		else if (h_version == V6 && display == _AMIGA_)
+		else if (z_header.version == V6 && display == _AMIGA_)
 			fg = (palette_fg == fg) ? 15 : 0;
 		else
 			fg = pc_colour[fg - 2];
@@ -263,7 +263,7 @@ static void adjust_style(void)
 	if (bg < 16) {
 		if (display == _MONO_)
 			bg = (bg == WHITE_COLOUR) ? LIGHTGRAY : BLACK;
-		else if (h_version == V6 && display == _AMIGA_)
+		else if (z_header.version == V6 && display == _AMIGA_)
 			bg = (palette_bg == bg) ? 0 : 15;
 		else
 			bg = pc_colour[bg - 2];
@@ -432,7 +432,7 @@ void write_pattern(byte far * screen, byte val, byte mask)
 
 	/* Handle accented characters */
 	if (c >= ZC_LATIN1_MIN
-	    && (story_id != BEYOND_ZORK || (h_flags & GRAPHICS_FLAG)))
+	    && (story_id != BEYOND_ZORK || (z_header.flags & GRAPHICS_FLAG)))
 		if (display == _CGA_ || display == _MCGA_) {
 			char *ptr = latin1_to_ascii + 3 * (c - ZC_LATIN1_MIN);
 
@@ -528,9 +528,9 @@ void write_pattern(byte far * screen, byte val, byte mask)
 			align = 0;
 			type = 3;
 		} else if (display >= _EGA_) {
-			table = (byte far *) getvect(0x43) + h_font_height * c;
+			table = (byte far *) getvect(0x43) + z_header.font_height * c;
 			mask = 0xff;
-			underline = h_font_height - 1;
+			underline = z_header.font_height - 1;
 			boldface = (user_bold_typing != -1) ? 1 : -1;
 			align = 0;
 			type = 3;
@@ -556,13 +556,13 @@ void write_pattern(byte far * screen, byte val, byte mask)
 			outport(0x03ce, 0xff08);
 		}
 
-		for (i = 0; i < h_font_height; i++) {
+		for (i = 0; i < z_header.font_height; i++) {
 			byte far *screen = get_scrnptr(cursor_y + i) + offset;
 
 			if (type == 1) {
 				val =
 				    *((byte far *) table +
-				      8 * i / h_font_height);
+				      8 * i / z_header.font_height);
 			}
 			if (type == 2)
 				val = *((word far *) table + i);
@@ -628,7 +628,7 @@ int os_char_width(zchar c)
 {
 	/* Handle accented characters */
 	if (c >= ZC_LATIN1_MIN
-	    && (story_id != BEYOND_ZORK || (h_flags & GRAPHICS_FLAG)))
+	    && (story_id != BEYOND_ZORK || (z_header.flags & GRAPHICS_FLAG)))
 		if (display == _CGA_ || display == _MCGA_) {
 
 			const char *ptr =
@@ -765,7 +765,7 @@ void os_more_prompt(void)
 	os_read_key(0, TRUE);
 
 	os_erase_area(cursor_y + 1,
-		      saved_x + 1, cursor_y + h_font_height, cursor_x + 1, -1);
+		      saved_x + 1, cursor_y + z_header.font_height, cursor_x + 1, -1);
 
 	cursor_x = saved_x;
 

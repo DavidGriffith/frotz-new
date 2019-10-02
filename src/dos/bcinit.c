@@ -29,6 +29,7 @@
 #include "bcblorb.h"
 
 f_setup_t f_setup;
+z_header_t z_header;
 
 static char information[] =
     "An interpreter for all Infocom and other Z-Machine games.\n"
@@ -232,7 +233,7 @@ static void interrupt fast_exit()
  */
 void os_fatal(const char *s, ...)
 {
-	if (h_interpreter_number)
+	if (z_header.interpreter_number)
 		os_reset_screen();
 
 	/* Display error message */
@@ -479,19 +480,19 @@ static void standard_palette(void)
  * (mouse, sound board). Set various OS depending story file header
  * entries:
  *
- *     h_config (aka flags 1)
- *     h_flags (aka flags 2)
- *     h_screen_cols (aka screen width in characters)
- *     h_screen_rows (aka screen height in lines)
- *     h_screen_width
- *     h_screen_height
- *     h_font_height (defaults to 1)
- *     h_font_width (defaults to 1)
- *     h_default_foreground
- *     h_default_background
- *     h_interpreter_number
- *     h_interpreter_version
- *     h_user_name (optional; not used by any game)
+ *     z_header.config (aka flags 1)
+ *     z_header.flags (aka flags 2)
+ *     z_header.screen_cols (aka screen width in characters)
+ *     z_header.screen_rows (aka screen height in lines)
+ *     z_header.screen_width
+ *     z_header.screen_height
+ *     z_header.font_height (defaults to 1)
+ *     z_header.font_width (defaults to 1)
+ *     z_header.default_foreground
+ *     z_header.default_background
+ *     z_header.interpreter_number
+ *     z_header.interpreter_version
+ *     z_header.user_name (optional; not used by any game)
  *
  * Finally, set reserve_mem to the amount of memory (in bytes) that
  * should not be used for multiple undo and reserved for later use.
@@ -563,7 +564,7 @@ static void standard_palette(void)
 	 if (display == -1) {
 		if (old_video_mode == 7)
 			display = '0';
-		else if (h_version == V6 || (h_flags & GRAPHICS_FLAG))
+		else if (z_header.version == V6 || (z_header.flags & GRAPHICS_FLAG))
 			display = '5';
 		else
 			display = '1';
@@ -634,7 +635,7 @@ static void standard_palette(void)
 #endif
 
 	/* Amiga emulation under V6 needs special preparation. */
-	if (display == _AMIGA_ && h_version == V6) {
+	if (display == _AMIGA_ && z_header.version == V6) {
 		user_reverse_fg = -1;
 		user_reverse_bg = -1;
 		zcolour[LIGHTGRAY] = LIGHTGREY_COLOUR;
@@ -645,84 +646,84 @@ static void standard_palette(void)
 
 	/* Set various bits in the configuration byte. These bits tell
 	   the game which features are supported by the interpreter. */
-	if (h_version == V3 && user_tandy_bit != -1)
-		h_config |= CONFIG_TANDY;
-	if (h_version == V3)
-		h_config |= CONFIG_SPLITSCREEN;
-	if (h_version == V3
+	if (z_header.version == V3 && user_tandy_bit != -1)
+		z_header.config |= CONFIG_TANDY;
+	if (z_header.version == V3)
+		z_header.config |= CONFIG_SPLITSCREEN;
+	if (z_header.version == V3
 	    && (display == _MCGA_ || (display == _AMIGA_ && user_font != 0)))
-		h_config |= CONFIG_PROPORTIONAL;
-	if (h_version >= V4 && display != _MCGA_
+		z_header.config |= CONFIG_PROPORTIONAL;
+	if (z_header.version >= V4 && display != _MCGA_
 	    && (user_bold_typing != -1 || display <= _TEXT_))
-		h_config |= CONFIG_BOLDFACE;
-	if (h_version >= V4)
-		h_config |= CONFIG_EMPHASIS | CONFIG_FIXED | CONFIG_TIMEDINPUT;
-	if (h_version >= V5 && display != _MONO_ && display != _CGA_)
-		h_config |= CONFIG_COLOUR;
-	if (h_version >= V5 && display >= _CGA_ && init_pictures())
-		h_config |= CONFIG_PICTURES;
+		z_header.config |= CONFIG_BOLDFACE;
+	if (z_header.version >= V4)
+		z_header.config |= CONFIG_EMPHASIS | CONFIG_FIXED | CONFIG_TIMEDINPUT;
+	if (z_header.version >= V5 && display != _MONO_ && display != _CGA_)
+		z_header.config |= CONFIG_COLOUR;
+	if (z_header.version >= V5 && display >= _CGA_ && init_pictures())
+		z_header.config |= CONFIG_PICTURES;
 
 	/* Handle various game flags. These flags are set if the game wants
 	   to use certain features. The flags must be cleared if the feature
 	   is not available. */
-	if (h_flags & GRAPHICS_FLAG)
+	if (z_header.flags & GRAPHICS_FLAG)
 		if (display <= _TEXT_)
-			h_flags &= ~GRAPHICS_FLAG;
-	if (h_version == V3 && (h_flags & OLD_SOUND_FLAG))
+			z_header.flags &= ~GRAPHICS_FLAG;
+	if (z_header.version == V3 && (z_header.flags & OLD_SOUND_FLAG))
 #ifdef SOUND_SUPPORT
 		if (!dos_init_sound())
 #endif
-			h_flags &= ~OLD_SOUND_FLAG;
-	if (h_flags & SOUND_FLAG)
+			z_header.flags &= ~OLD_SOUND_FLAG;
+	if (z_header.flags & SOUND_FLAG)
 #ifdef SOUND_SUPPORT
 		if (!dos_init_sound())
 #endif
-			h_flags &= ~SOUND_FLAG;
-	if (h_version >= V5 && (h_flags & UNDO_FLAG))
+			z_header.flags &= ~SOUND_FLAG;
+	if (z_header.version >= V5 && (z_header.flags & UNDO_FLAG))
 		if (!f_setup.undo_slots)
-			h_flags &= ~UNDO_FLAG;
-	if (h_flags & MOUSE_FLAG)
+			z_header.flags &= ~UNDO_FLAG;
+	if (z_header.flags & MOUSE_FLAG)
 		if (subdisplay != -1 || !detect_mouse())
-			h_flags &= ~MOUSE_FLAG;
-	if (h_flags & COLOUR_FLAG)
+			z_header.flags &= ~MOUSE_FLAG;
+	if (z_header.flags & COLOUR_FLAG)
 		if (display == _MONO_ || display == _CGA_)
-			h_flags &= ~COLOUR_FLAG;
-	h_flags &= ~MENU_FLAG;
+			z_header.flags &= ~COLOUR_FLAG;
+	z_header.flags &= ~MENU_FLAG;
 
 	/* Set the screen dimensions, font size and default colour */
-	h_screen_width = info[display].width;
-	h_screen_height = info[display].height;
-	h_font_height = info[display].font_height;
-	h_font_width = info[display].font_width;
-	h_default_foreground = info[display].fg;
-	h_default_background = info[display].bg;
+	z_header.screen_width = info[display].width;
+	z_header.screen_height = info[display].height;
+	z_header.font_height = info[display].font_height;
+	z_header.font_width = info[display].font_width;
+	z_header.default_foreground = info[display].fg;
+	z_header.default_background = info[display].bg;
 
 	if (subdisplay != -1) {
-		h_screen_width = subinfo[subdisplay].width;
-		h_screen_height = subinfo[subdisplay].height;
+		z_header.screen_width = subinfo[subdisplay].width;
+		z_header.screen_height = subinfo[subdisplay].height;
 	}
 
 	if (user_screen_width != -1)
-		h_screen_width = user_screen_width;
+		z_header.screen_width = user_screen_width;
 	if (user_screen_height != -1)
-		h_screen_height = user_screen_height;
+		z_header.screen_height = user_screen_height;
 
-	h_screen_cols = h_screen_width / h_font_width;
-	h_screen_rows = h_screen_height / h_font_height;
+	z_header.screen_cols = z_header.screen_width / z_header.font_width;
+	z_header.screen_rows = z_header.screen_height / z_header.font_height;
 
 	if (user_foreground != -1)
-		h_default_foreground = zcolour[user_foreground];
+		z_header.default_foreground = zcolour[user_foreground];
 	if (user_background != -1)
-		h_default_background = zcolour[user_background];
+		z_header.default_background = zcolour[user_background];
 
 	/* Set the interpreter number (a constant telling the game which
 	   operating system it runs on) and the interpreter version. The
 	   interpreter number has effect on V6 games and "Beyond Zork". */
-	h_interpreter_number = INTERP_MSDOS;
-	h_interpreter_version = 'F';
+	z_header.interpreter_number = INTERP_MSDOS;
+	z_header.interpreter_version = 'F';
 
 	if (display == _AMIGA_)
-		h_interpreter_number = INTERP_AMIGA;
+		z_header.interpreter_number = INTERP_AMIGA;
 
 	/* Install the fast_exit routine to handle the ctrl-break key */
 	oldvect = getvect(0x1b);
