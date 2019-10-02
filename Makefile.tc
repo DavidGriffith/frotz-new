@@ -19,6 +19,7 @@ VERSION = "2.45pre"
 VER = -DVERSION=$(VERSION)
 
 DEFS = src\common\defs.h
+HASH = src\common\git_hash.h
 
 DOS_DIR = src\dos
 DOS_OBJECTS =   $(DOS_DIR)\bcinit.o \
@@ -54,9 +55,27 @@ CORE_OBJECTS =  $(CORE_DIR)\buffer.o \
 
 .SUFFIXES: .c .o .h
 
-all:	defs frotz
+all:	hash defs frotz
 
-defs: $(DEFS)
+# I can't figure out how Turbo Make does conditional tests on files, so
+# for now this will have to do to alert the builder of the need to first
+# do "make hash" within a Unix build environment.
+#
+hash: $(HASH)
+$(HASH):
+	@echo ******************************************************************************
+	@echo ******************************************************************************
+	@echo **  To build for DOS, you must first do "make hash" in Unix.
+	@echo **  That's why you may see a complaint about being unable to open 'git_hash.h'.
+	@echo **  If you're building from zip archive rather than a git repository, then
+	@echo **  git_hash.h will already be prepared.
+	@echo **  Eventually there will be an option to cross-compile using Watcom C from a
+	@echo **  Unix build environment.
+	@echo ******************************************************************************
+	@echo ******************************************************************************
+	@echo.
+
+defs: $(HASH) $(DEFS)
 $(DEFS):
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@

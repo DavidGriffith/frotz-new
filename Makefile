@@ -266,7 +266,7 @@ $(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	@echo "** Done building Frotz with SDL interface."
 
 dos: $(DOS_BIN)
-$(DOS_BIN): $(COMMON_DEFINES) $(HASH)
+$(DOS_BIN): $(HASH)
 	@echo
 	@echo "  ** Cannot cross-compile for DOS yet"
 	@echo "  ** For now, I'm just making $(COMMON_DEFINES) and $(HASH)"
