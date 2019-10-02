@@ -601,8 +601,12 @@ void os_draw_picture(int picture, int y, int x)
 
 		for (yy = 0; yy < eh * m_gfxScale_h; yy++) {
 			int ys = ceil(yy / m_gfxScale_h);
+			if (ys >= pic->height)
+			    ys = pic->height - 1;
 			for (xx = 0; xx < ew * m_gfxScale_w; xx++) {
 				int xs = ceil(xx / m_gfxScale_w);
+				if (xs >= pic->width)
+				    xs = pic->width - 1;
 				int index = pic->pixels[ys * pic->width + xs];
 				if (index != pic->transparentcolor)
 					sf_wpixel(x + xx, y + yy,
