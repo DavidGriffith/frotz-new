@@ -600,9 +600,9 @@ void os_draw_picture(int picture, int y, int x)
 			sf_flushdisplay();
 
 		for (yy = 0; yy < eh * m_gfxScale_h; yy++) {
-			int ys = yy / m_gfxScale_h;
+			int ys = ceil(yy / m_gfxScale_h);
 			for (xx = 0; xx < ew * m_gfxScale_w; xx++) {
-				int xs = xx / m_gfxScale_w;
+				int xs = ceil(xx / m_gfxScale_w);
 				int index = pic->pixels[ys * pic->width + xs];
 				if (index != pic->transparentcolor)
 					sf_wpixel(x + xx, y + yy,
