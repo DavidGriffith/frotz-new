@@ -549,8 +549,8 @@ void os_draw_picture(int picture, int y, int x)
 
 	x--;
 	y--;
-	ew = m_gfxScale * pic->width;
-	eh = m_gfxScale * pic->height;
+	ew = ceil(m_gfxScale_w * pic->width);
+	eh = ceil(m_gfxScale_h * pic->height);
 
 	/* this takes care of the fact that x, y are really 16 bit values */
 	if (x & 0x8000)
@@ -574,7 +574,7 @@ void os_draw_picture(int picture, int y, int x)
 	}
 	if (x + ew > xmax)
 		ew = xmax - x;
-	ew /= m_gfxScale;
+	ew /= m_gfxScale_w;
 
 	if (y < ymin) {
 		d = ymin - y;
@@ -584,7 +584,7 @@ void os_draw_picture(int picture, int y, int x)
 	}
 	if (y + eh > ymax)
 		eh = ymax - y;
-	eh /= m_gfxScale;
+	eh /= m_gfxScale_h;
 
 	sf_setclip(ox, oy, ow, oh);
 
@@ -599,10 +599,14 @@ void os_draw_picture(int picture, int y, int x)
 		if (!pic->adaptive && ApplyPalette(pic))
 			sf_flushdisplay();
 
-		for (yy = 0; yy < eh * m_gfxScale; yy++) {
-			int ys = yy / m_gfxScale;
-			for (xx = 0; xx < ew * m_gfxScale; xx++) {
-				int xs = xx / m_gfxScale;
+		for (yy = 0; yy < eh * m_gfxScale_h; yy++) {
+			int ys = ceil(yy / m_gfxScale_h);
+			if (ys >= pic->height)
+			    ys = pic->height - 1;
+			for (xx = 0; xx < ew * m_gfxScale_w; xx++) {
+				int xs = ceil(xx / m_gfxScale_w);
+				if (xs >= pic->width)
+				    xs = pic->width - 1;
 				int index = pic->pixels[ys * pic->width + xs];
 				if (index != pic->transparentcolor)
 					sf_wpixel(x + xx, y + yy,
@@ -616,8 +620,8 @@ void os_draw_picture(int picture, int y, int x)
 		for (yy = 0; yy < eh; yy++) {
 			for (xx = 0; xx < ew; xx++) {
 				dst =
-				    sbuffer + x + xx * m_gfxScale +
-				    sbpitch * (y + yy * m_gfxScale);
+				    sbuffer + x + (uint32_t)(xx * m_gfxScale_w) +
+				    sbpitch * (y + (uint32_t)(yy * m_gfxScale_h));
 				sval = src[xx];
 				alpha = (sval >> 24);
 				if (alpha == 255)
@@ -627,8 +631,8 @@ void os_draw_picture(int picture, int y, int x)
 					    sf_blend((int)
 						     (alpha + (alpha >> 7)),
 						     sval, dst[0]);
-				for (iy = 0; iy < m_gfxScale; iy++) {
-					for (ix = 0; ix < m_gfxScale; ix++)
+				for (iy = 0; iy < m_gfxScale_h; iy++) {
+					for (ix = 0; ix < m_gfxScale_w; ix++)
 						dst[ix] = dval;
 					dst += sbpitch;
 				}

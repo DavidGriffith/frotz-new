@@ -58,7 +58,8 @@ int colour_in_use(zword colour);
 /*  various data */
 extern bool m_tandy;
 extern int m_v6scale;
-extern int m_gfxScale;
+extern double m_gfxScale_w;
+extern double m_gfxScale_h;
 extern ulong m_defaultFore;
 extern ulong m_defaultBack;
 extern ulong m_colours[11];
