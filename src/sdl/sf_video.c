@@ -549,8 +549,8 @@ void os_draw_picture(int picture, int y, int x)
 
 	x--;
 	y--;
-	ew = m_gfxScale_w * pic->width;
-	eh = m_gfxScale_h * pic->height;
+	ew = ceil(m_gfxScale_w * pic->width);
+	eh = ceil(m_gfxScale_h * pic->height);
 
 	/* this takes care of the fact that x, y are really 16 bit values */
 	if (x & 0x8000)
