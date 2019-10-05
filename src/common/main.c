@@ -47,7 +47,7 @@ long story_size = 0;
 f_setup_t f_setup;
 
 /* Story file header data */
-z_header_t z_header;
+extern z_header_t z_header;
 
 /* Stack data */
 zword stack[STACK_SIZE];

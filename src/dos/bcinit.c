@@ -28,8 +28,8 @@
 #include "bcfrotz.h"
 #include "bcblorb.h"
 
-f_setup_t f_setup;
-z_header_t z_header;
+extern f_setup_t f_setup;
+extern z_header_t z_header;
 
 static char information[] =
     "An interpreter for all Infocom and other Z-Machine games.\n"
@@ -60,10 +60,9 @@ static char information[] =
 extern unsigned cdecl _heaplen = 0x800 + 4 * BUFSIZ;
 extern unsigned cdecl _stklen = 0x800;
 
-extern const char *optarg;
-extern int optind;
+extern int zoptind;
 
-int cdecl getopt(int, char *[], const char *);
+int cdecl zgetopt(int, char *[], const char *);
 
 static const char *progname = NULL;
 
@@ -259,11 +258,11 @@ static void parse_options(int argc, char **argv)
 	do {
 		int num = 0;
 
-		c = getopt(argc, argv,
+		c = zgetopt(argc, argv,
 			   "aAb:B:c:d:e:f:F:g:h:il:oOpr:R:s:S:tTu:w:xZ:");
 
-		if (optarg != NULL)
-			num = dectoi(optarg);
+		if (zoptarg != NULL)
+			num = dectoi(zoptarg);
 
 		if (c == 'a')
 			f_setup.attribute_assignment = 1;
@@ -276,7 +275,7 @@ static void parse_options(int argc, char **argv)
 		if (c == 'c')
 			f_setup.context_lines = num;
 		if (c == 'd') {
-			display = optarg[0] | 32;
+			display = zoptarg[0] | 32;
 			if ((display < '0' || display > '5')
 			    && (display < 'a' || display > 'e')) {
 				display = -1;
@@ -309,7 +308,7 @@ static void parse_options(int argc, char **argv)
 		if (c == 'r')
 			f_setup.right_margin = num;
 		if (c == 'R')
-			f_setup.restricted_path = strdup(optarg);
+			f_setup.restricted_path = strdup(zoptarg);
 		if (c == 's')
 			user_random_seed = num;
 		if (c == 'S')
@@ -327,7 +326,7 @@ static void parse_options(int argc, char **argv)
 				f_setup.err_report_mode = num;
 		}
 		if (c == '?')
-			optind = argc;
+			zoptind = argc;
 	} while (c != EOF && c != '?');
 
 } /* parse_options */
@@ -364,14 +363,14 @@ void os_process_arguments(int argc, char *argv[])
 	/* Parse command line options */
 	parse_options(argc, argv);
 
-	if (optind != argc - 1) {
+	if (zoptind != argc - 1) {
 		printf("FROTZ V%s\tMSDOS / PCDOS Edition\n", VERSION);
 		puts(information);
 		exit(EXIT_FAILURE);
 	}
 
 	/* Set the story file name */
-	f_setup.story_file = strdup(argv[optind]);
+	f_setup.story_file = strdup(argv[zoptind]);
 
 	/* Strip path and extension off the story file name */
 	p = strdup(f_setup.story_file);
