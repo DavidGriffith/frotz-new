@@ -397,24 +397,19 @@ extern zbyte *zmp;
 #define lo(v)   ((zbyte *)&v)[0]
 #define hi(v)   ((zbyte *)&v)[1]
 
-#if 0
-#define SET_WORD(addr,v) asm {\
-	les bx,zmp;\
-	add bx,addr;\
-	mov ax,v;\
-	xchg al,ah;\
-	mov es:[bx],ax }
+#define SET_WORD(addr, v) do {\
+	asm les bx,zmp;\
+	asm add bx,addr;\
+	_AX = (v); \
+	asm xchg al,ah;\
+	asm mov es:[bx],ax; } while (0);
 
-#define LOW_WORD(addr,v) asm {\
-	les bx,zmp;\
-	add bx,addr;\
-	mov ax,es:[bx];\
-	xchg al,ah;\
-	mov v,ax }
-#endif
-
-#define SET_WORD(addr,v)  { zmp[addr] = hi(v); zmp[addr+1] = lo(v); }
-#define LOW_WORD(addr,v)  { v = ((zword) zmp[addr] << 8) | zmp[addr+1]; }
+#define LOW_WORD(addr,v) do {\
+	asm les bx,zmp;\
+	asm add bx,addr;\
+	asm mov ax,es:[bx];\
+	asm xchg al,ah;\
+	(v) = _AX; } while (0);
 
 #define HIGH_WORD(addr,v) asm {\
 	mov bx,word ptr zmp;\
