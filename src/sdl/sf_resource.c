@@ -27,7 +27,8 @@ extern FILE *blorb_fp;
 /* various data */
 bool m_tandy = 0;
 int m_v6scale;
-int m_gfxScale = 1;
+double m_gfxScale_w = 1.0;
+double m_gfxScale_h = 1.0;
 ulong m_defaultFore;
 ulong m_defaultBack;
 ulong m_colours[11];
@@ -205,8 +206,8 @@ int os_picture_data(int picture, int *height, int *width)
 		} else {
 			sf_picture *res = sf_getpic(picture);
 			if (res) {
-				*height = m_gfxScale * res->height;
-				*width = m_gfxScale * res->width;
+				*height = m_gfxScale_h * res->height;
+				*width = m_gfxScale_w * res->width;
 				return 1;
 			}
 		}
@@ -405,7 +406,8 @@ void sf_readsettings(void)
 
 	m_frequency = sf_GetProfileInt("Audio", "Frequency", m_frequency);
 	m_v6scale = sf_GetProfileInt("Display", "Infocom V6 Scaling", 2);
-	m_gfxScale = 1;
+	m_gfxScale_w = 1.0;
+	m_gfxScale_h = 1.0;
 	m_defaultFore = (sf_GetProfileInt("Display", "Foreground", 0xffffff));
 	m_defaultBack = (sf_GetProfileInt("Display", "Background", 0x800000));
 	m_morePrompts =
@@ -586,10 +588,15 @@ void os_init_screen(void)
 	sf_load_resources();
 
 	/* Set the graphics scaling */
-	if (sf_IsInfocomV6() || (story_id == BEYOND_ZORK))
-		m_gfxScale = m_v6scale;
-	else
-		m_gfxScale = 1;
+	if (sf_IsInfocomV6() || (story_id == BEYOND_ZORK)) {
+		m_gfxScale_w = (double)m_v6scale;
+		m_gfxScale_h = (double)m_v6scale;
+	} else {
+		m_gfxScale_w = 1.0;
+		m_gfxScale_h = 1.0;
+	}
+	m_gfxScale_w *= (double) AcWidth /640.0;
+	m_gfxScale_h *= (double) AcHeight /400.0;
 
 	/* Set the configuration */
 	if (z_header.version == V3) {
