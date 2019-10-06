@@ -397,6 +397,19 @@ extern zbyte *zmp;
 #define lo(v)   ((zbyte *)&v)[0]
 #define hi(v)   ((zbyte *)&v)[1]
 
+/*
+ * Turbo C has a strange limitation with passing members of structs to
+ * assembly code within a macro.  If more than one struct have members
+ * of the same name, then Turbo C is unable to tell the difference.  In
+ * other words, suppose you have foo.a and bar.a.  Doing
+ * "SET_WORD(H_STUFF, foo.a);" will make Turbo C complain about
+ * "Ambiguous member name 'a' in function frobnitz".  The solution is to
+ * use the "pseudoregister" _AX to pass values in and out a macro.  Right
+ * now, just SET_WORD() and LOW_WORD() are being passed troublesome
+ * struct members.
+ *
+ */
+
 #define SET_WORD(addr, v) do {\
 	asm les bx,zmp;\
 	asm add bx,addr;\
