@@ -164,7 +164,7 @@ export NOSOUND
 export CURSES_SOUND_LDFLAGS
 
 NAME = frotz
-VERSION = 2.45pre
+VERSION = 2.50b1
 
 
 # If we're working from git, we have access to proper variables. If
