@@ -147,7 +147,7 @@ void os_process_arguments(int argc, char *argv[])
 		}
 	} while (c != EOF);
 
-	if ((argv[zoptind] == NULL)) {
+	if (argv[zoptind] == NULL) {
 		printf("FROTZ V%s\tDumb interface.\n", VERSION);
 		puts(INFORMATION);
 		puts(INFO2);
