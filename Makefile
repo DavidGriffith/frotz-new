@@ -131,6 +131,13 @@ endif
 # For missing strrchr()
 #NO_STRRCHR = yes
 
+# Assorted constants
+MAX_UNDO_SLOTS = 500
+MAX_FILE_NAME = 80
+TEXT_BUFFER_SIZE = 512
+INPUT_BUFFER_SIZE = 200
+STACK_SIZE = 1024
+
 
 #########################################################################
 # This section is where Frotz is actually built.
@@ -307,6 +314,7 @@ $(SUB_CLEAN):
 
 # Compile-time generated defines and strings
 #
+defs: common_defines
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
 ifeq ($(wildcard $(COMMON_DEFINES)), )
@@ -316,6 +324,11 @@ ifeq ($(wildcard $(COMMON_DEFINES)), )
 ifeq ($(OS_TYPE), unix)
 	@echo "#define UNIX" >> $@
 endif
+	@echo "#define MAX_UNDO_SLOTS $(MAX_UNDO_SLOTS)" >> $@
+	@echo "#define MAX_FILE_NAME $(MAX_FILE_NAME)" >> $@
+	@echo "#define TEXT_BUFFER_SIZE $(TEXT_BUFFER_SIZE)" >> $@
+	@echo "#define INPUT_BUFFER_SIZE $(INPUT_BUFFER_SIZE)" >> $@
+	@echo "#define STACK_SIZE $(STACK_SIZE)" >> $@
 ifdef NO_BLORB
 	@echo "#define NO_BLORB" >> $@
 endif
