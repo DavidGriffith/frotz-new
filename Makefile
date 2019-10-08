@@ -452,7 +452,7 @@ clean: $(SUB_CLEAN)
 	rm -rf $(COMMON_DEFINES) \
 		$(CURSES_DEFINES) \
 		$(HASH)
-	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB
+	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
 
 
 distclean: clean
