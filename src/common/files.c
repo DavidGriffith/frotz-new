@@ -147,8 +147,8 @@ void script_char(zchar c)
 	}
 
 #ifdef __MSDOS__
-	if (c > 0xff)
-		c = '?';
+	if (c > 0xff)	/* Should always be false */
+		c = '?';	/* Unreachable */
 	if (c >= ZC_LATIN1_MIN)
 		c = latin1_to_ibm[c - ZC_LATIN1_MIN];
 	fputc(c, sfp);
