@@ -28,6 +28,9 @@ For sound support, a few more things are necessary:
   * libvorbis     (1.3.2 or higher)
 Earlier versions of these libraries might work, but are untested.
 
+If you don't want to build Frotz with audio support, simply do "make
+nosound" or comment out the "SOUND" line from the Makefile.
+
 For NetBSD, you must install the libao-sun plugin for libao.
 
 Linux uses ncurses, so you're safe there.  The version of curses that

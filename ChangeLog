@@ -26,6 +26,12 @@ BUG FIXES
 
 - Fixed a lot of unsafe strcpy() and strcat() calls.
 
+- Fixed adaptive palette rendering for SDL.
+
+- Fixed scaling with manually specified window dimensions.
+
+- Fixed problem with unnecessary newlines with input timeouts.
+
 
 Summary of changes between Frotz 2.43 and Frotz 2.44:
 =====================================================
