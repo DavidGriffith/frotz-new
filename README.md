@@ -1,4 +1,4 @@
-# FROTZ V2.45pre
+# FROTZ V2.50b1
 An interpreter for all Infocom and other Z-machine games.
 Complies with standard 1.0 of Graham Nelson's specification.
 
@@ -8,12 +8,13 @@ Reference code and Unix port currently maintained by David Griffith.
 
 ## Features
 - Compiles and runs on most common flavors of Unix, both open source and not.
+  This includes MacOS.
 - Plays all Z-code games including V6.
 - Graphics displayed through SDL.
 - Sound support through libao.
 - Config files.
-- Configurable error checking.
-- Distributed under the GNU Public License.
+- User-configurable error checking.
+- Distributed under the GNU Public License, version 2 or any later version.
 
 ## Information
 For information on what Interactive Fiction is and how to play it, see the
