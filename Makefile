@@ -11,43 +11,6 @@ WCC=wcc
 # Enable compiler warnings. This is an absolute minimum.
 CFLAGS += -Wall -std=c99 #-Wextra
 
-# Determine if we are compiling on MAC OS X
-ifneq ($(OS),Windows_NT)
-    # For now, assume !windows == unix.
-    OS_TYPE ?= unix
-    UNAME_S := $(shell uname -s)
-    ifeq ($(UNAME_S),Darwin)
-	MACOS = yes
-    endif
-    ifeq ($(UNAME_S),NetBSD)
-	NETBSD = yes
-	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include
-	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
-	SDL_LDFLAGS += -lexecinfo
-    endif
-    ifeq ($(UNAME_S),FreeBSD)
-	FREEBSD = yes
-	CFLAGS += -I/usr/local/include
-	LDFLAGS += -L/usr/local/lib
-	SDL_LDFLAGS += -lexecinfo
-    endif
-    ifeq ($(UNAME_S),OpenBSD)
-	OPENBSD = yes
-	NO_EXECINFO_H = yes
-	NO_UCONTEXT_H = yes
-	NO_IMMINTRIN_H = yes
-	CFLAGS += -I/usr/local/include
-	LDFLAGS += -L/usr/local/lib
-	SDL_CFLAGS += -DSDL_DISABLE_IMMINTRIN_H
-	SDL_LDFLAGS += -lexecinfo
-    endif
-    ifeq ($(UNAME_S),Linux)
-	CFLAGS += -D_POSIX_C_SOURCE=200809L
-	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
-    endif
-endif
-
-
 # Define your optimization flags.
 #
 # These are good for regular use.
@@ -143,6 +106,42 @@ STACK_SIZE = 1024
 # This section is where Frotz is actually built.
 # Under normal circumstances, nothing in this section should be changed.
 #########################################################################
+
+# Determine if we are compiling on MAC OS X
+ifneq ($(OS),Windows_NT)
+    # For now, assume !windows == unix.
+    OS_TYPE ?= unix
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Darwin)
+	MACOS = yes
+    endif
+    ifeq ($(UNAME_S),NetBSD)
+	NETBSD = yes
+	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include
+	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
+	SDL_LDFLAGS += -lexecinfo
+    endif
+    ifeq ($(UNAME_S),FreeBSD)
+	FREEBSD = yes
+	CFLAGS += -I/usr/local/include
+	LDFLAGS += -L/usr/local/lib
+	SDL_LDFLAGS += -lexecinfo
+    endif
+    ifeq ($(UNAME_S),OpenBSD)
+	OPENBSD = yes
+	NO_EXECINFO_H = yes
+	NO_UCONTEXT_H = yes
+	NO_IMMINTRIN_H = yes
+	CFLAGS += -I/usr/local/include
+	LDFLAGS += -L/usr/local/lib
+	SDL_CFLAGS += -DSDL_DISABLE_IMMINTRIN_H
+	SDL_LDFLAGS += -lexecinfo
+    endif
+    ifeq ($(UNAME_S),Linux)
+	CFLAGS += -D_POSIX_C_SOURCE=200809L
+	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
+    endif
+endif
 
 RANLIB ?= $(shell which ranlib)
 AR ?= $(shell which ar)
