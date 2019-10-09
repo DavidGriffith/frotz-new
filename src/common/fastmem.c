@@ -896,7 +896,7 @@ static void mem_undiff(zbyte *diff, long diff_length, zbyte *dest)
  */
 int restore_undo(void)
 {
-	long pc = curr_undo->pc;
+	long pc;
 
 	/* undo feature unavailable */
 	if (f_setup.undo_slots == 0)
@@ -905,6 +905,8 @@ int restore_undo(void)
 	/* no saved game state */
 	if (curr_undo == NULL)
 		return 0;
+
+	pc = curr_undo->pc;
 
 	/* undo possible */
 	memmove(zmp, prev_zmp, z_header.dynamic_size);
