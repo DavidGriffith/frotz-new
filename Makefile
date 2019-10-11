@@ -67,12 +67,6 @@ COLOR ?= yes
 #CURSES ?= ncurses
 CURSES ?= ncursesw
 
-# On MACOS, curses is actually ncurses, but to get wide char support
-# you need to define _XOPEN_SOURCE_EXTENDED
-ifdef MACOS
-  CURSES = curses
-  CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS
-endif
 
 # Uncomment this if you want to disable the compilation of Blorb support.
 #NO_BLORB = yes
@@ -114,6 +108,10 @@ ifneq ($(OS),Windows_NT)
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
 	MACOS = yes
+	# On MACOS, curses is actually ncurses, but to get wide char support
+	# you need to define _XOPEN_SOURCE_EXTENDED
+	CURSES = curses
+	CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS
     endif
     ifeq ($(UNAME_S),NetBSD)
 	NETBSD = yes
@@ -369,8 +367,10 @@ ifndef CURSES
 endif
 ifdef USE_UTF8
 ifneq ($(CURSES),ncursesw)
+ifndef MACOS
 	@echo "** ERROR UTF-8 support only works with ncursesw!"
 	exit 2
+endif
 endif
 endif
 	@echo "** Generating $@"
