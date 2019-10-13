@@ -97,7 +97,7 @@ struct undo_struct {
 };
 
 static undo_t *first_undo = NULL, *last_undo = NULL, *curr_undo = NULL;
-static zbyte *undo_mem = NULL, *prev_zmp, *undo_diff;
+static zbyte *prev_zmp, *undo_diff;
 
 static int undo_count = 0;
 
@@ -529,13 +529,15 @@ void init_undo(void)
 	/* Allocate z_header.dynamic_size bytes for previous dynamic
 	 * zmp state + 1.5 z_header.dynamic_size for Quetzal diff + 2.
 	 */
-	undo_mem = malloc((z_header.dynamic_size * 5) / 2 + 2);
-	if (undo_mem != NULL) {
-		prev_zmp = undo_mem;
-		undo_diff = undo_mem + z_header.dynamic_size;
+	prev_zmp = malloc(z_header.dynamic_size);
+	undo_diff = malloc((z_header.dynamic_size * 3) / 2 + 2);
+	if ((undo_diff != NULL) && (prev_zmp != NULL)) {
 		memmove (prev_zmp, zmp, z_header.dynamic_size);
-	} else
+	} else {
 		f_setup.undo_slots = 0;
+		if (prev_zmp != NULL) free(prev_zmp);
+		if (undo_diff != NULL) free(undo_diff);
+	}
 
 	if (reserve_mem != 0)
 		free(reserved);
@@ -581,13 +583,15 @@ void reset_memory(void)
 		fclose(story_fp);
 	story_fp = NULL;
 
-	if (undo_mem) {
+	if (undo_diff) {
 		free_undo(undo_count);
-		free(undo_mem);
+		free(undo_diff);
+		free(prev_zmp);
 	}
 
-	undo_mem = NULL;
+	undo_diff = NULL;
 	undo_count = 0;
+	prev_zmp = NULL;
 
 	if (zmp)
 		free(zmp);
