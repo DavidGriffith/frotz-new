@@ -19,6 +19,7 @@ To compile DOS Frotz, you need the following:
 	* PC-DOS, MS-DOS, or DR-DOS version 5.0 or higher.
 	  FreeDOS works well too.
 
+
 ==============
 Compilation ||
 ==============
@@ -41,6 +42,14 @@ Unix and DOS versions.  After about a minute, you should have FROTZ.EXE.
 This file is all you need to run Frotz.  Put it somewhere in your path 
 and go to wherever you keep your Infocom games.  Type "frotz zork1.dat" 
 or whatever and there you go.
+
+If you want to disable Blorb file support and/or sound support, first
+open Makefile.tc in a text editor and scroll down to the section where
+you see "Compile-time options".  There comment out the define for
+"SOUND_SUPPORT" to disable compilation of sound support.  To disable
+Blorb file support, uncomment the define for "NO_BLORB".  Then do "build
+clean" and then "build".
+
 
 ========================
 Hardware Requirements ||

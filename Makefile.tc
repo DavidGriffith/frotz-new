@@ -75,6 +75,7 @@ $(HASH):
 	@echo ******************************************************************************
 	@echo.
 
+# Compile-time options
 defs: $(HASH) $(DEFS)
 $(DEFS):
 	@echo "** Generating $@"
