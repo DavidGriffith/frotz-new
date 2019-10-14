@@ -273,7 +273,7 @@ dos: $(DOS_BIN)
 $(DOS_BIN): $(HASH)
 	@echo
 	@echo "  ** Cannot cross-compile for DOS yet"
-	@echo "  ** For now, I'm just making $(COMMON_DEFINES) and $(HASH)"
+	@echo "  ** For now, I'm just making $(HASH)"
 	@echo "  ** To build for DOS, take what's here and use Turbo C in DOSBOX"
 	@echo
 
