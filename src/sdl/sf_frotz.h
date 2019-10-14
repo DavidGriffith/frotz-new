@@ -1,3 +1,10 @@
+/*
+ * sf_frotz.h
+ *
+ * Declarations and definitions for the SDL interface
+ *
+ */
+
 #ifndef _SF_FROTZ_H
 #define _SF_FROTZ_H
 

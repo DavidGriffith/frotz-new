@@ -1,5 +1,5 @@
 /**
- * @file generic.h
+ * generic.h - SDL interface, generic useful user interface utility functions.
  *
  * Generic useful user interface utility functions.
  */
