@@ -26,7 +26,10 @@
 #include <string.h>
 #include "frotz.h"
 #include "bcfrotz.h"
+
+#ifndef NO_BLORB
 #include "bcblorb.h"
+#endif
 
 extern f_setup_t f_setup;
 extern z_header_t z_header;
@@ -86,10 +89,12 @@ int user_random_seed = -1;
 int user_font = 1;
 
 /* Blorb-related things */
+#ifndef NO_BLORB
 char *blorb_name;
 char *blorb_file;
 bool use_blorb;
 bool exec_in_blorb;
+#endif
 
 static byte old_video_mode = 0;
 
@@ -400,6 +405,7 @@ void os_process_arguments(int argc, char *argv[])
 	/* Save the executable file name */
 	progname = argv[0];
 
+#ifndef NO_BLORB
 	blorb_file = strdup(f_setup.story_name);
 	strcat(blorb_file, ".blb");
 
@@ -412,6 +418,7 @@ void os_process_arguments(int argc, char *argv[])
 /* No problem.  Don't say anything. */
 /*	    printf("Blorb error code %i\n\n"); */
 	}
+#endif
 } /* os_process_arguments */
 
 
@@ -861,6 +868,7 @@ FILE *os_path_open(const char *name, const char *mode)
  */
 FILE *os_load_story(void)
 {
+#ifndef NO_BLORB
 	FILE *fp;
 
 	/* Did we build a valid blorb map? */
@@ -871,9 +879,13 @@ FILE *os_load_story(void)
 		fp = fopen(f_setup.story_file, "rb");
 	}
 	return fp;
+#else
+	return fopen(f_setup.story_file, "rb");
+#endif
 }
 
 
+#ifndef NO_BLORB
 int dos_init_blorb(void)
 {
 	FILE *blorbfile;
@@ -906,6 +918,7 @@ int dos_init_blorb(void)
 	}
 	return 0;
 }
+#endif /* NO_BLORB */
 
 
 /*
@@ -914,6 +927,7 @@ int dos_init_blorb(void)
  */
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
+#ifndef NO_BLORB
 	int retval;
 	/* Is this a Blorb file containing Zcode? */
 	if (exec_in_blorb) {
@@ -936,6 +950,7 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
 		}
 		return retval;
 	}
+#endif
 	return fseek(fp, offset, whence);
 }
 
@@ -946,9 +961,10 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
  */
 int os_storyfile_tell(FILE * fp)
 {
+#ifndef NO_BLORB
 	/* Is this a Blorb file containing Zcode? */
 	if (exec_in_blorb)
 		return ftell(fp) - blorb_res.data.startpos;
-
+#endif
 	return ftell(fp);
 }
