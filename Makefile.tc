@@ -14,7 +14,7 @@ RENAME = ren
 BINNAME = frotz.exe
 LIBRARY = frotz.lib
 
-VERSION = "2.45pre"
+VERSION = "2.50b1"
 
 VER = -DVERSION=$(VERSION)
 
@@ -82,6 +82,7 @@ $(DEFS):
 	@echo "#define COMMON_DEFINES_H" >> $@
 	@echo "#define MSDOS_16BIT" >> $@
 	@echo "#define SOUND_SUPPORT" >> $@
+#	@echo "#define NO_BLORB" >> $@
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 
 .c.o:
