@@ -117,22 +117,6 @@ static void interrupt end_of_dma(void)
 
 
 /*
- * os_init_sound
- *
- * Dummy function to satisfy the core code.  DOS Frotz does its sound
- * initialization in bcinit.c in os_init_screen().
- *
- * FIXME: Move the sound initlization from os_init_screen() to here and
- *        somehow work around the ifs.
- *
- */
-void os_init_sound(void)
-{
-	/* do nothing */
-}
-
-
-/*
  * dos_init_sound
  *
  * Initialise the sound board and various sound related variables.
@@ -245,6 +229,20 @@ void os_beep(int number)
 	outportb(0x61, inportb(0x61) & ~3);
 } /* os_beep */
 
+/*
+ * os_init_sound
+ *
+ * Dummy function to satisfy the core code.  DOS Frotz does its sound
+ * initialization in bcinit.c in os_init_screen().
+ *
+ * FIXME: Move the sound initlization from os_init_screen() to here and
+ *        somehow work around the ifs.
+ *
+ */
+void os_init_sound(void)
+{
+	/* do nothing */
+}
 
 /*
  * os_prepare_sample
