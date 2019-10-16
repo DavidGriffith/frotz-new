@@ -530,7 +530,7 @@ void init_undo(void)
 	 * zmp state + 1.5 z_header.dynamic_size for Quetzal diff + 2.
 	 */
 	prev_zmp = malloc(z_header.dynamic_size);
-	undo_diff = malloc((z_header.dynamic_size * 3) / 2 + 2);
+	undo_diff = malloc(((unsigned long)z_header.dynamic_size * 3) / 2 + 2);
 	if ((undo_diff != NULL) && (prev_zmp != NULL)) {
 		memmove (prev_zmp, zmp, z_header.dynamic_size);
 	} else {
