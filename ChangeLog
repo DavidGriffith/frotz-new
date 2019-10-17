@@ -32,6 +32,8 @@ BUG FIXES
 
 - Fixed problem with unnecessary newlines with input timeouts.
 
+- Fixed problem with memory allocation leading to crashes in DOS.
+
 - Allow fontdir in .sfrotzrc to work relative to user's home directory.
 
 
