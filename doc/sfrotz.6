@@ -585,7 +585,9 @@ Note that this option cannot be overridden by a command line switch.
 fontdir =
 .I folder
 .br
-Specify the directory containing the Truetype fonts.
+Specify the directory containing the Truetype fonts.  If this does not
+begin with a slash, then the directory is assumed to be relative to the
+user's home directory.
 
 .HP 2
 textroman =

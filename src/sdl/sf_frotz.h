@@ -39,6 +39,12 @@ bool sf_IsAdaptive(int picture);
 #define PATH1		"ZCODE_PATH"
 #define PATH2		"INFOCOM_PATH"
 
+#ifdef WIN32
+#define HOMEDIR "USERPROFILE"
+#else
+#define HOMEDIR "HOME"
+#endif
+
 /* this assumes RGBA with lsb = R */
 static inline ulong RGB5ToTrue(word w)
 {

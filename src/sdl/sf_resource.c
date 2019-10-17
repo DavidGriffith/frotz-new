@@ -436,6 +436,37 @@ void sf_readsettings(void)
 	m_gamma = sf_GetProfileDouble("Display", "Gamma", DEFAULT_GAMMA);
 	sf_initcolours();
 
+	fprintf(stderr, "m_fontdir == %s\n", m_fontdir);
+
+	/* If the leading character of m_fontdir is not PATH_SEPARATOR,
+	 * we should look in $HOME for our font files and directories.
+	 */
+	if (m_fontdir[0] != PATH_SEPARATOR) {
+		char *m_fontdir_temp;
+		char *myhome;
+		char path_separator[2];
+		size_t fontdir_len, homedir_len;
+
+		myhome = getenv(HOMEDIR);
+		path_separator[0] = PATH_SEPARATOR;
+		path_separator[1] = 0;
+
+		fontdir_len = strlen(m_fontdir);
+		homedir_len = strlen(myhome);
+
+		m_fontdir_temp = malloc(((fontdir_len + homedir_len) * sizeof(char)) + 3);
+		strncpy(m_fontdir_temp, myhome, homedir_len + 1);
+		strncat(m_fontdir_temp, path_separator, 2);
+
+		if ((m_fontdir[0] == '~') && (m_fontdir[1] == PATH_SEPARATOR))
+			strncat(m_fontdir_temp,m_fontdir + 2, fontdir_len);
+		else
+			strncat(m_fontdir_temp,m_fontdir, fontdir_len);
+
+		free(m_fontdir);
+		m_fontdir = strdup(m_fontdir_temp);
+	}
+
 	sf_FinishProfile();
 }
 

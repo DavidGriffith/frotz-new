@@ -943,8 +943,8 @@ void sf_initfonts()
 						: NULL);
 				if (!b)
 					fprintf(stderr,
-						"WARNING: could not load font%d [%s]\n",
-						i, m_fontfiles[i]);
+						"WARNING: could not load font%d [%s%c%s]\n",
+						i, m_fontdir, PATH_SEPARATOR, m_fontfiles[i]);
 				else {
 					setfontk(i, b);
 					b->refcount = 1;

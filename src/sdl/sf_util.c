@@ -809,12 +809,6 @@ void sf_FinishProfile()
 }
 
 
-#ifdef WIN32
-#define HOMEDIR "USERPROFILE"
-#else
-#define HOMEDIR "HOME"
-#endif
-
 void sf_InitProfile(const char *fn)
 {
 	FILE *f;
