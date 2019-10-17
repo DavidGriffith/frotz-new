@@ -1,4 +1,4 @@
-FROTZ V2.50b1
+FROTZ V2.50b2
 An interpreter for all Infocom and other Z-Machine games.
 Complies with standard 1.0 of Graham Nelson's specification.
 
@@ -11,9 +11,10 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
-This archive contains only the DOS executable for Frotz.  For the source 
-code and to report bugs, please see Frotz's Gitlab page at 
-https://gitlab.com/DavidGriffith/frotz
+This archive contains only the DOS executable for Frotz.  For the
+source code and to report bugs, please see Frotz's Gitlab page at
+https://gitlab.com/DavidGriffith/frotz.  The source can also be
+found at the Interactive Fiction Archive at http://ifarchive.org/
 
 
 Syntax: frotz [options] story-file
@@ -355,7 +356,7 @@ Table of display modes:
     [2] Boldface text is available using the -T switch.
     [3] ISO Latin 1 characters are replaced with suitable substitutes.
 
-Acknowledgements:
+Acknowledgements by Stefan Jokisch:
 
     Many thanks to Paul D. Doherty for his continuing support of this
     project. Thanks to everyone who sent bug reports, contributions or
@@ -374,4 +375,14 @@ Acknowledgements:
     Christopher J. Madsen (OS/2), Galen Hazelwood (Unix curses library),
     Ian Dean (Windows CE).
 
-    Executables are available from ifarchive.org.
+
+Acknowledgements by David Griffith:
+
+    To the above list I would like to thank the following people:
+
+    Torbjorn Anderson, Timo Korvola, Martin Frost, Mihail Milushev,
+    David Picton, Archturiat Baumann, Leonard Richardson, Stephen
+    Kitt, Paul E Coad, Paul Janzen, Brad Town, Jason C Penney, Denis
+    Hirschfeldt, Jacob Nevins, Matteo De Luigi, Steven Frank, Thomas
+    Troeger, David Kinder, Bill Lash, Chris Bracken, and others whom
+    I've forgotten
