@@ -1,7 +1,7 @@
-Summary of changes between Frotz 2.44 and Frotz 2.45:
+Summary of changes between Frotz 2.44 and Frotz 2.50:
 =====================================================
 
-Frotz 2.45 was released on ????
+Frotz 2.50 was released on ????
 
 NEW FEATURES
 
@@ -31,6 +31,8 @@ BUG FIXES
 - Fixed scaling with manually specified window dimensions.
 
 - Fixed problem with unnecessary newlines with input timeouts.
+
+- Allow fontdir in .sfrotzrc to work relative to user's home directory.
 
 
 Summary of changes between Frotz 2.43 and Frotz 2.44:

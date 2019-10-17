@@ -1,4 +1,4 @@
-# FROTZ V2.50b1
+# FROTZ V2.50b2
 An interpreter for all Infocom and other Z-machine games.
 Complies with standard 1.0 of Graham Nelson's specification.
 
