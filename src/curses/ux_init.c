@@ -310,7 +310,7 @@ void os_process_arguments (int argc, char *argv[])
 		case 'S': f_setup.script_cols = atoi(zoptarg); break;
 		case 't': u_setup.tandy_bit = 1; break;
 		case 'u': f_setup.undo_slots = atoi(zoptarg); break;
-		case 'v': print_version(); exit(2); break;
+		case 'v': print_version(); exit(0); break;
 		case 'w': u_setup.screen_width = atoi(zoptarg); break;
 		case 'x': f_setup.expand_abbreviations = 1; break;
 		case 'Z':
@@ -334,7 +334,7 @@ void os_process_arguments (int argc, char *argv[])
 
 		puts (INFORMATION);
 		puts (INFO2);
-		exit (1);
+		exit (0);
 	}
 
 	/* This section is exceedingly messy and really can't be fixed

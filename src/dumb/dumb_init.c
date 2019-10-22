@@ -129,7 +129,7 @@ void os_process_arguments(int argc, char *argv[])
 			break;
 		case 'v':
 			print_version();
-			exit(2);
+			exit(0);
 			break;
 		case 'w':
 			user_text_width = atoi(zoptarg);
@@ -151,7 +151,7 @@ void os_process_arguments(int argc, char *argv[])
 		printf("FROTZ V%s\tDumb interface.\n", VERSION);
 		puts(INFORMATION);
 		puts(INFO2);
-		exit(1);
+		exit(0);
 	}
 
 	/* Save the story file name */

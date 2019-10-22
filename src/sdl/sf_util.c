@@ -333,7 +333,7 @@ static void parse_options(int argc, char **argv)
 			f_setup.expand_abbreviations = 1;
 		if (c == 'X') {
 			usage(USAGE_EXTENDED);
-			exit(EXIT_FAILURE);
+			exit(EXIT_SUCCESS);
 		}
 		if (c == 'Z')
 			if (num >= ERR_REPORT_NEVER && num <= ERR_REPORT_FATAL)
@@ -359,7 +359,7 @@ static void print_version(void)
 	printf
 	    ("  The core and SDL port are currently maintained by David Griffith.\n");
 	printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
-	exit(2);
+	exit(EXIT_SUCCESS);
 }
 
 
@@ -406,7 +406,7 @@ void os_process_arguments(int argc, char *argv[])
 
 	if (argv[zoptind] == NULL) {
 		usage(USAGE_NORMAL);
-		exit(EXIT_FAILURE);
+		exit(EXIT_SUCCESS);
 	}
 	f_setup.story_file = strdup(argv[zoptind]);
 
