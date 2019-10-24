@@ -230,6 +230,19 @@ static void interrupt fast_exit()
 
 
 /*
+ * os_quit
+ *
+ * Immediately and cleanly exit, passing along exit status.
+ *
+ */
+
+void os_quit(int status)
+{
+    cleanup();
+    exit(status);
+}
+
+/*
  * os_fatal
  *
  * Display error message and exit program.
