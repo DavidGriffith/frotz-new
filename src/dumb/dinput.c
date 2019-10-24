@@ -1,5 +1,5 @@
 /*
- * dumb_input.c - Dumb interface, input functions
+ * dinput.c - Dumb interface, input functions
  *
  * This file is part of Frotz.
  *
@@ -21,7 +21,7 @@
 
 #include <string.h>
 
-#include "dumb_frotz.h"
+#include "dfrotz.h"
 
 f_setup_t f_setup;
 

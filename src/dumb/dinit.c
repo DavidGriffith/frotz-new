@@ -1,5 +1,5 @@
 /*
- * dumb-init.c - Dumb interface, initialization
+ * dinit.c - Dumb interface, initialization
  *
  * This file is part of Frotz.
  *
@@ -20,8 +20,8 @@
  */
 
 #include <libgen.h>
-#include "dumb_frotz.h"
-#include "dumb_blorb.h"
+#include "dfrotz.h"
+#include "dblorb.h"
 
 f_setup_t f_setup;
 z_header_t z_header;

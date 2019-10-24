@@ -1,5 +1,5 @@
 /*
- * dumb_blorb.h
+ * dblorb.h
  *
  * Blorb related functions specific to the Dumb interface.
  *

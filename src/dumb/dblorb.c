@@ -1,5 +1,5 @@
 /*
- * dumb_blorb.c - Blorb routines
+ * dblorb.c - Blorb routines
  *
  * This file is part of Frotz.
  *
@@ -20,8 +20,8 @@
  */
 
 
-#include "dumb_frotz.h"
-#include "dumb_blorb.h"
+#include "dfrotz.h"
+#include "dblorb.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,5 +1,5 @@
 /*
- * dumb_output.c - Dumb interface, output functions
+ * doutput.c - Dumb interface, output functions
  *
  * This file is part of Frotz.
  *
@@ -19,7 +19,7 @@
  * Or visit http://www.fsf.org/
  */
 
-#include "dumb_frotz.h"
+#include "dfrotz.h"
 
 f_setup_t f_setup;
 
