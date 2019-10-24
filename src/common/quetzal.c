@@ -25,6 +25,7 @@
 #ifdef MSDOS_16BIT
 
 #include <alloc.h>
+#include <dos.h>
 
 #define malloc(size)	farmalloc (size)
 #define realloc(size,p)	farrealloc (size,p)
@@ -287,7 +288,22 @@ zword restore_quetzal(FILE * svf, FILE * stf)
 					tmpl >>= 8;	/* Shift to get PC value. */
 					--tmpl;	/* Point at result byte. */
 					/* Sanity check on result variable... */
+#ifdef MSDOS_16BIT
+					if (tmpl > 0xffffL)
+					{
+					    zbyte far *zmp2;
+					    zmp2 = MK_FP(FP_SEG(zmp) + (unsigned)(tmpl >> 16) * 0x1000,
+							 FP_OFF(zmp));
+					    x -= zmp2[tmpl & 0xffff];
+					}
+					else
+					{
+					    x -= zmp[tmpl];
+					}
+					if (x != 0) {
+#else
 					if (zmp[tmpl] != (zbyte) x) {
+#endif
 						print_string
 						    ("Save-file has wrong variable number on stack (possibly wrong game version?)\n");
 						return fatal;
@@ -555,7 +571,21 @@ zword save_quetzal(FILE * svf, FILE * stf)
 
 		switch (p[0] & 0xF000) {	/* Check type of call. */
 		case 0x0000:	/* Function. */
+#ifdef MSDOS_16BIT
+			if (pc > 0xffffL)
+			{
+			    zbyte far *zmp2;
+			    zmp2 = MK_FP(FP_SEG(zmp) + (unsigned)(pc >> 16) * 0x1000,
+				         FP_OFF(zmp));
+			    var = zmp2[pc & 0xffff];
+			}
+			else
+			{
+			    var = zmp[pc];
+			}
+#else
 			var = zmp[pc];
+#endif
 			pc = ((pc + 1) << 8) | nvars;
 			break;
 		case 0x1000:	/* Procedure. */
@@ -585,7 +615,6 @@ zword save_quetzal(FILE * svf, FILE * stf)
 		/* Calculate length written thus far. */
 		stkslen += 8 + 2 * (nvars + nstk);
 	}
-
 	/* Fill in variable chunk lengths. */
 	ifzslen = 3 * 8 + 4 + 14 + cmemlen + stkslen;
 	if (cmemlen & 1)
