@@ -436,12 +436,10 @@ void sf_readsettings(void)
 	m_gamma = sf_GetProfileDouble("Display", "Gamma", DEFAULT_GAMMA);
 	sf_initcolours();
 
-	fprintf(stderr, "m_fontdir == %s\n", m_fontdir);
-
 	/* If the leading character of m_fontdir is not PATH_SEPARATOR,
 	 * we should look in $HOME for our font files and directories.
 	 */
-	if (m_fontdir[0] != PATH_SEPARATOR) {
+	if (m_fontdir != NULL && m_fontdir[0] != PATH_SEPARATOR) {
 		char *m_fontdir_temp;
 		char *myhome;
 		char path_separator[2];
