@@ -109,6 +109,16 @@ void os_reset_screen(void)
 
 	sf_cleanup_all();
 }
+/*
+ * os_quit
+ *
+ * Immediately and cleanly exit, passing along exit status.
+ *
+ */
+void os_quit(int status)
+{
+	exit(status);
+} /* os_quit */
 
 int user_background = -1;
 int user_foreground = -1;
@@ -333,7 +343,7 @@ static void parse_options(int argc, char **argv)
 			f_setup.expand_abbreviations = 1;
 		if (c == 'X') {
 			usage(USAGE_EXTENDED);
-			exit(EXIT_SUCCESS);
+			os_quit(EXIT_SUCCESS);
 		}
 		if (c == 'Z')
 			if (num >= ERR_REPORT_NEVER && num <= ERR_REPORT_FATAL)
@@ -359,7 +369,7 @@ static void print_version(void)
 	printf
 	    ("  The core and SDL port are currently maintained by David Griffith.\n");
 	printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
-	exit(EXIT_SUCCESS);
+	os_quit(EXIT_SUCCESS);
 }
 
 
@@ -406,7 +416,7 @@ void os_process_arguments(int argc, char *argv[])
 
 	if (argv[zoptind] == NULL) {
 		usage(USAGE_NORMAL);
-		exit(EXIT_SUCCESS);
+		os_quit(EXIT_SUCCESS);
 	}
 	f_setup.story_file = strdup(argv[zoptind]);
 

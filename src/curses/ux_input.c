@@ -364,7 +364,7 @@ static int unix_read_char(int extkeys)
 			continue;
 
 		/* use ^Q to immediately exit. */
-		case MOD_CTRL ^ 'Q': os_quit();
+		case MOD_CTRL ^ 'Q': os_quit(EXIT_SUCCESS);
 
 		default: break; /* Who knows? */
 		}

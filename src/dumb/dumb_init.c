@@ -129,7 +129,7 @@ void os_process_arguments(int argc, char *argv[])
 			break;
 		case 'v':
 			print_version();
-			exit(0);
+			os_quit(EXIT_SUCCESS);
 			break;
 		case 'w':
 			user_text_width = atoi(zoptarg);
@@ -151,7 +151,7 @@ void os_process_arguments(int argc, char *argv[])
 		printf("FROTZ V%s\tDumb interface.\n", VERSION);
 		puts(INFORMATION);
 		puts(INFO2);
-		exit(0);
+		os_quit(EXIT_SUCCESS);
 	}
 
 	/* Save the story file name */
@@ -237,6 +237,18 @@ int os_random_seed (void)
 }
 
 
+/*
+ * os_quit
+ *
+ * Immediately and cleanly exit, passing along exit status.
+ *
+ */
+void os_quit(int status)
+{
+	exit(status);
+}
+
+
 void os_restart_game (int UNUSED (stage)) {}
 
 
@@ -246,7 +258,7 @@ void os_fatal (const char *s, ...)
 	if (f_setup.ignore_errors)
 		fprintf(stderr, "Continuing anyway...\n");
 	else
-		exit(1);
+		os_quit(EXIT_FAILURE);
 }
 
 

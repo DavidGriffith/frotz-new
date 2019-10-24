@@ -24,6 +24,7 @@
  *
  */
 
+#include <stdlib.h>
 #include "frotz.h"
 
 #ifndef MSDOS_16BIT
@@ -119,5 +120,6 @@ int cdecl main(int argc, char *argv[])
 	reset_screen();
 	reset_memory();
 	os_reset_screen();
+	os_quit(EXIT_SUCCESS);
 	return 0;
 } /* main */

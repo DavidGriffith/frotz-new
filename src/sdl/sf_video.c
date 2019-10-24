@@ -1328,7 +1328,7 @@ static void sf_quitconf()
 		printf
 		    ("\n\nQuitting (close button clicked on main window)\n\n");
 		SDL_Quit();
-		exit(0);
+		os_quit(EXIT_SUCCESS);
 	}
 }
 

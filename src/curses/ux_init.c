@@ -561,17 +561,16 @@ void os_reset_screen (void)
 	os_set_text_style(0);
 	print_c_string("[Hit any key to exit.]\n");
 	os_read_key(0, FALSE);
-	os_quit();
 } /* os_reset_screen */
 
 
 /*
  * os_quit
  *
- * Immediately and cleanly exit.
+ * Immediately and cleanly exit, passing along exit status.
  *
  */
-void os_quit(void)
+void os_quit(int status)
 {
 	os_stop_sample(0);
 	ux_blorb_stop();
@@ -581,7 +580,7 @@ void os_quit(void)
 		refresh();
 		endwin();
 	}
-	exit(EXIT_FAILURE);
+	exit(status);
 } /* os_quit */
 
 

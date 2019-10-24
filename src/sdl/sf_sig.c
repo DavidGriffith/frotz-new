@@ -116,7 +116,7 @@ static void bt_sighandler(int sig, siginfo_t * info, void *secret)
 	if (sig == SIGINT) {
 		fprintf(stderr, "Emergency Exit (Signal SIGITNT received)\n");
 		SDL_Quit();
-		exit(EXIT_FAILURE);
+		os_quit(EXIT_FAILURE);
 	}
 
 	/* Do something useful with siginfo_t */
@@ -143,7 +143,7 @@ static void bt_sighandler(int sig, siginfo_t * info, void *secret)
 		backtrace_symbols_fd(trace + i, 1, fileno(stdout));
 	}
 
-	exit(0);
+	os_quit(EXIT_SUCCESS);
 }
 
 void sf_installhandlers()

@@ -798,7 +798,7 @@ int	os_storyfile_tell(FILE *);
 int  	os_string_width(const zchar *);
 void	os_init_setup(void);
 void 	os_warn(const char *, ...);
-void	os_quit(void);
+void	os_quit(int);
 
 /**
  * Called regularly by the interpreter, at least every few instructions
