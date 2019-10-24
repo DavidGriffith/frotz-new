@@ -371,7 +371,7 @@ void os_process_arguments(int argc, char *argv[])
 	if (zoptind != argc - 1) {
 		printf("FROTZ V%s\tMSDOS / PCDOS Edition\n", VERSION);
 		puts(information);
-		exit(EXIT_FAILURE);
+		exit(EXIT_SUCCESS);
 	}
 
 	/* Set the story file name */

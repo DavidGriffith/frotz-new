@@ -78,7 +78,7 @@ static void sigterm_handler(int signal) {
 	ioctl(dsp_fd, SNDCTL_DSP_RESET, 0);
 	if (mixer_fd >= 0)
 		ioctl(mixer_fd, SOUND_MIXER_WRITE_VOLUME, &old_volume);
-	_exit(0);
+	_exit(EXIT_SUCCESS);
 }
 
 static void oss_sigint_handler(int signal) {
@@ -93,7 +93,7 @@ static void play_sound(int volume, int repeats) {
 	dsp_fd = open(SOUND_DEV, O_WRONLY);
 	if (dsp_fd < 0) {
 		perror(SOUND_DEV);
-		_exit(1);
+		_exit(EXIT_FAILURE);
 	}
 
 
@@ -103,19 +103,19 @@ static void play_sound(int volume, int repeats) {
 	 */
 	if (ioctl(dsp_fd, SNDCTL_DSP_SETFMT, &format) == -1) {
 		perror(SOUND_DEV);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	if (format != AFMT_U8) {
 		fprintf(stderr, "bad sound format\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	if (ioctl(dsp_fd, SNDCTL_DSP_CHANNELS, &channels) == -1) {
 		perror(SOUND_DEV);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	if (channels != 1) {
 		fprintf(stderr, "bad channels\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	/* End sound fix from Torbjorn Andersson (no dot thingies) */
 
@@ -165,7 +165,7 @@ finish:
 	ioctl(dsp_fd, SNDCTL_DSP_SYNC, 0);
 	if (mixer_fd >= 0)
 		ioctl(mixer_fd, SOUND_MIXER_WRITE_VOLUME, &old_volume);
-	_exit(0);
+	_exit(EXIT_SUCCESS);
 }
 
 

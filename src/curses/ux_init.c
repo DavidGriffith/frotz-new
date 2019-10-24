@@ -162,7 +162,7 @@ void os_fatal (const char *s, ...)
 		} else {
 			os_reset_screen();
 			ux_blorb_stop();
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
 
@@ -175,7 +175,7 @@ void os_fatal (const char *s, ...)
 
 	fputs ("\n\n", stderr);
 
-	exit (1);
+	exit (EXIT_FAILURE);
 } /* os_fatal */
 
 /* extern char script_name[]; */
@@ -208,7 +208,7 @@ void os_process_arguments (int argc, char *argv[])
 #ifndef WIN32
 	if ((getuid() == 0) || (geteuid() == 0)) {
 		printf("I won't run as root!\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 #endif
 
@@ -220,7 +220,7 @@ void os_process_arguments (int argc, char *argv[])
 
 	if ((home = getenv(HOMEDIR)) == NULL) {
 		printf("Hard drive on fire!\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 
@@ -310,7 +310,7 @@ void os_process_arguments (int argc, char *argv[])
 		case 'S': f_setup.script_cols = atoi(zoptarg); break;
 		case 't': u_setup.tandy_bit = 1; break;
 		case 'u': f_setup.undo_slots = atoi(zoptarg); break;
-		case 'v': print_version(); exit(0); break;
+		case 'v': print_version(); exit(EXIT_SUCCESS); break;
 		case 'w': u_setup.screen_width = atoi(zoptarg); break;
 		case 'x': f_setup.expand_abbreviations = 1; break;
 		case 'Z':
@@ -334,7 +334,7 @@ void os_process_arguments (int argc, char *argv[])
 
 		puts (INFORMATION);
 		puts (INFO2);
-		exit (0);
+		exit (EXIT_SUCCESS);
 	}
 
 	/* This section is exceedingly messy and really can't be fixed
@@ -448,7 +448,7 @@ void os_init_screen (void)
 
 	if (initscr() == NULL) {    /* Set up curses */
 		os_fatal("Unable to initialize curses. Maybe your $TERM setting is bad.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	u_setup.curses_active = 1;	/* Let os_fatal know curses is running */
 	raw();				/* Raw input mode, no line processing */
@@ -581,7 +581,7 @@ void os_quit(void)
 		refresh();
 		endwin();
 	}
-	exit(1);
+	exit(EXIT_FAILURE);
 } /* os_quit */
 
 
