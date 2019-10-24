@@ -23,4 +23,4 @@ clean:
 	rm -f $(TARGET) $(OBJECTS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ -c $<

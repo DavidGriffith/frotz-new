@@ -20,10 +20,6 @@
 
 #include "frotz.h"
 
-#ifdef DJGPP
-#include "djfrotz.h"
-#endif
-
 zword zargs[8];
 int zargc;
 
@@ -279,11 +275,6 @@ void interpret(void)
 			}
 			var_opcodes[opcode - 0xc0] ();
 		}
-
-#if defined(DJGPP) && defined(SOUND_SUPPORT)
-		if (end_of_sound_flag)
-			end_of_sound();
-#endif
 
 		os_tick();
 	} while (finished == 0);

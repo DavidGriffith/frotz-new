@@ -2,11 +2,12 @@
 # GNU make is required.
 
 # Your C compiler
-CC ?= gcc
-#CC ?= clang
+ifeq ($(origin CC),default)
+CC = gcc
+endif
 
 # Enable compiler warnings. This is an absolute minimum.
-CFLAGS += -Wall -std=c99 -O3 #-Wextra
+CFLAGS += -Wall -std=gnu99 -O3 #-Wextra
 
 # Define your optimization flags.
 #
@@ -14,6 +15,10 @@ CFLAGS += -Wall -std=c99 -O3 #-Wextra
 #CFLAGS += -O2 -fomit-frame-pointer -falign-functions=2 -falign-loops=2 -falign-jumps=2
 # These are handy for debugging.
 CFLAGS += -g
+
+ifneq ($(MAKECMDGOALS),djgpp)
+EXTRA_CFLAGS = -fPIC -fpic
+endif
 
 # Define where you want Frotz installed
 PREFIX ?= /usr/local
@@ -130,11 +135,11 @@ ifneq ($(OS),Windows_NT)
     endif
 endif
 
-RANLIB ?= $(shell which ranlib)
-AR ?= $(shell which ar)
+RANLIB ?= ranlib
 PKG_CONFIG ?= pkg-config
 
 export CC
+export EXTRA_CFLAGS
 export CFLAGS
 export CURSES_CFLAGS
 export NPROCS
@@ -213,13 +218,17 @@ SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
 
 DOS_DIR = $(SRCDIR)/dos
 
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
+DJGPP_DIR = $(SRCDIR)/djgpp
+DJGPP_LIB = $(DJGPP_DIR)/frotz_djgpp.a
+
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR) $(DJGPP_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
+DJGPP_BIN = frotz32.exe
 
 FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
@@ -280,6 +289,12 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
+djgpp: USE_UTF8 = no
+djgpp: $(DJGPP_BIN)
+$(DJGPP_BIN): $(COMMON_LIB) $(DJGPP_LIB) $(BLORB_LIB) $(COMMON_LIB)
+	$(CC) $+ -o $@ $(LDFLAGS)
+	@echo "** Done building Frotz with DJGPP interface."
+
 dos: $(DOS_BIN)
 $(DOS_BIN):
 	@echo
@@ -324,6 +339,12 @@ $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 $(BLORB_LIB): $(COMMON_DEFINES)
 	$(MAKE) -C $(BLORB_DIR)
 
+$(DJGPP_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(DJGPP_DIR)
+
+#$(SUBDIRS):
+#	$(MAKE) -C $@
+
 $(SUB_CLEAN):
 	-$(MAKE) -C $(@:%-clean=%) clean
 
@@ -337,8 +358,13 @@ ifeq ($(wildcard $(COMMON_DEFINES)), )
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
+ifeq ($(MAKECMDGOALS),djgpp)
+	@echo "#define SOUND_SUPPORT" >> $@
+else
 ifeq ($(OS_TYPE), unix)
 	@echo "#define UNIX" >> $@
+	@echo "" >> $@
+endif
 endif
 	@echo "#define MAX_UNDO_SLOTS $(MAX_UNDO_SLOTS)" >> $@
 	@echo "#define MAX_FILE_NAME $(MAX_FILE_NAME)" >> $@
@@ -363,9 +389,7 @@ endif
 ifdef NO_EXECINFO_H
 	@echo "#define NO_EXECINFO_H" >> $@
 endif
-ifeq ($(USE_UTF8), yes)
-	@echo "#define USE_UTF8" >> $@
-endif
+	$(if $(findstring yes,$(USE_UTF8)), echo "#define USE_UTF8" >> $@)
 ifdef FREEBSD
 	@echo "#define __BSD_VISIBLE 1" >> $@
 endif
@@ -482,7 +506,7 @@ clean: $(SUB_CLEAN)
 	rm -rf $(COMMON_DEFINES) \
 		$(CURSES_DEFINES) \
 		$(HASH)
-	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
+	rm -f frotz.bak $(DOS_BIN) $(DJGPP_BIN) frotz.lib frotz.dsk *.obj
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
