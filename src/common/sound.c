@@ -20,10 +20,6 @@
 
 #include "frotz.h"
 
-#ifdef DJGPP
-#include "djfrotz.h"
-#endif
-
 #define EFFECT_PREPARE 1
 #define EFFECT_PLAY 2
 #define EFFECT_STOP 3
@@ -130,10 +126,6 @@ static void start_next_sample(void)
  */
 void end_of_sound(void)
 {
-#if defined(DJGPP) && defined(SOUND_SUPPORT)
-	end_of_sound_flag = 0;
-#endif
-
 	playing = FALSE;
 
 	if (!locked) {
