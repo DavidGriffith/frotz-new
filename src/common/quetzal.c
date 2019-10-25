@@ -111,6 +111,7 @@ static bool read_word(FILE * f, zword * result)
 
 
 /* Read one long from file; return TRUE if OK. */
+#ifndef MSDOS_16BIT
 static bool read_long(FILE * f, zlong * result)
 {
 	int a, b, c, d;
@@ -128,6 +129,30 @@ static bool read_long(FILE * f, zlong * result)
 	    ((zlong) c << 8) | (zlong) d;
 	return TRUE;
 }
+#else
+static bool read_long(FILE * f, zlong * result)
+{
+	int a, b, c, d;
+
+	if ((a = get_c(f)) == EOF)
+		return FALSE;
+	if ((b = get_c(f)) == EOF)
+		return FALSE;
+	if ((c = get_c(f)) == EOF)
+		return FALSE;
+	if ((d = get_c(f)) == EOF)
+		return FALSE;
+
+/*
+ * When optimization is turned on in TurboC, the next to most significant
+ * byte seems to leak into the least significant byte.  Use a mask to
+ * prevent this from happening.
+ */
+	*result = ((zlong) a << 24) | (0x00ff0000UL &((zlong) b << 16)) |
+	    ((zlong) c << 8) | (zlong) d;
+	return TRUE;
+}
+#endif
 
 
 /*
