@@ -36,6 +36,8 @@ BUG FIXES
 
 - Allow fontdir in .sfrotzrc to work relative to user's home directory.
 
+- Fixed problem with DOS Frotz creating non-portable Quetzal files.
+
 
 Summary of changes between Frotz 2.43 and Frotz 2.44:
 =====================================================
