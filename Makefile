@@ -261,7 +261,7 @@ nosound_helper:
 
 dumb: $(DFROTZ_BIN)
 $(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
-	$(CC) $+ -o $@$(EXTENSION)
+	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS)
 	@echo "** Done building Frotz with dumb interface."
 
 sdl: $(SFROTZ_BIN)
