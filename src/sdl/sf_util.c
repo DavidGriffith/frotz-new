@@ -450,38 +450,33 @@ void os_process_arguments(int argc, char *argv[])
 	f_setup.script_name =
 	    malloc((strlen(f_setup.story_name) +
 		    strlen(EXT_SCRIPT)) * sizeof(char) + 1);
-	strncpy(f_setup.script_name, f_setup.story_name,
-		strlen(f_setup.story_name) + 1);
+	memcpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) * sizeof(char));
 	strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
 
 	f_setup.command_name =
 	    malloc((strlen(f_setup.story_name) +
 		    strlen(EXT_COMMAND)) * sizeof(char) + 1);
-	strncpy(f_setup.command_name, f_setup.story_name,
-		strlen(f_setup.story_name) + 1);
+	memcpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) * sizeof(char));
 	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
 	if (!f_setup.restore_mode) {
 		f_setup.save_name =
 		    malloc((strlen(f_setup.story_name) +
 			    strlen(EXT_SAVE)) * sizeof(char) + 1);
-		strncpy(f_setup.save_name, f_setup.story_name,
-			strlen(f_setup.story_name) + 1);
+		memcpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name) * sizeof(char));
 		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-	} else {		/* Set our auto load save as the name_save */
+	} else {	/* Set our auto load save as the name_save */
 		f_setup.save_name =
 		    malloc((strlen(f_setup.tmp_save_name) +
 			    strlen(EXT_SAVE)) * sizeof(char) + 1);
-		strncpy(f_setup.save_name, f_setup.tmp_save_name,
-			strlen(f_setup.tmp_save_name) + 1);
+		memcpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.story_name) * sizeof(char));
 		free(f_setup.tmp_save_name);
 	}
 
 	f_setup.aux_name =
 	    malloc((strlen(f_setup.story_name) +
 		    strlen(EXT_AUX)) * sizeof(char) + 1);
-	strncpy(f_setup.aux_name, f_setup.story_name,
-		strlen(f_setup.story_name) + 1);
+	memcpy(f_setup.aux_name, f_setup.story_name, strlen(f_setup.story_name) * sizeof(char));
 	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
 
 	/* Save the executable file name */
@@ -824,14 +819,17 @@ void sf_InitProfile(const char *fn)
 	FILE *f;
 	int size;
 	char *s, *d;
-	char my_fn[FILENAME_MAX + 1];
+	char *my_fn;
+	char *homedir;
+	int len;
 
 	if (!fn)
 		return;
 
-	strncpy(my_fn, getenv(HOMEDIR), FILENAME_MAX);
-	strncat(my_fn, "/", 2);
-	strncat(my_fn, fn, strlen(fn) + 1);
+	homedir = strdup(getenv(HOMEDIR));
+	len = ((strlen(homedir) + strlen(fn) + 1) * sizeof(char)) + 1;
+	my_fn = malloc(len);
+	snprintf(my_fn, len, "%s/%s", homedir, fn);
 
 	f = fopen(fn, "rb");
 	if (!f) {

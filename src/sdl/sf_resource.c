@@ -158,7 +158,7 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 			lastch = *bp++ = *path++;
 		if (lastch != OS_DIRSEP)
 			*bp++ = OS_DIRSEP;
-		strncpy(bp, name, strlen(name) + 1);
+		memcpy(bp, name, strlen(name) * sizeof(char));
 		if ((fp = fopen(buf, mode)) != NULL) {
 			free(buf);
 			return fp;
@@ -388,6 +388,7 @@ void sf_readsettings(void)
 
 	m_aafonts = sf_GetProfileInt("Fonts", "antialias", 0);
 	m_fontdir = sf_GetProfileString("Fonts", "fontdir", NULL);
+
 	m_fontfiles[0] = sf_GetProfileString("Fonts", "textroman", NULL);
 	m_fontfiles[1] = sf_GetProfileString("Fonts", "textbold", NULL);
 	m_fontfiles[2] = sf_GetProfileString("Fonts", "textitalic", NULL);
@@ -442,24 +443,19 @@ void sf_readsettings(void)
 	if (m_fontdir != NULL && m_fontdir[0] != PATH_SEPARATOR) {
 		char *m_fontdir_temp;
 		char *myhome;
-		char path_separator[2];
 		size_t fontdir_len, homedir_len;
 
-		myhome = getenv(HOMEDIR);
-		path_separator[0] = PATH_SEPARATOR;
-		path_separator[1] = 0;
+		myhome = strdup(getenv(HOMEDIR));
 
 		fontdir_len = strlen(m_fontdir);
 		homedir_len = strlen(myhome);
 
 		m_fontdir_temp = malloc(((fontdir_len + homedir_len) * sizeof(char)) + 3);
-		strncpy(m_fontdir_temp, myhome, homedir_len + 1);
-		strncat(m_fontdir_temp, path_separator, 2);
 
 		if ((m_fontdir[0] == '~') && (m_fontdir[1] == PATH_SEPARATOR))
-			strncat(m_fontdir_temp,m_fontdir + 2, fontdir_len);
+			snprintf(m_fontdir_temp, fontdir_len + homedir_len + 3, "%s%c%s", myhome, PATH_SEPARATOR, m_fontdir+2);
 		else
-			strncat(m_fontdir_temp,m_fontdir, fontdir_len);
+			snprintf(m_fontdir_temp, fontdir_len + homedir_len + 3, "%s%c%s", myhome, PATH_SEPARATOR, m_fontdir);
 
 		free(m_fontdir);
 		m_fontdir = strdup(m_fontdir_temp);

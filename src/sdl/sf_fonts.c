@@ -219,6 +219,8 @@ static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 		int j;
 		int dwid, w, h;
 
+		/* Unclear what the default for dwid should be */
+		dwid = 0;
 		bg = (SF_glyph *) po;
 		hasenc = hasbbx = 0;
 		for (;;) {
@@ -811,7 +813,8 @@ static SFONT *tryloadfont(char *fspec, SFONT * like)
 {
 	char buf[FILENAME_MAX];
 	int err, size = DEFSIZE;
-	char *p, *fn, *at;
+	char *fn = NULL;
+	char *p, *at;
 	int fnlen = -1;
 	SFONT *b = NULL;
 

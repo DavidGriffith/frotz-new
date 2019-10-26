@@ -355,27 +355,26 @@ void os_process_arguments (int argc, char *argv[])
 		*p = '\0';  /* extension removed */
 
 	/* Create nice default file names */
-
 	f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
-	strncpy(f_setup.script_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+	memcpy(f_setup.script_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char));
 	strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
 
 	f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
-	strncpy(f_setup.command_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+	memcpy(f_setup.command_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char));
 	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
 	if (!f_setup.restore_mode) {
 		f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-		strncpy(f_setup.save_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
 		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
 	} else {  /*Set our auto load save as the name_save*/
 		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-		strncpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) + 1);
+		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
 		free(f_setup.tmp_save_name);
 	}
 
 	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
-	strncpy(f_setup.aux_name, f_setup.story_name, strlen(f_setup.story_name) + 1);
+	memcpy(f_setup.aux_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
 	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
 } /* os_process_arguments */
 
@@ -770,7 +769,7 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 			lastch = *bp++ = *path++;
 		if (lastch != DIRSEP)
 			*bp++ = DIRSEP;
-		strncpy(bp, name, strlen(name) + 1);
+		memcpy(bp, name, strlen(bp) * sizeof(char));
 		if ((fp = fopen(buf, mode)) != NULL) {
 			free(buf);
 			return fp;
@@ -928,7 +927,7 @@ static int getconfig(char *configfile)
 
 		else if (strcmp(varname, "zcode_path") == 0) {
 			f_setup.zcode_path = malloc(strlen(value) * sizeof(char) + 1);
-			strncpy(f_setup.zcode_path, value, strlen(value) * sizeof(char));
+			memcpy(f_setup.zcode_path, value, sizeof(char));
 		} /* The big nasty if-else thingy is finished */
 	} /* while */
 	return TRUE;

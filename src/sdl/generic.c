@@ -104,12 +104,12 @@ bb_err_t gen_blorb_init(char *filename)
 		if (f_setup.blorb_file != NULL)
 			mystring = strdup(f_setup.blorb_file);
 		else {
-			mystring = malloc(len2 * sizeof(char) + 1);
-			strncpy(mystring, filename, len1 * sizeof(char));
+			mystring = malloc(max(len1, len2) * sizeof(char) + 1);
+			memcpy(mystring, filename, max(len1, len2) * sizeof(char));
 			p = strrchr(mystring, '.');
 			if (p != NULL)
 				*p = '\0';
-			strncat(mystring, EXT_BLORB, len1 * sizeof(char));
+			strncat(mystring, EXT_BLORB, len1);
 		}
 
 		/* Check if foo.blb is there. */

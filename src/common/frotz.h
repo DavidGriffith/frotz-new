@@ -36,6 +36,21 @@ typedef int bool;
 #define FALSE 0
 #endif
 
+#define max(a,b)		 \
+({				 \
+	__typeof__ (a) _a = (a); \
+	__typeof__ (b) _b = (b); \
+	_a > _b ? _a : _b;	 \
+})
+
+#define min(a,b)		\
+({				\
+    __typeof__ (a) _a = (a);    \
+    __typeof__ (b) _b = (b);    \
+    _a < _b ? _a : _b;		\
+})
+
+
 #ifndef PATH_MAX
 #  ifdef MAXPATHLEN                /* defined in <sys/param.h> some systems */
 #    define PATH_MAX      MAXPATHLEN
