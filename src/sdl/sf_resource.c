@@ -793,6 +793,10 @@ bool sf_IsAdaptive(int picture)
 {
 	bb_result_t result;
 	bool adaptive = FALSE;
+	
+	/* Check to see if there is a blorb map */
+	if (!blorb_map)
+		return adaptive;
 
 	if (bb_load_chunk_by_type
 	    (blorb_map, bb_method_Memory, &result, bb_ID_APal, 0) == bb_err_None) {
