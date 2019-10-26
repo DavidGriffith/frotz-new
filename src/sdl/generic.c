@@ -99,12 +99,11 @@ bb_err_t gen_blorb_init(char *filename)
 		blorb_fp = fp;
 	} else {
 		fclose(fp);
-
+		len1 = strlen(filename) + strlen(EXT_BLORB);
+		len2 = strlen(filename) + strlen(EXT_BLORB3);
 		if (f_setup.blorb_file != NULL)
 			mystring = strdup(f_setup.blorb_file);
 		else {
-			len1 = strlen(filename) + strlen(EXT_BLORB);
-			len2 = strlen(filename) + strlen(EXT_BLORB3);
 			mystring = malloc(len2 * sizeof(char) + 1);
 			strncpy(mystring, filename, len1 * sizeof(char));
 			p = strrchr(mystring, '.');
