@@ -314,15 +314,12 @@ zword restore_quetzal(FILE * svf, FILE * stf)
 					--tmpl;	/* Point at result byte. */
 					/* Sanity check on result variable... */
 #ifdef MSDOS_16BIT
-					if (tmpl > 0xffffL)
-					{
+					if (tmpl > 0xffffL) {
 					    zbyte far *zmp2;
 					    zmp2 = MK_FP(FP_SEG(zmp) + (unsigned)(tmpl >> 16) * 0x1000,
 							 FP_OFF(zmp));
 					    x -= zmp2[tmpl & 0xffff];
-					}
-					else
-					{
+					} else {
 					    x -= zmp[tmpl];
 					}
 					if (x != 0) {
@@ -597,15 +594,12 @@ zword save_quetzal(FILE * svf, FILE * stf)
 		switch (p[0] & 0xF000) {	/* Check type of call. */
 		case 0x0000:	/* Function. */
 #ifdef MSDOS_16BIT
-			if (pc > 0xffffL)
-			{
+			if (pc > 0xffffL) {
 			    zbyte far *zmp2;
 			    zmp2 = MK_FP(FP_SEG(zmp) + (unsigned)(pc >> 16) * 0x1000,
 				         FP_OFF(zmp));
 			    var = zmp2[pc & 0xffff];
-			}
-			else
-			{
+			} else {
 			    var = zmp[pc];
 			}
 #else
