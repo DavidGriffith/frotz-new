@@ -790,6 +790,8 @@ bool sf_IsAdaptive(int picture)
 	bb_result_t result;
 	bool adaptive = FALSE;
 
+	if (blorb_map == NULL) return FALSE;
+
 	if (bb_load_chunk_by_type
 	    (blorb_map, bb_method_Memory, &result, bb_ID_APal, 0) == bb_err_None) {
 		for (int i = 0; i < (int)result.length; i += 4) {
