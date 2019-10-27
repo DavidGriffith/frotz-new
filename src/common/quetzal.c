@@ -124,18 +124,14 @@ static bool read_long(FILE * f, zlong * result)
 	if ((d = get_c(f)) == EOF)
 		return FALSE;
 
-/*
- * When optimization is turned on in TurboC, the next to most significant
- * byte seems to leak into the least significant byte.  Use a mask to
- * prevent this from happening.
- */
-#ifdef MSDOS_16BIT
+	/*
+	 * When optimization is turned on in TurboC, the next to most
+	 * significant byte seems to leak into the least significant byte.
+	 * Use a mask to prevent this from happening.
+	 * There's no harm in letting all ports see this.
+	 */
 	*result = ((zlong) a << 24) | (0x00ff0000UL &((zlong) b << 16)) |
 	    ((zlong) c << 8) | (zlong) d;
-#else
-	*result = ((zlong) a << 24) | ((zlong) b << 16) |
-	    ((zlong) c << 8) | (zlong) d;
-#endif
 
 	return TRUE;
 }
