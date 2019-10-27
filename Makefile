@@ -9,7 +9,7 @@ CC ?= gcc
 WCC=wcc
 
 # Enable compiler warnings. This is an absolute minimum.
-CFLAGS += -Wall -std=c99 -O2 #-Wextra
+CFLAGS += -Wall -std=c99 -O3 #-Wextra
 
 # Define your optimization flags.
 #
