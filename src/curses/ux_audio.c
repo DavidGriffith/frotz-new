@@ -456,7 +456,7 @@ process_aiff(sound_stream_t *self_, float *outl, float *outr, unsigned samples)
 		 * there are more repeats and if so, continue filling the scratch
 		 * buffer, a repeat value of 255 means repeat forever
 		 */
-		if (inf < remaining_samples) {
+		if (inf < (int)remaining_samples) {
 			if (self->repeats<255)
 				self->repeats--;
 			if (self->repeats > 0){
@@ -466,7 +466,7 @@ process_aiff(sound_stream_t *self_, float *outl, float *outr, unsigned samples)
 				 * scratch buffer, and continue with the while loop
 				 */
 				sf_seek(self->sndfile,0, SEEK_SET);
-				if ( inf == remaining_samples)
+				if ( inf == (int)remaining_samples)
 					remaining_samples = samples;
 				else
 					remaining_samples = remaining_samples - inf;

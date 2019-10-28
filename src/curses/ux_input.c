@@ -240,8 +240,11 @@ static int unix_read_char(int extkeys)
 #endif
 
 		/* On many terminals the backspace key returns DEL. */
-		if (c == erasechar()) return ZC_BACKSPACE;;
-
+#ifdef USE_UTF8
+		if (c == (wint_t)erasechar()) return ZC_BACKSPACE;;
+#else
+		if (c == (int)erasechar()) return ZC_BACKSPACE;;
+#endif
 		switch(c) {
 		/* This should not happen because select said we have input. */
 		case ERR:
