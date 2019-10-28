@@ -25,15 +25,6 @@
 f_setup_t f_setup;
 z_header_t z_header;
 
-#define PIC_FILE_HEADER_FLAGS 1
-#define PIC_FILE_HEADER_NUM_IMAGES 4
-#define PIC_FILE_HEADER_ENTRY_SIZE 8
-#define PIC_FILE_HEADER_VERSION 14
-
-#define PIC_HEADER_NUMBER 0
-#define PIC_HEADER_WIDTH 2
-#define PIC_HEADER_HEIGHT 4
-
 bb_map_t *blorb_map;
 
 static struct {
