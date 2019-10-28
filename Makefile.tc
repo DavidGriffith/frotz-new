@@ -1,6 +1,5 @@
 # This file is used to build Frotz for DOS using Borland Turbo C++ 3.00.
 # The resulting executable runs as a 16-bit program.
-# -O or higher optimization causes problems in quetzal.c
 #
 
 CC = tcc
