@@ -198,6 +198,11 @@ ifdef NETBSD
 endif
 endif
 
+ifdef NO_BLORB
+SOUND = none
+else
+BLORB_DIR = $(SRCDIR)/blorb
+BLORB_LIB = $(BLORB_DIR)/blorblib.a
 ifeq ($(SOUND), ao)
   CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
@@ -205,7 +210,7 @@ ifeq ($(SOUND), ao)
 else
   CURSES_SOUND = disabled
 endif
-
+endif
 
 # Source locations
 #
@@ -221,11 +226,6 @@ CURSES_DEFINES = $(CURSES_DIR)/ux_defines.h
 
 DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
-
-ifndef NO_BLORB
-BLORB_DIR = $(SRCDIR)/blorb
-BLORB_LIB = $(BLORB_DIR)/blorblib.a
-endif
 
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
