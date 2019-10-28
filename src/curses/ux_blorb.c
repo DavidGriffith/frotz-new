@@ -173,17 +173,17 @@ static int isblorb(FILE *fp)
 	char mybuf[4];
 
 	if (fp == NULL)
-		return 0;
+		return FALSE;
 
 	fread(mybuf, 1, 4, fp);
 	if (strncmp(mybuf, "FORM", 4))
-		return 0;
+		return FALSE;
 
 	fseek(fp, 4, SEEK_CUR);
 	fread(mybuf, 1, 4, fp);
 
 	if (strncmp(mybuf, "IFRS", 4))
-		return 0;
+		return FALSE;
 
-	return 1;
+	return TRUE;
 }
