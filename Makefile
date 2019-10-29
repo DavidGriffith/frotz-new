@@ -69,7 +69,7 @@ CURSES ?= ncursesw
 
 # Uncomment this to disable Blorb support for dumb and curses interfaces.
 # SDL interface always has Blorb support.
-NO_BLORB = yes
+#NO_BLORB = yes
 
 # These are for enabling local version of certain functions which may be
 # missing or behave differently from what's expected in modern system.
