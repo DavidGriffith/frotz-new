@@ -323,7 +323,7 @@ void os_process_arguments (int argc, char *argv[])
 	} while (c != EOF);
 
 	if (argv[zoptind] == NULL) {
-		printf("FROTZ V%s\tCurses interface.  ", VERSION);
+		printf("FROTZ V%s - Curses interface.  ", VERSION);
 
 #ifndef NO_SOUND
 		printf("Audio output enabled.");

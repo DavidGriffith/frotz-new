@@ -141,7 +141,7 @@ extern char *m_reslist_file;
 extern int option_scrollback_buffer;
 
 static char *info_header =
-    "FROTZ V%s\tSDL graphics and audio interface.\n"
+    "FROTZ V%s - SDL graphics and audio interface.\n"
     "An interpreter for all Infocom and other Z-Machine games.\n\n"
     "Syntax: sfrotz [options] story-file\n";
 

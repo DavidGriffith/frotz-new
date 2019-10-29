@@ -382,7 +382,7 @@ void os_process_arguments(int argc, char *argv[])
 	parse_options(argc, argv);
 
 	if (zoptind != argc - 1) {
-		printf("FROTZ V%s\tMSDOS / PCDOS Edition\n", VERSION);
+		printf("FROTZ V%s - MSDOS / PCDOS Edition\n", VERSION);
 		puts(information);
 		exit(EXIT_SUCCESS);
 	}
