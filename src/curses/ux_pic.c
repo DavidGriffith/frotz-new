@@ -31,6 +31,7 @@
 #endif
 
 #include "ux_frotz.h"
+#include "ux_blorb.h"
 
 #define PIC_FILE_HEADER_FLAGS 1
 #define PIC_FILE_HEADER_NUM_IMAGES 4
@@ -88,17 +89,17 @@ bool unix_init_pictures (void)
 
 	if (blorb_map == NULL) return FALSE;
 
-	bb_count_resources(blorb_map, bb_ID_Pict, &num_pictures, NULL, &maxlegalpic);
+	ux_count_resources(blorb_map, bb_ID_Pict, &num_pictures, NULL, &maxlegalpic);
 	pict_info = malloc((num_pictures + 1) * sizeof(*pict_info));
 	pict_info[0].z_num = 0;
 	pict_info[0].height = num_pictures;
-	pict_info[0].width = bb_get_release_num(blorb_map);
+	pict_info[0].width = ux_get_release_num(blorb_map);
 
 	y_scale = 200;
 	x_scale = 320;
 
   	for (i = 1; i <= num_pictures; i++) {
-		if (bb_load_resource(blorb_map, bb_method_Memory, &res, bb_ID_Pict, i) == bb_err_None) {
+		if (ux_load_resource(blorb_map, bb_method_Memory, &res, bb_ID_Pict, i) == bb_err_None) {
 			pict_info[i].type = blorb_map->chunks[res.chunknum].type;
 			/* Copy and scale. */
 			pict_info[i].z_num = i;

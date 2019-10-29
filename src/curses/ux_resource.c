@@ -36,7 +36,7 @@ int ux_getresource( int num, int ispic, int method, myresource * res)
 	else
 		usage = bb_ID_Snd;
 
-	st = bb_load_resource(blorb_map, method, (bb_result_t *) res, usage, num);
+	st = ux_load_resource(blorb_map, method, (bb_result_t *) res, usage, num);
 
 	if (st == bb_err_None) {
 		res->type = blorb_map->chunks[res->bbres.chunknum].type;
@@ -59,7 +59,7 @@ int ux_freeresource(myresource *res)
 		return 0;
 
 	if (blorb_map != NULL)
-		return bb_unload_chunk(blorb_map, res->bbres.chunknum);
+		return ux_unload_chunk(blorb_map, res->bbres.chunknum);
 
 	return 0;
 } /* ux_freeresource */

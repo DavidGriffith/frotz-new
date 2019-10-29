@@ -12,16 +12,16 @@ TARGET = frotz_curses.a
 
 ARFLAGS = rc
 
-SOUND ?= ao
+SOUND_TYPE ?= ao
 
-ifeq ($(SOUND), ao)
+ifeq ($(SOUND_TYPE), ao)
   CFLAGS += -pthread
-else ifeq ($(SOUND), none)
+else ifeq ($(SOUND_TYPE), none)
 
-else ifndef SOUND
+else ifndef SOUND_TYPE
 
 else
-  $(error Invalid sound choice $(SOUND))
+  $(error Invalid sound choice $(SOUND_TYPE))
 endif
 
 .PHONY: clean

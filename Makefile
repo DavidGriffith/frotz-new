@@ -34,7 +34,7 @@ SYSCONFDIR ?= /etc
 
 # Choose your sound support
 # OPTIONS: ao, none
-SOUND ?= ao
+SOUND_TYPE ?= ao
 
 
 ##########################################################################
@@ -157,7 +157,7 @@ export MANDIR
 export SYSCONFDIR
 export SDL_CFLAGS
 export COLOR
-export SOUND
+export SOUND_TYPE
 export NOSOUND
 export CURSES_SOUND_LDFLAGS
 
@@ -199,11 +199,12 @@ endif
 endif
 
 ifdef NO_BLORB
-SOUND = none
+  SOUND_TYPE = none
+  CURSES_SOUND = disabled
 else
-BLORB_DIR = $(SRCDIR)/blorb
-BLORB_LIB = $(BLORB_DIR)/blorblib.a
-ifeq ($(SOUND), ao)
+  BLORB_DIR = $(SRCDIR)/blorb
+  BLORB_LIB = $(BLORB_DIR)/blorblib.a
+ifeq ($(SOUND_TYPE), ao)
   CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
 	-lsndfile -lvorbisfile -lmodplug -lsamplerate
   CURSES_SOUND = enabled
@@ -211,6 +212,7 @@ else
   CURSES_SOUND = disabled
 endif
 endif
+
 
 # Source locations
 #
@@ -245,7 +247,6 @@ DOS_BIN = frotz.exe
 
 # Build recipes
 #
-
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
 $(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
@@ -378,14 +379,14 @@ endif
 	@echo "#define CURSES_DEFINES_H" >> $@
 	@echo "#define $(CURSES_DEFINE)" >> $@
 	@echo "#define CONFIG_DIR \"$(SYSCONFDIR)\"" >> $@
-	@echo "#define SOUND \"$(SOUND)\"" >> $@
+	@echo "#define SOUND_TYPE \"$(SOUND_TYPE)\"" >> $@
 	@echo "#define SAMPLERATE $(SAMPLERATE)" >> $@
 	@echo "#define BUFFSIZE $(BUFFSIZE)" >> $@
 	@echo "#define DEFAULT_CONVERTER $(DEFAULT_CONVERTER)" >> $@
-ifeq ($(SOUND), none)
+ifeq ($(SOUND_TYPE), none)
 	@echo "#define NO_SOUND" >> $@
 endif
-ifndef SOUND
+ifndef SOUND_TYPE
 	@echo "#define NO_SOUND" >> $@
 endif
 ifdef COLOR
