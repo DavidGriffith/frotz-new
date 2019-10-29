@@ -44,8 +44,6 @@
 
 bb_map_t *blorb_map;
 
-static void safe_mvaddch(int, int, int);
-
 static struct {
 	int z_num;
 	int width;
@@ -56,6 +54,10 @@ static struct {
 } *pict_info;
 static int num_pictures = 0;
 
+
+#ifndef NO_BLORB
+
+static void safe_mvaddch(int, int, int);
 
 /*
  * Do a rounding division, rounding to even if fraction part is 1/2.
@@ -71,10 +73,12 @@ static int round_div(int x, int y)
 		quotient++;
 	return quotient;
 } /* round_div */
+#endif
 
 
 bool unix_init_pictures (void)
 {
+#ifndef NO_BLORB
 	int maxlegalpic = 0;
 	int i, x_scale, y_scale;
 	bool success = FALSE;
@@ -89,17 +93,17 @@ bool unix_init_pictures (void)
 
 	if (blorb_map == NULL) return FALSE;
 
-	ux_count_resources(blorb_map, bb_ID_Pict, &num_pictures, NULL, &maxlegalpic);
+	bb_count_resources(blorb_map, bb_ID_Pict, &num_pictures, NULL, &maxlegalpic);
 	pict_info = malloc((num_pictures + 1) * sizeof(*pict_info));
 	pict_info[0].z_num = 0;
 	pict_info[0].height = num_pictures;
-	pict_info[0].width = ux_get_release_num(blorb_map);
+	pict_info[0].width = bb_get_release_num(blorb_map);
 
 	y_scale = 200;
 	x_scale = 320;
 
   	for (i = 1; i <= num_pictures; i++) {
-		if (ux_load_resource(blorb_map, bb_method_Memory, &res, bb_ID_Pict, i) == bb_err_None) {
+		if (bb_load_resource(blorb_map, bb_method_Memory, &res, bb_ID_Pict, i) == bb_err_None) {
 			pict_info[i].type = blorb_map->chunks[res.chunknum].type;
 			/* Copy and scale. */
 			pict_info[i].z_num = i;
@@ -169,6 +173,9 @@ bool unix_init_pictures (void)
 	else z_header.flags &= ~GRAPHICS_FLAG;
 
 	return success;
+#else
+	return FALSE;
+#endif
 } /* unix_init_pictures */
 
 
@@ -213,6 +220,7 @@ int os_picture_data(int num, int *height, int *width)
 } /* os_picture_data */
 
 
+#ifndef NO_BLORB
 /*
  * Do a mvaddch if the coordinates aren't too large.
  *
@@ -238,6 +246,7 @@ static void safe_scrnset(int y, int x, int ch, int n)
 			addch(ch);
 	}
 } /* safe_scrnset */
+#endif
 
 
 /*
@@ -252,6 +261,7 @@ static void safe_scrnset(int y, int x, int ch, int n)
  */
 void os_draw_picture(int num, int row, int col)
 {
+#ifndef NO_BLORB
 	int width, height, r, c;
 	int saved_x, saved_y;
 	static int plus, ltee, rtee, ttee, btee, hline, vline, ckboard;
@@ -327,6 +337,7 @@ void os_draw_picture(int num, int row, int col)
 	}
 
 	move(saved_y, saved_x);
+#endif
 } /* os_draw_picture */
 
 

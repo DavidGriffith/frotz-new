@@ -346,8 +346,10 @@ void os_process_arguments (int argc, char *argv[])
 	f_setup.story_file = strdup(argv[zoptind]);
 	f_setup.story_name = strdup(basename(argv[zoptind]));
 
+#ifndef NO_BLORB
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
+#endif
 
 	/* Now strip off the extension */
 	p = strrchr(f_setup.story_name, '.');
@@ -668,8 +670,9 @@ FILE *os_path_open(const char *name, const char *mode)
  */
 FILE *os_load_story(void)
 {
-	FILE *fp;
 
+	FILE *fp;
+#ifndef NO_BLORB
 	switch (ux_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
 		/* printf("No blorb file found.\n\n"); */
@@ -692,6 +695,10 @@ FILE *os_load_story(void)
 		fseek(fp, blorb_res.data.startpos, SEEK_SET);
 
 	return fp;
+#else
+	fp = os_path_open(f_setup.story_file, "rb");
+	return fp;
+#endif
 } /* os_load_story */
 
 
@@ -704,6 +711,7 @@ FILE *os_load_story(void)
  */
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
+#ifndef NO_BLORB
 	/* Is this a Blorb file containing Zcode? */
 	if (f_setup.exec_in_blorb) {
 		switch (whence) {
@@ -721,6 +729,9 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
 		}
 	} else
 		return fseek(fp, offset, whence);
+#else
+	return fseek(fp, offset, whence);
+#endif
 } /* os_storyfile_seek */
 
 
@@ -733,11 +744,15 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
  */
 int os_storyfile_tell(FILE * fp)
 {
+#ifdef NO_BLORB
 	/* Is this a Blorb file containing Zcode? */
 	if (f_setup.exec_in_blorb)
 		return ftell(fp) - blorb_res.data.startpos;
 	else
 		return ftell(fp);
+#else
+	return ftell(fp);
+#endif
 } /* os_storyfile_tell */
 
 

@@ -46,10 +46,13 @@ FILE *blorb_fp;
 bb_result_t blorb_res;
 bb_map_t *blorb_map;
 
-static int isblorb(FILE *);
 
 #define UnsignedToFloat(u) (((double)((long)(u - 2147483647L - 1))) + 2147483648.0)
 
+
+#ifndef NO_BLORB
+
+static int isblorb(FILE *);
 
 /*
  * ux_blorb_init
@@ -122,7 +125,7 @@ bb_err_t ux_blorb_init(char *filename)
 	 * This will fail if the file is not a valid Blorb file.
 	 * From this map, we can now pick out any resource we need.
 	 */
-	blorb_err = ux_create_map(blorb_fp, &blorb_map);
+	blorb_err = bb_create_map(blorb_fp, &blorb_map);
 	if (blorb_err != bb_err_None)
 		return bb_err_Format;
 
@@ -130,13 +133,14 @@ bb_err_t ux_blorb_init(char *filename)
 	 * location so os_load_story() can find it.
 	 */
 	if (f_setup.exec_in_blorb) {
-		blorb_err = ux_load_chunk_by_type(blorb_map, bb_method_FilePos,
+		blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
 			&blorb_res, bb_ID_ZCOD, 0);
 		f_setup.exec_in_blorb = 1;
 	}
 
 	return blorb_err;
 }
+#endif
 
 
 /*
@@ -166,6 +170,7 @@ void ux_blorb_stop(void)
  **********************************************
  */
 
+#ifndef NO_BLORB
 /*
  * isblorb
  *
@@ -191,58 +196,4 @@ static int isblorb(FILE *fp)
 
 	return TRUE;
 }
-
-uint16 ux_get_release_num(bb_map_t *map)
-{
-#ifndef NO_BLORB
-	return bb_get_release_num(map);
-#else
-	return 0;
 #endif
-}
-
-bb_err_t ux_load_resource(bb_map_t *map, int method,
-    bb_result_t *res, uint32 usage, int resnum)
-{
-#ifndef NO_BLORB
-	return bb_load_resource(map, method, res, usage, resnum);
-#else
-	return 0;
-#endif
-}
-
-bb_err_t ux_unload_chunk(bb_map_t *map, int chunknum)
-{
-#ifndef NO_BLORB
-	return bb_unload_chunk(map, chunknum);
-#else
-	return 0;
-#endif
-}
-
-bb_err_t ux_count_resources(bb_map_t *map, uint32 usage, int *num, int *min, int *max)
-{
-#ifndef NO_BLORB
-	return bb_count_resources(map, usage, num, min, max);
-#else
-	return 0;
-#endif
-}
-
-bb_err_t ux_load_chunk_by_type(bb_map_t *map, int method, bb_result_t *res, uint32 chunktype, int count)
-{
-#ifndef NO_BLORB
-	return bb_load_chunk_by_type(map, method, res, chunktype, count);
-#else
-	return 0;
-#endif
-}
-
-bb_err_t ux_create_map(FILE *file, bb_map_t **newmap)
-{
-#ifndef NO_BLORB
-	return bb_create_map(file, newmap);
-#else
-	return 0;
-#endif
-}

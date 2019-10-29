@@ -38,10 +38,3 @@ extern FILE *blorb_fp;
 
 bb_err_t ux_blorb_init(char *);
 void ux_blorb_stop(void);
-
-uint16 ux_get_release_num(bb_map_t *map);
-bb_err_t ux_count_resources(bb_map_t *map, uint32 usage, int *num, int *min, int *max);
-bb_err_t ux_load_resource(bb_map_t *, int, bb_result_t *, uint32, int);
-bb_err_t ux_unload_chunk(bb_map_t *map, int chunknum);
-bb_err_t ux_load_chunk_by_type(bb_map_t *, int, bb_result_t *, uint32, int);
-bb_err_t ux_create_map(FILE *file, bb_map_t **newmap);
