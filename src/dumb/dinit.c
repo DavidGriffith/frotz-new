@@ -262,9 +262,11 @@ FILE *os_load_story(void)
 {
 	FILE *fp;
 
+	printf("Loading %s.\n", f_setup.story_file);
+
 	switch (dumb_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
-/*		printf("No blorb file found.\n\n"); */
+		printf("Not a blorb file.\n\n");
 		break;
 	case bb_err_Format:
 		printf("Blorb file loaded, but unable to build map.\n\n");
@@ -273,7 +275,7 @@ FILE *os_load_story(void)
 		printf("Blorb file loaded, but lacks executable chunk.\n\n");
 		break;
 	case bb_err_None:
-/*		printf("No blorb errors.\n\n"); */
+		printf("Blorb file loaded successfully.\n\n");
 		break;
 	}
 
@@ -289,23 +291,41 @@ FILE *os_load_story(void)
 
 /*
  * Seek into a storyfile, either a standalone file or the
- * ZCODE chunk of a blorb file (dumb does not support blorb
- * so this is just a wrapper for fseek)
+ * ZCODE chunk of a blorb file.
  */
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
-	return fseek(fp, offset, whence);
+	/* Is this a Blorb file containing Zcode? */
+	if (f_setup.exec_in_blorb) {
+		switch (whence) {
+		case SEEK_END:
+			return fseek(fp, blorb_res.data.startpos + blorb_res.length + offset, SEEK_SET);
+			break;
+		case SEEK_CUR:
+			return fseek(fp, offset, SEEK_CUR);
+			break;
+		case SEEK_SET:
+			/* SEEK_SET falls through to default */
+		default:
+			return fseek(fp, blorb_res.data.startpos + offset, SEEK_SET);
+			break;
+		}
+	} else
+		return fseek(fp, offset, whence);
 }
 
 
 /*
  * Tell the position in a storyfile, either a standalone file
- * or the ZCODE chunk of a blorb file (dumb does not support
- * blorb so this is just a wrapper for fseek)
+ * or the ZCODE chunk of a blorb file.
  */
 int os_storyfile_tell(FILE * fp)
 {
-	return ftell(fp);
+	/* Is this a Blorb file containing Zcode? */
+	if (f_setup.exec_in_blorb)
+		return ftell(fp) - blorb_res.data.startpos;
+	else
+		return ftell(fp);
 }
 
 
