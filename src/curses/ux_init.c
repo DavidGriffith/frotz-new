@@ -670,9 +670,9 @@ FILE *os_path_open(const char *name, const char *mode)
  */
 FILE *os_load_story(void)
 {
-
-	FILE *fp;
 #ifndef NO_BLORB
+	FILE *fp;
+
 	switch (ux_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
 		/* printf("No blorb file found.\n\n"); */
@@ -696,8 +696,7 @@ FILE *os_load_story(void)
 
 	return fp;
 #else
-	fp = os_path_open(f_setup.story_file, "rb");
-	return fp;
+	return os_path_open(f_setup.story_file, "rb");
 #endif
 } /* os_load_story */
 

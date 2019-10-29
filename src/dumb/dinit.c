@@ -267,9 +267,9 @@ void os_fatal (const char *s, ...)
 
 FILE *os_load_story(void)
 {
+#ifndef NO_BLORB
 	FILE *fp;
 
-#ifndef NO_BLORB
 	switch (dumb_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
 /*		printf("No blorb file found.\n\n"); */
@@ -293,8 +293,7 @@ FILE *os_load_story(void)
 
 	return fp;
 #else
-	fp = fopen(f_setup.story_file, "rb");
-	return fp;
+	return fopen(f_setup.story_file, "rb");
 #endif
 }
 
