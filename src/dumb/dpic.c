@@ -25,7 +25,6 @@
 f_setup_t f_setup;
 z_header_t z_header;
 
-bb_map_t *blorb_map;
 
 static struct {
 	int z_num;
@@ -37,6 +36,9 @@ static struct {
 } *pict_info;
 static int num_pictures = 0;
 
+#ifndef NO_BLORB
+
+bb_map_t *blorb_map;
 
 static int round_div(int x, int y)
 {
@@ -47,10 +49,12 @@ static int round_div(int x, int y)
 		quotient++;
 	return quotient;
 }
+#endif
 
 
 bool dumb_init_pictures (void)
 {
+#ifndef NO_BLORB
 	int maxlegalpic = 0;
 	int i, x_scale, y_scale;
 	bool success = FALSE;
@@ -144,6 +148,9 @@ bool dumb_init_pictures (void)
 	else z_header.flags &= ~GRAPHICS_FLAG;
 
 	return success;
+#else
+	return FALSE;
+#endif
 }
 
 
@@ -181,6 +188,7 @@ bool os_picture_data(int num, int *height, int *width)
 
 void os_draw_picture (int num, int row, int col)
 {
+#ifndef NO_BLORB
 	int width, height, r, c;
 	if (!os_picture_data(num, &height, &width) || !width || !height)
 		return;
@@ -209,6 +217,7 @@ void os_draw_picture (int num, int row, int col)
 		for (c = col + width - 2; c > col; c--, (num /= 10))
 			dumb_set_picture_cell(row + height - 2, c, num ? (num % 10 + '0') : ':');
 	}
+#endif
 }
 
 

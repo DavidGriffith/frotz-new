@@ -67,9 +67,8 @@ COLOR ?= yes
 #CURSES ?= ncurses
 CURSES ?= ncursesw
 
-
 # Uncomment this if you want to disable the compilation of Blorb support.
-#NO_BLORB = yes
+NO_BLORB = yes
 
 # These are for enabling local version of certain functions which may be
 # missing or behave differently from what's expected in modern system.

@@ -5,6 +5,15 @@
  *
  */
 
+#include <limits.h>
+#if UINT_MAX == (1UL<<32)-1UL
+typedef unsigned int  uint32;
+#else
+typedef unsigned long  uint32;
+#endif
+
+#ifndef NO_BLORB
+
 #include "../blorb/blorb.h"
 #include "../blorb/blorblow.h"
 
@@ -41,3 +50,5 @@ extern bb_result_t	blorb_res;
 
 bb_err_t dumb_blorb_init(char *);
 void dumb_blorb_stop(void);
+
+#endif

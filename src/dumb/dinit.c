@@ -161,6 +161,13 @@ void os_process_arguments(int argc, char *argv[])
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
+	printf("Loading %s.\n", f_setup.story_file);
+
+#ifndef NO_BLORB
+	if (f_setup.blorb_file != NULL)
+		printf("Also loading %s.\n", f_setup.blorb_file);
+#endif
+
 	/* Now strip off the extension */
 	p = strrchr(f_setup.story_name, '.');
 	if ( p != NULL )
@@ -262,11 +269,10 @@ FILE *os_load_story(void)
 {
 	FILE *fp;
 
-	printf("Loading %s.\n", f_setup.story_file);
-
+#ifndef NO_BLORB
 	switch (dumb_blorb_init(f_setup.story_file)) {
 	case bb_err_NoBlorb:
-		printf("Not a blorb file.\n\n");
+/*		printf("No blorb file found.\n\n"); */
 		break;
 	case bb_err_Format:
 		printf("Blorb file loaded, but unable to build map.\n\n");
@@ -275,7 +281,7 @@ FILE *os_load_story(void)
 		printf("Blorb file loaded, but lacks executable chunk.\n\n");
 		break;
 	case bb_err_None:
-		printf("Blorb file loaded successfully.\n\n");
+/*		printf("No blorb errors.\n\n"); */
 		break;
 	}
 
@@ -286,6 +292,10 @@ FILE *os_load_story(void)
 		fseek(fp, blorb_res.data.startpos, SEEK_SET);
 
 	return fp;
+#else
+	fp = fopen(f_setup.story_file, "rb");
+	return fp;
+#endif
 }
 
 
@@ -295,6 +305,7 @@ FILE *os_load_story(void)
  */
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
+#ifndef NO_BLORB
 	/* Is this a Blorb file containing Zcode? */
 	if (f_setup.exec_in_blorb) {
 		switch (whence) {
@@ -312,6 +323,9 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
 		}
 	} else
 		return fseek(fp, offset, whence);
+#else
+	return fseek(fp, offset, whence);
+#endif
 }
 
 
@@ -321,11 +335,15 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
  */
 int os_storyfile_tell(FILE * fp)
 {
+#ifndef NO_BLORB
 	/* Is this a Blorb file containing Zcode? */
 	if (f_setup.exec_in_blorb)
 		return ftell(fp) - blorb_res.data.startpos;
 	else
 		return ftell(fp);
+#else
+	return ftell(fp);
+#endif
 }
 
 
