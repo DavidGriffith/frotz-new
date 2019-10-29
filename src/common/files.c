@@ -154,8 +154,10 @@ void script_char(zchar c)
 	fputc(c, sfp);
 	script_width++;
 #else
-    /* Encode as UTF-8 */
-	if (c > 0x7ff) {
+
+
+#ifdef USE_UTF8
+	if (c > 0x7ff) {	/* Encode as UTF-8 */
 		fputc(0xe0 | ((c >> 12) & 0xf), sfp);
 		fputc(0x80 | ((c >> 6) & 0x3f), sfp);
 		fputc(0x80 | (c & 0x3f), sfp);
@@ -164,6 +166,14 @@ void script_char(zchar c)
 		fputc(0x80 | (c & 0x3f), sfp);
 	} else
 		fputc(c, sfp);
+#else
+	if (c > 0x7f) {
+		fputc(0xc0 | ((c >> 6) & 0x1f), sfp);
+		fputc(0x80 | (c & 0x3f), sfp);
+	} else
+		fputc(c, sfp);
+#endif
+
 
 	script_width++;
 #endif
