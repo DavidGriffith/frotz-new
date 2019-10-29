@@ -32,9 +32,6 @@
 #include <math.h>
 
 
-/* Don't build any of this if we don't want Blorb support. */
-#ifndef NO_BLORB
-
 f_setup_t f_setup;
 
 FILE *blorb_fp;
@@ -155,5 +152,3 @@ static int isblorb(FILE *fp)
 
 	return 1;
 }
-
-#endif /* NO_BLORB */
