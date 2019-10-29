@@ -67,7 +67,8 @@ COLOR ?= yes
 #CURSES ?= ncurses
 CURSES ?= ncursesw
 
-# Uncomment this if you want to disable the compilation of Blorb support.
+# Uncomment this to disable Blorb support for dumb and curses interfaces.
+# SDL interface always has Blorb support.
 NO_BLORB = yes
 
 # These are for enabling local version of certain functions which may be
@@ -197,11 +198,12 @@ ifdef NETBSD
 endif
 endif
 
+BLORB_DIR = $(SRCDIR)/blorb
+
 ifdef NO_BLORB
   SOUND_TYPE = none
   CURSES_SOUND = disabled
 else
-  BLORB_DIR = $(SRCDIR)/blorb
   BLORB_LIB = $(BLORB_DIR)/blorblib.a
 ifeq ($(SOUND_TYPE), ao)
   CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
@@ -211,6 +213,8 @@ else
   CURSES_SOUND = disabled
 endif
 endif
+
+BLORB_LIB_SDL = $(BLORB_DIR)/blorblib.a
 
 
 # Source locations
@@ -265,7 +269,7 @@ $(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
 	@echo "** Done building Frotz with dumb interface."
 
 sdl: $(SFROTZ_BIN)
-$(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
+$(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB_SDL) $(COMMON_LIB)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
@@ -284,6 +288,7 @@ common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
 sdl_lib:	$(SDL_LIB)
 dumb_lib:	$(DUMB_LIB)
+blorb_lib_sdl:	$(BLORB_LIB_SDL)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
 
@@ -300,6 +305,9 @@ $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(DUMB_DIR)
 
 $(BLORB_LIB): $(COMMON_DEFINES)
+	$(MAKE) -C $(BLORB_DIR)
+
+$(BLORB_LIB_SDL): $(COMMON_DEFINES)
 	$(MAKE) -C $(BLORB_DIR)
 
 #$(SUBDIRS):
