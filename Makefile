@@ -161,7 +161,7 @@ export SOUND_TYPE
 export NO_SOUND
 
 NAME = frotz
-VERSION = 2.50b2
+VERSION = 2.50b3
 
 
 # If we're working from git, we have access to proper variables. If

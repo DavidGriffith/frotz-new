@@ -13,7 +13,7 @@ RENAME = ren
 BINNAME = frotz.exe
 LIBRARY = frotz.lib
 
-VERSION = "2.50b2"
+VERSION = "2.50b3"
 
 VER = -DVERSION=$(VERSION)
 

@@ -1,4 +1,4 @@
-# FROTZ V2.50b2
+# FROTZ V2.50b3
 An interpreter for all Infocom and other Z-machine games.
 Complies with standard 1.0 of Graham Nelson's specification.
 
@@ -23,6 +23,8 @@ For information on what Interactive Fiction is and how to play it, see the
 file "HOW_TO_PLAY".
 
 For installation information, see the file "INSTALL".
+
+For information on building for DOS, see the file "DOSBUILD.txt".
 
 For update history, see the file "Changelog".
 
