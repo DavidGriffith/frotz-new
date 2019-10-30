@@ -158,8 +158,7 @@ export SYSCONFDIR
 export SDL_CFLAGS
 export COLOR
 export SOUND_TYPE
-export NOSOUND
-export CURSES_SOUND_LDFLAGS
+export NO_SOUND
 
 NAME = frotz
 VERSION = 2.50b2
@@ -198,24 +197,6 @@ ifdef NETBSD
 endif
 endif
 
-BLORB_DIR = $(SRCDIR)/blorb
-
-ifdef NO_BLORB
-  SOUND_TYPE = none
-  CURSES_SOUND = disabled
-else
-  BLORB_LIB = $(BLORB_DIR)/blorblib.a
-ifeq ($(SOUND_TYPE), ao)
-  CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
-	-lsndfile -lvorbisfile -lmodplug -lsamplerate
-  CURSES_SOUND = enabled
-else
-  CURSES_SOUND = disabled
-endif
-endif
-
-BLORB_LIB_SDL = $(BLORB_DIR)/blorblib.a
-
 
 # Source locations
 #
@@ -224,6 +205,9 @@ COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
 COMMON_DEFINES = $(COMMON_DIR)/defs.h
 HASH = $(COMMON_DIR)/git_hash.h
+
+BLORB_DIR = $(SRCDIR)/blorb
+BLORB_LIB = $(BLORB_DIR)/blorblib.a
 
 CURSES_DIR = $(SRCDIR)/curses
 CURSES_LIB = $(CURSES_DIR)/frotz_curses.a
@@ -247,29 +231,54 @@ DFROTZ_BIN = dfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
 
+FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
+DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
+SFROTZ_LIBS = $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
+
+
+ifdef NO_BLORB
+  SOUND_TYPE = none
+  CURSES_SOUND = disabled
+  BLORB_SUPPORT = disabled
+  FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(COMMON_LIB)
+  DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(COMMON_LIB)
+else
+  BLORB_SUPPORT = enabled
+endif
+
+ifeq ($(SOUND_TYPE), ao)
+  CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
+	-lsndfile -lvorbisfile -lmodplug -lsamplerate
+  CURSES_SOUND = enabled
+else
+  CURSES_SOUND = disabled
+endif
+
 
 # Build recipes
 #
 curses: $(FROTZ_BIN)
 ncurses: $(FROTZ_BIN)
-$(FROTZ_BIN): $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
+$(FROTZ_BIN): $(FROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS)
 	@echo "** Done building Frotz with curses interface"
-	@echo "** Audio support $(CURSES_SOUND)"
+	@echo "** Audio support $(CURSES_SOUND) (type $(SOUND_TYPE))"
+	@echo "** Blorb support $(BLORB_SUPPORT)"
 
 nosound: nosound_helper $(FROTZ_BIN) | nosound_helper
 nosound_helper:
-	$(eval NOSOUND= -DNO_SOUND)
+	$(eval NO_SOUND= -DNO_SOUND)
 	$(eval CURSES_SOUND_LDFLAGS= )
 	$(eval CURSES_SOUND= disabled)
 
 dumb: $(DFROTZ_BIN)
-$(DFROTZ_BIN): $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
+$(DFROTZ_BIN): $(DFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS)
 	@echo "** Done building Frotz with dumb interface."
+	@echo "** Blorb support $(BLORB_SUPPORT)"
 
 sdl: $(SFROTZ_BIN)
-$(SFROTZ_BIN): $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB_SDL) $(COMMON_LIB)
+$(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
@@ -288,7 +297,6 @@ common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
 sdl_lib:	$(SDL_LIB)
 dumb_lib:	$(DUMB_LIB)
-blorb_lib_sdl:	$(BLORB_LIB_SDL)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
 
@@ -306,12 +314,6 @@ $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 
 $(BLORB_LIB): $(COMMON_DEFINES)
 	$(MAKE) -C $(BLORB_DIR)
-
-$(BLORB_LIB_SDL): $(COMMON_DEFINES)
-	$(MAKE) -C $(BLORB_DIR)
-
-#$(SUBDIRS):
-#	$(MAKE) -C $@
 
 $(SUB_CLEAN):
 	-$(MAKE) -C $(@:%-clean=%) clean
