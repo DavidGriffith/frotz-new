@@ -283,16 +283,22 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 dos: $(DOS_BIN)
 $(DOS_BIN):
 	@echo
-	@echo "  ** Cannot cross-compile for DOS yet"
-	@echo "  ** To build for DOS, take this zip file and use Turbo C"
+	@echo "  ** Cannot cross-compile for DOS yet."
+	@echo "  ** Copy this zip file, $(NAME)src.zip, into a DOS machine and use Turbo C."
+	@echo "  ** A virtualized DOS machine will do.  This zip file will fit on a single"
+	@echo "  ** double-sided double-density 5.25-inch floppy disk.  Read the file"
+	@echo "  ** DOSBUILD.txt for more information."
 	@echo
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
-	git archive --format=zip --prefix $(NAME)src/ HEAD -o $(NAME)src.zip
+	@git archive --format=zip --prefix $(NAME)src/ HEAD -o $(NAME)src.zip
+	@zip -d $(NAME)src.zip $(NAME)src/src/curses/* \
+		$(NAME)src/src/dumb/* $(NAME)src/src/blorb/* \
+		$(NAME)src/src/sdl/* $(NAME)src/src/misc/* \
+		$(NAME)src/doc/*.6 $(NAME)src/doc/frotz.conf* \
+		$(NAME)src/doc/Xresources  > /dev/null
 else
         @echo "Not in a git repository or git command not found.  Cannot make a tarball."
 endif
-	@echo
-
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
@@ -468,7 +474,7 @@ frotz-$(VERSION).tar.gz:
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	git archive --format=tgz --prefix $(NAME)-$(VERSION)/ HEAD -o $(NAME)-$(VERSION).tar.gz
 else
-	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
+	@echo "Not in a git repository or git command not found.  Cannot make a zip file."
 endif
 
 clean: $(SUB_CLEAN)
@@ -478,9 +484,9 @@ clean: $(SUB_CLEAN)
 		$(HASH)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
 
-
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
+	rm -rf $(NAME)src
 	rm -f $(NAME)*.tar.gz $(NAME)src.zip
 
 help:
@@ -490,6 +496,7 @@ help:
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
 	@echo "    all: build curses, dumb, and SDL versions"
+	@echo "    dos: Make a zip file containing DOS Frotz source code"
 	@echo "    install"
 	@echo "    uninstall"
 	@echo "    install_dumb"
