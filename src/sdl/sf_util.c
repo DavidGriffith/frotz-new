@@ -366,7 +366,7 @@ static void print_version(void)
 	    ("  It complies with standard 1.0 of Graham Nelson's specification.\n");
 	printf("  It was ported to Unix by Galen Hazelwood.\n");
 	printf
-	    ("  The core and SDL port are currently maintained by David Griffith.\n");
+	    ("  The core and SDL port are maintained by David Griffith.\n");
 	printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
 	os_quit(EXIT_SUCCESS);
 }

@@ -1148,7 +1148,7 @@ static void print_version(void)
 	printf("  Frotz was originally written by Stefan Jokisch.\n");
 	printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
 	printf("  It was ported to Unix by Galen Hazelwood.\n");
-	printf("  The core and Unix port are currently maintained by David Griffith.\n");
+	printf("  The core and Unix port are maintained by David Griffith.\n");
 	printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
 	return;
 } /* print_version */
