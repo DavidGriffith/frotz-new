@@ -62,17 +62,13 @@ all:	hash defs frotz
 #
 hash: $(HASH)
 $(HASH):
-	@echo ******************************************************************************
-	@echo ******************************************************************************
-	@echo **  To build for DOS, you must first do "make hash" in Unix.
-	@echo **  That's why you may see a complaint about being unable to open 'git_hash.h'.
-	@echo **  If you're building from zip archive rather than a git repository, then
-	@echo **  git_hash.h will already be prepared.
-	@echo **  Eventually there will be an option to cross-compile using Watcom C from a
-	@echo **  Unix build environment.
-	@echo ******************************************************************************
-	@echo ******************************************************************************
-	@echo.
+	@echo "** Generating $@"
+	@echo "#ifndef GIT_HASH_H" > $@
+	@echo "#define GIT_HASH_H" >> $@
+	@echo "#define GIT_HASH $Format:%H$" >> $@
+	@echo "#define GIT_HASH_SHORT  $Format:%h$"" >> $@
+	@echo "#define GIT_DATE $Format:%ci$" >> $@
+	@echo "#endif /* GIT_HASH_H */" >> $@
 
 # Compile-time options
 defs: $(HASH) $(DEFS)
@@ -93,6 +89,7 @@ clean:
 	$(RM) $(CORE_DIR)\*.o
 	$(RM) $(DOS_DIR)\*.o
 	$(RM) $(DEFS)
+	$(RM) $(HASH)
 	$(RM) *.lib
 	$(RM) *.exe
 	$(RM) *.bak
