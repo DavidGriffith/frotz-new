@@ -284,7 +284,13 @@ dos: $(DOS_BIN)
 $(DOS_BIN):
 	@echo
 	@echo "  ** Cannot cross-compile for DOS yet"
-	@echo "  ** To build for DOS, take what's here and use Turbo C in DOSBOX"
+	@echo "  ** To build for DOS, take this zip file and use Turbo C"
+	@echo
+ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
+	git archive --format=zip --prefix $(NAME)src/ HEAD -o $(NAME)src.zip
+else
+        @echo "Not in a git repository or git command not found.  Cannot make a tarball."
+endif
 	@echo
 
 
@@ -475,7 +481,7 @@ clean: $(SUB_CLEAN)
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
-	rm -f $(NAME)*.tar.gz
+	rm -f $(NAME)*.tar.gz $(NAME)src.zip
 
 help:
 	@echo "Targets:"
