@@ -18,7 +18,6 @@ VERSION = "2.50b2"
 VER = -DVERSION=$(VERSION)
 
 DEFS = src\common\defs.h
-HASH = src\common\git_hash.h
 
 DOS_DIR = src\dos
 DOS_OBJECTS =   $(DOS_DIR)\bcinit.o \
@@ -54,24 +53,10 @@ CORE_OBJECTS =  $(CORE_DIR)\buffer.o \
 
 .SUFFIXES: .c .o .h
 
-all:	hash defs frotz
-
-# I can't figure out how Turbo Make does conditional tests on files, so
-# for now this will have to do to alert the builder of the need to first
-# do "make hash" within a Unix build environment.
-#
-hash: $(HASH)
-$(HASH):
-	@echo "** Generating $@"
-	@echo "#ifndef GIT_HASH_H" > $@
-	@echo "#define GIT_HASH_H" >> $@
-	@echo "#define GIT_HASH $Format:%H$" >> $@
-	@echo "#define GIT_HASH_SHORT  $Format:%h$"" >> $@
-	@echo "#define GIT_DATE $Format:%ci$" >> $@
-	@echo "#endif /* GIT_HASH_H */" >> $@
+all:	defs frotz
 
 # Compile-time options
-defs: $(HASH) $(DEFS)
+defs: $(DEFS)
 $(DEFS):
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
@@ -89,7 +74,6 @@ clean:
 	$(RM) $(CORE_DIR)\*.o
 	$(RM) $(DOS_DIR)\*.o
 	$(RM) $(DEFS)
-	$(RM) $(HASH)
 	$(RM) *.lib
 	$(RM) *.exe
 	$(RM) *.bak

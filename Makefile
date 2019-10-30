@@ -281,10 +281,9 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	@echo "** Done building Frotz with SDL interface."
 
 dos: $(DOS_BIN)
-$(DOS_BIN): $(HASH)
+$(DOS_BIN):
 	@echo
 	@echo "  ** Cannot cross-compile for DOS yet"
-	@echo "  ** For now, I'm just making $(HASH)"
 	@echo "  ** To build for DOS, take what's here and use Turbo C in DOSBOX"
 	@echo
 

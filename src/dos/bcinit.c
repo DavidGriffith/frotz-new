@@ -31,6 +31,8 @@
 #include "bcblorb.h"
 #endif
 
+#include "bchash.h"
+
 extern f_setup_t f_setup;
 extern z_header_t z_header;
 

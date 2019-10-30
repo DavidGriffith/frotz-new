@@ -16,10 +16,9 @@
 #endif
 #endif
 
-/* This will be addressed later. */
-//#ifndef MSDOS_16BIT
+#ifndef MSDOS_16BIT
 #include "git_hash.h"
-//#endif
+#endif
 
 #ifndef __UNIX_PORT_FILE
 #include <signal.h>
