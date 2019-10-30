@@ -39,6 +39,9 @@ bool sf_IsAdaptive(int picture);
 #define PATH1		"ZCODE_PATH"
 #define PATH2		"INFOCOM_PATH"
 
+#define MAX(x,y) ((x)>(y)) ? (x) : (y)
+#define MIN(x,y) ((x)<(y)) ? (x) : (y
+
 #ifdef WIN32
 #define HOMEDIR "USERPROFILE"
 #else

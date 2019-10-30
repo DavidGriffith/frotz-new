@@ -82,8 +82,8 @@ bb_err_t dumb_blorb_init(char *filename)
 		if (f_setup.blorb_file != NULL)
 			mystring = strdup(f_setup.blorb_file);
 		else {
-			mystring = malloc(max(len1, len2) * sizeof(char) + 1);
-			memcpy(mystring, filename, max(len1, len2) * sizeof(char));
+			mystring = malloc(MAX(len1, len2) * sizeof(char) + 1);
+			memcpy(mystring, filename, MAX(len1, len2) * sizeof(char));
 			p = strrchr(mystring, '.');
 			if (p != NULL) *p = '\0';
 			strncat(mystring, EXT_BLORB, len1);
