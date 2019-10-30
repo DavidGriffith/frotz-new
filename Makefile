@@ -169,12 +169,10 @@ VERSION = 2.50b2
 #
 GIT_DIR ?= .git
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
-	GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 	GIT_HASH = $(shell git rev-parse HEAD)
 	GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 	GIT_DATE = $(shell git show -s --format=%ci)
 else
-	GIT_BRANCH = $(shell echo "$Format:%D$" | sed s/^.*\>\\s*// | cut -d, -f1)
 	GIT_HASH = "$Format:%H$"
 	GIT_HASH_SHORT = "$Format:%h$"
 	GIT_DATE = "$Format:%ci$"
@@ -413,7 +411,6 @@ $(HASH):
 ifeq ($(wildcard $(HASH)), )
 	@echo "** Generating $@"
 	@echo "#define VERSION \"$(VERSION)\"" > $@
-	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" >> $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
