@@ -41,25 +41,24 @@ static char information[] =
     "Complies with standard 1.0 of Graham Nelson's specification.\n"
     "\n"
     "Syntax: frotz [options] story-file\n"
-    "  -a   watch attribute setting    \t -o   watch object movement\n"
-    "  -A   watch attribute testing    \t -O   watch object locating\n"
-    "  -b # background colour          \t -p   alter piracy opcode\n"
-    "  -B # reverse background colour  \t -r # right margin\n"
-    "  -c # context lines              \t -R <path> restricted read/write\n"
-    "  -d # display mode (see below)   \t -s # random number seed value\n"
-    "  -e # emphasis colour [mode 1]   \t -S # transcript width\n"
-    "  -f # foreground colour          \t -t   set Tandy bit\n"
-    "  -F # reverse foreground colour  \t -T   bold typing [modes 2+4+5]\n"
-    "  -g # font [mode 5] (see below)  \t -u # slots for multiple undo\n"
+    "  -a   watch attribute setting    \t -O   watch object locating\n"
+    "  -A   watch attribute testing    \t -p   alter piracy opcode\n"
+    "  -b # background colour          \t -r # right margin\n"
+    "  -B # reverse background colour  \t -R <path> restricted read/write\n"
+    "  -c # context lines              \t -s # random number seed value\n"
+    "  -d # display mode (see below)   \t -S # transcript width\n"
+    "  -e # emphasis colour [mode 1]   \t -t   set Tandy bit\n"
+    "  -f # foreground colour          \t -T   bold typing [modes 2+4+5]\n"
+    "  -F # reverse foreground colour  \t -u # slots for multiple undo\n"
+    "  -g # font [mode 5] (see below)  \t -v   show version information\n"
     "  -h # screen height              \t -w # screen width\n"
     "  -i   ignore runtime errors      \t -x   expand abbreviations g/x/z\n"
-    "  -l # left margin                \t -Z # error checking (see below)"
+    "  -l # left margin                \t -Z # error checking (see below)\n"
+    "  -o   watch object movement\n"
     "\n"
-    "Fonts are 0 (fixed), 1 (sans serif), 2 (comic), 3 (times), 4 (serif).\n"
-    "Display modes are 0 (mono), 1 (text), 2 (CGA), 3 (MCGA), 4 (EGA), 5 (Amiga)."
-    "\n\n"
-    "Error checking is 0 (none), 1 (report first error (default)),\n"
-    "  2 (report all errors), 3 (exit after any error).";
+    "Fonts: 0 fixed, 1 sans serif, 2 comic, 3 times, 4 serif.\n"
+    "Display modes:  0 mono, 1 text, 2 CGA, 3 MCGA, 4 EGA, 5 Amiga.\n"
+    "Error reporting: 0 none, 1 first only (default), 2 all, 3 exit after any error.";
 
 /* in bcinit.c only.  What is its significance? */
 extern unsigned cdecl _heaplen = 0x800 + 4 * BUFSIZ;
@@ -396,7 +395,12 @@ void os_process_arguments(int argc, char *argv[])
 	parse_options(argc, argv);
 
 	if (zoptind != argc - 1) {
-		printf("FROTZ V%s - MSDOS / PCDOS Edition\n", VERSION);
+		printf("FROTZ V%s - MSDOS / PCDOS Edition.  ", VERSION);
+#ifndef NO_SOUND
+		printf("Audio output enabled.\n");
+#else
+		printf("Audio output disabled.\n");
+#endif
 		puts(information);
 		exit(EXIT_SUCCESS);
 	}

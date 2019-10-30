@@ -21,6 +21,7 @@
 -t   set Tandy bit
 -T   bold typing [modes 2+4+5]
 -u # slots for multiple undo
+-v   show version information
 -w # screen width
 -x   expand abbreviations g/x/z
 -Z # error checking (see below)
