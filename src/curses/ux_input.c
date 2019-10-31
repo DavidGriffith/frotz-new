@@ -286,7 +286,11 @@ static int unix_read_char(int extkeys)
 		 */
 		case ZC_ESCAPE:
 #ifdef USE_UTF8
-		nodelay(stdscr, TRUE); get_wch(&c); nodelay(stdscr, FALSE);
+		nodelay(stdscr, TRUE);
+		if (get_wch(&c) == ERR){
+			c = ERR;
+		}
+		nodelay(stdscr, FALSE);
 #else
 		nodelay(stdscr, TRUE); c = getch(); nodelay(stdscr, FALSE);
 #endif
