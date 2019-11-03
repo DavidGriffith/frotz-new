@@ -26,17 +26,14 @@
 #include <string.h>
 #include "frotz.h"
 #include "djfrotz.h"
+#include "sbdrv.h"
 
 #include <dpmi.h>
 #include <go32.h>
 
 #define SWAP_BYTES(v)	v = v << 8 | v >> 8;
 
-#define READ_DSP(v)	{while(!inportb(sound_adr+14)&0x80);v=inportb(sound_adr+10);}
-#define WRITE_DSP(v)	{while(inportb(sound_adr+12)&0x80);outportb(sound_adr+12,v);}
-
 extern void end_of_sound(void);
-void end_of_dma_end(void);
 
 static struct {
 	word prefix;
@@ -47,114 +44,17 @@ static struct {
 	word length;
 } sheader;
 
+volatile int end_of_sound_flag = 0;
+
 static int current_sample = 0;
 
-static _go32_dpmi_seginfo old_vector;
-static _go32_dpmi_seginfo addr;
-
-struct {
-    int play_part_ __attribute__((packed));
-    int play_count_ __attribute__((packed));
-    long sample_adr1_ __attribute__((packed));
-    long sample_adr2_ __attribute__((packed));
-    int end_of_sound_flag_ __attribute__((packed));
-    word sample_len1_ __attribute__((packed));
-    word sample_len2_ __attribute__((packed));
-    word sound_adr_ __attribute__((packed));
-    word sound_irq_ __attribute__((packed));
-    word sound_dma_ __attribute__((packed));
-    word dma_page_port_[4] __attribute__((packed));
-} nonpaged_data = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    { 0x87, 0x83, 0x81, 0x82 }
-};
-
-#define play_part nonpaged_data.play_part_
-#define play_count nonpaged_data.play_count_
-#define sound_adr nonpaged_data.sound_adr_
-#define sound_irq nonpaged_data.sound_irq_
-#define sound_dma nonpaged_data.sound_dma_
-#define end_of_sound_flag nonpaged_data.end_of_sound_flag_
-#define sample_adr1 nonpaged_data.sample_adr1_
-#define sample_adr2 nonpaged_data.sample_adr2_
-#define sample_len1 nonpaged_data.sample_len1_
-#define sample_len2 nonpaged_data.sample_len2_
-#define dma_page_port nonpaged_data.dma_page_port_
-
-static word sound_int = 0;
-static word sound_ver = 0;
-
 static byte *sample_data = NULL;
-static int sample_sel;
-static int sample_seg = -1;
 
-#ifdef SOUND_SUPPORT
 
-/*
- * start_of_dma
- *
- * Start the DMA transfer to the sound board.
- *
- */
-void start_of_dma(long address, unsigned length)
+void end_of_sound_cb(sound_blaster_t *device)
 {
-	length--;
-
-	/* Set up DMA chip */
-	outportb(0x0a, 0x04 | sound_dma);
-	outportb(0x0c, 0x00);
-	outportb(0x0b, 0x48 | sound_dma);
-	outportb(2 * sound_dma, byte0(address));
-	outportb(2 * sound_dma, byte1(address));
-	outportb(dma_page_port[sound_dma], byte2(address));
-	outportb(2 * sound_dma + 1, byte0(length));
-	outportb(2 * sound_dma + 1, byte1(length));
-	outportb(0x0a, sound_dma);
-
-	/* Play 8-bit mono sample */
-	WRITE_DSP(0x14)
-	WRITE_DSP(byte0(length))
-	WRITE_DSP(byte1(length))
-} /* start_of_dma */
-
-
-/*
- * end_of_dma
- *
- * This function is called when a hardware interrupt signals the
- * end of the current sound. We may have to play the second half
- * of the sound effect, or we may have to repeat it, or call the
- * end_of_sound function when we are finished.
- *
- */
-void end_of_dma(void)
-{
-	/* Play the second half, play another cycle or finish */
-	if (play_part == 1 && sample_len2 != 0) {
-		play_part = 2;
-		start_of_dma(sample_adr2, sample_len2);
-	} else if (play_count == 255 || --play_count != 0) {
-		play_part = 1;
-		start_of_dma(sample_adr1, sample_len1);
-	} else {
-		play_part = 0;
-		end_of_sound_flag = 1;
-	}
-
-	/* Tell interrupt controller(s) + sound board we are done */
-	outportb(0x20, 0x20);
-
-	if (sound_irq >= 8)
-		outportb(0xa0, 0x20);
-
-	inportb(sound_adr + 14);
-} /* end_of_dma */
-
-asm(".globl _end_of_dma_end");
-asm(".align 4, 0x90");
-asm("_end_of_dma_end:");
-
-#endif /* SOUND_SUPPORT */
+	end_of_sound_flag = 1;
+}
 
 /* calls end_of_sound if flag is set. */
 void check_end_of_sound(void)
@@ -177,76 +77,27 @@ void os_init_sound(void)
 {
 #ifdef SOUND_SUPPORT
 	const char *settings;
-	word irc_mask_port;
+	int irq, adr, dmalo, dmahi;
 
-	/* Read the IRQ, port address, DMA channel and SB version */
-	if ((settings = getenv("BLASTER")) == NULL)
+	/* Read the IRQ, port address, DMA channel High DMA channel */
+	if ((settings = getenv("BLASTER")) == NULL) {
 		goto nosound;
-
-	sound_irq = dectoi(strchr(settings, 'I') + 1);
-	sound_adr = hextoi(strchr(settings, 'A') + 1);
-	sound_dma = dectoi(strchr(settings, 'D') + 1);
-	sound_ver = dectoi(strchr(settings, 'T') + 1);
-
-	/* Reset mixer chip and DSP */
-	outportb(sound_adr + 4, 0);
-	outportb(sound_adr + 5, 0);
-
-	outportb(sound_adr + 6, 1);
-	inportb(sound_adr + 6);
-	inportb(sound_adr + 6);
-	inportb(sound_adr + 6);
-	outportb(sound_adr + 6, 0);
-
-	/* Turn on speakers */
-	WRITE_DSP(0xd1);
-
-	/* Install the end_of_dma interrupt */
-	if (sound_irq < 8) {
-		irc_mask_port = 0x21;
-		sound_int = 0x08 + sound_irq;
-	} else {
-		irc_mask_port = 0xa1;
-		sound_int = 0x68 + sound_irq;
 	}
 
-	addr.pm_selector = _my_cs();
-	addr.pm_offset = (long)end_of_dma;
-	_go32_dpmi_get_protected_mode_interrupt_vector(sound_int, &old_vector);
-
-	if (_go32_dpmi_allocate_iret_wrapper(&addr) != 0)
-		goto nosound;
-
-	_go32_dpmi_lock_code(start_of_dma,
-	                     (long)end_of_dma_end - (long)start_of_dma);
-	_go32_dpmi_lock_data((void *)&nonpaged_data, sizeof(nonpaged_data));
-
-	_go32_dpmi_set_protected_mode_interrupt_vector(sound_int, &addr);
+	irq =   dectoi(strchr(settings, 'I') + 1);
+	adr =   hextoi(strchr(settings, 'A') + 1);
+	dmalo = dectoi(strchr(settings, 'D') + 1);
+	dmahi = dectoi(strchr(settings, 'H') + 1);
 
 	/* Allocate 64KB RAM for sample data */
-	if ((sample_data = (byte *) malloc(0x10000L)) == NULL)
+	if ((sample_data = (byte *) malloc(0x10000L)) == NULL) {
 		goto nosound;
+	}
 
-	/* allocate DOS memory for DMA */
-	sample_seg = __dpmi_allocate_dos_memory(0x1000, &sample_sel);
-
-	if (sample_seg < 0)
+	if (!sound_blaster_init(adr, irq, dmalo, dmahi)) {
 		goto nosound;
-
-	sample_adr1 = sample_seg << 4;
-	sample_adr2 = sample_adr1;
-	sample_adr2 &= 0xffff0000;
-	++word1 (sample_adr2);
-
-	/* Enable the end_of_dma interrupt */
-	outportb(0x20, 0x20);
-
-	if (sound_irq >= 8)
-		outportb(0xa0, 0x20);
-
-	outportb(irc_mask_port,
-	inportb(irc_mask_port) & ~(1 << (sound_irq & 7)));
-
+	}
+	sound_blaster_callback(end_of_sound_cb, NULL);
 	/* Indicate success */
 	return;
 
@@ -259,7 +110,7 @@ nosound:
 	if (z_header.flags & SOUND_FLAG) {
 			z_header.flags &= ~SOUND_FLAG;
 	}
-	f_setup.sound_flag = FALSE;
+	f_setup.sound = FALSE;
 
 } /* os_init_sound */
 
@@ -277,16 +128,7 @@ void cleanup_sound(void)
 		free(sample_data);
 		sample_data = NULL;
 	}
-	if (sample_seg > 0) {
-		__dpmi_free_dos_memory (sample_sel);
-		sample_seg = 0;
-	}
-	if (sound_adr != 0) {
-		_go32_dpmi_set_protected_mode_interrupt_vector(sound_int, &old_vector);
-		_go32_dpmi_free_iret_wrapper(&addr);
-		sound_adr = 0;
-	}
-
+	sound_blaster_deinit();
 } /* cleanup_sound */
 
 /*
@@ -320,13 +162,16 @@ void os_prepare_sample(int number)
 {
 #ifdef SOUND_SUPPORT
 
+	if (!f_setup.sound) {
+		return;
+	}
+
 	os_stop_sample(0);
 
 	/* Exit if the sound board isn't set up properly */
-	if (sample_data == NULL)
+	if (sample_data == NULL) {
 		return;
-	if (sound_adr == 0)
-		return;
+	}
 
 	/* Continue only if the desired sample is not already present */
 	if (current_sample != number) {
@@ -355,17 +200,6 @@ void os_prepare_sample(int number)
 		SWAP_BYTES(sheader.frequency);
 		SWAP_BYTES(sheader.length);
 		fread(sample_data, 1, sheader.length, fp);
-		dosmemput(sample_data, sheader.length, sample_adr1);
-
-		sample_len1 = -(word)sample_adr1;
-
-		if (sample_len1 > sheader.length || sample_len1 == 0)
-			sample_len1 = sheader.length;
-
-		sample_len2 = sheader.length - sample_len1;
-
-		WRITE_DSP(0x40);
-		WRITE_DSP(256 - 1000000L / sheader.frequency);
 		current_sample = number;
 
 		/* Close sample file */
@@ -390,43 +224,28 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 #ifdef SOUND_SUPPORT
 	eos = eos;		/* not used in DOS Frotz */
 
+	if (!f_setup.sound) {
+		return;
+	}
+
 	os_stop_sample(0);
 
 	/* Exit if the sound board isn't set up properly */
-	if (sample_data == NULL)
+	if (sample_data == NULL) {
 		return;
-	if (sound_adr == 0)
-		return;
+	}
 
 	/* Load new sample */
 	os_prepare_sample(number);
 
 	/* Continue only if the sample's in memory now */
 	if (current_sample == number) {
-		play_count = repeats;
-
-		if (sound_ver < 6) {	/* Set up SB pro mixer chip */
-			volume = (volume != 255) ? 7 + volume : 15;
-			outportb(sound_adr + 4, 0x04);
-			outportb(sound_adr + 5, (volume << 4) | volume);
-			outportb(sound_adr + 4, 0x22);
-			outportb(sound_adr + 5, 0xff);
-		} else {	/* Set up SB16 mixer chip */
-			/* Many thanks to Linards Ticmanis for writing this part! */
-			volume = (volume != 255) ? 127 + 16 * volume : 255;
-			outportb(sound_adr + 4, 0x32);
-			outportb(sound_adr + 5, volume);
-			outportb(sound_adr + 4, 0x33);
-			outportb(sound_adr + 5, volume);
-			outportb(sound_adr + 4, 0x30);
-			outportb(sound_adr + 5, 0xff);
-			outportb(sound_adr + 4, 0x31);
-			outportb(sound_adr + 5, 0xff);
-		}
-
-		play_part = 1;
-		start_of_dma(sample_adr1, sample_len1);
-
+		repeats = ((repeats & 0xFF) == 255 ? 255 : repeats - 1);
+		sound_blaster_bits(8);
+		sound_blaster_channels(1);
+		sound_blaster_sign(FALSE);
+		sound_blaster_volume(volume);
+		sound_blaster_play(sample_data, sheader.length, sheader.frequency, repeats);
 	}
 
 #endif /* SOUND_SUPPORT */
@@ -442,16 +261,15 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 void os_stop_sample(int UNUSED(id))
 {
 #ifdef SOUND_SUPPORT
-	play_part = 0;
 
+	if (!f_setup.sound) {
+		return;
+	}
 	/* Exit if the sound board isn't set up properly */
-	if (sample_data == NULL)
+	if (sample_data == NULL) {
 		return;
-	if (sound_adr == 0)
-		return;
-
-	/* Tell DSP to stop the current sample */
-	WRITE_DSP(0xd0)
+	}
+	sound_blaster_stop();
 #endif /* SOUND_SUPPORT */
 } /* os_stop_sample */
 
@@ -465,8 +283,6 @@ void os_stop_sample(int UNUSED(id))
 void os_finish_with_sample(int UNUSED(id))
 {
 #ifdef SOUND_SUPPORT
-
 	os_stop_sample(0);	/* we keep 64KB allocated all the time */
-
 #endif /* SOUND_SUPPORT */
 } /* os_finish_with_sample */
