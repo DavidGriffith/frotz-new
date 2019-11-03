@@ -875,25 +875,32 @@ int dos_init_blorb(void)
 	 * is contained in the blorb file.
 	 */
 	if (strncmp((char *)basename(f_setup.story_file),
-		    (char *)basename(blorb_file), 55) == 0) {
-		if ((blorbfile = fopen(blorb_file, "rb")) == NULL)
-			return bb_err_Read;
-		/* Under DOS, bb_create_map() returns bb_err_Format */
-		blorb_err = bb_create_map(blorbfile, &blorb_map);
+	            (char *)basename(blorb_file), 55) == 0) {
+		exec_in_blorb = 1;
+	}
 
-		if (blorb_err != bb_err_None) {
-			return blorb_err;
-		}
+	if ((blorbfile = fopen(blorb_file, "rb")) == NULL)
+		return bb_err_Read;
 
+	/* Under DOS, bb_create_map() returns bb_err_Format */
+	blorb_err = bb_create_map(blorbfile, &blorb_map);
+
+	if (blorb_err != bb_err_None) {
+		return blorb_err;
+	}
+
+	if (exec_in_blorb) {
 		/* Now we need to locate the EXEC chunk within the blorb file
 		 * and present it to the rest of the program as a file stream.
 		 */
 		blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
-						  &blorb_res, bb_ID_ZCOD, 0);
+		                                  &blorb_res, bb_ID_ZCOD, 0);
 
 		if (blorb_err == bb_err_None) {
 			exec_in_blorb = 1;
 			use_blorb = 1;
+		} else {
+			return blorb_err;
 		}
 	}
 	return 0;
