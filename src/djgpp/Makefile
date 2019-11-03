@@ -1,10 +1,10 @@
 # For GNU Make.
 
-SOURCES = djinit.c djinput.c djmouse.c djpic.c djsample.c djscreen.c djtext.c
+SOURCES = djinit.c djinput.c djmouse.c djpic.c djsample.c djscreen.c djtext.c sbdrv.c
 
 TARGET = frotz_djgpp.a
 
-HEADERS = djfrotz.h fontdata.h
+HEADERS = djfrotz.h fontdata.h sbdrv.h
 
 ARFLAGS = rc
 
