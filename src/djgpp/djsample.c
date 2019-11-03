@@ -22,34 +22,129 @@
 #include <pc.h>
 #include <dos.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "frotz.h"
 #include "djfrotz.h"
 #include "sbdrv.h"
+#include "djblorb.h"
 
 #include <dpmi.h>
 #include <go32.h>
 
-#define SWAP_BYTES(v)	v = v << 8 | v >> 8;
-
 extern void end_of_sound(void);
 
-static struct {
-	word prefix;
-	byte repeats;
-	byte base_note;
-	word frequency;
-	word unused;
-	word length;
-} sheader;
+typedef struct {
+	uint16_t freq;
+	uint16_t channels;
+	uint16_t bits;
+	uint32_t length;
+	uint8_t *samples;
+} sound_t;
+
+sound_t snd;
 
 volatile int end_of_sound_flag = 0;
 
 static int current_sample = 0;
 
-static byte *sample_data = NULL;
+long double convert_to_long_double(uint8_t *buffer)
+{
+		union {
+			long double value;
+			uint8_t buffer[16];
+		} conv;
+		conv.buffer[9] = buffer[0];
+		conv.buffer[8] = buffer[1];
+		conv.buffer[7] = buffer[2];
+		conv.buffer[6] = buffer[3];
+		conv.buffer[5] = buffer[4];
+		conv.buffer[4] = buffer[5];
+		conv.buffer[3] = buffer[6];
+		conv.buffer[2] = buffer[7];
+		conv.buffer[1] = buffer[8];
+		conv.buffer[0] = buffer[9];
+		return conv.value;
+}
 
+uint16_t convert_to_uint16(uint8_t *buffer)
+{
+		return buffer[1] | (buffer[0] << 8);
+}
+
+uint32_t convert_to_uint32(uint8_t *buffer)
+{
+		return buffer[3] | (buffer[2] << 8) | (buffer[1] << 16) | (buffer[0] << 24);
+}
+
+bool loadaiff(int fp, int length, sound_t *snd)
+{
+	uint8_t buffer[18];
+	uint16_t *samples16;;
+	int bytes, i;
+	uint16_t offset;
+	uint32_t chkSz;
+
+	if ((bytes = read(fp, buffer, 12)) < 12) {
+		return FALSE;
+	}
+	if (memcmp(buffer, "FORM", 4) != 0 || memcmp(buffer + 8, "AIFF", 4) != 0) {
+		return FALSE;
+	}
+	length -= bytes;
+	while (bytes != 0 && length != 0) {
+		chkSz = 0;
+		bytes = read(fp, buffer, 8);
+		if (bytes == 0) {
+			continue;
+		} else if (bytes < 8) {
+			return FALSE;
+		}
+		length -= bytes;
+		chkSz = convert_to_uint32(buffer+4);
+		if (memcmp(buffer, "COMM", 4) == 0) {
+			if ((bytes = read(fp, buffer, 18)) < 18) {
+				return FALSE;
+			}
+			length -= bytes;
+			snd->channels = convert_to_uint16(buffer);
+			snd->bits = (convert_to_uint16(buffer+6) + 7) & ~7;
+			snd->freq = (uint16_t)convert_to_long_double(buffer + 8);
+			if (snd->bits > 16) {
+				return FALSE;
+			}
+		} else if (memcmp(buffer, "SSND", 4) == 0) {
+			if ((bytes = read(fp, buffer, 8)) < 8) {
+				return FALSE;
+			}
+			length -= bytes;
+			offset = convert_to_uint32(buffer);
+			chkSz -= 8 - offset;
+			snd->samples = malloc(chkSz);
+			snd->length = chkSz;
+			bytes = read(fp, snd->samples, chkSz);
+			length -= bytes;
+		} else {
+			lseek(fp, chkSz, SEEK_CUR);
+			length -= chkSz;
+		}
+	}
+	if (snd->bits == 8) {
+		for (i = 0; i < snd->length; ++i) {
+			snd->samples[i] ^= 0x80;
+		}
+	} else {
+		samples16 = (uint16_t *)snd->samples;
+		for (i = 0; i < snd->length / 2; ++i) {
+			samples16[i] = (samples16[i] >> 8) | (samples16[i] << 8);
+		}
+	}
+	return TRUE;
+}
 
 void end_of_sound_cb(sound_blaster_t *device)
 {
@@ -89,11 +184,6 @@ void os_init_sound(void)
 	dmalo = dectoi(strchr(settings, 'D') + 1);
 	dmahi = dectoi(strchr(settings, 'H') + 1);
 
-	/* Allocate 64KB RAM for sample data */
-	if ((sample_data = (byte *) malloc(0x10000L)) == NULL) {
-		goto nosound;
-	}
-
 	if (!sound_blaster_init(adr, irq, dmalo, dmahi)) {
 		goto nosound;
 	}
@@ -124,12 +214,14 @@ void cleanup_sound(void)
 {
 	os_stop_sample(0);
 
-	if (sample_data != NULL) {
-		free(sample_data);
-		sample_data = NULL;
+	if (snd.samples) {
+		free(snd.samples);
+		memset(&snd, 0, sizeof(snd));
 	}
+
 	sound_blaster_deinit();
 } /* cleanup_sound */
+
 
 /*
  * os_beep
@@ -161,50 +253,39 @@ void os_beep(int number)
 void os_prepare_sample(int number)
 {
 #ifdef SOUND_SUPPORT
+	bb_result_t resource;
 
 	if (!f_setup.sound) {
 		return;
 	}
 
-	os_stop_sample(0);
-
-	/* Exit if the sound board isn't set up properly */
-	if (sample_data == NULL) {
+	if (blorb_map == NULL) {
 		return;
 	}
+
+	os_stop_sample(0);
 
 	/* Continue only if the desired sample is not already present */
 	if (current_sample != number) {
 
-		char sample_name[MAX_FILE_NAME + 1];
-		char numstr[2];
-		FILE *fp;
+		if (snd.samples) {
+			free(snd.samples);
+			memset(&snd, 0, sizeof(snd));
+		}
 
-		/* Build sample file name */
-		strcpy(sample_name, "sound/");
-
-		numstr[0] = '0' + number / 10;
-		numstr[1] = '0' + number % 10;
-
-		strncat(sample_name, f_setup.story_name, 6);
-		strncat(sample_name, numstr, 2);
-		strncat(sample_name, ".snd", 4);
-
-		/* Open sample file */
-		if ((fp = fopen(sample_name, "rb")) == NULL)
+		if (bb_err_None != bb_load_resource(blorb_map, bb_method_FilePos, &resource, bb_ID_Snd, number)) {
 			return;
+		}
 
-		/* Load header and sample data */
-		fread(&sheader, sizeof(sheader), 1, fp);
-
-		SWAP_BYTES(sheader.frequency);
-		SWAP_BYTES(sheader.length);
-		fread(sample_data, 1, sheader.length, fp);
+		switch(blorb_map->chunks[resource.chunknum].type) {
+		case bb_ID_FORM:
+			lseek(fileno(blorb_map->file), resource.data.startpos, SEEK_SET);
+			loadaiff(fileno(blorb_map->file), resource.length, &snd);
+			break;
+		default:
+			return;
+		}
 		current_sample = number;
-
-		/* Close sample file */
-		fclose(fp);
-
 	}
 #endif /* SOUND_SUPPORT */
 } /* os_prepare_sample */
@@ -230,22 +311,17 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 
 	os_stop_sample(0);
 
-	/* Exit if the sound board isn't set up properly */
-	if (sample_data == NULL) {
-		return;
-	}
-
 	/* Load new sample */
 	os_prepare_sample(number);
 
 	/* Continue only if the sample's in memory now */
 	if (current_sample == number) {
 		repeats = ((repeats & 0xFF) == 255 ? 255 : repeats - 1);
-		sound_blaster_bits(8);
-		sound_blaster_channels(1);
-		sound_blaster_sign(FALSE);
+		sound_blaster_bits(snd.bits);
+		sound_blaster_channels(snd.channels);
+		sound_blaster_sign(snd.bits > 8);
 		sound_blaster_volume(volume);
-		sound_blaster_play(sample_data, sheader.length, sheader.frequency, repeats);
+		sound_blaster_play(snd.samples, snd.length, snd.freq, repeats);
 	}
 
 #endif /* SOUND_SUPPORT */
@@ -263,10 +339,6 @@ void os_stop_sample(int UNUSED(id))
 #ifdef SOUND_SUPPORT
 
 	if (!f_setup.sound) {
-		return;
-	}
-	/* Exit if the sound board isn't set up properly */
-	if (sample_data == NULL) {
 		return;
 	}
 	sound_blaster_stop();
