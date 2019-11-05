@@ -3,7 +3,7 @@
 #
 
 CC = tcc
-CFLAGS = -ml -N
+CFLAGS = -ml -N -O
 TLIB = tlib
 CP = copy
 RM = del
