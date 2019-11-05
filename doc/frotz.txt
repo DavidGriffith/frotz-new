@@ -4,7 +4,7 @@ Complies with standard 1.0 of Graham Nelson's specification.
 
 Originally written by Stefan Jokisch in 1995-1997.
 Ported to Unix by Galen Hazelwood.
-Reference code Unix and DOS ports currently maintained by David Griffith.
+Reference code Unix and DOS ports are maintained by David Griffith.
 
 Frotz is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -302,6 +302,23 @@ Questions and answers:
 
     Q: How can I scroll the status window in 'Beyond Zork'?
     A: Use page up/down instead of cursor up/down.
+
+
+Caveats, Bugs, and Deficiencies:
+
+    - V8 games push the limit of what Frotz is capable of running under
+      DOS.  Anchorhead, for instance, usually will not load because
+      there's not enough memory below 640K to fit Frotz and the game
+      file.  Hopefully paging the game file in from disk instead of
+      sucking the whole thing into main memory will help with this.
+      Infocom's own interpreters did this to deal with low-memory
+      computers.
+
+    - Blorb file can be read, but only as far as loading a zcode game file.
+      Support for using audio and graphics resources within a Blorb file
+      is still under development.  Therefore Blorb support is disabled
+      by default.  If you want to try it, you'll need to recompile Frotz.
+
 
 List of fatal errors:
 
