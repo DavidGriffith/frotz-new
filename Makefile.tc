@@ -60,6 +60,7 @@ all:	frotz
 clean:
 	$(RM) $(CORE_DIR)\*.o
 	$(RM) $(DOS_DIR)\*.o
+	$(RM) *.obj
 	$(RM) *.lib
 	$(RM) *.exe
 	$(RM) *.bak
