@@ -8,15 +8,21 @@
 #ifndef FROTZ_H_
 #define FROTZ_H_
 
-#include "defs.h"
+
+/* For now we assume DOS Frotz is always 16-bit */
+#ifdef __TURBOC__
+#define MSDOS_16BIT
+#endif
 
 #ifdef MSDOS_16BIT
+#include "..\dos\defs.h"
 #ifdef USE_UTF8
 #error UTF-8 is not supported in DOS Frotz
 #endif
 #endif
 
 #ifndef MSDOS_16BIT
+#include "defs.h"
 #include "git_hash.h"
 #endif
 

@@ -17,8 +17,6 @@ VERSION = "2.50b3"
 
 VER = -DVERSION=$(VERSION)
 
-DEFS = src\common\defs.h
-
 DOS_DIR = src\dos
 DOS_OBJECTS =   $(DOS_DIR)\bcinit.o \
 		$(DOS_DIR)\bcinput.o \
@@ -53,18 +51,7 @@ CORE_OBJECTS =  $(CORE_DIR)\buffer.o \
 
 .SUFFIXES: .c .o .h
 
-all:	defs frotz
-
-# Compile-time options
-defs: $(DEFS)
-$(DEFS):
-	@echo "** Generating $@"
-	@echo "#ifndef COMMON_DEFINES_H" > $@
-	@echo "#define COMMON_DEFINES_H" >> $@
-	@echo "#define MSDOS_16BIT" >> $@
-	@echo "#define SOUND_SUPPORT" >> $@
-	@echo "#define NO_BLORB" >> $@
-	@echo "#endif /* COMMON_DEFINES_H */" >> $@
+all:	frotz
 
 .c.o:
 	$(CC) $(CFLAGS) $(VER) -I$(DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
@@ -73,7 +60,6 @@ $(DEFS):
 clean:
 	$(RM) $(CORE_DIR)\*.o
 	$(RM) $(DOS_DIR)\*.o
-	$(RM) $(DEFS)
 	$(RM) *.lib
 	$(RM) *.exe
 	$(RM) *.bak
