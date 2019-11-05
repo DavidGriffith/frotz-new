@@ -141,8 +141,11 @@ void os_tick()
 	}
 
 #ifndef NO_SOUND
-	if (ux_sem_trywait(&sound_done) == 0)
-		end_of_sound();
+
+	if (f_setup.sound) {
+		if (ux_sem_trywait(&sound_done) == 0)
+			end_of_sound();
+	}
 #endif
 } /* os_tick */
 
