@@ -15,23 +15,19 @@ CFLAGS += -Wall -std=c99 -O3 #-Wextra
 # These are handy for debugging.
 CFLAGS += -g
 
-# This keeps make(1) output understandable when using -j for parallel
-# building. If your version of make(1) can't do parallel builds, comment
-# this out.
-MAKEFLAGS += -Orecurse
-
 # Define where you want Frotz installed
 PREFIX ?= /usr/local
 MANDIR ?= $(PREFIX)/share/man
 SYSCONFDIR ?= /etc
 
-## Toolchain paths for Apple MacOS Sierra 10.12 plus MacPorts
-#CFLAGS += -I/opt/local/include
-#LDFLAGS += -L/opt/local/lib
-
 # Choose your sound support
 # OPTIONS: ao, none
 SOUND_TYPE ?= ao
+
+# This keeps make(1) output understandable when using -j for parallel
+# building. If your version of make(1) can't do parallel builds, comment
+# this out.
+MAKEFLAGS += -Orecurse
 
 
 ##########################################################################
@@ -108,7 +104,8 @@ ifneq ($(OS),Windows_NT)
 	# On MACOS, curses is actually ncurses, but to get wide char support
 	# you need to define _XOPEN_SOURCE_EXTENDED
 	CURSES = curses
-	CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS
+	CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS -I/opt/local/include
+	LDFLAGS += -L/opt/local/lib
     endif
     ifeq ($(UNAME_S),NetBSD)
 	NETBSD = yes
