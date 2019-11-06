@@ -22,4 +22,4 @@ clean:
 	rm -f *.O
 
 %.o: %.c
-	$(CC) $(CFLAGS) -I../common/ $(DJGPP_CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -I../common/ -o $@ -c $<
