@@ -5,9 +5,6 @@
 CC ?= gcc
 #CC ?= clang
 
-# Your DOS C Compiler (Watcom)
-WCC=wcc
-
 # Enable compiler warnings. This is an absolute minimum.
 CFLAGS += -Wall -std=c99 -O3 #-Wextra
 
