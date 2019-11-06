@@ -31,35 +31,50 @@
 
 #define DMA_BUF_SZ  0x10000L
 
+extern char *stext_locked;
+extern char *etext_locked;
+extern char *sdata_locked;
+extern char *edata_locked;
+
+static void WRITE_DSP(uint8_t byte) __attribute__((section(".locked.text")));
+static uint8_t READ_DSP(void);
+static void WRITE_MIXER(uint8_t reg, uint8_t value);
+static uint8_t READ_MIXER(uint8_t reg) __attribute__((section(".locked.text")));
+static bool sound_blaster_alloc_dma_buffer(uint32_t size);
+static uint32_t sound_blaster_copy_next_sample() __attribute__((section(".locked.text")));
+static void play_sample(uint32_t size) __attribute__((section(".locked.text")));
+static bool sound_blaster_reset();
+static void sound_blaster_interrupt(void) __attribute__((section(".locked.text")));
+
 /* Sound Blaster 1.0 and 2.0 */
 static void default_frequency(uint16_t freq);
-static void default_play(uint16_t size);
+static void default_play(uint16_t size) __attribute__((section(".locked.text")));
 static void default_stop(void);
 static void sb2_volume(uint8_t volume);
 
 /* Sound Blaster Pro */
 static void sbpro_frequency(uint16_t freq);
 static void sbpro_volume(uint8_t volume);
-static void sbpro_play(uint16_t size);
+static void sbpro_play(uint16_t size) __attribute__((section(".locked.text")));
 static void sbpro_stop(void);
 static void sbpro_channels(uint8_t channels);
 
 /* Sound Blaster 16 */
 static void sb16_frequency(uint16_t freq);
 static void sb16_volume(uint8_t volume);
-static void sb16_play(uint16_t size);
+static void sb16_play(uint16_t size) __attribute__((section(".locked.text")));
 static void sb16_stop(void);
 static void sb16_sign(bool enable);
 static void sb16_bits(uint8_t bits);
 static void sb16_channels(uint8_t channels);
 
-static sound_blaster_t sound_blaster = {
+static sound_blaster_t sound_blaster __attribute__((section(".locked.data"))) = {
 	.dma_port_address = {0x00, 0x02, 0x04, 0x06, 0xC0, 0xC4, 0xC8, 0xCC},
 	.dma_port_count = {0x01, 0x03, 0x05, 0x07, 0xC2, 0xC6, 0xCA, 0xCE},
 	.dma_port_page = {0x87, 0x83, 0x81, 0x82, 0x8F, 0x8B, 0x89, 0x8A},
 };
 
-static sound_blaster_ops_t ops[4] = {
+static sound_blaster_ops_t ops[4] __attribute__((section(".locked.data"))) = {
 	/* Original Sound Blaster */
 	{
 		.frequency = default_frequency,
@@ -327,7 +342,7 @@ static void sb16_sign(bool enable)
 	}
 }
 
-void sound_blaster_interrupt(void)
+static void sound_blaster_interrupt(void)
 {
 	uint32_t size = sound_blaster_copy_next_sample();
 	if (size > 0) {
@@ -383,9 +398,8 @@ bool sound_blaster_init(uint16_t base, uint16_t irq, uint16_t dmalo, uint16_t dm
 	if (_go32_dpmi_allocate_iret_wrapper(&int_vector) != 0)
 		goto nosound;
 
-	_go32_dpmi_lock_code (WRITE_DSP, (uint32_t)sound_blaster_init - (uint32_t)WRITE_DSP);
-	_go32_dpmi_lock_data((void *)&sound_blaster, sizeof(sound_blaster));
-	_go32_dpmi_lock_data((void *)&ops, sizeof(ops));
+	_go32_dpmi_lock_code(stext_locked, etext_locked - stext_locked);
+	_go32_dpmi_lock_data(sdata_locked, edata_locked - sdata_locked);
 
 	_go32_dpmi_set_protected_mode_interrupt_vector(sound_blaster.interrupt, &int_vector);
 

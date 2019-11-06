@@ -20,6 +20,7 @@ ifneq ($(MAKECMDGOALS),djgpp)
 EXTRA_CFLAGS = -fPIC -fpic
 else
 EXTRA_CFLAGS = -march=i386
+LDFLAGS += -Xlinker -Map=output.map -T djgpp.ld
 endif
 
 # Define where you want Frotz installed
