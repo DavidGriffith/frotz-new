@@ -48,7 +48,7 @@ typedef struct {
 
 sound_t snd;
 
-volatile int end_of_sound_flag = 0;
+volatile int end_of_sound_flag __attribute__((section(".locked.data"))) = 0;
 
 static int current_sample = 0;
 
@@ -146,10 +146,34 @@ bool loadaiff(int fp, int length, sound_t *snd)
 	return TRUE;
 }
 
-void end_of_sound_cb(sound_blaster_t *device)
+__attribute__((section(".locked.text"))) void end_of_sound_cb(sound_blaster_t *device)
 {
 	end_of_sound_flag = 1;
 }
+
+/* DJGPP does not actually define the inverse of _go32_dpmi_lock_data, so use our own */
+
+int _go32_dpmi_unlock_data(void *lockaddr, unsigned long locksize)
+{
+	unsigned long baseaddr;
+	__dpmi_meminfo memregion;
+
+	if (__dpmi_get_segment_base_address(_go32_my_ds(), &baseaddr) == -1) {
+		return -1;
+	}
+
+	memset(&memregion, 0, sizeof(memregion));
+
+	memregion.address = baseaddr + (unsigned long)lockaddr;
+	memregion.size    = locksize;
+
+	if (__dpmi_unlock_linear_region(&memregion) == -1) {
+		return -1;
+	}
+
+	return 0;
+}
+
 
 /* calls end_of_sound if flag is set. */
 void check_end_of_sound(void)
@@ -215,6 +239,7 @@ void cleanup_sound(void)
 	os_stop_sample(0);
 
 	if (snd.samples) {
+		_go32_dpmi_unlock_data(snd.samples, snd.length);
 		free(snd.samples);
 		memset(&snd, 0, sizeof(snd));
 	}
@@ -269,6 +294,7 @@ void os_prepare_sample(int number)
 	if (current_sample != number) {
 
 		if (snd.samples) {
+			_go32_dpmi_unlock_data(snd.samples, snd.length);
 			free(snd.samples);
 			memset(&snd, 0, sizeof(snd));
 		}
@@ -281,6 +307,7 @@ void os_prepare_sample(int number)
 		case bb_ID_FORM:
 			lseek(fileno(blorb_map->file), resource.data.startpos, SEEK_SET);
 			loadaiff(fileno(blorb_map->file), resource.length, &snd);
+			_go32_dpmi_lock_data(snd.samples, snd.length);
 			break;
 		default:
 			return;
