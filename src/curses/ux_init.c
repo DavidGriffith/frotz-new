@@ -447,6 +447,9 @@ void os_init_screen (void)
 	setlocale(LC_ALL, "");
 #endif
 
+	if (getenv("ESCDELAY") == NULL)
+		putenv("ESCDELAY=50");
+
 	if (initscr() == NULL) {    /* Set up curses */
 		os_fatal("Unable to initialize curses. Maybe your $TERM setting is bad.");
 		exit(EXIT_FAILURE);
