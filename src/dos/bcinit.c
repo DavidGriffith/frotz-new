@@ -362,6 +362,17 @@ static void parse_options(int argc, char **argv)
 
 } /* parse_options */
 
+static char *malloc_filename(char *story_name, char *extension)
+{
+	int length = strlen(story_name) + strlen(extension) + 2;
+	char *filename = malloc(length);
+	if (filename) {
+		strcpy(filename, story_name);
+		strcat(filename, ".");
+		strcat(filename, extension);
+	}
+	return filename;
+}
 
 /*
  * os_process_arguments
@@ -423,22 +434,16 @@ void os_process_arguments(int argc, char *argv[])
 	f_setup.story_name = strdup(stripped_story_name);
 
 	/* Create nice default file names */
-	f_setup.script_name = strdup(f_setup.story_name);
-	f_setup.command_name = strdup(f_setup.story_name);
-	f_setup.save_name = strdup(f_setup.story_name);
-	f_setup.aux_name = strdup(f_setup.story_name);
-
-	strcat(f_setup.script_name, ".scr");
-	strcat(f_setup.command_name, ".rec");
-	strcat(f_setup.save_name, ".sav");
-	strcat(f_setup.aux_name, ".aux");
+	f_setup.script_name = malloc_filename(f_setup.story_name, "scr");
+	f_setup.command_name = malloc_filename(f_setup.story_name, "rec");
+	f_setup.save_name = malloc_filename(f_setup.story_name, "sav");
+	f_setup.aux_name = malloc_filename(f_setup.story_name, "aux");
 
 	/* Save the executable file name */
 	progname = argv[0];
 
 #ifndef NO_BLORB
-	blorb_file = strdup(f_setup.story_name);
-	strcat(blorb_file, ".blb");
+	blorb_file = malloc_filename(f_setup.story_name, "blb");
 
 	switch (dos_init_blorb()) {
 	case bb_err_Format:
