@@ -69,12 +69,12 @@ void init_sound(void)
 
 	if ((z_header.flags & SOUND_FLAG)
 	    || (z_header.version == V3 && (z_header.flags & OLD_SOUND_FLAG))) {
-		f_setup.sound_flag = TRUE;
+		f_setup.sound = TRUE;
 		locked = FALSE;
 		playing = FALSE;
 		os_init_sound();
 	} else
-		f_setup.sound_flag = FALSE;
+		f_setup.sound = FALSE;
 } /* init_sound */
 
 
@@ -178,7 +178,7 @@ void z_sound_effect(void)
 		return;
 	}
 
-	if (!f_setup.sound_flag) {
+	if (!f_setup.sound) {
 		runtime_error(ERR_PLAY_SOUND);
 		return;
 	}
