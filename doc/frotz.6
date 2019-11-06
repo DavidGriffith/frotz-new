@@ -678,6 +678,12 @@ on which you restore a saved game has the same dimensions as the one on
 which you saved the game.
 
 .PP
+Audio latency might be unreasonably long depending on the settings of
+your operating system.  Linux generally has things right.  The BSDs may
+need some sysctl(8) settings adjusted.  See the sound(4) or audio(4)
+manpages for more information.
+
+.PP
 You can use a path like "/usr/local/games/zcode:$HOME/zcode" with
 $ZCODE_PATH or $INFOCOM_PATH because the shell will digest that $HOME
 variable for you before setting $ZCODE_PATH. While processing frotz.conf
