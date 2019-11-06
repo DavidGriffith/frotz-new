@@ -18,6 +18,8 @@ CFLAGS += -g
 
 ifneq ($(MAKECMDGOALS),djgpp)
 EXTRA_CFLAGS = -fPIC -fpic
+else
+EXTRA_CFLAGS = -march=i386
 endif
 
 # Define where you want Frotz installed
