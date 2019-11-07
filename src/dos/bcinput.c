@@ -36,6 +36,8 @@ extern void read_string (int, zchar *);
 
 extern int completion (const zchar *, zchar *);
 
+extern bool at_keybrd;
+
 static long limit = 0;
 
 static struct {
@@ -209,6 +211,8 @@ static int get_key(bool cursor)
 					0x52, 0x49, 0x51, 0x0f};
 	static byte hot_key_map[] = {0x13, 0x19, 0x1f, 0x16,
 				     0x31, 0x2d, 0x20, 0x23};
+	static byte function_key_map[] = {0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40,
+	                                  0x41, 0x42, 0x43, 0x44, 0x85, 0x86};
 
 	int key;
 
@@ -228,12 +232,12 @@ static int get_key(bool cursor)
 			end_of_sound();
 #endif
 
-		if (_bios_keybrd(_KEYBRD_READY)) {
-			word code = _bios_keybrd(_KEYBRD_READ);
+		if (_bios_keybrd(at_keybrd ? _NKEYBRD_READY : _KEYBRD_READY)) {
+			word code = _bios_keybrd(at_keybrd ? _NKEYBRD_READ : _KEYBRD_READ);
 			byte code0 = code;
 			byte code1 = code >> 8;
 
-			if (code0 != 0 && code0 != 9) {
+			if (code0 != 0 && code0 != 9 && code0 != 0xe0) {
 				key = code0 - '0' + ZC_NUMPAD_MIN;
 				if (key >= ZC_NUMPAD_MIN && key <= ZC_NUMPAD_MAX && code1 >= 0x10)
 					goto exit_loop;
@@ -258,9 +262,10 @@ static int get_key(bool cursor)
 						goto exit_loop;
 				}
 
-				key = code1 - 0x3b + ZC_FKEY_MIN;
-				if (key >= ZC_FKEY_MIN && key <= ZC_FKEY_MAX - 2)
-					goto exit_loop;
+				for (key = ZC_FKEY_MIN; key <= ZC_FKEY_MAX; key++) {
+					if (code1 == function_key_map[key - ZC_FKEY_MIN])
+						goto exit_loop;
+				}
 
 				for (key = ZC_HKEY_MIN; key <= ZC_HKEY_MAX; key++) {
 					if (code1 == hot_key_map[key - ZC_HKEY_MIN])
