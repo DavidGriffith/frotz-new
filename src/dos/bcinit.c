@@ -101,6 +101,19 @@ static byte old_video_mode = 0;
 
 static void interrupt(*oldvect) () = NULL;
 
+bool at_keybrd;
+
+/* Test for the existance of Enhanced AT keyboard support in BIOS */
+static bool test_enhanced_keyboard(unsigned char b)
+{
+	union REGS regs;
+	unsigned char far *shift_status;
+	shift_status = MK_FP(0, 0x417);
+	shift_status[0] = b;
+	regs.h.ah = 0x12;
+	int86(0x16, &regs, &regs);
+	return b == regs.h.al;
+}
 
 /*
  * os_init_setup
@@ -126,6 +139,8 @@ void os_init_setup(void)
 	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
 	f_setup.restore_mode = 0;
 
+	at_keybrd = (test_enhanced_keyboard(0x40) && test_enhanced_keyboard(0x80));
+	test_enhanced_keyboard(0x00);
 } /* os_init_setup */
 
 
