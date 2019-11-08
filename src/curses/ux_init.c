@@ -768,10 +768,9 @@ int os_storyfile_tell(FILE * fp)
 static FILE *pathopen(const char *name, const char *path, const char *mode)
 {
 	FILE *fp;
+	
 	char *buf;
-	char *bp, lastch;
-
-	lastch = 'a';	/* makes compiler shut up */
+	char sep = DIRSEP;
 
 	/*
 	 * If the path variable doesn't end in a "/" a "/"
@@ -779,23 +778,18 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 	 * for the path + / + name + \0
 	 */
 	buf = malloc(strlen(path) + strlen(name) + 2);
-
-	while (*path) {
-		bp = buf;
-		while (*path && *path != PATHSEP)
-			lastch = *bp++ = *path++;
-		if (lastch != DIRSEP)
-			*bp++ = DIRSEP;
-		memcpy(bp, name, strlen(bp) * sizeof(char));
-		if ((fp = fopen(buf, mode)) != NULL) {
-			free(buf);
-			return fp;
-		}
-		if (*path)
-			path++;
-	}
+	
+	strcpy(buf, path);	
+	
+	if (buf[strlen(buf)-1] != sep) {
+		strncat(buf, &sep, 1);
+	}	
+	
+	strcat(buf, name);
+	
+	fp = fopen(buf, mode);
 	free(buf);
-	return NULL;
+	return fp;
 } /* pathopen */
 
 
@@ -944,7 +938,7 @@ static int getconfig(char *configfile)
 
 		else if (strcmp(varname, "zcode_path") == 0) {
 			f_setup.zcode_path = malloc(strlen(value) * sizeof(char) + 1);
-			memcpy(f_setup.zcode_path, value, sizeof(char));
+			strcpy(f_setup.zcode_path, value);
 		} /* The big nasty if-else thingy is finished */
 	} /* while */
 	return TRUE;
