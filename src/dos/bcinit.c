@@ -661,6 +661,16 @@ static void standard_palette(void)
 			display = '1';
 	}
 
+	/* This checks the selected display against the graphics adapter and
+	 * forces the correct display type if you have selected an invalid display
+	 * for your installed adapter */
+	if ((display == '3' || display >= '5') && graphics_adapter != VGA_ADAPTER)
+		display = '4';
+	if (display == '4' && graphics_adapter > EGA_ADAPTER)
+		display = '2';
+	if (display == '2' && graphics_adapter > CGA_ADAPTER)
+		display = '0';
+
 	/* Activate the desired display mode. All VESA text modes are very
 	   similar to the standard text mode; in fact, only here we need to
 	   know which VESA mode is used. */
