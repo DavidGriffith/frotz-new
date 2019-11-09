@@ -35,6 +35,11 @@
 #define SPECIAL_KEY_TAB 264
 #define SPECIAL_KEY_MAX 264
 
+#define MONO_ADAPTER 4
+#define CGA_ADAPTER  3
+#define EGA_ADAPTER  2
+#define VGA_ADAPTER  1
+
 #define _MONO_	0
 #define _TEXT_	1
 #define _CGA_	2
