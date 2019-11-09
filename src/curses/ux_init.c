@@ -768,34 +768,26 @@ int os_storyfile_tell(FILE * fp)
 static FILE *pathopen(const char *name, const char *path, const char *mode)
 {
 	FILE *fp;
-	char *buf;
-	char *bp, lastch;
-
-	lastch = 'a';	/* makes compiler shut up */
-
+	char *buf;	
+	
 	/*
 	 * If the path variable doesn't end in a "/" a "/"
 	 * will be added, so the buffer needs to be long enough
 	 * for the path + / + name + \0
-	 */
-	buf = malloc(strlen(path) + strlen(name) + 2);
+	 */	
+	size_t buf_sz = strlen(path) + strlen(name) + sizeof(DIRSEP) + 1;
+	buf = malloc(buf_sz);
+	
+	if (path[strlen(path)-1] != DIRSEP) {
+		snprintf(buf, buf_sz, "%s%c%s", path, DIRSEP, name);
+	} else {
+		snprintf(buf, buf_sz, "%s%s", path, name);
+	}	
 
-	while (*path) {
-		bp = buf;
-		while (*path && *path != PATHSEP)
-			lastch = *bp++ = *path++;
-		if (lastch != DIRSEP)
-			*bp++ = DIRSEP;
-		memcpy(bp, name, strlen(bp) * sizeof(char));
-		if ((fp = fopen(buf, mode)) != NULL) {
-			free(buf);
-			return fp;
-		}
-		if (*path)
-			path++;
-	}
+	fp = fopen(buf, mode);
 	free(buf);
-	return NULL;
+	return fp;
+
 } /* pathopen */
 
 
@@ -943,8 +935,9 @@ static int getconfig(char *configfile)
 		/* now for really stringtype variable */
 
 		else if (strcmp(varname, "zcode_path") == 0) {
-			f_setup.zcode_path = malloc(strlen(value) * sizeof(char) + 1);
-			memcpy(f_setup.zcode_path, value, sizeof(char));
+			size_t sz = strlen(value) * sizeof(char) + 1;
+			f_setup.zcode_path = malloc(sz);
+			strncpy(f_setup.zcode_path, value, sz);
 		} /* The big nasty if-else thingy is finished */
 	} /* while */
 	return TRUE;
