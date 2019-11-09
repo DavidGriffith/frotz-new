@@ -786,7 +786,7 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 			lastch = *bp++ = *path++;
 		if (lastch != DIRSEP)
 			*bp++ = DIRSEP;
-		memcpy(bp, name, strlen(bp) * sizeof(char));
+		memcpy(bp, name, strlen(name) * sizeof(char) + 1);
 		if ((fp = fopen(buf, mode)) != NULL) {
 			free(buf);
 			return fp;
@@ -944,7 +944,7 @@ static int getconfig(char *configfile)
 
 		else if (strcmp(varname, "zcode_path") == 0) {
 			f_setup.zcode_path = malloc(strlen(value) * sizeof(char) + 1);
-			memcpy(f_setup.zcode_path, value, sizeof(char));
+			memcpy(f_setup.zcode_path, value, sizeof(value));
 		} /* The big nasty if-else thingy is finished */
 	} /* while */
 	return TRUE;
