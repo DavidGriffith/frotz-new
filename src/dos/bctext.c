@@ -30,6 +30,8 @@
 
 extern byte far *get_scrnptr(int);
 
+extern int graphics_adapter;
+
 int current_bg = 0;
 int current_fg = 0;
 int current_style = 0;
@@ -455,8 +457,11 @@ void write_pattern(byte far * screen, byte val, byte mask)
 
 			if (c >= ZC_LATIN1_MIN)
 				c -= 32;
-		} else
-			c = latin1_to_ibm[c - ZC_LATIN1_MIN];
+		} else {
+			if (graphics_adapter > EGA_ADAPTER || display != _TEXT_) {
+				c = latin1_to_ibm[c - ZC_LATIN1_MIN];
+			}
+		}
 
 	/* Handle special indentations */
 	if (c == ZC_INDENT) {

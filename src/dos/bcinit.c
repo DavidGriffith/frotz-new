@@ -31,6 +31,9 @@
 #include "bcblorb.h"
 #endif
 
+#include "font8x8.h"
+#include "font8x14.h"
+#include "font8x16.h"
 #include "bchash.h"
 
 extern f_setup_t f_setup;
@@ -102,6 +105,7 @@ static byte old_video_mode = 0;
 static void interrupt(*oldvect) () = NULL;
 
 bool at_keybrd;
+int graphics_adapter;
 
 /* Test for the existance of Enhanced AT keyboard support in BIOS */
 static bool test_enhanced_keyboard(unsigned char b)
@@ -113,6 +117,35 @@ static bool test_enhanced_keyboard(unsigned char b)
 	regs.h.ah = 0x12;
 	int86(0x16, &regs, &regs);
 	return b == regs.h.al;
+}
+
+static int detect_adapter(void)
+{
+	union REGS regs;
+
+	regs.x.ax = 0x1200;
+	regs.h.bl = 0x32;
+	int86(0x10, &regs, &regs);
+
+	if (regs.h.al == 0x12) {
+		return VGA_ADAPTER;
+	}
+
+	regs.h.ah = 0x12;
+	regs.h.bl = 0x10;
+	int86(0x10, &regs, &regs);
+
+	if (regs.h.bl < 4) {
+		return EGA_ADAPTER;
+	}
+
+	regs.h.ah = 0x0F;
+	int86(0x10, &regs, &regs);
+	if (regs.h.al != 7) {
+		return CGA_ADAPTER;
+	}
+
+	return MONO_ADAPTER;
 }
 
 /*
@@ -139,6 +172,7 @@ void os_init_setup(void)
 	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
 	f_setup.restore_mode = 0;
 
+	graphics_adapter = detect_adapter();
 	at_keybrd = (test_enhanced_keyboard(0x40) && test_enhanced_keyboard(0x80));
 	test_enhanced_keyboard(0x00);
 } /* os_init_setup */
@@ -650,7 +684,29 @@ static void standard_palette(void)
 
 	/* Make various preparations */
 	if (display <= _TEXT_) {
-
+		if (graphics_adapter == EGA_ADAPTER || graphics_adapter == VGA_ADAPTER) {
+			asm mov bx, 0x0e00
+			asm mov bp, offset font8x14_ext_latin
+			asm mov ax, graphics_adapter
+			asm cmp ax, EGA_ADAPTER
+			asm je load_font
+			asm mov ax, 0x1130
+			asm mov bh, 1
+			asm int 0x10
+			asm mov bx, 0x1000
+			asm mov bp, offset font8x16_ext_latin
+			asm cmp cx, 0x10
+			asm je load_font
+			asm mov bx, 0x0800
+			asm mov bp, offset font8x8_ext_latin
+load_font:
+			asm mov ax, 0x1110
+			asm mov cx, 0x0060
+			asm mov dx, 0x00a0
+			asm push ds
+			asm pop es
+			asm int 0x10
+		}
 		/* Enable bright background colours */
 		asm mov ax, 0x1003
 		asm mov bl, 0
