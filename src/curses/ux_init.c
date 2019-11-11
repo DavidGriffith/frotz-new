@@ -937,7 +937,7 @@ static int getconfig(char *configfile)
 		else if (strcmp(varname, "zcode_path") == 0) {
 			size_t sz = strlen(value) * sizeof(char) + 1;
 			f_setup.zcode_path = malloc(sz);
-			strncpy(f_setup.zcode_path, value, sz);
+			memcpy(f_setup.zcode_path, value, sz);
 		} /* The big nasty if-else thingy is finished */
 	} /* while */
 	return TRUE;
