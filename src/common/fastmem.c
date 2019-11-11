@@ -684,13 +684,15 @@ void z_restart(void)
  * copy it to a string.
  *
  */
-static void get_default_name(char *default_name, zword addr)
+static void get_default_name(char *default_name, size_t length, zword addr)
 {
 	if (addr != 0) {
 		zbyte len;
 		int i;
 
 		LOW_BYTE(addr, len);
+		len = (len >= length) ? (length - 1) : len;
+
 		addr++;
 
 		for (i = 0; i < len; i++) {
@@ -706,11 +708,10 @@ static void get_default_name(char *default_name, zword addr)
 		default_name[i] = 0;
 
 		if (strchr (default_name, '.') == NULL)
-			strncat(default_name, EXT_AUX,
-			    strlen(default_name) - strlen(EXT_AUX) + 1);
+			strncat(default_name, EXT_AUX, length - len - 1);
 	} else {
-		free(default_name);
-		default_name = strdup(f_setup.aux_name);
+		memset(default_name, 0, length);
+		strncpy(default_name, f_setup.aux_name, length - 1);
 	}
 } /* get_default_name */
 
@@ -733,7 +734,7 @@ void z_restore(void)
 
 	if (zargc != 0) {
 		/* Get the file name */
-		get_default_name(default_name, (zargc >= 3) ? zargs[2] : 0);
+		get_default_name(default_name, MAX_FILE_NAME + 1, (zargc >= 3) ? zargs[2] : 0);
 
 		new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
 		if (new_name == NULL)
@@ -960,7 +961,7 @@ void z_save(void)
 
 	if (zargc != 0) {
 		/* Get the file name */
-		get_default_name(default_name, (zargc >= 3) ? zargs[2] : 0);
+		get_default_name(default_name, MAX_FILE_NAME + 1, (zargc >= 3) ? zargs[2] : 0);
 		new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
 		if (new_name == NULL)
 			goto finished;
