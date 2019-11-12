@@ -8,7 +8,6 @@ CC = gcc
 #CC = clang
 
 PKG_CONFIG ?= pkg-config
-override CFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --cflags) $(SDL_CFLAGS)
 
 SOURCES = sf_fonts.c sf_msg_en.c sf_resource.c sf_util.c \
 	sf_deffont.c sf_ftype.c sf_osfdlg.c sf_sig.c sf_video.c \
@@ -34,6 +33,8 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	-rm -f $(TARGET) $(OBJECTS) $(DEPS)
+
+%.o: override CFLAGS += $(shell $(PKG_CONFIG) --silence-errors $(SDL_PKGS) --cflags) $(SDL_CFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<
