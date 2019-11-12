@@ -1183,12 +1183,8 @@ STATIC zword Zentry(int x, int y)
 				clen = 1;
 			else if (c < 0x800)
 				clen = 2;
-			else if (c < 0x10000)
+			else
 				clen = 3;
-			else {
-				clen = 1;
-				c = '?';
-			}
 #endif
 			if (nchars >= nmax)
 				continue;
