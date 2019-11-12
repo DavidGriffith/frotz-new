@@ -240,6 +240,13 @@ else
   CURSES_SOUND = disabled
 endif
 
+# Check to see if the -Orecurse option is available.  It's nice for
+# watching the output of a parallel build, but is otherwise not
+# necessary.
+ifneq ($(filter output-sync,$(value .FEATURES)),)
+MAKEFLAGS += -Orecurse
+endif
+
 
 # Build recipes
 #
