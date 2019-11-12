@@ -77,7 +77,7 @@ static void gethex(char *p, byte * dst, int n)
 
 static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 {
-	int totb, i, k, wh[4];
+	int totb, i, k = 0, wh[4];
 	byte *po, *pbeg;
 	char *p, *q;
 	char *fontname = "", *copyright = "unknown";
