@@ -179,7 +179,11 @@ else ifneq ($(findstring ncurses,$(CURSES)),)
   CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
   CURSES_DEFINE = USE_NCURSES_H
 ifdef NETBSD
-  CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw
+ifeq ($(CURSES), ncursesw)
+  CURSES_CFLAGS += -I/usr/pkg/include/ncursesw
+else
+  CURSES_CFLAGS += -I/usr/pkg/include/ncurses
+endif
 endif
 endif
 
