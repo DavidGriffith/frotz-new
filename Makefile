@@ -253,6 +253,7 @@ $(FROTZ_BIN): $(FROTZ_LIBS)
 
 nosound: nosound_helper $(FROTZ_BIN) | nosound_helper
 nosound_helper:
+	$(eval SOUND_TYPE= none)
 	$(eval NO_SOUND= -DNO_SOUND)
 	$(eval CURSES_SOUND_LDFLAGS= )
 	$(eval CURSES_SOUND= disabled)
