@@ -448,7 +448,7 @@ void os_init_screen (void)
 #endif
 
 	if (getenv("ESCDELAY") == NULL)
-		putenv("ESCDELAY=50");
+		setenv("ESCDELAY", "50", 1);
 
 	if (initscr() == NULL) {    /* Set up curses */
 		os_fatal("Unable to initialize curses. Maybe your $TERM setting is bad.");

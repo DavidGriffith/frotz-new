@@ -172,12 +172,11 @@ export CFLAGS
 
 # Compile time options handling
 #
+CURSES_LDFLAGS += -l$(CURSES)
 ifeq ($(CURSES), curses)
-  CURSES_LDFLAGS += -lcurses
   CURSES_DEFINE = USE_CURSES_H
 else ifneq ($(findstring ncurses,$(CURSES)),)
-  CURSES_LDFLAGS += $(or $(shell $(PKG_CONFIG) $(CURSES) --libs 2>/dev/null),-l$(CURSES))
-  CURSES_CFLAGS += $(or $(shell $(PKG_CONFIG) $(CURSES) --cflags 2>/dev/null),-D_XOPEN_SOURCE_EXTENDED)
+  CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
   CURSES_DEFINE = USE_NCURSES_H
 ifdef NETBSD
   CURSES_CFLAGS += -I/usr/pkg/include/ncurses -I/usr/pkg/include/ncursesw
