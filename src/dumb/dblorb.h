@@ -5,13 +5,6 @@
  *
  */
 
-#include <limits.h>
-#if UINT_MAX == (1UL<<32)-1UL
-typedef unsigned int  uint32;
-#else
-typedef unsigned long  uint32;
-#endif
-
 #ifndef NO_BLORB
 
 #include "../blorb/blorb.h"
