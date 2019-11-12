@@ -27,7 +27,7 @@ SOUND_TYPE ?= ao
 # This keeps make(1) output understandable when using -j for parallel
 # building. If your version of make(1) can't do parallel builds, comment
 # this out.
-MAKEFLAGS += -Orecurse
+#MAKEFLAGS += -Orecurse
 
 
 ##########################################################################
@@ -507,6 +507,7 @@ help:
 .SUFFIXES:
 .SUFFIXES: .c .o .h
 
+.NOTPARALLEL:
 .PHONY: all clean dist curses ncurses dumb sdl hash help \
 	common_defines curses_defines nosound nosound_helper\
 	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \

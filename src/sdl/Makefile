@@ -34,7 +34,7 @@ $(TARGET): $(OBJECTS)
 clean:
 	-rm -f $(TARGET) $(OBJECTS) $(DEPS)
 
-%.o: override CFLAGS += $(shell $(PKG_CONFIG) --silence-errors $(SDL_PKGS) --cflags) $(SDL_CFLAGS)
+%.o: override CFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --cflags) $(SDL_CFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<
