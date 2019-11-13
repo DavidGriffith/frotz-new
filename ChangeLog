@@ -1,7 +1,7 @@
 Summary of changes between Frotz 2.44 and Frotz 2.50:
 =====================================================
 
-Frotz 2.50 was released on ????
+Frotz 2.50 was released on Tuesday November 12, 2019.
 
 NEW FEATURES
 
@@ -26,15 +26,17 @@ BUG FIXES
 
 - Fixed a lot of unsafe strcpy() and strcat() calls.
 
+- Fixed numerous problems with portability to other flavors of Unix.
+
 - Fixed adaptive palette rendering for SDL.
 
 - Fixed scaling with manually specified window dimensions.
 
 - Fixed problem with unnecessary newlines with input timeouts.
 
-- Fixed problem with memory allocation leading to crashes in DOS.
-
 - Allow fontdir in .sfrotzrc to work relative to user's home directory.
+
+- Fixed problem with memory allocation leading to crashes in DOS.
 
 - Fixed problem with DOS Frotz creating non-portable Quetzal files.
 
