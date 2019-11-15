@@ -1,5 +1,5 @@
 /*
- * bcinit.c - DOS interface, initialization
+ * djinit.c - DJGPP interface, initialization
  *
  * This file is part of Frotz.
  *
@@ -19,22 +19,22 @@
  * Or visit http://www.fsf.org/
  */
 
+#include <pc.h>
+#include <signal.h>
 #include <conio.h>
 #include <dos.h>
+#include <dpmi.h>
+#include <go32.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "frotz.h"
-#include "bcfrotz.h"
+#include "djfrotz.h"
 
 #ifndef NO_BLORB
-#include "bcblorb.h"
+#include "djblorb.h"
 #endif
-
-#include "font8x8.h"
-#include "font8x14.h"
-#include "font8x16.h"
-#include "bchash.h"
 
 extern f_setup_t f_setup;
 extern z_header_t z_header;
@@ -44,28 +44,25 @@ static char information[] =
     "Complies with standard 1.0 of Graham Nelson's specification.\n"
     "\n"
     "Syntax: frotz [options] story-file\n"
-    "  -a   watch attribute setting    \t -O   watch object locating\n"
-    "  -A   watch attribute testing    \t -p   alter piracy opcode\n"
-    "  -b # background colour          \t -r # right margin\n"
-    "  -B # reverse background colour  \t -R <path> restricted read/write\n"
-    "  -c # context lines              \t -s # random number seed value\n"
-    "  -d # display mode (see below)   \t -S # transcript width\n"
-    "  -e # emphasis colour [mode 1]   \t -t   set Tandy bit\n"
-    "  -f # foreground colour          \t -T   bold typing [modes 2+4+5]\n"
-    "  -F # reverse foreground colour  \t -u # slots for multiple undo\n"
-    "  -g # font [mode 5] (see below)  \t -v   show version information\n"
+    "  -a   watch attribute setting    \t -o   watch object movement\n"
+    "  -A   watch attribute testing    \t -O   watch object locating\n"
+    "  -b # background colour          \t -p   alter piracy opcode\n"
+    "  -B # reverse background colour  \t -r # right margin\n"
+    "  -c # context lines              \t -R <path> restricted read/write\n"
+    "  -d # display mode (see below)   \t -s # random number seed value\n"
+    "  -e # emphasis colour [mode 1]   \t -S # transcript width\n"
+    "  -f # foreground colour          \t -t   set Tandy bit\n"
+    "  -F # reverse foreground colour  \t -T   bold typing [modes 2+4+5]\n"
+    "  -g # font [mode 5] (see below)  \t -u # slots for multiple undo\n"
     "  -h # screen height              \t -w # screen width\n"
     "  -i   ignore runtime errors      \t -x   expand abbreviations g/x/z\n"
-    "  -l # left margin                \t -Z # error checking (see below)\n"
-    "  -o   watch object movement\n"
+    "  -l # left margin                \t -Z # error checking (see below)"
     "\n"
-    "Fonts: 0 fixed, 1 sans serif, 2 comic, 3 times, 4 serif.\n"
-    "Display modes:  0 mono, 1 text, 2 CGA, 3 MCGA, 4 EGA, 5 Amiga.\n"
-    "Error reporting: 0 none, 1 first only (default), 2 all, 3 exit after any error.";
-
-/* in bcinit.c only.  What is its significance? */
-extern unsigned cdecl _heaplen = 0x800 + 4 * BUFSIZ;
-extern unsigned cdecl _stklen = 0x800;
+    "Fonts are 0 (fixed), 1 (sans serif), 2 (comic), 3 (times), 4 (serif).\n"
+    "Display modes are 0 (mono), 1 (text), 2 (CGA), 3 (MCGA), 4 (EGA), 5 (Amiga)."
+    "\n\n"
+    "Error checking is 0 (none), 1 (report first error (default)),\n"
+    "  2 (report all errors), 3 (exit after any error).";
 
 extern int zoptind;
 
@@ -98,55 +95,12 @@ char *blorb_name;
 char *blorb_file;
 bool use_blorb;
 bool exec_in_blorb;
+
+int dos_init_blorb(void);
 #endif
 
 static byte old_video_mode = 0;
 
-static void interrupt(*oldvect) () = NULL;
-
-bool at_keybrd;
-int graphics_adapter;
-
-/* Test for the existance of Enhanced AT keyboard support in BIOS */
-static bool test_enhanced_keyboard(unsigned char b)
-{
-	union REGS regs;
-	unsigned char far *shift_status;
-	shift_status = MK_FP(0, 0x417);
-	shift_status[0] = b;
-	regs.h.ah = 0x12;
-	int86(0x16, &regs, &regs);
-	return b == regs.h.al;
-}
-
-static int detect_adapter(void)
-{
-	union REGS regs;
-
-	regs.x.ax = 0x1200;
-	regs.h.bl = 0x32;
-	int86(0x10, &regs, &regs);
-
-	if (regs.h.al == 0x12) {
-		return VGA_ADAPTER;
-	}
-
-	regs.h.ah = 0x12;
-	regs.h.bl = 0x10;
-	int86(0x10, &regs, &regs);
-
-	if (regs.h.bl < 4) {
-		return EGA_ADAPTER;
-	}
-
-	regs.h.ah = 0x0F;
-	int86(0x10, &regs, &regs);
-	if (regs.h.al != 7) {
-		return CGA_ADAPTER;
-	}
-
-	return MONO_ADAPTER;
-}
 
 /*
  * os_init_setup
@@ -171,10 +125,6 @@ void os_init_setup(void)
 	f_setup.sound = 1;
 	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
 	f_setup.restore_mode = 0;
-
-	graphics_adapter = detect_adapter();
-	at_keybrd = (test_enhanced_keyboard(0x40) && test_enhanced_keyboard(0x80));
-	test_enhanced_keyboard(0x00);
 } /* os_init_setup */
 
 
@@ -222,28 +172,6 @@ int hextoi(const char *s)
 	return n;
 } /* hextoi */
 
-
-/*
- * basename
- *
- * A generic and spartan bit of code to extract the filename from a path.
- * This one is so trivial that it's okay to steal.
- */
-char *basename(const char *path)
-{
-	const char *s;
-	const char *p;
-	p = s = path;
-
-	while (*s) {
-		if (*s++ == '\\') {
-			p = s;
-		}
-	}
-	return (char *)p;
-} /* basename */
-
-
 /*
  * cleanup
  *
@@ -253,16 +181,17 @@ char *basename(const char *path)
  */
 static void cleanup(void)
 {
-#ifdef SOUND_SUPPORT
-	dos_reset_sound();
-#endif
+	__dpmi_regs regs;
+
+	cleanup_sound();
+
 	reset_pictures();
 
-	asm mov ah, 0
-	asm mov al, old_video_mode
-	asm int 0x10
+	regs.h.ah = 0;
+	regs.h.al = old_video_mode;
+	__dpmi_int (0x10, &regs);
 
-	setvect(0x1b, oldvect);
+	signal(SIGINT, SIG_DFL);
 } /* cleanup */
 
 
@@ -272,12 +201,11 @@ static void cleanup(void)
  * Handler routine to be called when the crtl-break key is pressed.
  *
  */
-static void interrupt fast_exit()
+static void fast_exit()
 {
 	cleanup();
 	exit(EXIT_FAILURE);
 } /* fast_exit */
-
 
 /*
  * os_quit
@@ -327,7 +255,7 @@ static void parse_options(int argc, char **argv)
 		int num = 0;
 
 		c = zgetopt(argc, argv,
-			   "aAb:B:c:d:e:f:F:g:h:il:oOpr:R:s:S:tTu:vw:xZ:");
+			   "aAb:B:c:d:e:f:F:g:h:il:oOpr:R:s:S:tTu:w:xZ:");
 
 		if (zoptarg != NULL)
 			num = dectoi(zoptarg);
@@ -385,18 +313,6 @@ static void parse_options(int argc, char **argv)
 			user_tandy_bit = 1;
 		if (c == 'u')
 			f_setup.undo_slots = num;
-		if (c == 'v') {
-			printf("FROTZ V%s - MSDOS / PCDOS Edition\n", VERSION);
-			printf("Build date:\t%s %s\n", __DATE__, __TIME__);
-			printf("Commit date:\t%s\n", GIT_DATE);
-			printf("Git commit:\t%s\n", GIT_HASH);
-			printf("  Frotz was originally written by Stefan Jokisch.\n");
-			printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
-			printf("  It was ported to Unix by Galen Hazelwood.\n");
-			printf("  The core and DOS port are maintained by David Griffith.\n");
-			printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n");
-			exit(0);
-		}
 		if (c == 'w')
 			user_screen_width = num;
 		if (c == 'x')
@@ -411,14 +327,15 @@ static void parse_options(int argc, char **argv)
 
 } /* parse_options */
 
+
 static char *malloc_filename(char *story_name, char *extension)
 {
-	int length = strlen(story_name) + strlen(extension) + 2;
+	int length = strlen(story_name) + 5;
 	char *filename = malloc(length);
 	if (filename) {
-		strcpy(filename, story_name);
-		strcat(filename, ".");
-		strcat(filename, extension);
+		strlcpy(filename, story_name, length);
+		strlcat(filename, ".", length);
+		strlcat(filename, extension, length);
 	}
 	return filename;
 }
@@ -455,18 +372,13 @@ void os_process_arguments(int argc, char *argv[])
 	parse_options(argc, argv);
 
 	if (zoptind != argc - 1) {
-		printf("FROTZ V%s - MSDOS / PCDOS Edition.  ", VERSION);
-#ifndef NO_SOUND
-		printf("Audio output enabled.\n");
-#else
-		printf("Audio output disabled.\n");
-#endif
+		printf("FROTZ V%s\tMSDOS / PCDOS Edition\n", VERSION);
 		puts(information);
-		exit(EXIT_SUCCESS);
+		exit(EXIT_FAILURE);
 	}
 
 	/* Set the story file name */
-	f_setup.story_file = strdup(argv[zoptind]);
+	f_setup.story_file = strlwr(strdup(argv[zoptind]));
 
 	/* Strip path and extension off the story file name */
 	p = strdup(f_setup.story_file);
@@ -516,7 +428,7 @@ void os_process_arguments(int argc, char *argv[])
  */
 static void standard_palette(void)
 {
-
+	__dpmi_regs regs;
 	static byte palette[] = {
 		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x14, 0x07,
 		0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
@@ -524,14 +436,14 @@ static void standard_palette(void)
 	};
 
 	if (display == _AMIGA_) {
-		asm mov ax, 0x1002
-		asm lea dx, palette
-		asm push ds
-		asm pop es
-		asm int 0x10
-		asm mov ax, 0x1013
-		asm mov bx, 0x0001
-		asm int 0x10
+		dosmemput(palette, sizeof(palette), MASK_LINEAR(__tb));
+		regs.x.ax = 0x1002;
+		regs.x.dx = RM_OFFSET(__tb);
+		regs.x.es = RM_SEGMENT(__tb);
+		__dpmi_int (0x10, &regs);
+		regs.x.ax = 0x1013;
+		regs.x.bx = 0x0001;
+		__dpmi_int (0x10, &regs);
 	}
 } /* standard_palette */
 
@@ -544,7 +456,7 @@ static void standard_palette(void)
  *
  */ static void special_palette(void)
 {
-
+	__dpmi_regs regs;
 	static byte palette[] = {
 		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
 		0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -552,14 +464,14 @@ static void standard_palette(void)
 	};
 
 	if (display == _AMIGA_) {
-		asm mov ax, 0x1002
-		asm mov dx, offset palette
-		asm push ds
-		asm pop es
-		asm int 0x10
-		asm mov ax, 0x1013
-		asm mov bx, 0x0101
-		asm int 0x10
+		dosmemput(palette, sizeof(palette), MASK_LINEAR(__tb));
+		regs.x.ax = 0x1002;
+		regs.x.dx = RM_OFFSET(__tb);
+		regs.x.es = RM_SEGMENT(__tb);
+		__dpmi_int (0x10, &regs);
+		regs.x.ax = 0x1013;
+		regs.x.bx = 0x0101;
+		__dpmi_int (0x10, &regs);
 	}
 } /* special_palette */
 
@@ -638,14 +550,15 @@ static void standard_palette(void)
 		{0x10c, 132, 60}
 	};
 
-	int subdisplay;
+	int subdisplay = -1;
+	__dpmi_regs regs;
 
 	/* Get the current video mode. This video mode will be selected
 	   when the program terminates. It's also useful to auto-detect
 	   monochrome boards. */
-	asm mov ah, 15
-	asm int 0x10
-	asm mov old_video_mode, al
+	regs.h.ah = 15;
+	__dpmi_int (0x10, &regs);
+	old_video_mode = regs.h.al;
 
 	/* If the display mode has not already been set by the user then see
 	   if this is a monochrome board. If so, set the display mode to 0.
@@ -661,71 +574,38 @@ static void standard_palette(void)
 			display = '1';
 	}
 
-	/* This checks the selected display against the graphics adapter and
-	 * forces the correct display type if you have selected an invalid display
-	 * for your installed adapter */
-	if ((display == '3' || display >= '5') && graphics_adapter != VGA_ADAPTER)
-		display = '4';
-	if (display == '4' && graphics_adapter > EGA_ADAPTER)
-		display = '2';
-	if (display == '2' && graphics_adapter > CGA_ADAPTER)
-		display = '0';
-
 	/* Activate the desired display mode. All VESA text modes are very
 	   similar to the standard text mode; in fact, only here we need to
 	   know which VESA mode is used. */
 	if (display >= '0' && display <= '5') {
 		subdisplay = -1;
 		display -= '0';
-		_AL = info[display].vmode;
-		_AH = 0;
+		regs.h.al = info[display].vmode;
+		regs.h.ah = 0;
 	} else if (display == 'a') {
 		subdisplay = 0;
 		display = 1;
-		_AL = 0x01;
-		_AH = 0;
+		regs.x.ax = 0x0001;
 	} else if (display >= 'b' && display <= 'e') {
 		subdisplay = display - 'a';
 		display = 1;
-		_BX = subinfo[subdisplay].vesamode;
-		_AX = 0x4f02;
+		regs.x.bx = subinfo[subdisplay].vesamode;
+		regs.x.ax = 0x4f02;
 	}
 
-	geninterrupt(0x10);
+	__dpmi_int (0x10, &regs);
 
 	/* Make various preparations */
 	if (display <= _TEXT_) {
-		if (graphics_adapter == EGA_ADAPTER || graphics_adapter == VGA_ADAPTER) {
-			asm mov bx, 0x0e00
-			asm mov bp, offset font8x14_ext_latin
-			asm mov ax, graphics_adapter
-			asm cmp ax, EGA_ADAPTER
-			asm je load_font
-			asm mov ax, 0x1130
-			asm mov bh, 1
-			asm int 0x10
-			asm mov bx, 0x1000
-			asm mov bp, offset font8x16_ext_latin
-			asm cmp cx, 0x10
-			asm je load_font
-			asm mov bx, 0x0800
-			asm mov bp, offset font8x8_ext_latin
-load_font:
-			asm mov ax, 0x1110
-			asm mov cx, 0x0060
-			asm mov dx, 0x00a0
-			asm push ds
-			asm pop es
-			asm int 0x10
-		}
+
 		/* Enable bright background colours */
-		asm mov ax, 0x1003
-		asm mov bl, 0
-		asm int 0x10
+		regs.x.ax = 0x1003;
+		regs.h.bl = 0;
+		__dpmi_int (0x10, &regs);
 		/* Turn off hardware cursor */
-		asm mov ah, 1
-		asm mov cx, 0xffff
-		asm int 0x10
+		regs.h.ah = 1;
+		regs.x.cx = 0xffff;
+		__dpmi_int (0x10, &regs);
 	} else {
 		load_fonts();
 
@@ -736,26 +616,17 @@ load_font:
 			   help us here since this is not a standard resolution. */
 			outportb(0x03c2, 0x63);
 
-			outport(0x03d4, 0x0e11);
-			outport(0x03d4, 0xbf06);
-			outport(0x03d4, 0x1f07);
-			outport(0x03d4, 0x9c10);
-			outport(0x03d4, 0x8f12);
-			outport(0x03d4, 0x9615);
-			outport(0x03d4, 0xb916);
+			outportw(0x03d4, 0x0e11);
+			outportw(0x03d4, 0xbf06);
+			outportw(0x03d4, 0x1f07);
+			outportw(0x03d4, 0x9c10);
+			outportw(0x03d4, 0x8f12);
+			outportw(0x03d4, 0x9615);
+			outportw(0x03d4, 0xb916);
 
 		}
 
 	}
-#if !defined(__SMALL__) && !defined (__TINY__) && !defined (__MEDIUM__)
-	/* Set the amount of memory to reserve for later use. It takes
-	   some memory to open command, script and game files. If Frotz
-	   is compiled in a small memory model then memory for opening
-	   files is allocated on the "near heap" while other allocations
-	   are made on the "far heap", i.e. we need not reserve memory
-	   in this case. */ reserve_mem = 4 * BUFSIZ;
-
-#endif
 
 	/* Amiga emulation under V6 needs special preparation. */
 	if (display == _AMIGA_ && z_header.version == V6) {
@@ -792,16 +663,6 @@ load_font:
 	if (z_header.flags & GRAPHICS_FLAG)
 		if (display <= _TEXT_)
 			z_header.flags &= ~GRAPHICS_FLAG;
-	if (z_header.version == V3 && (z_header.flags & OLD_SOUND_FLAG))
-#ifdef SOUND_SUPPORT
-		if (!dos_init_sound())
-#endif
-			z_header.flags &= ~OLD_SOUND_FLAG;
-	if (z_header.flags & SOUND_FLAG)
-#ifdef SOUND_SUPPORT
-		if (!dos_init_sound())
-#endif
-			z_header.flags &= ~SOUND_FLAG;
 	if (z_header.version >= V5 && (z_header.flags & UNDO_FLAG))
 		if (!f_setup.undo_slots)
 			z_header.flags &= ~UNDO_FLAG;
@@ -849,8 +710,7 @@ load_font:
 		z_header.interpreter_number = INTERP_AMIGA;
 
 	/* Install the fast_exit routine to handle the ctrl-break key */
-	oldvect = getvect(0x1b);
-	setvect(0x1b, fast_exit);
+	signal(SIGINT, fast_exit);
 } /* os_init_screen */
 
 
@@ -867,7 +727,6 @@ void os_reset_screen(void)
 	os_display_string((zchar *) "[Hit any key to exit.]");
 	os_read_key(0, TRUE);
 
-	cleanup();
 } /* os_reset_screen */
 
 
@@ -885,6 +744,7 @@ void os_reset_screen(void)
 void os_restart_game(int stage)
 {
 	int x, y;
+	__dpmi_regs regs;
 
 	if (story_id == BEYOND_ZORK) {
 		if (stage == RESTART_BEGIN) {
@@ -893,18 +753,18 @@ void os_restart_game(int stage)
 
 				special_palette();
 
-				asm mov ax, 0x1010
-				asm mov bx, 64
-				asm mov dh, 0
-				asm mov ch, 0
-				asm mov cl, 0
-				asm int 0x10
-				asm mov ax, 0x1010
-				asm mov bx, 79
-				asm mov dh, 0xff
-				asm mov ch, 0xff
-				asm mov cl, 0xff
-				asm int 0x10
+
+				regs.x.ax = 0x1010;
+				regs.x.bx = 64;
+				regs.h.dh = 0;
+				regs.x.cx = 0;
+				__dpmi_int (0x10, &regs);
+				regs.x.ax = 0x1010;
+				regs.x.bx = 79;
+				regs.h.dh = 0xff;
+				regs.x.cx = 0xffff;
+				__dpmi_int (0x10, &regs);
+
 				os_draw_picture(1, 1, 1);
 				os_read_key(0, FALSE);
 
@@ -924,12 +784,15 @@ void os_restart_game(int stage)
  */
 int os_random_seed(void)
 {
+	__dpmi_regs regs;
+
 	if (user_random_seed == -1) {
 		/* Use the time of day as seed value */
-		asm mov ah, 0
-		asm int 0x1a
+		regs.h.ah = 0;
+		__dpmi_int (0x1a, &regs);
 
-		return _DX & 0x7fff;
+		return regs.x.dx & 0x7fff;
+
 	} else
 		return user_random_seed;
 } /* os_random_seed */
@@ -947,7 +810,7 @@ FILE *os_path_open(const char *name, const char *mode)
 {
 	FILE *fp;
 	char buf[MAX_FILE_NAME + 1];
-	char *p, *bp, lastch;
+	char *p, *bp, lastch = 0;
 
 	if ((fp = fopen(name, mode)) != NULL)
 		return fp;
@@ -1012,25 +875,32 @@ int dos_init_blorb(void)
 	 * is contained in the blorb file.
 	 */
 	if (strncmp((char *)basename(f_setup.story_file),
-		    (char *)basename(blorb_file), 55) == 0) {
-		if ((blorbfile = fopen(blorb_file, "rb")) == NULL)
-			return bb_err_Read;
-		/* Under DOS, bb_create_map() returns bb_err_Format */
-		blorb_err = bb_create_map(blorbfile, &blorb_map);
+	            (char *)basename(blorb_file), 55) == 0) {
+		exec_in_blorb = 1;
+	}
 
-		if (blorb_err != bb_err_None) {
-			return blorb_err;
-		}
+	if ((blorbfile = fopen(blorb_file, "rb")) == NULL)
+		return bb_err_Read;
 
+	/* Under DOS, bb_create_map() returns bb_err_Format */
+	blorb_err = bb_create_map(blorbfile, &blorb_map);
+
+	if (blorb_err != bb_err_None) {
+		return blorb_err;
+	}
+
+	if (exec_in_blorb) {
 		/* Now we need to locate the EXEC chunk within the blorb file
 		 * and present it to the rest of the program as a file stream.
 		 */
 		blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
-						  &blorb_res, bb_ID_ZCOD, 0);
+		                                  &blorb_res, bb_ID_ZCOD, 0);
 
 		if (blorb_err == bb_err_None) {
 			exec_in_blorb = 1;
 			use_blorb = 1;
+		} else {
+			return blorb_err;
 		}
 	}
 	return 0;
