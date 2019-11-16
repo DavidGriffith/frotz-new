@@ -297,7 +297,7 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 		$(NAME)src/doc/*.6 $(NAME)src/doc/frotz.conf* \
 		$(NAME)src/doc/Xresources  > /dev/null
 else
-        @echo "Not in a git repository or git command not found.  Cannot make a tarball."
+	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
 endif
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
