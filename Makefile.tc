@@ -1,4 +1,5 @@
 # This file is used to build Frotz for DOS using Borland Turbo C++ 3.00.
+# Written with Borland MAKE Version 3.6 in mind.
 # The resulting executable runs as a 16-bit program.
 #
 
