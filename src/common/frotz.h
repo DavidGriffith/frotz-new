@@ -23,7 +23,7 @@
 
 #ifndef MSDOS_16BIT
 #include "defs.h"
-#include "git_hash.h"
+#include "hash.h"
 #endif
 
 #ifndef __UNIX_PORT_FILE

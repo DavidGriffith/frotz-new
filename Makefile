@@ -248,7 +248,7 @@ SRCDIR = src
 COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
 COMMON_DEFINES = $(COMMON_DIR)/defs.h
-HASH = $(COMMON_DIR)/git_hash.h
+HASH = $(COMMON_DIR)/hash.h
 
 BLORB_DIR = $(SRCDIR)/blorb
 BLORB_LIB = $(BLORB_DIR)/blorblib.a
