@@ -468,7 +468,7 @@ void os_process_arguments(int argc, char *argv[])
 		f_setup.save_name =
 		    malloc((strlen(f_setup.tmp_save_name) +
 			    strlen(EXT_SAVE)) * sizeof(char) + 1);
-		memcpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.story_name) * sizeof(char));
+		memcpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) * sizeof(char));
 		free(f_setup.tmp_save_name);
 	}
 
