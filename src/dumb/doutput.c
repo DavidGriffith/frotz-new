@@ -21,6 +21,8 @@
 
 #include "dfrotz.h"
 
+#define DEFAULT_IRC_COLOUR 31
+
 f_setup_t f_setup;
 
 static bool show_line_numbers = FALSE;
@@ -38,31 +40,32 @@ static char latin1_to_ascii[] =
 	"th  n   o   o   o   o   oe  :   o   u   u   u   ue  y   th  y   "
 ;
 
+static char frotz_to_mirc [256];
+
 /* z_header.screen_rows * z_header.screen_cols */
 static int screen_cells;
 
 /* The in-memory state of the screen.  */
 /* Each cell contains a style in the lower byte and a zchar above. */
-#ifdef USE_UTF8
-typedef unsigned int cell;
-#else
-typedef unsigned short cell;
-#endif
-static cell *screen_data;
 
-static cell make_cell(int style, zchar c) {return (c << 8) | (0xff & style);}
-static zchar cell_char(cell c) {return c >> 8;}
-static int cell_style(cell c) {return c & 0xff;}
+typedef struct cell_struct {
+	int style;
+	short fg;
+	short bg;
+	zchar c;
+} cell_t;
 
+static cell_t *screen_data;
 
 /* A cell's style is REVERSE_STYLE, normal (0), or PICTURE_STYLE.
  * PICTURE_STYLE means the character is part of an ascii image outline
  * box.  (This just buys us the ability to turn box display on and off
  * with immediate effect.  No, not very useful, but I wanted to give
  * the rv bit some company in that huge byte I allocated for it.)  */
-#define PICTURE_STYLE 16
 
 static int current_style = 0;
+static char current_fg = DEFAULT_IRC_COLOUR;
+static char current_bg = DEFAULT_IRC_COLOUR;
 
 /* Which cells have changed (1 byte per cell).  */
 static char *screen_changes;
@@ -71,29 +74,420 @@ static int cursor_row = 0, cursor_col = 0;
 
 /* Compression styles.  */
 static enum {
-	COMPRESSION_NONE, COMPRESSION_SPANS, COMPRESSION_MAX,
+	COMPRESSION_NONE,
+	COMPRESSION_SPANS,
+	COMPRESSION_MAX,
 } compression_mode = COMPRESSION_SPANS;
 static char *compression_names[] = {"NONE", "SPANS", "MAX"};
 static int hide_lines = 0;
 
 /* Reverse-video display styles.  */
 static enum {
-	RV_NONE, RV_DOUBLESTRIKE, RV_UNDERLINE, RV_CAPS,
+        RV_NONE,
+	RV_DOUBLESTRIKE,
+	RV_UNDERLINE,
+	RV_CAPS,
 } rv_mode = RV_NONE;
 static char *rv_names[] = {"NONE", "DOUBLESTRIKE", "UNDERLINE", "CAPS"};
 static char rv_blank_char = ' ';
 
-static cell *dumb_row(int r)
+
+/*
+ * Local functions
+ */
+#ifdef USE_UTF8
+static void zputchar(zchar);
+void zputchar(zchar c)
+{
+	if(c > 0x7ff) {
+		putchar(0xe0 | ((c >> 12) & 0xf));
+		putchar(0x80 | ((c >> 6) & 0x3f));
+		putchar(0x80 | (c & 0x3f));
+	} else if(c > 0x7f) {
+		putchar(0xc0 | ((c >> 6) & 0x1f));
+		putchar(0x80 | (c & 0x3f));
+	} else {
+		putchar(c);
+	}
+}
+#else
+#define zputchar(x) putchar(x)
+#endif
+
+/* if val is '0' or '1', set *var accordingly, else toggle it.  */
+static void toggle(bool *var, char val)
+{
+	*var = val == '1' || (val != '0' && !*var);
+}
+
+
+/* Print a cell to stdout using IRC formatting codes.  */
+#ifndef DISABLE_FORMATS
+static void show_cell_irc(cell_t cel)
+{
+	static char lastfg   = DEFAULT_IRC_COLOUR,
+		    lastbg   = DEFAULT_IRC_COLOUR,
+		    lastbold = 0,
+		    lastemph = 0;
+
+	char	    fg	     = cel.fg,
+		    bg	     = cel.bg;
+
+	if (cel.style & REVERSE_STYLE) {
+		char temp;
+		temp = cel.fg;
+		cel.fg = cel.bg;
+		bg = temp;
+	}
+
+	if (fg != lastfg || bg != lastbg) {
+		putchar ('\017');	/* ^O cancels all text styles */
+		lastbold = 0;
+		lastemph = 0;
+
+		if (fg != DEFAULT_IRC_COLOUR) {
+			if (bg != DEFAULT_IRC_COLOUR)
+				printf("\003%hhu,%s%hhu", fg, (bg < 10) ? "0" : "", bg);
+			else
+				printf("\003%s%hhu", (fg < 10) ? "0" : "", fg);
+		}
+	}
+
+	if (cel.style & BOLDFACE_STYLE) {
+		if (!lastbold)
+			putchar('\002');
+		lastbold = 1;
+	} else {
+		if (lastbold)
+			putchar('\002');
+		lastbold = 0;
+	}
+
+	if (cel.style & EMPHASIS_STYLE) {
+		if (!lastemph)
+			putchar('\037');
+		lastemph = 1;
+	} else {
+		if (lastemph)
+			putchar('\037');
+		lastemph = 0;
+	}
+
+	if (cel.style & PICTURE_STYLE)
+		zputchar(show_pictures ? cel.c : ' ');
+	else
+		zputchar(cel.c);
+
+	lastfg = fg;
+	lastbg = bg;
+}
+#endif /* DISABLE_FORMATS */
+
+
+/* Print a cell to stdout without using formatting codes.  */
+static void show_cell_normal(cell_t cel)
+{
+	switch (cel.style) {
+	case NORMAL_STYLE:
+	case FIXED_WIDTH_STYLE:	/* NORMAL_STYLE falls through to here */
+		zputchar(cel.c);
+		break;
+	case PICTURE_STYLE:
+		zputchar(show_pictures ? cel.c : ' ');
+		break;
+	case REVERSE_STYLE:
+		if (cel.c == ' ')
+			putchar(rv_blank_char);
+		else {
+			switch (rv_mode) {
+			case RV_CAPS:
+				if (cel.c <= 0x7f) {
+					zputchar(toupper(cel.c));
+					break;
+				}
+			case RV_NONE:
+				zputchar(cel.c);
+				break;
+			case RV_UNDERLINE:
+				putchar('_');
+				putchar('\b');
+				zputchar(cel.c);
+				break;
+			case RV_DOUBLESTRIKE:
+				zputchar(cel.c);
+				putchar('\b');
+				zputchar(cel.c);
+				break;
+			}
+		}
+		break;
+	}
+}
+
+
+static void show_cell(cell_t cel)
+{
+#ifndef DISABLE_FORMATS
+	if (f_setup.format == FORMAT_IRC)
+		show_cell_irc(cel);
+	else
+#endif
+		show_cell_normal(cel);
+}
+
+
+static bool will_print_blank(cell_t c)
+{
+	return (((c.style == PICTURE_STYLE) && !show_pictures)
+		|| ((c.c == ' ')
+		&& ((c.style != REVERSE_STYLE)
+		|| (rv_blank_char == ' '))));
+}
+
+
+static void show_line_prefix(int row, char c)
+{
+	if (show_line_numbers) {
+		if (row == -1)
+			printf("..");
+		else
+			printf("%02d", (row + 1) % 100);
+	}
+	if (show_line_types)
+		putchar(c);
+	/* Add a separator char (unless there's nothing to separate).  */
+	if (show_line_numbers || show_line_types)
+		putchar(' ');
+}
+
+
+static cell_t *dumb_row(int r)
 {
 	return screen_data + r * z_header.screen_cols;
 }
 
 
-static char *dumb_changes_row(int r)
+static cell_t make_cell(int style, short fg, short bg, zchar c)
 {
-    return screen_changes + r * z_header.screen_cols;
+	cell_t	cel;
+
+	cel.style = style;
+	cel.c = c;
+
+	if (f_setup.format == FORMAT_IRC) {
+		cel.bg = bg;
+		cel.fg = fg;
+	}
+	return cel;
 }
 
+
+/* Print a row to stdout.  */
+static void show_row(int r)
+{
+	if (r == -1) {
+		show_line_prefix(-1, '.');
+	} else {
+		int c, last;
+		show_line_prefix(r, (r == cursor_row) ? ']' : ' ');
+		/* Don't print spaces at end of line.  */
+		/* (Saves bandwidth and printhead wear.)  */
+		/* TODO: compress spaces to tabs.  */
+		for (last = z_header.screen_cols - 1; last >= 0; last--) {
+			if (!will_print_blank(dumb_row(r)[last]))
+				break;
+		}
+
+		for (c = 0; c <= last; c++)
+			show_cell(dumb_row(r)[c]);
+	}
+	show_cell(make_cell (0, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, '\n'));
+}
+
+
+static char *dumb_changes_row(int r)
+{
+	return screen_changes + r * z_header.screen_cols;
+}
+
+
+/* Set a cell and update screen_changes.  */
+static void dumb_set_cell(int row, int col, cell_t c)
+{
+	cell_t test;
+	bool result = FALSE;
+
+	test = dumb_row(row)[col];
+
+	if (c.style  == test.style &&
+		c.fg == test.fg    &&
+		c.bg == test.bg    &&
+		c.c  == test.c) {
+		result = TRUE;
+	}
+
+	dumb_changes_row(row)[col] = (!result);
+	dumb_row(row)[col] = c;
+}
+
+
+/* put a character in the cell at the cursor and advance the cursor.  */
+static void dumb_display_char(zchar c)
+{
+	dumb_set_cell(cursor_row, cursor_col, make_cell(current_style, current_fg, current_bg, c));
+	if (++cursor_col == z_header.screen_cols) {
+		if (cursor_row == z_header.screen_rows - 1)
+			cursor_col--;
+		else {
+			cursor_row++;
+			cursor_col = 0;
+		}
+	}
+}
+
+
+static void mark_all_unchanged(void)
+{
+	memset(screen_changes, 0, screen_cells);
+}
+
+
+/* Check if a cell is a blank or will display as one.
+ * (Used to help decide if contents are worth printing.)  */
+static bool is_blank(cell_t c)
+{
+	return ((c.c == ' ')
+		|| ((c.style == PICTURE_STYLE) && !show_pictures));
+}
+
+
+static void dumb_copy_cell(int dest_row, int dest_col,
+			int src_row, int src_col)
+{
+	dumb_row(dest_row)[dest_col] = dumb_row(src_row)[src_col];
+	dumb_changes_row(dest_row)[dest_col] = dumb_changes_row(src_row)[src_col];
+}
+
+
+
+/*
+ * Public functions, mostly for the core.
+ */
+void os_display_char (zchar c)
+{
+	if (c >= ZC_LATIN1_MIN) {
+		if (plain_ascii) {
+			char *ptr = latin1_to_ascii + 4 * (c - ZC_LATIN1_MIN);
+			do
+				dumb_display_char(*ptr++);
+			while (*ptr != ' ');
+		} else
+			dumb_display_char(c);
+	} else if (c >= 32 && c <= 126) {
+		dumb_display_char(c);
+	} else if (c == ZC_GAP) {
+		dumb_display_char(' ');
+		dumb_display_char(' ');
+	} else if (c == ZC_INDENT) {
+		dumb_display_char(' ');
+		dumb_display_char(' ');
+		dumb_display_char(' ');
+	}
+	return;
+}
+
+
+/* Haxor your boxor? */
+void os_display_string (const zchar *s)
+{
+	zchar c;
+
+	while ((c = *s++) != 0) {
+		if (c == ZC_NEW_FONT)
+			s++;
+		else if (c == ZC_NEW_STYLE)
+			os_set_text_style(*s++);
+		else {
+			os_display_char (c);
+		}
+	}
+}
+
+
+void os_erase_area (int top, int left, int bottom, int right, int UNUSED (win))
+{
+	int row, col;
+	top--; left--; bottom--; right--;
+	for (row = top; row <= bottom; row++) {
+		for (col = left; col <= right; col++)
+			dumb_set_cell(row, col, make_cell(current_style, current_fg, current_bg, ' '));
+	}
+}
+
+
+void os_scroll_area (int top, int left, int bottom, int right, int units)
+{
+	int row, col;
+
+	top--; left--; bottom--; right--;
+
+	if (units > 0) {
+		for (row = top; row <= bottom - units; row++) {
+			for (col = left; col <= right; col++)
+				dumb_copy_cell(row, col, row + units, col);
+		}
+		os_erase_area(bottom - units + 2, left + 1,
+			bottom + 1, right + 1, -1 );
+	} else if (units < 0) {
+		for (row = bottom; row >= top - units; row--) {
+			for (col = left; col <= right; col++)
+				dumb_copy_cell(row, col, row + units, col);
+		}
+		os_erase_area(top + 1, left + 1, top - units, right + 1 , -1);
+	}
+}
+
+
+int os_font_data(int font, int *height, int *width)
+{
+	if (font == TEXT_FONT) {
+		*height = 1;
+		*width = 1;
+		return 1;
+	}
+	return 0;
+}
+
+
+void os_set_colour (int newfg, int newbg)
+{
+	current_fg = frotz_to_mirc[newfg];
+	current_bg = frotz_to_mirc[newbg];
+}
+
+
+void os_reset_screen(void)
+{
+	dumb_show_screen(FALSE);
+}
+
+
+void os_beep (int volume)
+{
+	if (visual_bell)
+		printf("[%s-PITCHED BEEP]\n", (volume == 1) ? "HIGH" : "LOW");
+	else
+		putchar('\a'); /* so much for dumb.  */
+}
+
+
+/* To make the common code happy */
+void os_set_font (int UNUSED (x)) {}
+void os_init_sound(void) {}
+void os_prepare_sample (int UNUSED (a)) {}
+void os_finish_with_sample (int UNUSED (a)) {}
+void os_start_sample (int UNUSED (a), int UNUSED (b), int UNUSED (c), zword UNUSED (d)) {}
+void os_stop_sample (int UNUSED (a)) {}
 
 int os_check_unicode(int font, zchar c)
 {
@@ -136,55 +530,75 @@ void os_set_cursor(int row, int col)
 
 
 bool os_repaint_window(int UNUSED(win), int UNUSED(ypos_old),
-                       int UNUSED(ypos_new), int UNUSED(xpos),
-                       int UNUSED(ysize), int UNUSED(xsize))
+			int UNUSED(ypos_new), int UNUSED(xpos),
+			int UNUSED(ysize), int UNUSED(xsize))
 {
 	return FALSE;
 }
 
 
-/* Set a cell and update screen_changes.  */
-static void dumb_set_cell(int row, int col, cell c)
-{
-	dumb_changes_row(row)[col] = (c != dumb_row(row)[col]);
-	dumb_row(row)[col] = c;
-}
-
-
-void dumb_set_picture_cell(int row, int col, zchar c)
-{
-	dumb_set_cell(row, col, make_cell(PICTURE_STYLE, c));
-}
-
-
-/* Copy a cell and copy its changedness state.
- * This is used for scrolling.  */
-static void dumb_copy_cell(int dest_row, int dest_col,
-			   int src_row, int src_col)
-{
-	dumb_row(dest_row)[dest_col] = dumb_row(src_row)[src_col];
-	dumb_changes_row(dest_row)[dest_col] = dumb_changes_row(src_row)[src_col];
-}
-
-
 void os_set_text_style(int x)
 {
-	current_style = x & REVERSE_STYLE;
+	current_style = x;
 }
 
 
-/* put a character in the cell at the cursor and advance the cursor.  */
-static void dumb_display_char(zchar c)
+/*
+ * Public functions just for the Dumb interface.
+ */
+void dumb_set_picture_cell(int row, int col, zchar c)
 {
-	dumb_set_cell(cursor_row, cursor_col, make_cell(current_style, c));
-	if (++cursor_col == z_header.screen_cols) {
-		if (cursor_row == z_header.screen_rows - 1)
-			cursor_col--;
-		else {
-			cursor_row++;
-			cursor_col = 0;
-		}
+	dumb_set_cell(row, col, make_cell(current_style | PICTURE_STYLE, current_fg, current_bg, c));
+}
+
+
+void dumb_init_output(void)
+{
+#ifndef DISABLE_FORMATS
+	if (f_setup.format == FORMAT_IRC) {
+		setvbuf(stdout, 0, _IONBF, 0);
+		setvbuf(stderr, 0, _IONBF, 0);
+
+		z_header.config |= CONFIG_COLOUR | CONFIG_BOLDFACE | CONFIG_EMPHASIS;
+
+		memset (frotz_to_mirc, 256, DEFAULT_IRC_COLOUR);
+		frotz_to_mirc [BLACK_COLOUR]   = 1;
+		frotz_to_mirc [RED_COLOUR]     = 4;
+		frotz_to_mirc [GREEN_COLOUR]   = 3;
+		frotz_to_mirc [YELLOW_COLOUR]  = 8;
+		frotz_to_mirc [BLUE_COLOUR]    = 12;
+		frotz_to_mirc [MAGENTA_COLOUR] = 6;
+		frotz_to_mirc [CYAN_COLOUR]    = 11;
+		frotz_to_mirc [WHITE_COLOUR]   = 0;
+		frotz_to_mirc [GREY_COLOUR]    = 14;
+
+		z_header.default_foreground = WHITE_COLOUR;
+		z_header.default_background = BLACK_COLOUR;
 	}
+#endif /* DISABLE_FORMATS */
+
+	if (z_header.version == V3) {
+		z_header.config |= CONFIG_SPLITSCREEN;
+		z_header.flags &= ~OLD_SOUND_FLAG;
+	}
+
+	if (z_header.version >= V5) {
+		z_header.flags &= ~SOUND_FLAG;
+	}
+
+	z_header.screen_height = z_header.screen_rows;
+	z_header.screen_width = z_header.screen_cols;
+	screen_cells = z_header.screen_rows * z_header.screen_cols;
+
+	z_header.font_width = 1; z_header.font_height = 1;
+
+	if (show_line_types == -1)
+		show_line_types = z_header.version > 3;
+
+	screen_data = malloc(screen_cells * sizeof(cell_t));
+	screen_changes = malloc(screen_cells);
+	os_erase_area(1, 1, z_header.screen_rows, z_header.screen_cols, -2);
+	memset(screen_changes, 0, screen_cells);
 }
 
 
@@ -192,7 +606,7 @@ void dumb_display_user_input(char *s)
 {
 	/* copy to screen without marking it as a change.  */
 	while (*s)
-		dumb_row(cursor_row)[cursor_col++] = make_cell(0, *s++);
+		dumb_row(cursor_row)[cursor_col++] = make_cell(0, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, *s++);
 }
 
 
@@ -210,202 +624,6 @@ void dumb_discard_old_input(int num_chars)
 }
 
 
-void os_display_char (zchar c)
-{
-	if (c >= ZC_LATIN1_MIN) {
-		if (plain_ascii) {
-			char *ptr = latin1_to_ascii + 4 * (c - ZC_LATIN1_MIN);
-			do
-				dumb_display_char(*ptr++);
-			while (*ptr != ' ');
-		} else
-			dumb_display_char(c);
-	} else if (c >= 32 && c <= 126) {
-		dumb_display_char(c);
-	} else if (c == ZC_GAP) {
-		dumb_display_char(' '); dumb_display_char(' ');
-	} else if (c == ZC_INDENT) {
-		dumb_display_char(' ');
-		dumb_display_char(' ');
-		dumb_display_char(' ');
-	}
-	return;
-}
-
-
-/* Haxor your boxor? */
-void os_display_string (const zchar *s)
-{
-	zchar c;
-
-	while ((c = *s++) != 0) {
-		if (c == ZC_NEW_FONT)
-			s++;
-		else if (c == ZC_NEW_STYLE)
-			os_set_text_style(*s++);
-		else {
-			os_display_char (c);
-		}
-	}
-}
-
-
-void os_erase_area (int top, int left, int bottom, int right, int UNUSED (win))
-{
-	int row, col;
-	top--; left--; bottom--; right--;
-	for (row = top; row <= bottom; row++) {
-		for (col = left; col <= right; col++)
-			dumb_set_cell(row, col, make_cell(current_style, ' '));
-	}
-}
-
-
-void os_scroll_area (int top, int left, int bottom, int right, int units)
-{
-	int row, col;
-
-	top--; left--; bottom--; right--;
-
-	if (units > 0) {
-		for (row = top; row <= bottom - units; row++) {
-			for (col = left; col <= right; col++)
-				dumb_copy_cell(row, col, row + units, col);
-		}
-		os_erase_area(bottom - units + 2, left + 1,
-			bottom + 1, right + 1, -1 );
-	} else if (units < 0) {
-		for (row = bottom; row >= top - units; row--) {
-			for (col = left; col <= right; col++)
-				dumb_copy_cell(row, col, row + units, col);
-		}
-		os_erase_area(top + 1, left + 1, top - units, right + 1 , -1);
-	}
-}
-
-
-int os_font_data(int font, int *height, int *width)
-{
-	if (font == TEXT_FONT) {
-		*height = 1;
-		*width = 1;
-		return 1;
-	}
-	return 0;
-}
-
-
-void os_set_colour (int UNUSED (x), int UNUSED (y)) {}
-void os_set_font (int UNUSED (x)) {}
-
-#ifdef USE_UTF8
-void zputchar(zchar c)
-{
-	if(c > 0x7ff) {
-		putchar(0xe0 | ((c >> 12) & 0xf));
-		putchar(0x80 | ((c >> 6) & 0x3f));
-		putchar(0x80 | (c & 0x3f));
-	} else if(c > 0x7f) {
-		putchar(0xc0 | ((c >> 6) & 0x1f));
-		putchar(0x80 | (c & 0x3f));
-	} else {
-		putchar(c);
-	}
-}
-#else
-#define zputchar(x) putchar(x)
-#endif
-
-
-/* Print a cell to stdout.  */
-static void show_cell(cell cel)
-{
-	zchar c = cell_char(cel);
-	switch (cell_style(cel)) {
-	case 0:
-		zputchar(c);
-		break;
-	case PICTURE_STYLE:
-		zputchar(show_pictures ? c : ' ');
-		break;
-	case REVERSE_STYLE:
-		if (c == ' ')
-			putchar(rv_blank_char);
-		else {
-			switch (rv_mode) {
-			case RV_CAPS:
-				if (c <= 0x7f) {
-					zputchar(toupper(c));
-					break;
-				}
-			case RV_NONE:
-				zputchar(c);
-				break;
-			case RV_UNDERLINE:
-				putchar('_');
-				putchar('\b');
-				zputchar(c);
-				break;
-			case RV_DOUBLESTRIKE:
-				zputchar(c);
-				putchar('\b');
-				zputchar(c);
-				break;
-	    		}
-			break;
-		}
-    	}
-}
-
-
-static bool will_print_blank(cell c)
-{
-	return (((cell_style(c) == PICTURE_STYLE) && !show_pictures)
-		|| ((cell_char(c) == ' ')
-		&& ((cell_style(c) != REVERSE_STYLE)
-		|| (rv_blank_char == ' '))));
-}
-
-
-static void show_line_prefix(int row, char c)
-{
-	if (show_line_numbers) {
-		if (row == -1)
-			printf("..");
-		else
-			printf("%02d", (row + 1) % 100);
-	}
-	if (show_line_types)
-		putchar(c);
-	/* Add a separator char (unless there's nothing to separate).  */
-	if (show_line_numbers || show_line_types)
-		putchar(' ');
-}
-
-
-/* Print a row to stdout.  */
-static void show_row(int r)
-{
-	if (r == -1) {
-		show_line_prefix(-1, '.');
-	} else {
-		int c, last;
-		show_line_prefix(r, (r == cursor_row) ? ']' : ' ');
-		/* Don't print spaces at end of line.  */
-		/* (Saves bandwidth and printhead wear.)  */
-		/* TODO: compress spaces to tabs.  */
-		for (last = z_header.screen_cols - 1; last >= 0; last--) {
-			if (!will_print_blank(dumb_row(r)[last]))
-				break;
-		}
-
-		for (c = 0; c <= last; c++)
-			show_cell(dumb_row(r)[c]);
-	}
-	putchar('\n');
-}
-
-
 /* Print the part of the cursor row before the cursor.  */
 void dumb_show_prompt(bool show_cursor, char line_type)
 {
@@ -418,29 +636,14 @@ void dumb_show_prompt(bool show_cursor, char line_type)
 }
 
 
-static void mark_all_unchanged(void)
-{
-	memset(screen_changes, 0, screen_cells);
-}
-
-
-/* Check if a cell is a blank or will display as one.
- * (Used to help decide if contents are worth printing.)  */
-static bool is_blank(cell c)
-{
-	return ((cell_char(c) == ' ')
-		|| ((cell_style(c) == PICTURE_STYLE) && !show_pictures));
-}
-
-
 /* Show the current screen contents, or what's changed since the last
  * call.
  *
  * If compressing, and show_cursor is true, and the cursor is past the
  * last nonblank character on the last line that would be shown, then
  * don't show that line (because it will be redundant with the prompt
- * line just below it).  */
-
+ * line just below it).
+ */
 void dumb_show_screen(bool show_cursor)
 {
 	int r, c, first, last;
@@ -454,7 +657,7 @@ void dumb_show_screen(bool show_cursor)
 		return;
 	}
 
-	/* Check which rows changed, and where the first and last change is.  */
+	/* Check which rows changed, and where the first and last change is. */
 	first = last = -1;
 	memset(changed_rows, 0, z_header.screen_rows);
 	for (r = hide_lines; r < z_header.screen_rows; r++) {
@@ -526,37 +729,6 @@ void dumb_elide_more_prompt(void)
 }
 
 
-void os_reset_screen(void)
-{
-	dumb_show_screen(FALSE);
-}
-
-
-void os_beep (int volume)
-{
-	if (visual_bell)
-		printf("[%s-PITCHED BEEP]\n", (volume == 1) ? "HIGH" : "LOW");
-	else
-		putchar('\a'); /* so much for dumb.  */
-}
-
-
-/* To make the common code happy */
-
-void os_init_sound(void) {}
-void os_prepare_sample (int UNUSED (a)) {}
-void os_finish_with_sample (int UNUSED (a)) {}
-void os_start_sample (int UNUSED (a), int UNUSED (b), int UNUSED (c), zword UNUSED (d)) {}
-void os_stop_sample (int UNUSED (a)) {}
-
-
-/* if val is '0' or '1', set *var accordingly, else toggle it.  */
-static void toggle(bool *var, char val)
-{
-	*var = val == '1' || (val != '0' && !*var);
-}
-
-
 bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 				bool startup)
 {
@@ -569,7 +741,7 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 		if (startup)
 			return TRUE;
 		for (i = 0; i < screen_cells; i++)
-			screen_changes[i] = (cell_style(screen_data[i]) == PICTURE_STYLE);
+			screen_changes[i] = (screen_data[i].style == PICTURE_STYLE);
 		dumb_show_screen(show_cursor);
 	} else if (!strncmp(setting, "vb", 2)) {
 		toggle(&visual_bell, setting[2]);
@@ -604,10 +776,10 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 			rv_names[rv_mode], rv_blank_char);
 
 		for (p = "sample reverse text"; *p; p++)
-			show_cell(make_cell(REVERSE_STYLE, *p));
+			show_cell(make_cell(REVERSE_STYLE, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, *p));
 		putchar('\n');
 		for (i = 0; i < screen_cells; i++)
-			screen_changes[i] = (cell_style(screen_data[i]) == REVERSE_STYLE);
+			screen_changes[i] = (screen_data[i].style == REVERSE_STYLE);
 		dumb_show_screen(show_cursor);
 	} else if (!strcmp(setting, "set")) {
 		printf("Compression Mode %s, hiding top %d lines\n",
@@ -620,7 +792,7 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 		printf("Reverse-Video mode %s, Blanks reverse to '%c': ",
 			rv_names[rv_mode], rv_blank_char);
 		for (p = "sample reverse text"; *p; p++)
-			show_cell(make_cell(REVERSE_STYLE, *p));
+			show_cell(make_cell(REVERSE_STYLE, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, *p));
 		putchar('\n');
 	} else
 		return FALSE;
@@ -628,28 +800,3 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 }
 
 
-void dumb_init_output(void)
-{
-	if (z_header.version == V3) {
-		z_header.config |= CONFIG_SPLITSCREEN;
-		z_header.flags &= ~OLD_SOUND_FLAG;
-	}
-
-	if (z_header.version >= V5) {
-		z_header.flags &= ~SOUND_FLAG;
-	}
-
-	z_header.screen_height = z_header.screen_rows;
-	z_header.screen_width = z_header.screen_cols;
-	screen_cells = z_header.screen_rows * z_header.screen_cols;
-
-	z_header.font_width = 1; z_header.font_height = 1;
-
-	if (show_line_types == -1)
-		show_line_types = z_header.version > 3;
-
-	screen_data = malloc(screen_cells * sizeof(cell));
-	screen_changes = malloc(screen_cells);
-	os_erase_area(1, 1, z_header.screen_rows, z_header.screen_cols, -2);
-	memset(screen_changes, 0, screen_cells);
-}

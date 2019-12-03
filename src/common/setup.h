@@ -2,6 +2,14 @@
  * Various status thingies for the interpreter and interface.
  *
  */
+
+typedef enum {
+	FORMAT_NORMAL,
+	FORMAT_UNKNOWN,
+	FORMAT_DISABLED,
+	FORMAT_IRC
+} format_t;
+
 typedef struct frotz_setup_struct {
 	int attribute_assignment;
 	int attribute_testing;
@@ -33,7 +41,8 @@ typedef struct frotz_setup_struct {
         char *zcode_path;
 	char *restricted_path;
 
-	bool restore_mode; /* for a save file passed from command line*/
+	format_t format;  /* type of format codes for dumb interface */
+	bool restore_mode; /* for a save file passed from command line */
 	bool use_blorb;
 	bool exec_in_blorb;
 } f_setup_t;

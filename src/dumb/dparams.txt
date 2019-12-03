@@ -1,5 +1,6 @@
 -a   watch attribute setting
 -A   watch attribute testing
+-f <type> type of format codes
 -h # screen height
 -i   ignore fatal errors
 -I # interpreter number

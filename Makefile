@@ -76,6 +76,9 @@ CURSES ?= ncursesw
 # For missing strrchr()
 #NO_STRRCHR = yes
 
+# Uncomment to disable format codes for dumb interface
+#DISABLE_FORMATS = yes
+
 # Assorted constants
 MAX_UNDO_SLOTS = 500
 MAX_FILE_NAME = 80
@@ -372,6 +375,9 @@ endif
 ifdef MACOS
 	@echo "#define _DARWIN_C_SOURCE" >> $@
 	@echo "#define _XOPEN_SOURCE 600" >> $@
+endif
+ifdef DISABLE_FORMATS
+	@echo "#define DISABLE_FORMATS" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 endif
