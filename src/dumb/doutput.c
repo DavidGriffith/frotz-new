@@ -89,7 +89,7 @@ static enum {
 	RV_CAPS,
 } rv_mode = RV_NONE;
 static char *rv_names[] = {"NONE", "DOUBLESTRIKE", "UNDERLINE", "CAPS"};
-static char rv_blank_char = ' ';
+static char rv_blank_str[5] = {' ', 0, 0, 0, 0};
 
 
 /*
@@ -197,7 +197,7 @@ static void show_cell_normal(cell_t cel)
 		break;
 	case REVERSE_STYLE:
 		if (cel.c == ' ')
-			putchar(rv_blank_char);
+			printf("%s", rv_blank_str);
 		else {
 			switch (rv_mode) {
 			case RV_CAPS:
@@ -241,7 +241,7 @@ static bool will_print_blank(cell_t c)
 	return (((c.style == PICTURE_STYLE) && !show_pictures)
 		|| ((c.c == ' ')
 		&& ((c.style != REVERSE_STYLE)
-		|| (rv_blank_char == ' '))));
+		|| (*rv_blank_str == ' '))));
 }
 
 
@@ -734,6 +734,9 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 {
 	char *p;
 	int i;
+#ifdef USE_UTF8
+	unsigned char *q;
+#endif
 
 	if (!strncmp(setting, "pb", 2)) {
 		toggle(&show_pictures, setting[2]);
@@ -769,11 +772,18 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 		case 'o': rv_mode = RV_DOUBLESTRIKE; break;
 		case 'u': rv_mode = RV_UNDERLINE; break;
 		case 'c': rv_mode = RV_CAPS; break;
-		case 'b': rv_blank_char = setting[2] ? setting[2] : ' '; break;
+		case 'b': strncpy(rv_blank_str, setting[2] ? &setting[2] : " ", 4); break;
 		default: return FALSE;
 		}
-		printf("Reverse-video mode %s, blanks reverse to '%c': ",
-			rv_names[rv_mode], rv_blank_char);
+#ifdef USE_UTF8
+		for (q = (unsigned char *)&rv_blank_str[1]; *q; q++)
+			if (*q < 0x80 || *q >= 0xc0 || (unsigned char)rv_blank_str[0] < 0x80)
+				*q = 0;
+#else
+		rv_blank_str[1] = 0;
+#endif
+		printf("Reverse-video mode %s, blanks reverse to '%s': ",
+			rv_names[rv_mode], rv_blank_str);
 
 		for (p = "sample reverse text"; *p; p++)
 			show_cell(make_cell(REVERSE_STYLE, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, *p));
@@ -789,8 +799,8 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 		os_beep(1); os_beep(2);
 		printf("Line Numbering %s\n", show_line_numbers ? "ON" : "OFF");
 		printf("Line-Type display %s\n", show_line_types ? "ON" : "OFF");
-		printf("Reverse-Video mode %s, Blanks reverse to '%c': ",
-			rv_names[rv_mode], rv_blank_char);
+		printf("Reverse-Video mode %s, Blanks reverse to '%s': ",
+			rv_names[rv_mode], rv_blank_str);
 		for (p = "sample reverse text"; *p; p++)
 			show_cell(make_cell(REVERSE_STYLE, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, *p));
 		putchar('\n');
