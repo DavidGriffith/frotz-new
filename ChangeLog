@@ -1,3 +1,25 @@
+Summary of changes between Frotz 2.50 and Frotz 2.51:
+=====================================================
+
+Frotz 2.51 was released on xxx xxx xx, 20xx.
+
+This is a minor release focusing on minor enhancements and bug fixes.
+
+NEW FEATURES
+
+- Added an -f option for Dumb Frotz to mark up the output with color and
+  formatting codes.  Currently only "irc" and "normal" modes are supported.
+
+
+BUG FIXES
+
+- Fixed where the Makefile used spaces instead of a tab in a rarely-used
+  recipe.
+
+- Fixed a memory allocation problem with restoring a game at the command
+  line using the -L option.
+
+
 Summary of changes between Frotz 2.44 and Frotz 2.50:
 =====================================================
 
