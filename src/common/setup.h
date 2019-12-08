@@ -7,7 +7,8 @@ typedef enum {
 	FORMAT_NORMAL,
 	FORMAT_UNKNOWN,
 	FORMAT_DISABLED,
-	FORMAT_IRC
+	FORMAT_IRC,
+	FORMAT_ANSI
 } format_t;
 
 typedef struct frotz_setup_struct {
