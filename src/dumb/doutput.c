@@ -313,32 +313,14 @@ static void show_cell(cell_t cel)
 
 static bool will_print_blank(cell_t c)
 {
+#ifndef DISABLE_FORMATS
+	if (f_setup.format != FORMAT_NORMAL)
+		return FALSE;
+#endif
 	return (((c.style == PICTURE_STYLE) && !show_pictures)
 		|| ((c.c == ' ')
 		&& ((c.style != REVERSE_STYLE)
 		|| (rv_blank_char == ' '))));
-}
-
-
-static void show_line_prefix(int row, char c)
-{
-	if (show_line_numbers) {
-		if (row == -1)
-			printf("..");
-		else
-			printf("%02d", (row + 1) % 100);
-	}
-	if (show_line_types)
-		putchar(c);
-	/* Add a separator char (unless there's nothing to separate).  */
-	if (show_line_numbers || show_line_types)
-		putchar(' ');
-}
-
-
-static cell_t *dumb_row(int r)
-{
-	return screen_data + r * z_header.screen_cols;
 }
 
 
@@ -354,6 +336,35 @@ static cell_t make_cell(int style, short fg, short bg, zchar c)
 		cel.fg = fg;
 	}
 	return cel;
+}
+
+
+static void show_line_prefix(int row, char c)
+{
+	if (show_line_numbers) {
+		if (row == -1) {
+			show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, '.'));
+			show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, '.'));
+		}
+		else {
+			char s[4];
+			sprintf(s, "%02d", (row + 1) % 100);
+			show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, s[0]));
+			show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, s[1]));
+		}
+	}
+	if (show_line_types)
+		show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, c));
+
+	/* Add a separator char (unless there's nothing to separate).  */
+	if (show_line_numbers || show_line_types)
+		show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, ' '));
+}
+
+
+static cell_t *dumb_row(int r)
+{
+	return screen_data + r * z_header.screen_cols;
 }
 
 
