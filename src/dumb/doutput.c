@@ -21,7 +21,7 @@
 
 #include "dfrotz.h"
 
-#define DEFAULT_IRC_COLOUR 31
+#define DEFAULT_DUMB_COLOUR 31
 
 f_setup_t f_setup;
 
@@ -40,7 +40,7 @@ static char latin1_to_ascii[] =
 	"th  n   o   o   o   o   oe  :   o   u   u   u   ue  y   th  y   "
 ;
 
-static char frotz_to_mirc [256];
+static char frotz_to_dumb [256];
 
 /* z_header.screen_rows * z_header.screen_cols */
 static int screen_cells;
@@ -64,8 +64,8 @@ static cell_t *screen_data;
  * the rv bit some company in that huge byte I allocated for it.)  */
 
 static int current_style = 0;
-static char current_fg = DEFAULT_IRC_COLOUR;
-static char current_bg = DEFAULT_IRC_COLOUR;
+static char current_fg = DEFAULT_DUMB_COLOUR;
+static char current_bg = DEFAULT_DUMB_COLOUR;
 
 /* Which cells have changed (1 byte per cell).  */
 static char *screen_changes;
@@ -125,8 +125,8 @@ static void toggle(bool *var, char val)
 #ifndef DISABLE_FORMATS
 static void show_cell_irc(cell_t cel)
 {
-	static char lastfg   = DEFAULT_IRC_COLOUR,
-		    lastbg   = DEFAULT_IRC_COLOUR,
+	static char lastfg   = DEFAULT_DUMB_COLOUR,
+		    lastbg   = DEFAULT_DUMB_COLOUR,
 		    lastbold = 0,
 		    lastemph = 0;
 
@@ -143,8 +143,8 @@ static void show_cell_irc(cell_t cel)
 		lastbold = 0;
 		lastemph = 0;
 
-		if (fg != DEFAULT_IRC_COLOUR) {
-			if (bg != DEFAULT_IRC_COLOUR)
+		if (fg != DEFAULT_DUMB_COLOUR) {
+			if (bg != DEFAULT_DUMB_COLOUR)
 				printf("\003%hhu,%s%hhu", fg, (bg < 10) ? "0" : "", bg);
 			else
 				printf("\003%s%hhu", (fg < 10) ? "0" : "", fg);
@@ -178,6 +178,79 @@ static void show_cell_irc(cell_t cel)
 
 	lastfg = fg;
 	lastbg = bg;
+}
+
+static void show_cell_ansi(cell_t cel)
+{
+	static char lastfg   = DEFAULT_DUMB_COLOUR,
+		    lastbg   = DEFAULT_DUMB_COLOUR,
+		    lastbold = 0,
+		    lastemph = 0,
+		    lastrev  = 0;
+
+	char	    fg	     = cel.fg,
+		    bg	     = cel.bg;
+
+	if (cel.c == '\n') {
+		printf("\033[0K\n");
+		return;
+	}
+
+	if (fg == DEFAULT_DUMB_COLOUR)
+		fg = frotz_to_dumb [z_header.default_foreground];
+	if (bg == DEFAULT_DUMB_COLOUR)
+		bg = frotz_to_dumb [z_header.default_background];
+
+	if (fg != lastfg) {
+		if (fg < 8)
+			printf("\033[%dm", 30 + fg);
+		else
+			printf("\033[38;5;%dm", 232 + fg);
+		lastfg = fg;
+	}
+
+	if (bg != lastbg) {
+		if (bg < 8)
+			printf("\033[%dm", 40 + bg);
+		else
+			printf("\033[48;5;%dm", 232 + bg);
+		lastbg = bg;
+	}
+
+	if (cel.style & REVERSE_STYLE) {
+		if (!lastrev)
+			printf("\033[7m");
+		lastrev = 1;
+	} else {
+		if (lastrev)
+			printf("\033[27m");
+		lastrev = 0;
+	}
+
+	if (cel.style & BOLDFACE_STYLE) {
+		if (!lastbold)
+			printf("\033[1m");
+		lastbold = 1;
+	} else {
+		if (lastbold)
+			printf("\033[22m");
+		lastbold = 0;
+	}
+
+	if (cel.style & EMPHASIS_STYLE) {
+		if (!lastemph)
+			printf("\033[4m");
+		lastemph = 1;
+	} else {
+		if (lastemph)
+			printf("\033[24m");
+		lastemph = 0;
+	}
+
+	if (cel.style & PICTURE_STYLE)
+		zputchar(show_pictures ? cel.c : ' ');
+	else
+		zputchar(cel.c);
 }
 #endif /* DISABLE_FORMATS */
 
@@ -228,6 +301,8 @@ static void show_cell(cell_t cel)
 #ifndef DISABLE_FORMATS
 	if (f_setup.format == FORMAT_IRC)
 		show_cell_irc(cel);
+	else if (f_setup.format == FORMAT_ANSI)
+		show_cell_ansi(cel);
 	else
 #endif
 		show_cell_normal(cel);
@@ -236,32 +311,14 @@ static void show_cell(cell_t cel)
 
 static bool will_print_blank(cell_t c)
 {
+#ifndef DISABLE_FORMATS
+	if (f_setup.format != FORMAT_NORMAL)
+		return FALSE;
+#endif
 	return (((c.style == PICTURE_STYLE) && !show_pictures)
 		|| ((c.c == ' ')
 		&& ((c.style != REVERSE_STYLE)
 		|| (*rv_blank_str == ' '))));
-}
-
-
-static void show_line_prefix(int row, char c)
-{
-	if (show_line_numbers) {
-		if (row == -1)
-			printf("..");
-		else
-			printf("%02d", (row + 1) % 100);
-	}
-	if (show_line_types)
-		putchar(c);
-	/* Add a separator char (unless there's nothing to separate).  */
-	if (show_line_numbers || show_line_types)
-		putchar(' ');
-}
-
-
-static cell_t *dumb_row(int r)
-{
-	return screen_data + r * z_header.screen_cols;
 }
 
 
@@ -272,11 +329,40 @@ static cell_t make_cell(int style, short fg, short bg, zchar c)
 	cel.style = style;
 	cel.c = c;
 
-	if (f_setup.format == FORMAT_IRC) {
+	if (f_setup.format != FORMAT_NORMAL) {
 		cel.bg = bg;
 		cel.fg = fg;
 	}
 	return cel;
+}
+
+
+static void show_line_prefix(int row, char c)
+{
+	if (show_line_numbers) {
+		if (row == -1) {
+			show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, '.'));
+			show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, '.'));
+		}
+		else {
+			char s[4];
+			sprintf(s, "%02d", (row + 1) % 100);
+			show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, s[0]));
+			show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, s[1]));
+		}
+	}
+	if (show_line_types)
+		show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, c));
+
+	/* Add a separator char (unless there's nothing to separate).  */
+	if (show_line_numbers || show_line_types)
+		show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, ' '));
+}
+
+
+static cell_t *dumb_row(int r)
+{
+	return screen_data + r * z_header.screen_cols;
 }
 
 
@@ -299,7 +385,7 @@ static void show_row(int r)
 		for (c = 0; c <= last; c++)
 			show_cell(dumb_row(r)[c]);
 	}
-	show_cell(make_cell (0, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, '\n'));
+	show_cell(make_cell (0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, '\n'));
 }
 
 
@@ -459,8 +545,8 @@ int os_font_data(int font, int *height, int *width)
 
 void os_set_colour (int newfg, int newbg)
 {
-	current_fg = frotz_to_mirc[newfg];
-	current_bg = frotz_to_mirc[newbg];
+	current_fg = frotz_to_dumb[newfg];
+	current_bg = frotz_to_dumb[newbg];
 }
 
 
@@ -559,22 +645,42 @@ void dumb_init_output(void)
 
 		z_header.config |= CONFIG_COLOUR | CONFIG_BOLDFACE | CONFIG_EMPHASIS;
 
-		memset (frotz_to_mirc, 256, DEFAULT_IRC_COLOUR);
-		frotz_to_mirc [BLACK_COLOUR]   = 1;
-		frotz_to_mirc [RED_COLOUR]     = 4;
-		frotz_to_mirc [GREEN_COLOUR]   = 3;
-		frotz_to_mirc [YELLOW_COLOUR]  = 8;
-		frotz_to_mirc [BLUE_COLOUR]    = 12;
-		frotz_to_mirc [MAGENTA_COLOUR] = 6;
-		frotz_to_mirc [CYAN_COLOUR]    = 11;
-		frotz_to_mirc [WHITE_COLOUR]   = 0;
-		frotz_to_mirc [GREY_COLOUR]    = 14;
+		memset (frotz_to_dumb, 256, DEFAULT_DUMB_COLOUR);
+		frotz_to_dumb [BLACK_COLOUR]   = 1;
+		frotz_to_dumb [RED_COLOUR]     = 4;
+		frotz_to_dumb [GREEN_COLOUR]   = 3;
+		frotz_to_dumb [YELLOW_COLOUR]  = 8;
+		frotz_to_dumb [BLUE_COLOUR]    = 12;
+		frotz_to_dumb [MAGENTA_COLOUR] = 6;
+		frotz_to_dumb [CYAN_COLOUR]    = 11;
+		frotz_to_dumb [WHITE_COLOUR]   = 0;
+		frotz_to_dumb [GREY_COLOUR]    = 14;
+
+		z_header.default_foreground = WHITE_COLOUR;
+		z_header.default_background = BLACK_COLOUR;
+	} else if (f_setup.format == FORMAT_ANSI) {
+		setvbuf(stdout, 0, _IONBF, 0);
+		setvbuf(stderr, 0, _IONBF, 0);
+
+		z_header.config |= CONFIG_COLOUR | CONFIG_BOLDFACE | CONFIG_EMPHASIS;
+
+		memset (frotz_to_dumb, 256, DEFAULT_DUMB_COLOUR);
+		frotz_to_dumb [BLACK_COLOUR]      = 0;
+		frotz_to_dumb [RED_COLOUR]        = 1;
+		frotz_to_dumb [GREEN_COLOUR]      = 2;
+		frotz_to_dumb [YELLOW_COLOUR]     = 3;
+		frotz_to_dumb [BLUE_COLOUR]       = 4;
+		frotz_to_dumb [MAGENTA_COLOUR]    = 5;
+		frotz_to_dumb [CYAN_COLOUR]       = 6;
+		frotz_to_dumb [WHITE_COLOUR]      = 7;
+		frotz_to_dumb [LIGHTGREY_COLOUR]  = 17;
+		frotz_to_dumb [MEDIUMGREY_COLOUR] = 13;
+		frotz_to_dumb [DARKGREY_COLOUR]   = 8;
 
 		z_header.default_foreground = WHITE_COLOUR;
 		z_header.default_background = BLACK_COLOUR;
 	}
 #endif /* DISABLE_FORMATS */
-
 	if (z_header.version == V3) {
 		z_header.config |= CONFIG_SPLITSCREEN;
 		z_header.flags &= ~OLD_SOUND_FLAG;
@@ -604,7 +710,7 @@ void dumb_display_user_input(char *s)
 {
 	/* copy to screen without marking it as a change.  */
 	while (*s)
-		dumb_row(cursor_row)[cursor_col++] = make_cell(0, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, *s++);
+		dumb_row(cursor_row)[cursor_col++] = make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, *s++);
 }
 
 
@@ -784,7 +890,7 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 			rv_names[rv_mode], rv_blank_str);
 
 		for (p = "sample reverse text"; *p; p++)
-			show_cell(make_cell(REVERSE_STYLE, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, *p));
+			show_cell(make_cell(REVERSE_STYLE, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, *p));
 		putchar('\n');
 		for (i = 0; i < screen_cells; i++)
 			screen_changes[i] = (screen_data[i].style == REVERSE_STYLE);
@@ -800,7 +906,7 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 		printf("Reverse-Video mode %s, Blanks reverse to '%s': ",
 			rv_names[rv_mode], rv_blank_str);
 		for (p = "sample reverse text"; *p; p++)
-			show_cell(make_cell(REVERSE_STYLE, DEFAULT_IRC_COLOUR, DEFAULT_IRC_COLOUR, *p));
+			show_cell(make_cell(REVERSE_STYLE, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, *p));
 		putchar('\n');
 	} else
 		return FALSE;
