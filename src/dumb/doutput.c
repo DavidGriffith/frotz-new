@@ -134,10 +134,8 @@ static void show_cell_irc(cell_t cel)
 		    bg	     = cel.bg;
 
 	if (cel.style & REVERSE_STYLE) {
-		char temp;
-		temp = cel.fg;
-		cel.fg = cel.bg;
-		bg = temp;
+		fg = cel.bg;
+		bg = cel.fg;
 	}
 
 	if (fg != lastfg || bg != lastbg) {
