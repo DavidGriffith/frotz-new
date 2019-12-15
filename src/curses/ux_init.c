@@ -205,7 +205,7 @@ void os_process_arguments (int argc, char *argv[])
 
 	zoptarg = NULL;
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__HAIKU__)
 	if ((getuid() == 0) || (geteuid() == 0)) {
 		printf("I won't run as root!\n");
 		exit(EXIT_FAILURE);
