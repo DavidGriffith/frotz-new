@@ -26,6 +26,7 @@
 
 /* #include <bits/sigaction.h> */
 
+#include "ux_defines.h"
 
 #ifdef USE_NCURSES_H
 #include <ncurses.h>

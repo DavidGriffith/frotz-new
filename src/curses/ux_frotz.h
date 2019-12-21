@@ -14,7 +14,6 @@
 #include "../blorb/blorb.h"
 #include "../blorb/blorblow.h"
 #include "ux_setup.h"
-#include "ux_defines.h"
 
 #define MASTER_CONFIG		"frotz.conf"
 #define USER_CONFIG		".frotzrc"
