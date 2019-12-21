@@ -25,8 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <signal.h>
-
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
 #else

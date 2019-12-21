@@ -32,7 +32,6 @@
 
 #include <unistd.h>
 #include <ctype.h>
-#include <signal.h>
 #include <libgen.h>
 
 #ifdef USE_NCURSES_H

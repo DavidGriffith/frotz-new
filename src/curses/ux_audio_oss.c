@@ -24,7 +24,6 @@
 
 #define __UNIX_PORT_FILE
 
-#include <signal.h>
 /* #include <bits/sigaction.h> */
 
 
