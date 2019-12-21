@@ -33,6 +33,8 @@
 #include <sys/time.h>
 #include <sys/select.h>
 
+#include "ux_defines.h"
+
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
 #else

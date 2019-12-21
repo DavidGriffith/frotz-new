@@ -24,9 +24,9 @@
 
 #define __UNIX_PORT_FILE
 
-#include <signal.h>
 /* #include <bits/sigaction.h> */
 
+#include "ux_defines.h"
 
 #ifdef USE_NCURSES_H
 #include <ncurses.h>

@@ -21,6 +21,8 @@
 
 #define __UNIX_PORT_FILE
 
+#include "ux_defines.h"
+
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
 #else
