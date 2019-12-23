@@ -32,8 +32,9 @@
 
 #include <unistd.h>
 #include <ctype.h>
-#include <signal.h>
 #include <libgen.h>
+
+#include "ux_defines.h"
 
 #ifdef USE_NCURSES_H
 #include <ncurses.h>

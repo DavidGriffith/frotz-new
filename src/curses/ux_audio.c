@@ -32,6 +32,8 @@
 #include <assert.h>
 #include <unistd.h> //pread
 
+#include "ux_defines.h"
+
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
 #else
