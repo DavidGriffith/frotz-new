@@ -10,7 +10,7 @@ DUMB		Description of the dumb-interface version of Frotz.
 HOW_TO_PLAY	How to play Interactive Fiction.
 INSTALL		How to build and install Frotz.
 Makefile	The Makefile (the INSTALL file tells you about this).
-Makefile.tc	Makefile for building Frotz for DOS.
+Makefile.tc	Makefile for building Frotz for DOS using Turbo C 3.00.
 README		An overview of Frotz.
 README.md	An overview of Frotz formatted in Markdown.
 README.1st	This file.
