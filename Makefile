@@ -90,6 +90,9 @@ CURSES ?= ncursesw
 # Uncomment to disable format codes for dumb interface
 #DISABLE_FORMATS = yes
 
+# For missing basename()
+#NO_BASENAME = yes
+
 # Assorted constants
 MAX_UNDO_SLOTS = 500
 MAX_FILE_NAME = 80
@@ -434,6 +437,7 @@ else
 ifeq ($(EXPORT_TYPE), tops20)
 	@echo "#define TOPS20" >> $@
 	@echo "#define NO_STRDUP" >> $@
+	@echo "#define NO_BASENAME" >> $@
 	@echo "#define MAXPATHLEN 39" >> $@
 else
 
