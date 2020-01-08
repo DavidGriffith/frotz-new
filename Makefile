@@ -138,6 +138,15 @@ ifneq ($(OS),Windows_NT)
     endif
 endif
 
+
+ifeq ($(MAKECMDGOALS),tops20)
+    EXPORT_TYPE = tops20
+endif
+ifeq ($(MAKECMDGOALS),dos)
+    EXPORT_TYPE = dos
+endif
+
+
 RANLIB ?= ranlib
 PKG_CONFIG ?= pkg-config
 
@@ -204,6 +213,8 @@ COMMON_LIB = $(COMMON_DIR)/frotz_common.a
 COMMON_DEFINES = $(COMMON_DIR)/defs.h
 HASH = $(COMMON_DIR)/hash.h
 
+MISC_DIR = $(SRCDIR)/misc
+
 BLORB_DIR = $(SRCDIR)/blorb
 BLORB_LIB = $(BLORB_DIR)/blorblib.a
 
@@ -237,6 +248,9 @@ FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
 SFROTZ_LIBS = $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 
+# Tools
+SNAVIG = $(MISC_DIR)/snavig.pl
+SNAVIG_DIR = snavig
 
 ifdef NO_BLORB
   SOUND_TYPE = none
@@ -318,6 +332,23 @@ else
 	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
 endif
 
+snavig:
+	@echo "Snavig: Change an object's shape..."
+	@echo "Possible snavig-processed targets:"
+	@echo "  tops20 (working on it)"
+	@echo "  its    (not even started)"
+	@echo "  tops10 (not even started)"
+	@echo "  tenex  (not even started)"
+	@echo "  waits  (not even started)"
+	@echo "That's all for now."
+
+tops20: $(COMMON_DEFINES) $(HASH)
+	@rm -rf $(SNAVIG_DIR)
+	@mkdir $(SNAVIG_DIR)
+	@echo Producing snavig-processed source for $(EXPORT_TYPE)
+	@$(SNAVIG) $(COMMON_DIR) $(DUMB_DIR) $(BLORB_DIR) $(SNAVIG_DIR)
+	@echo Now, get this into a $(EXPORT_TYPE) machine for compilation.
+
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
@@ -364,10 +395,21 @@ ifeq ($(wildcard $(COMMON_DEFINES)), )
 ifeq ($(MAKECMDGOALS),djgpp)
 	@echo "#define SOUND_SUPPORT" >> $@
 else
+
+ifeq ($(EXPORT_TYPE), dos)
+	@echo "#define MSDOS_16BIT" >> $@
+else
+ifeq ($(EXPORT_TYPE), tops20)
+	@echo "#define TOPS20" >> $@
+else
+
 ifeq ($(OS_TYPE), unix)
 	@echo "#define UNIX" >> $@
 	@echo "" >> $@
 endif
+endif
+endif
+
 endif
 	@echo "#define MAX_UNDO_SLOTS $(MAX_UNDO_SLOTS)" >> $@
 	@echo "#define MAX_FILE_NAME $(MAX_FILE_NAME)" >> $@
@@ -392,7 +434,7 @@ endif
 ifdef NO_EXECINFO_H
 	@echo "#define NO_EXECINFO_H" >> $@
 endif
-	$(if $(findstring yes,$(USE_UTF8)), echo "#define USE_UTF8" >> $@)
+	$(if $(findstring yes,$(USE_UTF8)), @echo "#define USE_UTF8" >> $@)
 ifdef FREEBSD
 	@echo "#define __BSD_VISIBLE 1" >> $@
 endif
@@ -513,7 +555,7 @@ clean: $(SUB_CLEAN)
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
-	rm -rf $(NAME)src
+	rm -rf $(NAME)src $(SNAVIG_DIR)
 	rm -f $(NAME)*.tar.gz $(NAME)src.zip
 
 help:
@@ -524,6 +566,7 @@ help:
 	@echo "    sdl: for SDL graphics and sound"
 	@echo "    all: build curses, dumb, and SDL versions"
 	@echo "    dos: Make a zip file containing DOS Frotz source code"
+	@echo "    snavig: Process source files for building on TOPS20"
 	@echo "    install"
 	@echo "    uninstall"
 	@echo "    install_dumb"
@@ -540,8 +583,8 @@ help:
 .SUFFIXES:
 .SUFFIXES: .c .o .h
 
-.PHONY: all clean dist curses ncurses dumb sdl hash help \
-	common_defines curses_defines nosound nosound_helper\
+.PHONY: all clean dist curses ncurses dumb sdl hash help snavig \
+	common_defines curses_defines nosound nosound_helper \
 	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz $(SUB_CLEAN)
