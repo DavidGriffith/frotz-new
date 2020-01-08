@@ -224,6 +224,9 @@ TRANS:		while (<$infile>) {
 		}
 		close $infile;
 	}
+
+	%symbolmap = delete_comments(\%symbolmap);
+
 	return %symbolmap;
 }
 
@@ -243,6 +246,19 @@ sub clean_symbol {
 	return $symbol;
 }
 
+
+sub delete_comments {
+	my ($map_ref, @junk) = @_;
+	my %symbolmap = %{$map_ref};
+	my $lkey;
+
+	$lkey = "\\/\\/\.*";
+	$symbolmap{$lkey} = ();
+	$symbolmap{$lkey}{'original'} = $lkey;
+	$symbolmap{$lkey}{'new'} = "";
+
+	return %symbolmap;
+}
 
 # Remove leading path on includes header files and if necessary, shorten
 # the filename before addding it to the symbol map.  It makes the symbol
