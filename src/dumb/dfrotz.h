@@ -16,8 +16,14 @@
 #include <ctype.h>
 #include <time.h>
 
+#include <sys/param.h>
+
+#ifndef MAX
 #define MAX(x,y) ((x)>(y)) ? (x) : (y)
+#endif
+#ifndef MIN
 #define MIN(x,y) ((x)<(y)) ? (x) : (y)
+#endif
 
 /* from ../common/setup.h */
 extern f_setup_t f_setup;

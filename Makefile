@@ -401,6 +401,8 @@ ifeq ($(EXPORT_TYPE), dos)
 else
 ifeq ($(EXPORT_TYPE), tops20)
 	@echo "#define TOPS20" >> $@
+	@echo "#define NO_STRDUP" >> $@
+	@echo "#define MAXPATHLEN 39" >> $@
 else
 
 ifeq ($(OS_TYPE), unix)
@@ -434,7 +436,11 @@ endif
 ifdef NO_EXECINFO_H
 	@echo "#define NO_EXECINFO_H" >> $@
 endif
+
+ifneq ($(EXPORT_TYPE), tops20)
 	$(if $(findstring yes,$(USE_UTF8)), @echo "#define USE_UTF8" >> $@)
+endif
+
 ifdef FREEBSD
 	@echo "#define __BSD_VISIBLE 1" >> $@
 endif
