@@ -1,119 +1,103 @@
-frotz has a slightly odd buyild system, these changes allow using it with
-debhelper
-
 --- a/Makefile
 +++ b/Makefile
-@@ -1,30 +1,31 @@
- # Define your C compiler.  I recommend gcc if you have it.
- # MacOS users should use "cc" even though it's really "gcc".
+@@ -2,11 +2,12 @@
+ # GNU make is required.
+ 
+ # Your C compiler
+-CC ?= gcc
++#CC ?= gcc
+ #CC ?= clang
+ 
+ # Enable compiler warnings. This is an absolute minimum.
+ CFLAGS += -Wall -std=c99 -O3 #-Wextra
++CFLAGS += $(shell dpkg-buildflags --get CFLAGS)
+ 
+ # Define your optimization flags.
  #
--CC = gcc
-+#CC = gcc
- #CC = cc
- 
- # Define your optimization flags.  Most compilers understand -O and -O2,
- # Standard (note: Solaris on UltraSparc using gcc 2.8.x might not like this.)
- #
--OPTS = -O2 
-+OPTS = -O2 $(shell dpkg-buildflags --get CFLAGS)
- 
- # Pentium with gcc 2.7.0 or better
- #OPTS = -O2 -fomit-frame-pointer -malign-functions=2 -malign-loops=2 \
- #-malign-jumps=2
- 
- # Define where you want Frotz installed.  Usually this is /usr/local
--PREFIX = /usr/local
-+PREFIX ?= /usr/local
- 
--MAN_PREFIX = $(PREFIX)
--#MAN_PREFIX = /usr/local/share
-+#BINDIR = $(PREFIX)/bin
+@@ -18,6 +19,9 @@
+ # Define where you want Frotz installed
+ PREFIX ?= /usr/local
+ MANDIR ?= $(PREFIX)/share/man
++#BINDIR ?= $(PREFIX)/bin
 +BINDIR ?= $(PREFIX)/games
- 
--CONFIG_DIR = $(PREFIX)/etc
--#CONFIG_DIR = /etc
 +MAN_PREFIX ?= $(PREFIX)/share
-+#MAN_PREFIX = /usr/local/share
+ SYSCONFDIR ?= /etc
  
- # Define where you want Frotz to look for frotz.conf.
+ # Choose your sound support
+@@ -260,7 +264,7 @@
+ curses: $(FROTZ_BIN)
+ ncurses: $(FROTZ_BIN)
+ $(FROTZ_BIN): $(FROTZ_LIBS)
+-	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS)
++	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS) $(shell dpkg-buildflags --get LDFLAGS)
+ 	@echo "** Done building Frotz with curses interface"
+ 	@echo "** Audio support $(CURSES_SOUND) (type $(SOUND_TYPE))"
+ 	@echo "** Blorb support $(BLORB_SUPPORT)"
+@@ -274,13 +278,13 @@
+ 
+ dumb: $(DFROTZ_BIN)
+ $(DFROTZ_BIN): $(DFROTZ_LIBS)
+-	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS)
++	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(shell dpkg-buildflags --get LDFLAGS)
+ 	@echo "** Done building Frotz with dumb interface."
+ 	@echo "** Blorb support $(BLORB_SUPPORT)"
+ 
+ sdl: $(SFROTZ_BIN)
+ $(SFROTZ_BIN): $(SFROTZ_LIBS)
+-	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
++	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS) $(shell dpkg-buildflags --get LDFLAGS)
+ 	@echo "** Done building Frotz with SDL interface."
+ 
+ dos: $(DOS_BIN)
+@@ -439,36 +443,36 @@
  #
--CONFIG_DIR = /usr/local/etc
-+CONFIG_DIR ?= $(PREFIX)/etc
-+#CONFIG_DIR = /usr/local/etc
- #CONFIG_DIR = /etc
- #CONFIG_DIR = /usr/pkg/etc
- #CONFIG_DIR =
-@@ -32,7 +33,7 @@
- # Uncomment this if you want color support.  Most, but not all curses
- # libraries that work with Frotz will support color.
- #
--COLOR_DEFS = -DCOLOR_SUPPORT
-+COLOR_DEFS ?= -DCOLOR_SUPPORT
+ install: install_frotz
+ install_frotz: $(FROTZ_BIN)
+-	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
+-	install "frotz$(EXTENSION)" "$(DESTDIR)$(PREFIX)/bin/"
+-	install -m 644 doc/frotz.6 "$(DESTDIR)$(MANDIR)/man6/"
++	install -d $(BINDIR) $(MAN_PREFIX)/man/man6
++	install -c -m 755 $(FROTZ_BIN) $(BINDIR)
++	install -m 644 doc/frotz.6 $(MAN_PREFIX)/man//man6/
  
- # Uncomment this if you have an OSS soundcard driver and want classical
- # Infocom sound support.
-@@ -47,7 +48,7 @@
- # Define your sound device 
- # This should probably be a command-line/config-file option.
- #
--#SOUND_DEV = /dev/dsp
-+SOUND_DEV = /dev/dsp
- #SOUND_DEV = /dev/sound
- #SOUND_DEV = /dev/audio
+ uninstall: uninstall_frotz
+ uninstall_frotz:
+-	rm -f "$(DESTDIR)$(PREFIX)/bin/frotz"
+-	rm -f "$(DESTDIR)$(MANDIR)/man6/frotz.6"
++	rm -f $(BINDIR)/frotz
++	rm -f $(MAN_PREFIX)/man6/frotz.6
  
-@@ -164,7 +165,7 @@
+ install_dumb: install_dfrotz
+ install_dfrotz: $(DFROTZ_BIN)
+-	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
+-	install "$(DFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
+-	install -m 644 doc/dfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
++	install -d $(BINDIR) $(MAN_PREFIX)/man/man6
++	install -c -m 755 $(DFROTZ_BIN) $(BINDIR)
++	install -m 644 doc/dfrotz.6 $(MAN_PREFIX)/man/man6/
  
- $(NAME)-curses:		soundcard.h  $(COMMON_TARGET) $(CURSES_TARGET)
- 	$(CC) -o $(BINNAME)$(EXTENSION) $(TARGETS) $(LIB) $(CURSES) \
--		$(SOUND_LIB)
-+		$(SOUND_LIB) $(shell dpkg-buildflags --get LDFLAGS)
+ uninstall_dumb: uninstall_dfrotz
+ uninstall_dfrotz:
+-	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
+-	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
++	rm -f $(BINDIR)/dfrotz
++	rm -f $(MAN_PREFIX)/man/man6/dfrotz.6
  
- all:	$(NAME) d$(NAME)
+ install_sdl: install_sfrotz
+ install_sfrotz: $(SFROTZ_BIN)
+-	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
+-	install "$(SFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
+-	install -m 644 doc/sfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
++	install -d $(BINDIR) $(MAN_PREFIX)/man/man6
++	install $(SFROTZ_BIN) $(BINDIR)
++	install -m 644 doc/sfrotz.6 $(MAN_PREFIX)/man/man6/
  
-@@ -172,7 +173,7 @@
- d$(NAME):	$(NAME)-dumb
- $(NAME)-dumb:		$(COMMON_TARGET) $(DUMB_TARGET)
- 	$(CC) -o d$(BINNAME)$(EXTENSION) $(COMMON_TARGET) \
--		$(DUMB_TARGET) $(LIB)
-+		$(DUMB_TARGET) $(LIB) $(shell dpkg-buildflags --get LDFLAGS)
+ uninstall_sdl: uninstall_sfrotz
+ uninstall_sfrotz:
+-	rm -f "$(DESTDIR)$(PREFIX)/bin/sfrotz"
+-	rm -f "$(DESTDIR)$(MANDIR)/man6/sfrotz.6"
++	rm -f $(BINDIR)/sfrotz
++	rm -f $(MAN_PREFIX)/man/man6/sfrotz.6"
  
- .SUFFIXES:
- .SUFFIXES: .c .o .h
-@@ -213,27 +214,29 @@
- 	fi
+ install_all:	install_frotz install_dfrotz install_sfrotz
  
- install: $(NAME)
--	strip $(BINNAME)$(EXTENSION)
--	install -d $(PREFIX)/bin
-+	# in the debian build stripping is done at a later stage
-+	#strip $(BINNAME)$(EXTENSION)
-+	install -d $(BINDIR)
- 	install -d $(MAN_PREFIX)/man/man6
--	install -c -m 755 $(BINNAME)$(EXTENSION) $(PREFIX)/bin
-+	install -c -m 755 $(BINNAME)$(EXTENSION) $(BINDIR)
- 	install -c -m 644 doc/$(NAME).6 $(MAN_PREFIX)/man/man6
- 
- uninstall:
--	rm -f $(PREFIX)/bin/$(NAME)
-+	rm -f $(BINDIR)/$(NAME)
- 	rm -f $(MAN_PREFIX)/man/man6/$(NAME).6
- 
- deinstall: uninstall
- 
- install_dumb: d$(NAME)
--	strip d$(BINNAME)$(EXTENSION)
--	install -d $(PREFIX)/bin
-+	# in the debian build stripping is done at a later stage
-+	#strip d$(BINNAME)$(EXTENSION)
-+	install -d $(BINDIR)
- 	install -d $(MAN_PREFIX)/man/man6
--	install -c -m 755 d$(BINNAME)$(EXTENSION) $(PREFIX)/bin
-+	install -c -m 755 d$(BINNAME)$(EXTENSION) $(BINDIR)
- 	install -c -m 644 doc/d$(NAME).6 $(MAN_PREFIX)/man/man6
- 
- uninstall_dumb:
--	rm -f $(PREFIX)/bin/d$(NAME)
-+	rm -f $(BINDIR)/d$(NAME)
- 	rm -f $(MAN_PREFIX)/man/man6/d$(NAME).6
- 
- deinstall_dumb: uninstall_dumb
