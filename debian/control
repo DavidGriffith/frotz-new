@@ -1,0 +1,23 @@
+Source: frotz
+Section: games
+Priority: optional
+Maintainer: Robert Lemmen <robertle@semistable.com>
+Build-Depends: debhelper (>= 8), libncurses5-dev
+Standards-Version: 3.9.3
+
+Package: frotz
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: zcode-interpreter
+Conflicts: zcode-support
+Replaces: zcode-support
+Homepage: http://frotz.sourceforge.net/
+Description: interpreter of Z-code story-files
+ Frotz interprets Z-code story-files, which are usually text adventure
+ games (although a few arcade-style Z-code games have been written).
+ Examples of such story files include the adventure games published by
+ Infocom, as well as any games produced by compilers to this format,
+ such as Inform.  You can find a number of Inform-compiled games up for
+ anonymous FTP at ftp://ftp.ifarchive.org/ or HTTP at http://www.ifarchive.org/
+ .
+ Frotz complies with the Z Machine specification version 1.0.

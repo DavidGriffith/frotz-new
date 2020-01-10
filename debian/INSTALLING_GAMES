@@ -1,0 +1,67 @@
+========================================
+Installing and playing games on Frotz ||
+========================================
+
+If you're unfamiliar with Infocom-style text adventures, you should
+probably stop here and read the file HOW_TO_PLAY.  Then come back and
+continue.
+
+Now that you have Frotz installed, you'll probably want to play some of
+those ultra-nifty text adventures on it.  These games come in files
+which are compiled programs that run on the Z-machine, which
+interpreters like Frotz emulate.  The best-stocked archive of freeware
+games for use on Z-machine interpreters is the Interactive Fiction
+Archive at http://www.ifarchive.org.  There are several mirrors of the
+archive all over the world listed there.
+
+Here are direct URLs to the zcode directories:
+
+http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html
+ftp://ftp.ifarchive.org/if-archive/games/zcode 
+
+
+Here is the scheme I use for organizing my Zcode games:
+
+/usr/local/share/zcode			This contains games written after the
+					demise of Infocom.  Most are freeware.
+
+/home/dave/.zcode			I sometimes put games here too.
+
+/usr/local/share/zcode/infocom		This is where I keep my collection of
+					genuine Infocom games.
+
+/usr/local/share/zcode/infocom/sound	Soundfiles from "Lurking Horror" 
+					and "Sherlock" go here.
+
+/usr/local/share/zcode/infocom/graphics	Graphics files from Zork 0,
+					Arthur, Shogun, and Journey go here.
+
+I add this command to my .profile file:
+export ZCODE_PATH="/usr/local/share/zcode: \
+	/usr/local/share/zcode/infocom:$HOME/.zcode
+
+Now, when I want to play Zork I, I will type "frotz zork1.dat" at the
+command prompt.  Then I will then be told I am standing in an open field
+west of a white house which has a boarded front door.
+
+You can also just give a path to the game file.
+
+When you save your game, all save files are put in the current directory
+unless you specify a full path.  Please name your saves intelligently.
+
+You MUST put sound and graphics in directories named "sound" and
+"graphics" in the same directory as the gamefile.  Yes, this is a bit
+confusing.  That's why Blorb will be so wonderful when Unix Frotz supports
+it.
+
+You'll probably want to make use of Frotz's new config file functionality.
+The options in the config file mirror the command line options and free
+you from having to remember to add something like "-Z0" to get rid of
+complaints about buggy zcode or if you want to always play with white text
+on black at a Linux console (instead of white on blue).  Sample config
+files are included here as "frotz.conf-big" (which lists all possible
+options) and "frotz.conf-small" (a shortened one listing the more
+commonly-used options).  The Makefile defines where Frotz will look for
+the frotz.conf file.  By default, this is /usr/local/etc and can be
+changed at compile time if you like.  This file will be read if Frotz
+notices you don't have a config file of your own in "$HOME/.frotzrc".

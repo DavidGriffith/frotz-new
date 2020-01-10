@@ -1,0 +1,5 @@
+version=2
+#http://www.cs.csubak.edu/~dgriffi/proj/frotz/ files/frotz-(.*)\.tar\.gz
+#http://frotz.homeunix.org/frotz/ files/frotz-(.*)\.tar\.gz
+http://sf.net/frotz/frotz-(.*)\.tar\.gz
+

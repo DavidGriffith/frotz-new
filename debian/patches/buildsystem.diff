@@ -1,0 +1,119 @@
+frotz has a slightly odd buyild system, these changes allow using it with
+debhelper
+
+--- a/Makefile
++++ b/Makefile
+@@ -1,30 +1,31 @@
+ # Define your C compiler.  I recommend gcc if you have it.
+ # MacOS users should use "cc" even though it's really "gcc".
+ #
+-CC = gcc
++#CC = gcc
+ #CC = cc
+ 
+ # Define your optimization flags.  Most compilers understand -O and -O2,
+ # Standard (note: Solaris on UltraSparc using gcc 2.8.x might not like this.)
+ #
+-OPTS = -O2 
++OPTS = -O2 $(shell dpkg-buildflags --get CFLAGS)
+ 
+ # Pentium with gcc 2.7.0 or better
+ #OPTS = -O2 -fomit-frame-pointer -malign-functions=2 -malign-loops=2 \
+ #-malign-jumps=2
+ 
+ # Define where you want Frotz installed.  Usually this is /usr/local
+-PREFIX = /usr/local
++PREFIX ?= /usr/local
+ 
+-MAN_PREFIX = $(PREFIX)
+-#MAN_PREFIX = /usr/local/share
++#BINDIR = $(PREFIX)/bin
++BINDIR ?= $(PREFIX)/games
+ 
+-CONFIG_DIR = $(PREFIX)/etc
+-#CONFIG_DIR = /etc
++MAN_PREFIX ?= $(PREFIX)/share
++#MAN_PREFIX = /usr/local/share
+ 
+ # Define where you want Frotz to look for frotz.conf.
+ #
+-CONFIG_DIR = /usr/local/etc
++CONFIG_DIR ?= $(PREFIX)/etc
++#CONFIG_DIR = /usr/local/etc
+ #CONFIG_DIR = /etc
+ #CONFIG_DIR = /usr/pkg/etc
+ #CONFIG_DIR =
+@@ -32,7 +33,7 @@
+ # Uncomment this if you want color support.  Most, but not all curses
+ # libraries that work with Frotz will support color.
+ #
+-COLOR_DEFS = -DCOLOR_SUPPORT
++COLOR_DEFS ?= -DCOLOR_SUPPORT
+ 
+ # Uncomment this if you have an OSS soundcard driver and want classical
+ # Infocom sound support.
+@@ -47,7 +48,7 @@
+ # Define your sound device 
+ # This should probably be a command-line/config-file option.
+ #
+-#SOUND_DEV = /dev/dsp
++SOUND_DEV = /dev/dsp
+ #SOUND_DEV = /dev/sound
+ #SOUND_DEV = /dev/audio
+ 
+@@ -164,7 +165,7 @@
+ 
+ $(NAME)-curses:		soundcard.h  $(COMMON_TARGET) $(CURSES_TARGET)
+ 	$(CC) -o $(BINNAME)$(EXTENSION) $(TARGETS) $(LIB) $(CURSES) \
+-		$(SOUND_LIB)
++		$(SOUND_LIB) $(shell dpkg-buildflags --get LDFLAGS)
+ 
+ all:	$(NAME) d$(NAME)
+ 
+@@ -172,7 +173,7 @@
+ d$(NAME):	$(NAME)-dumb
+ $(NAME)-dumb:		$(COMMON_TARGET) $(DUMB_TARGET)
+ 	$(CC) -o d$(BINNAME)$(EXTENSION) $(COMMON_TARGET) \
+-		$(DUMB_TARGET) $(LIB)
++		$(DUMB_TARGET) $(LIB) $(shell dpkg-buildflags --get LDFLAGS)
+ 
+ .SUFFIXES:
+ .SUFFIXES: .c .o .h
+@@ -213,27 +214,29 @@
+ 	fi
+ 
+ install: $(NAME)
+-	strip $(BINNAME)$(EXTENSION)
+-	install -d $(PREFIX)/bin
++	# in the debian build stripping is done at a later stage
++	#strip $(BINNAME)$(EXTENSION)
++	install -d $(BINDIR)
+ 	install -d $(MAN_PREFIX)/man/man6
+-	install -c -m 755 $(BINNAME)$(EXTENSION) $(PREFIX)/bin
++	install -c -m 755 $(BINNAME)$(EXTENSION) $(BINDIR)
+ 	install -c -m 644 doc/$(NAME).6 $(MAN_PREFIX)/man/man6
+ 
+ uninstall:
+-	rm -f $(PREFIX)/bin/$(NAME)
++	rm -f $(BINDIR)/$(NAME)
+ 	rm -f $(MAN_PREFIX)/man/man6/$(NAME).6
+ 
+ deinstall: uninstall
+ 
+ install_dumb: d$(NAME)
+-	strip d$(BINNAME)$(EXTENSION)
+-	install -d $(PREFIX)/bin
++	# in the debian build stripping is done at a later stage
++	#strip d$(BINNAME)$(EXTENSION)
++	install -d $(BINDIR)
+ 	install -d $(MAN_PREFIX)/man/man6
+-	install -c -m 755 d$(BINNAME)$(EXTENSION) $(PREFIX)/bin
++	install -c -m 755 d$(BINNAME)$(EXTENSION) $(BINDIR)
+ 	install -c -m 644 doc/d$(NAME).6 $(MAN_PREFIX)/man/man6
+ 
+ uninstall_dumb:
+-	rm -f $(PREFIX)/bin/d$(NAME)
++	rm -f $(BINDIR)/d$(NAME)
+ 	rm -f $(MAN_PREFIX)/man/man6/d$(NAME).6
+ 
+ deinstall_dumb: uninstall_dumb

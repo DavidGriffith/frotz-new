@@ -1,0 +1,15 @@
+Frotz for Debian
+----------------
+
+The Debian version of Frotz creates the directory $HOME/.infocom to place saved
+games into. The default name for saved games is $HOME/.infocom/<gamename>.sav,
+where <gamename> is the stem of the name of the game file.
+
+The system-wide configuration file for Frotz in Debian is /etc/frotz.conf. The
+default zcode_path in /etc/frotz.conf is /usr/share/games/zcode; this works
+well with int-fiction-installer.
+
+The package int-fiction-installer, which could be used to install games from 
+the if-archive in a manner similar to apt-get, is no longer available. Please 
+see INSTALLING_GAMES for a description on how to get and install games.
+

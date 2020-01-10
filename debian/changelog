@@ -1,0 +1,180 @@
+frotz (2.43-4) unstable; urgency=low
+
+  * Update upstream homepage (closes: #650257)
+  * Converted to quilt source format and new policy
+
+ -- Robert Lemmen <robertle@semistable.com>  Mon, 11 Jun 2012 10:07:24 +0100
+
+frotz (2.43-3) unstable; urgency=low
+
+  * Updated debhelper, standards-version and watch file
+
+ -- Robert Lemmen <robertle@semistable.com>  Thu, 12 Mar 2009 19:31:39 +0000
+
+frotz (2.43-2) unstable; urgency=low
+
+  * Taking over package (closes: #483582)
+  * Changed watch file to use current homepage (closes: #449905) 
+  * Added homepage field to control file
+  * Removed suggests and references to int-fiction-installer (closes: #461594)
+  * Fixed and cleaned up debian/rules
+  * Support nostrip build option (closes: #436874)
+  * Included actual copyright statement in debian/copyright
+  * Bumped standards-version
+
+ -- Robert Lemmen <robertle@semistable.com>  Mon, 16 Jun 2008 20:22:30 +0100
+
+frotz (2.43-1) unstable; urgency=low
+
+  * New upstream release. (closes: #184758) 
+  * New release fixes the ctrl-space bug. (closes: #90854)
+  * Adopted. (closes: #201407)
+  * Updated links to if-archive. (closes: #115809)
+  * Repackaged using debhelper
+  * Set default zcode_path in system-wide config file
+  * Suggest int-fiction-installer
+
+ -- Hans Fugal <hans@fugal.net>  Wed, 16 Jul 2003 07:28:17 -0600
+
+frotz (2.40-3) unstable; urgency=low
+
+  * Don't compile in sound support on the Hurd.  Closes: bug 99790.
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Mon,  4 Jun 2001 15:18:32 +0100
+
+frotz (2.40-2) unstable; urgency=low
+
+  * Rebuild against libncurses5.  Closes:bug#92509.
+  * Work around dpkg-shlibdeps bug by running dpkg-shlibdeps as root.
+    Closes:Bug#90699.
+  * Edit down the upstream INSTALL file and install it in
+    /usr/share/doc/frotz as "INSTALLING.GAMES".
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Wed,  9 May 2001 12:29:36 +0100
+
+frotz (2.40-1) unstable; urgency=low
+
+  * New upstream release.  (Closes:Bug#77358).
+  * Moved to "main"; Frotz is now GPLed!
+  * Ported old Debian patches to the new release.
+  * Default name for saved games now has ".frotz" if Frotz's old save
+    format is in use (-Q on command line) or ".sav" if Quetzal is being
+    used (the default).
+  * Updated to policy version 3.2.1.
+  * Removed conflicts against ancient versions of some zcode games.
+  * Bumped up frotz's alternatives priority a bit, so that it's definitely
+    preferred over jzip.  This should be okay now that frotz is free.
+    (Closes:Bug#53430).
+  * Comply with the FHS.
+  * Built against libncurses5.  (Closes:Bug#69700).
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Tue,  2 Jan 2001 17:22:28 +0000
+
+frotz (2.32r2-12) frozen unstable; urgency=low
+
+  * Recompile to fix dependencies.  Now depends on libc6, with no
+    version requirement.
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Fri, 11 Dec 1998 19:20:52 +0000
+
+frotz (2.32r2-11) frozen unstable; urgency=low
+
+  * Recompile against libncurses4.
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Fri,  6 Nov 1998 03:13:06 +0000
+
+frotz (2.32r2-10) frozen unstable; urgency=low
+
+  * By default, saved games now go into ~/.infocom with extension
+    ".frotz".  (Fixes:bug#21054)
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Wed, 13 May 1998 21:44:52 +0100
+
+frotz (2.32r2-9) frozen unstable; urgency=low
+
+  * Move /usr/bin/zcode-interpreter to /usr/games.
+  * Add some jiggery-pokery to maintainer scripts to clean up the mess
+    the zcode-interpreter alternatives were in.
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Tue,  7 Apr 1998 22:26:06 +0100
+
+frotz (2.32r2-8) frozen unstable; urgency=low
+
+  * Doh!  I'd moved the binary from /usr/bin to /usr/games, but didn't
+    update the alternatives to match.  Fixed.
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Mon,  6 Apr 1998 22:44:15 +0100
+
+frotz (2.32r2-7) frozen unstable; urgency=low
+
+  * Moved frotz from /usr/bin to /usr/games.  (Fixes:bug#19730)
+    Technically, frotz is a virtual machine interpreter, not a game,
+    but most people are likely to look for it in /usr/games first.
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Sat, 28 Mar 1998 11:48:46 +0000
+
+frotz (2.32r2-6) unstable; urgency=low
+
+  * Remove dpkg-geninfo from debian directory and remove call to it
+    from debian/rules following debian-policy discussion on `md5sums'
+    and `du' files.
+  * Stripped /usr/bin/frotz.
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Thu, 12 Mar 1998 01:56:53 +0000
+
+frotz (2.32r2-5) unstable; urgency=low
+
+  * Removed conflict against the (as yet) nonexistant "tatctae".
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Thu, 12 Feb 1998 22:58:06 +0000
+
+frotz (2.32r2-4) unstable; urgency=low
+
+  * Updated due to obsoletion of the `zcode-support' package.
+    Use update-alternatives method instead.
+  * Conflict and replace zcode-support.
+  * Actually install the man page.  (Oops.)
+
+  * Updated to standards-version 2.4.0.0.  No changes necessary.
+  * Use new maintainer email address <cpbs@debian.org>.
+  * New version of generic debian/rules, together with dpkg-geninfo.
+    New debian/process based on old debian/rules.
+
+ -- Charles Briscoe-Smith <cpbs@debian.org>  Sun,  8 Feb 1998 21:41:57 +0000
+
+frotz (2.32r2-3) unstable; urgency=low
+
+  * Updated for libc6.  (Actually, nothing in the source changed; this
+    is just a recompile.)
+
+ -- Charles Briscoe-Smith <cpb4@ukc.ac.uk>  Tue, 11 Nov 1997 02:47:22 +0000
+
+frotz (2.32r2-2) unstable; urgency=low
+
+  * Increased TEXT_BUFFER_SIZE in frotz.h from 200 to 500; some zcode
+    files overflowed the smaller buffer.
+
+ -- Charles Briscoe-Smith <cpb4@ukc.ac.uk>  Sun, 26 Oct 1997 19:41:47 +0000
+
+frotz (2.32r2-1) unstable; urgency=low
+
+  * New upstream source.
+  * Added clean target in Makefile, which seems to have dropped out of
+    the upstream sources.
+  * No longer change INFOCOM_PATH to ZCODE_PATH.
+
+ -- Charles Briscoe-Smith <cpb4@ukc.ac.uk>  Mon, 20 Oct 1997 21:49:57 +0100
+
+frotz (2.01-2) unstable; urgency=low
+
+  * Corrected typo of standards-version in debian/control.
+  * Updated prerm script which was left over from the previous
+    `infocom-support' incarnation of this package.
+
+ -- Charles Briscoe-Smith <cpb4@ukc.ac.uk>  Sun, 15 Jun 1997 00:57:52 +0100
+
+frotz (2.01-1) unstable; urgency=low
+
+  * First Debian version.
+
+ -- Charles Briscoe-Smith <cpb4@ukc.ac.uk>  Thu, 12 Jun 1997 15:01:27 +0100

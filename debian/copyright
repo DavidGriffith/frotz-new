@@ -1,0 +1,35 @@
+This package was debianized by Hans Fugal <hans@fugal.net> on
+Wed, 16 Jul 2003 17:48:37 -0600.  It was downloaded from
+http://www.cs.csubak.edu/~dgriffi/proj/frotz/files/frotz-2.43.tar.gz
+The previous debianization by Charles Briscoe-Smith <cpbs@debian.org>
+was used as a reference in creating this package.
+
+Frotz was written by Stefan Jokisch <s.jokisch@avu.de>, and ported to Unix
+by Galen Hazelwood <galenh@micron.net>.  Frotz is now maintained by Jim
+Dunleavy <jim.dunleavy@erha.ie> and David Griffith <dgriffi@cs.csubak.edu>
+(David also maintains the Unix port).
+
+Copyright (C) 1995-2002 Stefan Jokisch, Galen Hazelwood, David Griffith et al
+
+   FROTZ V2.43 - An interpreter for all Infocom and other Z-Machine games.
+   Complies with standard 1.0 of Graham Nelson's specification.
+
+   Frotz is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   Frotz is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+
+
+See AUTHORS.gz in this directory for acknowledgements.
+
+A copy of the GNU GPL is available in /usr/share/common-licenses/GPL on
+any recent Debian system.
