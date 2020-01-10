@@ -16,7 +16,7 @@ archive all over the world listed there.
 
 Here are direct URLs to the zcode directories:
 
-http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html
+http://ifarchive.org/indexes/if-archive/games/zcode/
 ftp://ftp.ifarchive.org/if-archive/games/zcode 
 
 
@@ -49,10 +49,19 @@ You can also just give a path to the game file.
 When you save your game, all save files are put in the current directory
 unless you specify a full path.  Please name your saves intelligently.
 
-You MUST put sound and graphics in directories named "sound" and
-"graphics" in the same directory as the gamefile.  Yes, this is a bit
-confusing.  That's why Blorb will be so wonderful when Unix Frotz supports
-it.
+If a game uses sound or graphics, they will be packaged into a Blorb
+file.  This file may or may not also contain a zcode game file.  Blorb
+files containing the game file are supposed to follow the name pattern
+of "game.zblorb" or "game.zbl".  For a Blorb file that does not contain
+a game file at all, the usual pattern is "game.blorb" or "game.blb". If
+you tell Frotz to load a .zblorb file, it will look for and load a zcode
+file within and then load whatever other resources it needs from that
+Blorb file.  If the Blorb file is separate from the zcode file, then
+Frotz takes a few extra steps to load.  Suppose we have "game.z5". Frotz
+will look in the same directory as the zcode file for "game.blb" or
+"game.blorb".  If such a file is found, great.  If not, Frotz will
+continue on without.  For graphical games, not loading graphics can
+cause the game to be unplayable.
 
 You'll probably want to make use of Frotz's new config file functionality.
 The options in the config file mirror the command line options and free
