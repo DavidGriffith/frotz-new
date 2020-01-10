@@ -1,3 +1,10 @@
+frotz (2.50-1.1) UNRELEASED; urgency=medium
+
+  * Update upstream homepage
+  * New upstream release
+
+ -- David Griffith <dave@thoth.661.org>  Fri, 10 Jan 2020 06:38:31 -0800
+
 frotz (2.43-4) unstable; urgency=low
 
   * Update upstream homepage (closes: #650257)
