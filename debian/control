@@ -1,9 +1,9 @@
 Source: frotz
 Section: games
 Priority: optional
-Maintainer: Robert Lemmen <robertle@semistable.com>
-Build-Depends: debhelper (>= 8), libncurses5-dev
-Standards-Version: 3.9.3
+Maintainer: David Griffith <dave@661.org>
+Build-Depends: debhelper (>= 12), libncurses5-dev
+Standards-Version: 4.4.1
 
 Package: frotz
 Architecture: any

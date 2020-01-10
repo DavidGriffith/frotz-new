@@ -2,7 +2,7 @@ Frotz for Debian
 ----------------
 
 The Debian version of Frotz creates the directory $HOME/.infocom to place saved
-games into. The default name for saved games is $HOME/.infocom/<gamename>.sav,
+games into. The default name for saved games is $HOME/.infocom/<gamename>.qzl,
 where <gamename> is the stem of the name of the game file.
 
 The system-wide configuration file for Frotz in Debian is /etc/frotz.conf. The
