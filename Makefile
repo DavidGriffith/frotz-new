@@ -486,6 +486,18 @@ else
 	@echo "Not in a git repository or git command not found.  Cannot make a zip file."
 endif
 
+
+deb:
+ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
+	git archive --format=tgz --prefix $(NAME)_$(VERSION).orig/ HEAD -o $(NAME)_$(VERSION).orig.tar.gz
+	git archive --format=tar --prefix $(NAME)_$(VERSION).orig/ HEAD | tar xf -
+else
+	@echo "Not in a git repository or git command not found.  Cannot build a deb this way."
+endif
+	cd $(NAME)_$(VERSION).orig/ ; dpkg-buildpackage -us -uc
+
+
+
 clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
 	rm -rf $(COMMON_DEFINES) \
@@ -497,6 +509,8 @@ distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
 	rm -rf $(NAME)src
 	rm -f $(NAME)*.tar.gz $(NAME)src.zip
+	rm -rf $(NAME)_$(VERSION)*
+	rm -f $(NAME)-dbgsym*
 
 help:
 	@echo "Targets:"
