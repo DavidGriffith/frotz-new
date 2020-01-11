@@ -2,7 +2,7 @@
 # GNU make is required.
 
 # Your C compiler
-CC ?= gcc
+#CC ?= gcc
 #CC ?= clang
 
 # Enable compiler warnings. This is an absolute minimum.
