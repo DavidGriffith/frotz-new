@@ -1,0 +1,35 @@
+--- a/Makefile	2020-01-11 04:38:39.608474948 -0800
++++ b/Makefile	2020-01-11 04:38:09.847759237 -0800
+@@ -7,6 +7,7 @@
+ 
+ # Enable compiler warnings. This is an absolute minimum.
+ CFLAGS += -Wall -std=c99 -O3 #-Wextra
++CFLAGS += $(shell dpkg-buildflags --get CFLAGS)
+ 
+ # Define your optimization flags.
+ #
+@@ -263,7 +264,7 @@
+ curses: $(FROTZ_BIN)
+ ncurses: $(FROTZ_BIN)
+ $(FROTZ_BIN): $(FROTZ_LIBS)
+-	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS)
++	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(CURSES_LDFLAGS) $(CURSES_SOUND_LDFLAGS) $(shell dpkg-buildflags --get LDFLAGS)
+ 	@echo "** Done building Frotz with curses interface"
+ 	@echo "** Audio support $(CURSES_SOUND) (type $(SOUND_TYPE))"
+ 	@echo "** Blorb support $(BLORB_SUPPORT)"
+@@ -277,13 +278,13 @@
+ 
+ dumb: $(DFROTZ_BIN)
+ $(DFROTZ_BIN): $(DFROTZ_LIBS)
+-	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS)
++	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(shell dpkg-buildflags --get LDFLAGS)
+ 	@echo "** Done building Frotz with dumb interface."
+ 	@echo "** Blorb support $(BLORB_SUPPORT)"
+ 
+ sdl: $(SFROTZ_BIN)
+ $(SFROTZ_BIN): $(SFROTZ_LIBS)
+-	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
++	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS) $(shell dpkg-buildflags --get LDFLAGS)
+ 	@echo "** Done building Frotz with SDL interface."
+ 
+ dos: $(DOS_BIN)

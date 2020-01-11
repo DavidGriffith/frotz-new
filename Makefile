@@ -18,6 +18,9 @@ CFLAGS += -g
 # Define where you want Frotz installed
 PREFIX ?= /usr/local
 MANDIR ?= $(PREFIX)/share/man
+#BINDIR ?= $(PREFIX)/bin
+BINDIR ?= $(PREFIX)/games
+MAN_PREFIX ?= $(PREFIX)/share
 SYSCONFDIR ?= /etc
 
 # Choose your sound support
@@ -439,36 +442,36 @@ endif
 #
 install: install_frotz
 install_frotz: $(FROTZ_BIN)
-	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
-	install "frotz$(EXTENSION)" "$(DESTDIR)$(PREFIX)/bin/"
-	install -m 644 doc/frotz.6 "$(DESTDIR)$(MANDIR)/man6/"
+	install -d $(BINDIR) $(MAN_PREFIX)/man/man6
+	install -c -m 755 $(FROTZ_BIN) $(BINDIR)
+	install -m 644 doc/frotz.6 $(MAN_PREFIX)/man//man6/
 
 uninstall: uninstall_frotz
 uninstall_frotz:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/frotz"
-	rm -f "$(DESTDIR)$(MANDIR)/man6/frotz.6"
+	rm -f $(BINDIR)/frotz
+	rm -f $(MAN_PREFIX)/man6/frotz.6
 
 install_dumb: install_dfrotz
 install_dfrotz: $(DFROTZ_BIN)
-	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
-	install "$(DFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
-	install -m 644 doc/dfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
+	install -d $(BINDIR) $(MAN_PREFIX)/man/man6
+	install -c -m 755 $(DFROTZ_BIN) $(BINDIR)
+	install -m 644 doc/dfrotz.6 $(MAN_PREFIX)/man/man6/
 
 uninstall_dumb: uninstall_dfrotz
 uninstall_dfrotz:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/dfrotz"
-	rm -f "$(DESTDIR)$(MANDIR)/man6/dfrotz.6"
+	rm -f $(BINDIR)/dfrotz
+	rm -f $(MAN_PREFIX)/man/man6/dfrotz.6
 
 install_sdl: install_sfrotz
 install_sfrotz: $(SFROTZ_BIN)
-	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
-	install "$(SFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
-	install -m 644 doc/sfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
+	install -d $(BINDIR) $(MAN_PREFIX)/man/man6
+	install $(SFROTZ_BIN) $(BINDIR)
+	install -m 644 doc/sfrotz.6 $(MAN_PREFIX)/man/man6/
 
 uninstall_sdl: uninstall_sfrotz
 uninstall_sfrotz:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/sfrotz"
-	rm -f "$(DESTDIR)$(MANDIR)/man6/sfrotz.6"
+	rm -f $(BINDIR)/sfrotz
+	rm -f $(MAN_PREFIX)/man/man6/sfrotz.6"
 
 install_all:	install_frotz install_dfrotz install_sfrotz
 
