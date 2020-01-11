@@ -113,17 +113,17 @@ void x_init_colour(char *bg_name, char *fg_name) {
     }
   }
   if (use_color) {
-    h_config |= CONFIG_COLOUR;
-    h_flags |= COLOUR_FLAG;
+    z_header.config |= CONFIG_COLOUR;
+    z_header.flags |= COLOUR_FLAG;
   }
   else {
-    h_flags &= ~COLOUR_FLAG;
+    z_header.flags &= ~COLOUR_FLAG;
     pixel_values[WHITE_COLOUR] = WhitePixel(dpy, DefaultScreen(dpy));
   }
 
-  h_default_background =
+  z_header.default_background =
     x_bg_fg_color(&def_bg_pixel, 14, bg_name, 9);
-  h_default_foreground =
+  z_header.default_foreground =
     x_bg_fg_color(&def_fg_pixel, 15, fg_name, 2);
 }
 
@@ -202,9 +202,9 @@ int os_font_data (int font, int *height, int *width)
 void os_set_colour (int new_foreground, int new_background)
 {
   if (new_foreground == 1)
-    new_foreground = h_default_foreground;
+    new_foreground = z_header.default_foreground;
   if (new_background == 1)
-    new_background = h_default_background;
+    new_background = z_header.default_background;
 
   fg_pixel = pixel_values[new_foreground];
   bg_pixel = pixel_values[new_background];
