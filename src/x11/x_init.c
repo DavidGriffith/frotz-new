@@ -423,6 +423,17 @@ void os_reset_screen (void)
 }/* os_reset_screen */
 
 /*
+ * os_quit
+ *
+ * Immediately and cleanly exit, passing along exit status.
+ *
+ */
+void os_quit(int status)
+{
+        exit(status);
+} /* os_quit */
+
+/*
  * os_restart_game
  *
  * This routine allows the interface to interfere with the process of
