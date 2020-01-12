@@ -30,3 +30,4 @@ src/test/*rec
 *.qzl
 *.scr
 *.rec
+*.pcf
