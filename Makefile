@@ -290,7 +290,7 @@ $(DFROTZ_BIN): $(DFROTZ_LIBS)
 
 x11: $(XFROTZ_BIN)
 $(XFROTZ_BIN): $(XFROTZ_LIBS)
-	$(CC) $(CFLAGS) $+ -o $@$(EXTENSION) $(LDFLAGS) $(X11_LDFLAGS)
+	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(X11_LDFLAGS)
 	@echo "** Done building Frotz with X11 interface."
 
 sdl: $(SFROTZ_BIN)
