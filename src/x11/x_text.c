@@ -422,12 +422,14 @@ void os_set_cursor (int y, int x)
 void os_more_prompt (void)
 {
   int saved_x, new_x;
+  const char *p = "[MORE]";
 
   /* Save some useful information */
   saved_x = curr_x;
 
   /*  os_set_text_style(0); */
-  os_display_string((zchar *)"[MORE]");
+  while(*p)
+    os_display_char((zchar) (*p++));
   os_read_key(0, TRUE);
 
   new_x = curr_x;
