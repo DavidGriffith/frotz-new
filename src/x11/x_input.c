@@ -18,6 +18,7 @@
 extern bool is_terminator(zchar key);
 extern void x_del_char(zchar c);
 
+
 /*
  * os_read_line
  *
@@ -63,36 +64,36 @@ extern void x_del_char(zchar c);
  * to implement word completion (similar to tcsh under Unix).
  *
  */
-
-zchar os_read_line (int max, zchar *buf, int timeout, int width, int continued)
+zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
 {
-  zchar c;
-  int index;
+	zchar c;
+	int index;
 
-  index = 0;
-  while (buf[index] != 0) index++;
-  for (;;) {
-    c = os_read_key(timeout, TRUE);
-    if (is_terminator(c))
-      return c;
-    if (c == ZC_BACKSPACE) {
-      if (index == 0)
-        os_beep(1);
-      else {
-        index--;
-        x_del_char(buf[index]);
-        buf[index] = 0;
-      }
-    }
-    else if (index == max)
-      os_beep(1);
-    else {
-      os_display_char(c);
-      buf[index++] = c;
-      buf[index] = 0;
-    }
-  }
-}/* os_read_line */
+	index = 0;
+	while (buf[index] != 0)
+		index++;
+	for (;;) {
+		c = os_read_key(timeout, TRUE);
+		if (is_terminator(c))
+			return c;
+		if (c == ZC_BACKSPACE) {
+			if (index == 0)
+				os_beep(1);
+			else {
+				index--;
+				x_del_char(buf[index]);
+				buf[index] = 0;
+			}
+		} else if (index == max)
+			os_beep(1);
+		else {
+			os_display_char(c);
+			buf[index++] = c;
+			buf[index] = 0;
+		}
+	}
+} /* os_read_line */
+
 
 /*
  * os_read_key
@@ -101,89 +102,87 @@ zchar os_read_line (int max, zchar *buf, int timeout, int width, int continued)
  * return it. Input aborts after timeout/10 seconds.
  *
  */
-
-zchar os_read_key (int timeout, int cursor)
+zchar os_read_key(int timeout, int cursor)
 {
-  XEvent ev;
-  char result[2];
-  int size;
-  KeySym symbol;
-  int text_height;
+	XEvent ev;
+	char result[2];
+	int size;
+	KeySym symbol;
+	int text_height;
 
-  text_height = current_font_info->ascent + current_font_info->descent;
-  if (cursor)
-    XFillRectangle(dpy, main_window, cursor_gc,
-                   curr_x, curr_y, 2, text_height);
-  for(;;) {
-    XNextEvent(dpy, &ev);
-    if (ev.type == KeyPress) {
-      XKeyEvent *key_ev = (XKeyEvent *) &ev;
+	text_height = current_font_info->ascent + current_font_info->descent;
+	if (cursor)
+		XFillRectangle(dpy, main_window, cursor_gc,
+			       curr_x, curr_y, 2, text_height);
+	for (;;) {
+		XNextEvent(dpy, &ev);
+		if (ev.type == KeyPress) {
+			XKeyEvent *key_ev = (XKeyEvent *) & ev;
 
-      if (cursor)
-        XFillRectangle(dpy, main_window, cursor_gc,
-                       curr_x, curr_y, 2, text_height);
-      size = XLookupString(key_ev, result, sizeof result,
-                           &symbol, NULL);
-      if (size == 1) {
-        if (key_ev->state & Mod1Mask)
-          switch (result[0]) {
-          case 'r':
-            return ZC_HKEY_RECORD;
-          case 'p':
-            return ZC_HKEY_PLAYBACK;
-          case 's':
-            return ZC_HKEY_SEED;
-          case 'u':
-            return ZC_HKEY_UNDO;
-          case 'n':
-            return ZC_HKEY_RESTART;
-          case 'x':
-            return ZC_HKEY_QUIT;
-          case 'd':
-            return ZC_HKEY_DEBUG;
-          case 'h':
-            return ZC_HKEY_HELP;
-          default:
-            os_beep(1);
-          }
-        else
-          return result[0] == 10 ? 13 : result[0];
-      }
-      else {
-        switch (symbol) {
-        case XK_Left:
-        case XK_KP_Left:
-          return ZC_ARROW_LEFT;
-        case XK_Up:
-        case XK_KP_Up:
-          return ZC_ARROW_UP;
-        case XK_Right:
-        case XK_KP_Right:
-          return ZC_ARROW_RIGHT;
-        case XK_Down:
-        case XK_KP_Down:
-          return ZC_ARROW_DOWN;
-        default:
-          if (symbol >= XK_F1 && symbol <= XK_F12)
-	    return (ZC_FKEY_MIN - XK_F1) + symbol;
-        }
-      }
-      if (cursor)
-        XFillRectangle(dpy, main_window, cursor_gc,
-                       curr_x, curr_y, 2, text_height);
-    }
-    else if (ev.type == ButtonPress) {
-      XButtonEvent *button_ev = (XButtonEvent *) &ev;
+			if (cursor)
+				XFillRectangle(dpy, main_window, cursor_gc,
+					       curr_x, curr_y, 2, text_height);
+			size = XLookupString(key_ev, result, sizeof result,
+					     &symbol, NULL);
+			if (size == 1) {
+				if (key_ev->state & Mod1Mask)
+					switch (result[0]) {
+					case 'r':
+						return ZC_HKEY_RECORD;
+					case 'p':
+						return ZC_HKEY_PLAYBACK;
+					case 's':
+						return ZC_HKEY_SEED;
+					case 'u':
+						return ZC_HKEY_UNDO;
+					case 'n':
+						return ZC_HKEY_RESTART;
+					case 'x':
+						return ZC_HKEY_QUIT;
+					case 'd':
+						return ZC_HKEY_DEBUG;
+					case 'h':
+						return ZC_HKEY_HELP;
+					default:
+						os_beep(1);
+				} else
+					return result[0] == 10 ? 13 : result[0];
+			} else {
+				switch (symbol) {
+				case XK_Left:
+				case XK_KP_Left:
+					return ZC_ARROW_LEFT;
+				case XK_Up:
+				case XK_KP_Up:
+					return ZC_ARROW_UP;
+				case XK_Right:
+				case XK_KP_Right:
+					return ZC_ARROW_RIGHT;
+				case XK_Down:
+				case XK_KP_Down:
+					return ZC_ARROW_DOWN;
+				default:
+					if (symbol >= XK_F1 && symbol <= XK_F12)
+						return (ZC_FKEY_MIN - XK_F1) +
+						    symbol;
+				}
+			}
+			if (cursor)
+				XFillRectangle(dpy, main_window, cursor_gc,
+					       curr_x, curr_y, 2, text_height);
+		} else if (ev.type == ButtonPress) {
+			XButtonEvent *button_ev = (XButtonEvent *) & ev;
 
-      if (cursor)
-        XFillRectangle(dpy, main_window, cursor_gc,
-                       curr_x, curr_y, 2, text_height);
-      mouse_x = button_ev->x + 1;
-      mouse_y = button_ev->y + 1;
-      return ZC_SINGLE_CLICK;
-    }
-  }
-}/* os_read_key */
+			if (cursor)
+				XFillRectangle(dpy, main_window, cursor_gc,
+					       curr_x, curr_y, 2, text_height);
+			mouse_x = button_ev->x + 1;
+			mouse_y = button_ev->y + 1;
+			return ZC_SINGLE_CLICK;
+		}
+	}
+} /* os_read_key */
+
 
 /*
  * os_read_file_name
@@ -206,37 +205,33 @@ zchar os_read_key (int timeout, int cursor)
  * Return value is NULL if there was a problem.
  *
  */
-
 extern void read_string(int, zchar *);
 
-char *os_read_file_name (const char *default_name, int flag)
+char *os_read_file_name(const char *default_name, int flag)
 {
-    int saved_replay = istream_replay;
-    int saved_record = ostream_record;
-    char file_name[FILENAME_MAX + 1];
+	int saved_replay = istream_replay;
+	int saved_record = ostream_record;
+	char file_name[FILENAME_MAX + 1];
 
-    /* Turn off playback and recording temporarily */
+	/* Turn off playback and recording temporarily */
+	istream_replay = 0;
+	ostream_record = 0;
 
-    istream_replay = 0;
-    ostream_record = 0;
+	print_string("Enter a file name.\nDefault is \"");
+	print_string(default_name);
+	print_string("\": ");
 
-    print_string ("Enter a file name.\nDefault is \"");
-    print_string (default_name);
-    print_string ("\": ");
+	read_string(MAX_FILE_NAME, (zchar *) file_name);
 
-    read_string (MAX_FILE_NAME, (zchar *)file_name);
+	/* Use the default name if nothing was typed */
+	if (file_name[0] == 0)
+		strcpy(file_name, default_name);
 
-    /* Use the default name if nothing was typed */
+	/* Restore state of playback and recording */
+	istream_replay = saved_replay;
+	ostream_record = saved_record;
 
-    if (file_name[0] == 0)
-        strcpy (file_name, default_name);
-
-    /* Restore state of playback and recording */
-
-    istream_replay = saved_replay;
-    ostream_record = saved_record;
-
-    return strdup(file_name);
+	return strdup(file_name);
 } /* os_read_file_name */
 
 
