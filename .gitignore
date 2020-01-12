@@ -1,3 +1,4 @@
+a.out
 frotz
 dfrotz
 sfrotz
@@ -17,12 +18,16 @@ frotz-*
 *.tar
 *.gz
 src/common/version.c
-#src/common/git_hash.h
+src/common/git_hash.h
 src/common/defs.h
 src/curses/ux_defines.h
 *.z?
+*.blb
+*.blorb
+*.zblorb
 src/test/*mem
 src/test/*rec
 *.qzl
 *.scr
 *.rec
+*.pcf

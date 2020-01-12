@@ -217,6 +217,7 @@ void os_process_arguments (int argc, char *argv[])
   XtAppContext app_context;
   char *str_type_return;
   char *class_buf, *name_buf, *class_append, *name_append;
+  char *p;
   int i;
   XrmValue value;
 
@@ -233,6 +234,34 @@ void os_process_arguments (int argc, char *argv[])
 
   f_setup.story_file = strdup(argv[1]);
   f_setup.story_name = strdup(basename(argv[1]));
+
+  /* Now strip off the extension */
+  p = strrchr(f_setup.story_name, '.');
+  if ( p != NULL )
+    *p = '\0';  /* extension removed */
+
+  /* Create nice default file names */
+  f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
+  memcpy(f_setup.script_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char));
+  strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
+
+  f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
+  memcpy(f_setup.command_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char));
+  strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
+
+  if (!f_setup.restore_mode) {
+    f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
+    memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
+    strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
+  } else {  /*Set our auto load save as the name_save*/
+    f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
+    memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char));
+    free(f_setup.tmp_save_name);
+  }
+
+  f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
+  memcpy(f_setup.aux_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
+  strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
 
   XtGetApplicationNameAndClass(dpy, &x_name, &x_class);
 
@@ -259,19 +288,18 @@ void os_process_arguments (int argc, char *argv[])
  * (mouse, sound board). Set various OS depending story file header
  * entries:
  *
- *     h_config (aka flags 1)
- *     h_flags (aka flags 2)
- *     h_screen_cols (aka screen width in characters)
- *     h_screen_rows (aka screen height in lines)
- *     h_screen_width
- *     h_screen_height
- *     h_font_height (defaults to 1)
- *     h_font_width (defaults to 1)
- *     h_default_foreground
- *     h_default_background
- *     h_interpreter_number
- *     h_interpreter_version
- *     h_user_name (optional; not used by any game)
+ *     z_header.config (aka flags 1)
+ *     z_header.flags (aka flags 2)
+ *     z_header.screen_cols (aka screen width in characters)
+ *     z_header.screen_rows (aka screen height in lines)
+ *     z_header.screen_width
+ *     z_header.screen_height
+ *     z_header.font_height (defaults to 1)
+ *     z_header.font_width (defaults to 1)
+ *     z_header.default_foreground
+ *     z_header.default_background
+ *     z_header.interpreter_number
+ *     z_header.interpreter_version
  *
  * Finally, set reserve_mem to the amount of memory (in bytes) that
  * should not be used for multiple undo and reserved for later use.
@@ -298,30 +326,30 @@ void os_init_screen (void)
   XGCValues gc_setup;
 
   /* First, configuration parameters get set up */
-  if (h_version == V3 && user_tandy_bit != 0)
-    h_config |= CONFIG_TANDY;
-  if (h_version == V3)
-    h_config |= CONFIG_SPLITSCREEN | CONFIG_PROPORTIONAL;
-  if (h_version >= V4)
-    h_config |= CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED;
-  if (h_version >= V5) {
-    h_flags |= GRAPHICS_FLAG | UNDO_FLAG | MOUSE_FLAG | COLOUR_FLAG;
+  if (z_header.version == V3 && user_tandy_bit != 0)
+    z_header.config |= CONFIG_TANDY;
+  if (z_header.version == V3)
+    z_header.config |= CONFIG_SPLITSCREEN | CONFIG_PROPORTIONAL;
+  if (z_header.version >= V4)
+    z_header.config |= CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED;
+  if (z_header.version >= V5) {
+    z_header.flags |= GRAPHICS_FLAG | UNDO_FLAG | MOUSE_FLAG | COLOUR_FLAG;
 #ifdef NO_SOUND
-    h_flags &= ~SOUND_FLAG;
+    z_header.flags &= ~SOUND_FLAG;
 #else
-    h_flags |= SOUND_FLAG;
+    z_header.flags |= SOUND_FLAG;
 #endif
   }
-  if (h_version >= V6) {
-    h_config |= CONFIG_PICTURES;
-    h_flags &= ~MENU_FLAG;
+  if (z_header.version >= V6) {
+    z_header.config |= CONFIG_PICTURES;
+    z_header.flags &= ~MENU_FLAG;
   }
 
-  if (h_version >= V5 && (h_flags & UNDO_FLAG) && f_setup.undo_slots == 0)
-    h_flags &= ~UNDO_FLAG;
+  if (z_header.version >= V5 && (z_header.flags & UNDO_FLAG) && f_setup.undo_slots == 0)
+    z_header.flags &= ~UNDO_FLAG;
 
-  h_interpreter_number = INTERP_DEC_20;
-  h_interpreter_version = 'F';
+  z_header.interpreter_number = INTERP_DEC_20;
+  z_header.interpreter_version = 'F';
 
   x_init_colour(user_bg, user_fg);
 
@@ -360,7 +388,7 @@ printf("%s\n\n", f_setup.story_name);
   else
     story_basename++;
   window_title = malloc(strlen(story_basename) + 14);
-  sprintf(window_title, "XFrotz (V%d): %s", h_version, story_basename);
+  sprintf(window_title, "XFrotz (V%d): %s", z_header.version, story_basename);
 
   XmbSetWMProperties(dpy, main_window, window_title, story_basename,
                      saved_argv, saved_argc, size_hints, wm_hints, class_hint);
@@ -372,12 +400,12 @@ printf("%s\n\n", f_setup.story_name);
   if (! current_font_info)
     os_fatal("Could not open default font");
 
-  h_screen_width = 800;
-  h_screen_height = 600;
+  z_header.screen_width = 800;
+  z_header.screen_height = 600;
   os_font_data(FIXED_WIDTH_FONT, &font_height, &font_width);
-  h_font_height = font_height; h_font_width = font_width;
-  h_screen_cols = 800 / h_font_width;
-  h_screen_rows = 600 / h_font_height;
+  z_header.font_height = font_height; z_header.font_width = font_width;
+  z_header.screen_cols = 800 / z_header.font_width;
+  z_header.screen_rows = 600 / z_header.font_height;
 
   fg_pixel = def_fg_pixel;
   bg_pixel = def_bg_pixel;
@@ -422,6 +450,17 @@ void os_reset_screen (void)
   flush_buffer();
   os_read_key(0, FALSE);
 }/* os_reset_screen */
+
+/*
+ * os_quit
+ *
+ * Immediately and cleanly exit, passing along exit status.
+ *
+ */
+void os_quit(int status)
+{
+        exit(status);
+} /* os_quit */
 
 /*
  * os_restart_game
@@ -471,10 +510,12 @@ FILE *os_load_story(void)
 
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
-    return 0;
+    /* No blorb in X11 for now, so just use fseek */
+    return fseek(fp, offset, whence);
 }
 
 int os_storyfile_tell(FILE * fp)
 {
-    return 0;
+    /* No blorb in X11 for now, so just use ftell */
+     return ftell(fp);
 }

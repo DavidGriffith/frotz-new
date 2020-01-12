@@ -16,6 +16,10 @@ run Frotz:
   * A POSIX-compliant version of make (GNU make will do)
   * A reasonably good SYSV derived curses library (ncurses is best)
 
+For Unicode support by way of UTF-8, libncursesw is required.  Unicode
+support can be disabled in the Makefile by commenting out this line:
+  USE_UTF8 ?= yes
+
 For sound support, a few more things are necessary:
   * libao         (1.1.0 or higher)
   * libmodplug    (0.8.8.4 or higher)
@@ -24,15 +28,23 @@ For sound support, a few more things are necessary:
   * libvorbis     (1.3.2 or higher)
 Earlier versions of these libraries might work, but are untested.
 
+If you don't want to build Frotz with audio support, simply do "make
+nosound" or comment out the "SOUND" line from the Makefile.
+
+For NetBSD, you must install the libao-sun plugin for libao.
+
 Linux uses ncurses, so you're safe there.  The version of curses that
 comes with NetBSD 1.6.x and later is good too.  Earlier versions lacked
 certain features needed by Frotz.  I don't know about the other *BSD
-curses.  You can download ncurses from ftp://ftp.gnu/org/gnu/ncurses/.
-If you insist on using the vendor-supplied curses library, see the
-platform-specific info below.
+curses.  Of the current BSDs, only NetBSD still uses the old BSD curses 
+library.  All the others, including MacOS, now use ncurses.
 
-For MAC OS/X users, check the Makefile, and uncomment the line that
-adds the "-D_DARWIN_SOURCE" and "-D_XOPEN_SOURCE=600" CFLAGS.
+You can download ncurses from https://www.gnu.org/software/ncurses/ or
+ftp://ftp.gnu/org/gnu/ncurses/.  If you must use the vendor-supplied
+curses library, see the platform-specific info below.
+
+For MacOS users, Frotz with all three of its user interfaces should
+compile without any changes to the source code or Makefiles.
 
 It's always a good idea to have the GNU version of make(1) around.
 
@@ -64,7 +76,7 @@ languishing for several years, it is now incorporated into the Unix
 Frotz codebase as a one of the available interfaces.  With SDL Frotz, 
 full support for V6 games is provided.
 
-Prerequisite packages for sfrotz:
+Prerequisite packages for sfrotz (Debian nomenclature):
   * libsdl2-dev		(2.0.9 or higher)
   * libsdl2-mixer-dev	(2.0.4 or higher)
   * libfreetype6-dev	(2.6.x or higher)
@@ -91,6 +103,22 @@ Prerequisite packages for xfrotz:
   * libxt		(1.1.5 or higher)  
 Earlier versions of these libraries might work, but are untested.
 
+Prerequisite packages for sfrotz (NetBSD nomenclature):
+  * SDL2		(2.0.9 or higher)
+  * SDL2_mixer		(2.0.4 or higher)
+  * freetype		(2.6.x or higher)
+  * png			(1.6.x or higher)
+  * jpeg		(1.5.x or higher)
+  * zlib		(1.2.x or higher)
+
+Prerequisite packages for sfrotz (OpenBSD nomenclature):
+  * sdl2		(2.0.9 or higher)
+  * sdl2-mixer		(2.0.4 or higher)
+  * freetype		(2.6.x or higher)
+  * png			(1.6.x or higher)
+  * jpeg		(1.5.x or higher)
+  * zlib		(1.2.x or higher)
+
 
 =======================
 Editing the Makefile ||
@@ -115,9 +143,9 @@ be compiled.  If this doesn't work, chances are you have an older flavor
 of Unix.  Check the second section of the Makefile.  That's where you'll 
 find options for older flavors of Unix.  Are you using plain old curses 
 or ncurses.  On modern systems, the regular curses library is actually 
-ncurses.  For older systems, this isn't always true.  Figure out where 
-the necessary header files and libraries live and edit the Makefile 
-accordingly.
+ncurses except for NetBSD.  For older systems, this isn't always true.
+Figure out where the necessary header files and libraries live and edit
+the Makefile accordingly.
 
 Once the compile is complete, make sure you have the correct permissions 
 to write where you want Frotz installed, then type "make install".  To 
@@ -158,7 +186,7 @@ archive all over the world listed there.
 
 Here are direct URLs to the zcode directories:
 
-http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html
+http://ifarchive.org/indexes/if-archive/games/zcode/
 ftp://ftp.ifarchive.org/if-archive/games/zcode
 
 
@@ -191,10 +219,19 @@ You can also just give a path to the game file.
 When you save your game, all save files are put in the current directory
 unless you specify a full path.  Please name your saves intelligently.
 
-You MUST put sound and graphics in directories named "sound" and
-"graphics" in the same directory as the gamefile.  Yes, this is a bit
-confusing.  That's why Blorb will be so wonderful when Unix Frotz supports
-it.
+If a game uses sound or graphics, they will be packaged into a Blorb
+file.  This file may or may not also contain a zcode game file.  Blorb
+files containing the game file are supposed to follow the name pattern
+of "game.zblorb" or "game.zbl".  For a Blorb file that does not contain
+a game file at all, the usual pattern is "game.blorb" or "game.blb". If
+you tell Frotz to load a .zblorb file, it will look for and load a zcode
+file within and then load whatever other resources it needs from that
+Blorb file.  If the Blorb file is separate from the zcode file, then
+Frotz takes a few extra steps to load.  Suppose we have "game.z5". Frotz
+will look in the same directory as the zcode file for "game.blb" or
+"game.blorb".  If such a file is found, great.  If not, Frotz will
+continue on without.  For graphical games, not loading graphics can
+cause the game to be unplayable.
 
 You'll probably want to make use of Frotz's new config file functionality.
 The options in the config file mirror the command line options and free
@@ -212,6 +249,11 @@ notices you don't have a config file of your own in "$HOME/.frotzrc".
 ===========================
 Platform-specific issues ||
 ===========================
+
+Unicode character support:
+Currently, only libncursesw is known to fully provide Unicode support by
+way of UTF-8 character encoding.  At the moment, it's not clear if BSD
+curses does the job all the way.
 
 Linux:  No apparent problems.
 

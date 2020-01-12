@@ -24,6 +24,7 @@
  *
  */
 
+#include <stdlib.h>
 #include "frotz.h"
 
 #ifndef MSDOS_16BIT
@@ -33,67 +34,29 @@
 extern void interpret (void);
 extern void init_memory (void);
 extern void init_undo (void);
+extern void reset_screen (void);
 extern void reset_memory (void);
 
 bool need_newline_at_exit = FALSE;
 
 /* Story file name, id number and size */
-
 char *story_name = 0;
-
 enum story story_id = UNKNOWN;
 long story_size = 0;
 
+/* Setup data */
+f_setup_t f_setup;
+
 /* Story file header data */
-
-zbyte h_version = 0;
-zbyte h_config = 0;
-zword h_release = 0;
-zword h_resident_size = 0;
-zword h_start_pc = 0;
-zword h_dictionary = 0;
-zword h_objects = 0;
-zword h_globals = 0;
-zword h_dynamic_size = 0;
-zword h_flags = 0;
-zbyte h_serial[6] = { 0, 0, 0, 0, 0, 0 };
-zword h_abbreviations = 0;
-zword h_file_size = 0;
-zword h_checksum = 0;
-zbyte h_interpreter_number = 0;
-zbyte h_interpreter_version = 0;
-zbyte h_screen_rows = 0;
-zbyte h_screen_cols = 0;
-zword h_screen_width = 0;
-zword h_screen_height = 0;
-zbyte h_font_height = 1;
-zbyte h_font_width = 1;
-zword h_functions_offset = 0;
-zword h_strings_offset = 0;
-zbyte h_default_background = 0;
-zbyte h_default_foreground = 0;
-zword h_terminating_keys = 0;
-zword h_line_width = 0;
-zbyte h_standard_high = 1;
-zbyte h_standard_low = 0;
-zword h_alphabet = 0;
-zword h_extension_table = 0;
-zbyte h_user_name[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-zword hx_table_size = 0;
-zword hx_mouse_x = 0;
-zword hx_mouse_y = 0;
-zword hx_unicode_table = 0;
+extern z_header_t z_header;
 
 /* Stack data */
-
 zword stack[STACK_SIZE];
 zword *sp = 0;
 zword *fp = 0;
 zword frame_count = 0;
 
 /* IO streams */
-
 bool ostream_screen = TRUE;
 bool ostream_script = FALSE;
 bool ostream_memory = FALSE;
@@ -102,15 +65,12 @@ bool istream_replay = FALSE;
 bool message = FALSE;
 
 /* Current window and mouse data */
-
 int cwin = 0;
 int mwin = 0;
-
 int mouse_y = 0;
 int mouse_x = 0;
 
 /* Window attributes */
-
 bool enable_wrapping = FALSE;
 bool enable_scripting = FALSE;
 bool enable_scrolling = FALSE;
@@ -121,7 +81,6 @@ char *option_zcode_path;
 
 
 /* Size of memory to reserve (in bytes) */
-
 long reserve_mem = 0;
 
 
@@ -131,11 +90,10 @@ long reserve_mem = 0;
  *	no zargs used
  *
  */
-void z_piracy (void)
+void z_piracy(void)
 {
-    branch (!f_setup.piracy);
-
-}/* z_piracy */
+	branch (!f_setup.piracy);
+} /* z_piracy */
 
 
 /*
@@ -144,34 +102,24 @@ void z_piracy (void)
  * Prepare and run the game.
  *
  */
-int cdecl main (int argc, char *argv[])
+int cdecl main(int argc, char *argv[])
 {
-    os_init_setup ();
-
-    os_process_arguments (argc, argv);
-
-    init_buffer ();
-
-    init_err ();
-
-    init_memory ();
-
-    init_process ();
-
-    init_sound ();
-
-    os_init_screen ();
-
-    init_undo ();
-
-    z_restart ();
-
-    interpret ();
-
-    reset_memory ();
-
-    os_reset_screen ();
-
-    return 0;
-
-}/* main */
+	init_header();
+	init_setup();
+	os_init_setup();
+	os_process_arguments(argc, argv);
+	init_buffer();
+	init_err();
+	init_memory();
+	init_process();
+	init_sound();
+	os_init_screen();
+	init_undo();
+	z_restart();
+	interpret();
+	reset_screen();
+	reset_memory();
+	os_reset_screen();
+	os_quit(EXIT_SUCCESS);
+	return 0;
+} /* main */

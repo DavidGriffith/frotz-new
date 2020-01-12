@@ -3,3 +3,4 @@
 .gitlab-ci.yml	export-ignore
 public		export-ignore
 Makefile	export-subst
+src/dos/bchash.h	export-subst

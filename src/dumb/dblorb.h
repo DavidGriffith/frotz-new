@@ -1,5 +1,5 @@
 /*
- * dumb_blorb.h
+ * dblorb.h
  *
  * Blorb related functions specific to the Dumb interface.
  *
@@ -28,9 +28,9 @@ typedef struct sampledata_struct {
  *
  */
 typedef struct {
-    bb_result_t bbres;
-    unsigned long type;
-    FILE *fp;
+	bb_result_t bbres;
+	unsigned long type;
+	FILE *fp;
 } myresource;
 
 /* These are used only locally */
@@ -44,4 +44,4 @@ extern bb_result_t	blorb_res;
 bb_err_t dumb_blorb_init(char *);
 void dumb_blorb_stop(void);
 
-#endif /* NO_BLORB */
+#endif

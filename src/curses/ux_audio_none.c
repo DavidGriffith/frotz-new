@@ -21,6 +21,8 @@
 
 #define __UNIX_PORT_FILE
 
+#include "ux_defines.h"
+
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
 #else
@@ -39,10 +41,9 @@
  */
 void os_init_sound(void)
 {
-
-    /* Not implemented */
-
+	/* Not implemented */
 }
+
 
 /*
  * os_beep
@@ -51,13 +52,11 @@ void os_init_sound(void)
  * or low-pitched (number == 2).
  *
  */
-
 void os_beep (int UNUSED(number))
 {
+	beep();
+}
 
-    beep();
-
-}/* os_beep */
 
 /*
  * os_prepare_sample
@@ -65,13 +64,13 @@ void os_beep (int UNUSED(number))
  * Load the sample from the disk.
  *
  */
-
 void os_prepare_sample (int UNUSED(number))
 {
 
-    /* Not implemented */
+	/* Not implemented */
 
-}/* os_prepare_sample */
+}
+
 
 /*
  * os_start_sample
@@ -88,9 +87,10 @@ void os_prepare_sample (int UNUSED(number))
 void os_start_sample (int UNUSED(number), int UNUSED(volume), int UNUSED(repeats), zword UNUSED(eos))
 {
 
-    /* Not implemented */
+	/* Not implemented */
 
-}/* os_start_sample */
+}
+
 
 /*
  * os_stop_sample
@@ -98,13 +98,13 @@ void os_start_sample (int UNUSED(number), int UNUSED(volume), int UNUSED(repeats
  * Turn off the current sample.
  *
  */
-
 void os_stop_sample (int UNUSED(number))
 {
 
     /* Not implemented */
 
-}/* os_stop_sample */
+}
+
 
 /*
  * os_finish_with_sample
@@ -112,13 +112,12 @@ void os_stop_sample (int UNUSED(number))
  * Remove the current sample from memory (if any).
  *
  */
-
 void os_finish_with_sample (int UNUSED(number))
 {
 
     /* Not implemented */
 
-}/* os_finish_with_sample */
+}
 
 /*
  * os_wait_sample
@@ -132,6 +131,6 @@ void os_wait_sample (void)
 
     /* Not implemented */
 
-}/* os_wait_sample */
+}
 
 #endif /* NO_SOUND */

@@ -1,12 +1,35 @@
 .\" -*- nroff -*-
-.TH SFROTZ 6 2.45pre
+.TH SFROTZ 6 2.50
 .SH NAME
 sfrotz \- interpreter for Infocom and other Z-Machine games (SDL interface)
 
 
 .SH SYNOPSIS
 .B sfrotz
-.RI [ options "] " file
+.RI [ options "] " "file " [ blorbfile "]"
+
+At least one file must be specified on the command line.  This can be
+either a plain Z-code file or a Blorb file.  A Z-code file is a compiled
+executable for the Z-Machine.  A Blorb file contains audio, graphics,
+and other things in addition to the game wrapped up into a single file.
+It can also optionally contain the Z-Machine executable.  If a plain
+Z-code file is supplied, then
+.B Frotz
+will check for a Blorb file with the same base name but an extension of
+.B .blb,
+.B .blorb,
+or
+.B .zblorb
+and load it if found.
+
+If the file supplied on the command line is a Blorb file, then
+.B Frotz
+will check to see if a Z-code file is contained within.  If not found, then
+.B Frotz
+will complain and exit.
+
+An alternatively-named Blorb file can be supplied as the optional second
+parameter to the command line invocatio
 
 
 .SH DESCRIPTION
@@ -15,14 +38,17 @@ is a Z-Machine interpreter.  The Z-machine is a virtual machine designed
 by Infocom to run all of their text adventures.  It went through multiple
 revisions during the lifetime of the company, and two further revisions
 (V7 and V8) were created by Graham Nelson after the company's demise.
-The specification is now quite well documented; this version of Frotz
+The specification is now quite well documented; this version of
+.B Frotz
 supports version 1.0.
 .P
-This version of Frotz fully supports all these versions of the Z-Machine
-including the graphical version 6.  Graphics and sound are created
-through the use of the SDL libraries.  AIFF sound effects and music in
-MOD and OGG formats are supported when packaged in Blorb container files
-or optionally from individual files.
+This version of
+.B Frotz
+fully supports all these versions of the Z-Machine including the
+graphical version 6.  Graphics and sound are created through the use of
+the SDL libraries.  AIFF sound effects and music in MOD and OGG formats
+are supported when packaged in Blorb container files or optionally from
+individual files.
 
 
 .SH STANDARD OPTIONS
@@ -49,10 +75,12 @@ option does nothing.
 .TP
 .B \-c N
 Sets the number of context lines used.  By default, after a ``[MORE]''
-prompt, and assuming there is enough output pending, Frotz will allow all
-the currently visible lines to scroll off the screen before prompting
-again.  This switch specifies how many lines of text Frotz will hold
-over and display at the top of the next screen.
+prompt, and assuming there is enough output pending,
+.B Frotz
+will allow all the currently visible lines to scroll off the screen
+before prompting again.  This switch specifies how many lines of text
+.B Frotz
+will hold over and display at the top of the next screen.
 
 .TP
 .B \-f <colorname>
@@ -66,7 +94,7 @@ option does nothing.
 
 .TP
 .B \-h N
-Manually sets the screen height.
+Manually sets the text height.
 
 .TP
 .B \-i
@@ -113,21 +141,6 @@ Z-code.
 .B \-r N
 Sets the right margin.
 
-.TP
-.B \-R <path>
-Restricted read/write.  Reading and writing files will be restricted
-only to the provided path. Ordinarily Frotz will write or read its
-saves, transcripts, and move recordings in whatever path or directory
-the user provides when the
-.B SAVE,
-.B SCRIPT,
-or
-.B RECORDING
-commands are given.  This can be undesirable if Frotz is run in a
-restricted environment, by a front end, or by a chatbot.  This option will
-cause Frotz to write or read only to the provided path and nowhere else.
-Then the controlling process can then watch that directory for changes
-and need not worry about someone scribbling or snooping who-knows-where.
 
 .TP
 .B \-s N
@@ -139,10 +152,10 @@ key Alt\-S does not really help).
 
 .TP
 .B \-S N
-Set the transcript width.  By default your transscript files are formatted
-to a width of 80 columns per line, regardless of the current screen width.
+Set the transcript width.  By default your transcript files are formatted
+to a width of 80 columns per line, regardless of the current text width.
 This switch allows you to change this setting. In particular, use \-S 0
-to deactivate automatic line splitting in transscript files.
+to deactivate automatic line splitting in transcript files.
 
 .TP
 .B \-t
@@ -154,15 +167,15 @@ toned down.
 
 .TP
 .B \-u N
-Sets the number of slots available for Frotz's multiple undo hotkey (see
-below).  This defaults to twenty, which should be sufficient for most
-purposes.  Setting too high a number here may be dangerous on machines
-with limited memory.
+Sets the number of slots available for
+.B Frotz's
+multiple undo hotkey (see below).  This defaults to twenty, which should
+be sufficient for most purposes.  Setting too high a number here may be
+dangerous on machines with limited memory.
 
 .TP
 .B \-w N
-Manually sets the screen width.  Again, this should not be necessary
-except in special circumstances.
+Manually sets the text width.
 
 .TP
 .B \-x
@@ -225,12 +238,14 @@ Force the use of default monospaced VGA font.
 
 
 .SH HOT KEYS
-Sfrotz supports the same hot keys as standard Frotz, plus the Ctl-Alt-X
-combination for immediate exit, which may be used in case of emergency.
-Note that these hot keys are enabled only when the Z-machine is waiting
-for line input (for Z-machine experts: @read opcode), with the
-exception of Ctl-Alt-X which also works in single character input mode
-(@read_char opcode).
+.B Sfrotz
+supports the same hot keys as standard
+.B Frotz,
+plus the Ctl-Alt-X combination for immediate exit, which may be used in
+case of emergency. Note that these hot keys are enabled only when the
+Z-machine is waiting for line input (for Z-machine experts: @read
+opcode), with the exception of Ctl-Alt-X which also works in single
+character input mode (@read_char opcode).
 
 .TP
 .B Alt-D
@@ -270,28 +285,31 @@ Exit game immediately (no confirmation).
 
 
 .SH WINDOW
-Sfrotz has a hardwired default screen size of 640x400. The screen size
-can be changed by the values in this section, by the values found in the
-Reso chunck of a Blorb file, and finally by the -w and -h command line
-options (in that order). Note however that Sfrotz shall refuse to set a
-screen width less than 640 and/or a height less than 400. NOTE: for
-normal (windowed) usage, the screen size should obviously be less than
-the PC screen resolution (taking into account also window decorations,
-taskbars etc.) For fullscreen usage, the size should preferably be one
-of those supported by the PC video driver; otherwise, SDL shall try to
-use the next higher available resolution, with black borders around the
-Z-machine screen. In fullscreen mode, however, it may happen that for
-some strange resolutions SDL accepts the request, but the screen goes
-blank... In such a case, you may shut down the program by pressing
-Ctrl-Alt-X.
+.B Sfrotz
+has a hardwired default screen size of 640x400. The screen size can be
+changed by the values in this section, by the values found in the Reso
+chunck of a Blorb file, and finally by the -w and -h command line
+options (in that order). Note however that
+.B Sfrotz
+shall refuse to set a screen width less than 640 and/or a height less
+than 400. NOTE: for normal (windowed) usage, the screen size should
+obviously be less than the PC screen resolution (taking into account
+also window decorations, taskbars etc.) For fullscreen usage, the size
+should preferably be one of those supported by the PC video driver;
+otherwise, SDL shall try to use the next higher available resolution,
+with black borders around the Z-machine screen. In fullscreen mode,
+however, it may happen that for some strange resolutions SDL accepts the
+request, but the screen goes blank... In such a case, you may shut down
+the program by pressing Ctrl-Alt-X.
 
 
 .SH INTERPRETER NUMBER
 The interpreter number is a setting in the Z-machine header which is
 used to tell the game on what sort of machine the interpreter is
-running. Frotz will automatically choose the most appropriate number for
-a given Infocom-produced game.  Should you want to override the number,
-the
+running.
+.B Sfrotz
+will automatically choose the most appropriate number for a given
+Infocom-produced game.  Should you want to override the number, the
 .B \-I
 option is available.
 
@@ -353,10 +371,12 @@ Infocom used the following interpreter numbers:
 
 
 .SH NON BLORB RESOURCES
-Besides Blorb-packaged resources, Sfrotz can also render graphics and
-sound from individual files, provided the latter are either suitably
-named (e.g a common root with a numeric field specifying the resource
-number), or listed in a suitably formatted text file.
+Besides Blorb-packaged resources,
+.B Sfrotz
+can also render graphics and sound from individual files, provided the
+latter are either suitably named (e.g a common root with a numeric field
+specifying the resource number), or listed in a suitably formatted text
+file.
 
 Note that this feature is not automatic, but must be enabled by the -%
 or -@ command line options. When the feature is enabled, resources found
@@ -371,44 +391,72 @@ the final Blorb file for distribution.
 
 
 .SH TRUETYPE FONTS
-Sfrotz can display text with Truetype or Type1 fonts, using the
-FreeType2 rendering library. The location of the necessary font files
-must be specified in the setup file. Also, antialiased rendering of
-Truetype fonts can be specified. Please note that this feature in Sfrotz
+
+.B Sfrotz
+can display text with Truetype or Type1 fonts, using the FreeType2
+rendering library. The location of the necessary font files must be
+specified in the setup file. Also, antialiased rendering of Truetype
+fonts can be specified. Please note that this feature in
+.B sfrotz
 is still
 .B experimental,
 so don't expect too much (e.g., kerning is not supported).
 
 
 .SH DEFAULT FONTS
-Sfrotz needs not Truetype fonts for working; in fact it has a default
+.B Sfrotz
+does not need Truetype fonts to work; in fact it has a default
 monospaced font, based on an 8x16 VGA font, which can be used for both
 the TEXT_FONT and the FIXED_FONT of the z-machine, with suitable (though
 not very nice) modifications for the various styles. Even if Truetype
-fonts are specified in the setup file, Sfrotz can be forced to use the
-VGA font by the -V command line switch.
+fonts are specified in the setup file,
+.B Sfrotz
+can be forced to use the VGA font by the -V command line switch.
+
+
+.SH UNICODE
+.B Sfrotz
+supports Unicode glyphs by way of UTF-8 as long as the fonts loaded
+contain the glyphs you need.  The default font provided by SDL does not
+contain much beyond the Latin alphabet and some diacritical marks.
+Inverted punctuation marks as used in Spanish are missing.  Two
+monospaced fonts known to work well with most commonly-encountered
+alphabetic languages are Leggie and FreeMono. They can be found at
+https://memleek.org/leggie/ (X11 BDF fonts) and
+https://www.gnu.org/software/freefont/ (Truetype fonts). Logographic
+glyphs (Kanji and Chinese are not currently supported.
+
 
 .SH ENVIRONMENT
-If the ZCODE_PATH environmental variable is defined, frotz will search
-that path for game files.  If that doesn't exist, INFOCOM_PATH will be
-searched.
+If the ZCODE_PATH environmental variable is defined,
+.B Sfrotz
+will search that path for game files.  If that doesn't exist,
+INFOCOM_PATH will be searched.
 
 
-.SH SETUP FILE DESCRIPTION
-There are four sections: Interpreter, Display, Fonts, and Resources.
+.SH SETUP FILE
+On startup,
+.B sfrotz
+will check $HOME/.sfrotzrc for setup information.  The setup file has
+four sections: Interpreter, Display, Fonts, and Resources.
 
 The
 .B Interpreter
-section deals with options having to do with how the Frotz core works.
+section deals with options having to do with how the
+.B Frotz
+core works.
 
 The
 .B Window
-section deals with screen display.  Sfrotz has a hardwired default
-screen size of 640x400. The screen size can be changed by the values in
-this section, by the values found in the Reso chunck of a Blorb file,
-and finally by the -w and -h command line options (in that order). Note
-however that Sfrotz shall refuse to set a screen width less than 640
-and/or a height less than 400.
+section deals with screen display.
+.B Sfrotz
+has a hardwired default screen size of 640x400. The screen size can be
+changed by the values in this section, by the values found in the Reso
+chunck of a Blorb file, and finally by the -w and -h command line
+options (in that order).  Note however that
+.B sfrotz
+shall refuse to set a screen width less than 640 and/or a height less
+than 400.
 
 .BR NOTE :
 for normal (windowed) usage, the screen size should obviously be less
@@ -439,9 +487,11 @@ each in four styles (roman, bold, italic and bold+italic). A single face
 is specified by the file name (with its suffix!), optionally followed by
 an @ sign and a number, indicating the font size in pixels (default is
 14). Multiple face files can be specified, separated by pipe (|)
-characters; Sfrotz shall use the first one it finds (see the example in
-EXAMPLE SETUP FILE). This feature allows e.g. to use the same setup file
-on different systems.
+characters;
+.B Sfrotz
+shall use the first one it finds (see the example in EXAMPLE SETUP
+FILE). This feature allows e.g. to use the same setup file on different
+systems.
 
 The
 .B Resources
@@ -535,7 +585,9 @@ Note that this option cannot be overridden by a command line switch.
 fontdir =
 .I folder
 .br
-Specify the directory containing the Truetype fonts.
+Specify the directory containing the Truetype fonts.  If this does not
+begin with a slash, then the directory is assumed to be relative to the
+user's home directory.
 
 .HP 2
 textroman =
@@ -709,7 +761,9 @@ Pict 30 PNG dott0.png
 
 .SH FURTHER INFORMATION
 .PP
-The Frotz homepage is at https://661.org/proj/if/frotz/.
+The
+.B Frotz
+homepage is at https://661.org/proj/if/frotz/.
 .PP
 A
 .BR git(1)
@@ -718,16 +772,20 @@ for public perusal here:
 .br
 https://gitlab.com/DavidGriffith/frotz/.
 .PP
-The bleeding edge of Frotz development may be followed there.
+The bleeding edge of
+.B Frotz
+development may be followed there.
 .PP
 The Interactive Fiction Archive is a good place to find games to play
-with Frotz.  Various ports and builds for Frotz may also be found here.
-Here is its URL:
+with
+.B Frotz.
+Various ports and builds for Frotz may also be found here.  Here is its URL:
 .br
 http://www.ifarchive.org/
 .PP
-Most distributions of Linux and BSD include Frotz in their package
-repositories.
+Most distributions of Linux and BSD include
+.B Frotz
+in their package repositories.
 
 
 .SH CAVEATS
@@ -737,16 +795,17 @@ It assumes that once the screen height and width are set, they will never
 change; even across saves.  This made sense when 24x80 terminals were the
 norm and graphical user interfaces were mostly unknown.  I'm fairly sure
 there's a way around this problem, but for now, don't resize an xterm in
-which frotz is running.  Also, you should try to make sure the terminal
-on which you restore a saved game has the same dimensions as the one on
-which you saved the game.
+which
+.B frotz
+is running.  Also, you should try to make sure the terminal on which you
+restore a saved game has the same dimensions as the one on which you
+saved the game.
 
 .PP
-You can use a path like "/usr/local/games/zcode:$HOME/zcode" with
-$ZCODE_PATH or $INFOCOM_PATH because the shell will digest that $HOME
-variable for you before setting $ZCODE_PATH. While processing frotz.conf
-and $HOME/.frotzrc, a shell is not used. Therefore you cannot use
-environmental variables in the "zcodepath" option within the config files.
+Audio latency might be unreasonably long depending on the settings of
+your operating system.  Linux generally has things right.  The BSDs may
+need some sysctl(8) settings adjusted.  See the sound(4) or audio(4)
+manpages for more information.
 
 .PP
 This manpage is not intended to tell users HOW to play interactive
@@ -760,11 +819,6 @@ http://www.brasslantern.org/beginners/
 http://www.musicwords.net/if/how_to_play.htm
 .br
 http://ifarchive.org/
-
-.PP
-If you prefer a PDF file of how to play, here is one:
-.br
-http://inform-fiction.org/I7Downloads/Examples/dm/IntroductionToIF.pdf
 
 
 .SH BUGS

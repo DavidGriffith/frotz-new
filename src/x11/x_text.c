@@ -113,17 +113,17 @@ void x_init_colour(char *bg_name, char *fg_name) {
     }
   }
   if (use_color) {
-    h_config |= CONFIG_COLOUR;
-    h_flags |= COLOUR_FLAG;
+    z_header.config |= CONFIG_COLOUR;
+    z_header.flags |= COLOUR_FLAG;
   }
   else {
-    h_flags &= ~COLOUR_FLAG;
+    z_header.flags &= ~COLOUR_FLAG;
     pixel_values[WHITE_COLOUR] = WhitePixel(dpy, DefaultScreen(dpy));
   }
 
-  h_default_background =
+  z_header.default_background =
     x_bg_fg_color(&def_bg_pixel, 14, bg_name, 9);
-  h_default_foreground =
+  z_header.default_foreground =
     x_bg_fg_color(&def_fg_pixel, 15, fg_name, 2);
 }
 
@@ -202,9 +202,9 @@ int os_font_data (int font, int *height, int *width)
 void os_set_colour (int new_foreground, int new_background)
 {
   if (new_foreground == 1)
-    new_foreground = h_default_foreground;
+    new_foreground = z_header.default_foreground;
   if (new_background == 1)
-    new_background = h_default_background;
+    new_background = z_header.default_background;
 
   fg_pixel = pixel_values[new_foreground];
   bg_pixel = pixel_values[new_background];
@@ -339,6 +339,20 @@ void os_display_string (const zchar *s)
 }/* os_display_string */
 
 /*
+ * os_check_unicode
+ *
+ * Return with bit 0 set if the Unicode character can be
+ * displayed, and bit 1 if it can be input.
+ *
+ */
+int os_check_unicode(int UNUSED(font), zchar UNUSED(c))
+{
+        /* Assume full input and output.  */
+        return 3;
+}
+
+
+/*
  * os_char_width
  *
  * Return the width of the character in screen units.
@@ -408,12 +422,14 @@ void os_set_cursor (int y, int x)
 void os_more_prompt (void)
 {
   int saved_x, new_x;
+  const char *p = "[MORE]";
 
   /* Save some useful information */
   saved_x = curr_x;
 
   /*  os_set_text_style(0); */
-  os_display_string((zchar *)"[MORE]");
+  while(*p)
+    os_display_char((zchar) (*p++));
   os_read_key(0, TRUE);
 
   new_x = curr_x;

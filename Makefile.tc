@@ -1,10 +1,10 @@
 # This file is used to build Frotz for DOS using Borland Turbo C++ 3.00.
+# Written with Borland MAKE Version 3.6 in mind.
 # The resulting executable runs as a 16-bit program.
-# -O or higher optimization causes problems in quetzal.c
 #
 
 CC = tcc
-CFLAGS = -ml -N
+CFLAGS = -ml -N -O
 TLIB = tlib
 CP = copy
 RM = del
@@ -14,10 +14,9 @@ RENAME = ren
 BINNAME = frotz.exe
 LIBRARY = frotz.lib
 
-SOUND_DEF = -DSOUND_SUPPORT
-DOS_DEF = -DMSDOS_16BIT
+VERSION = "2.50"
 
-DEFS = $(SOUND_DEF) $(DOS_DEF)
+VER = -DVERSION=$(VERSION)
 
 DOS_DIR = src\dos
 DOS_OBJECTS =   $(DOS_DIR)\bcinit.o \
@@ -53,15 +52,16 @@ CORE_OBJECTS =  $(CORE_DIR)\buffer.o \
 
 .SUFFIXES: .c .o .h
 
-.c.o:
-	$(CC) $(CFLAGS) $(DEFS) -I$(DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
-	$(TLIB) $(LIBRARY) +-$@
-
 all:	frotz
+
+.c.o:
+	$(CC) $(CFLAGS) $(VER) -I$(DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
+	$(TLIB) $(LIBRARY) +-$@
 
 clean:
 	$(RM) $(CORE_DIR)\*.o
 	$(RM) $(DOS_DIR)\*.o
+	$(RM) *.obj
 	$(RM) *.lib
 	$(RM) *.exe
 	$(RM) *.bak

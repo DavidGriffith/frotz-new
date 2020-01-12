@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- * Or visit http://www.fsf.org/ 
+ * Or visit http://www.fsf.org/
  */
-
 
 #define __UNIX_PORT_FILE
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "ux_defines.h"
 
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
@@ -45,12 +46,12 @@ bool color_enabled = FALSE;
 /* int current_color = 0; */
 
 static char latin1_to_ascii[] =
-    "   !  c  L  >o<Y  |  S  '' C  a  << not-  R  _  "
-    "^0 +/-^2 ^3 '  my P  .  ,  ^1 o  >> 1/41/23/4?  "
-    "A  A  A  A  Ae A  AE C  E  E  E  E  I  I  I  I  "
-    "Th N  O  O  O  O  Oe *  O  U  U  U  Ue Y  Th ss "
-    "a  a  a  a  ae a  ae c  e  e  e  e  i  i  i  i  "
-    "th n  o  o  o  o  oe :  o  u  u  u  ue y  th y  ";
+	"   !  c  L  >o<Y  |  S  '' C  a  << not-  R  _  "
+	"^0 +/-^2 ^3 '  my P  .  ,  ^1 o  >> 1/41/23/4?  "
+	"A  A  A  A  Ae A  AE C  E  E  E  E  I  I  I  I  "
+	"Th N  O  O  O  O  Oe *  O  U  U  U  Ue Y  Th ss "
+	"a  a  a  a  ae a  ae c  e  e  e  e  i  i  i  i  "
+	"th n  o  o  o  o  oe :  o  u  u  u  ue y  th y  ";
 
 
 /*
@@ -63,18 +64,20 @@ static char latin1_to_ascii[] =
  *    GRAPHICS_FONT
  *    FIXED_WIDTH_FONT
  *
- * The font size should be stored in "height" and "width". If
- * the given font is unavailable then these values must _not_
- * be changed.
+ * The font size should be stored in "height" and "width".
+ * If the given font is unavailable then these values must
+ * _not_ be changed.
  *
  */
 int os_font_data (int font, int *height, int *width)
 {
-    if (font == TEXT_FONT) {
-      *height = 1; *width = 1; return 1; /* Truth in advertising */
-    }
-    return 0;
-}/* os_font_data */
+	if (font == TEXT_FONT) {
+		*height = 1;
+		*width = 1;
+		return 1; /* Truth in advertising */
+	}
+	return 0;
+} /* os_font_data */
 
 
 #ifdef COLOR_SUPPORT
@@ -86,18 +89,18 @@ int os_font_data (int font, int *height, int *width)
  */
 static int unix_convert(int color)
 {
-  switch(color) {
-        case BLACK_COLOUR: return COLOR_BLACK;
-        case RED_COLOUR: return COLOR_RED;
-        case GREEN_COLOUR: return COLOR_GREEN;
-        case YELLOW_COLOUR: return COLOR_YELLOW;
-        case BLUE_COLOUR: return COLOR_BLUE;
-        case MAGENTA_COLOUR: return COLOR_MAGENTA;
-        case CYAN_COLOUR: return COLOR_CYAN;
-        case WHITE_COLOUR: return COLOR_WHITE;
-  }
-  return 0;
-}
+	switch(color) {
+		case BLACK_COLOUR: return COLOR_BLACK;
+		case RED_COLOUR: return COLOR_RED;
+		case GREEN_COLOUR: return COLOR_GREEN;
+		case YELLOW_COLOUR: return COLOR_YELLOW;
+		case BLUE_COLOUR: return COLOR_BLUE;
+		case MAGENTA_COLOUR: return COLOR_MAGENTA;
+		case CYAN_COLOUR: return COLOR_CYAN;
+		case WHITE_COLOUR: return COLOR_WHITE;
+	}
+	return 0;
+} /* unix_convert */
 #endif
 
 
@@ -132,32 +135,32 @@ static int unix_convert(int color)
  */
 void os_set_colour (int new_foreground, int new_background)
 {
-    if (new_foreground == 1) new_foreground = h_default_foreground;
-    if (new_background == 1) new_background = h_default_background;
-    if (u_setup.color_enabled) {
+	if (new_foreground == 1) new_foreground = z_header.default_foreground;
+	if (new_background == 1) new_background = z_header.default_background;
+	if (u_setup.color_enabled) {
 #ifdef COLOR_SUPPORT
-	static int colorspace[10][10];
-	static int n_colors = 0;
+		static int colorspace[10][10];
+		static int n_colors = 0;
 
-	if (!colorspace[new_foreground][new_background]) {
-	  init_pair(++n_colors, unix_convert(new_foreground),
-			unix_convert(new_background));
-	  colorspace[new_foreground][new_background] = n_colors;
-	}
-	u_setup.current_color = COLOR_PAIR(colorspace[new_foreground][new_background]);
+		if (!colorspace[new_foreground][new_background]) {
+			init_pair(++n_colors, unix_convert(new_foreground),
+				unix_convert(new_background));
+			colorspace[new_foreground][new_background] = n_colors;
+		}
+		u_setup.current_color = COLOR_PAIR(colorspace[new_foreground][new_background]);
 #endif
-    } else
-      u_setup.current_color = (((new_foreground == h_default_background)
-			&& (new_background == h_default_foreground))
+	} else
+		u_setup.current_color = (((new_foreground == z_header.default_background)
+			&& (new_background == z_header.default_foreground))
 			? A_REVERSE : 0);
-    os_set_text_style(u_setup.current_text_style);
-}/* os_set_colour */
+	os_set_text_style(u_setup.current_text_style);
+} /* os_set_colour */
 
 
 /*
  * os_set_text_style
  *
- * Set the current text style. Following flags can be set:
+ * Set the current text style.  Following flags can be set:
  *
  *     REVERSE_STYLE
  *     BOLDFACE_STYLE
@@ -167,27 +170,27 @@ void os_set_colour (int new_foreground, int new_background)
  */
 void os_set_text_style (int new_style)
 {
-    int temp = 0;
+	int temp = 0;
 
-    u_setup.current_text_style = new_style;
-    if (new_style & REVERSE_STYLE) temp |= A_REVERSE;
-    if (new_style & BOLDFACE_STYLE) temp |= A_BOLD;
-    if (new_style & EMPHASIS_STYLE) temp |= A_UNDERLINE;
-    attrset(temp ^ u_setup.current_color);
-}/* os_set_text_style */
+	u_setup.current_text_style = new_style;
+	if (new_style & REVERSE_STYLE) temp |= A_REVERSE;
+	if (new_style & BOLDFACE_STYLE) temp |= A_BOLD;
+	if (new_style & EMPHASIS_STYLE) temp |= A_UNDERLINE;
+	attrset(temp ^ u_setup.current_color);
+} /* os_set_text_style */
 
 
 /*
  * os_set_font
  *
- * Set the font for text output. The interpreter takes care not to
+ * Set the font for text output.  The interpreter takes care not to
  * choose fonts which aren't supported by the interface.
  *
  */
 void os_set_font (int UNUSED(new_font))
 {
-    /* Not implemented */
-}/* os_set_font */
+	/* Not implemented */
+} /* os_set_font */
 
 
 /*
@@ -203,38 +206,49 @@ void os_set_font (int UNUSED(new_font))
  */
 void os_display_char (zchar c)
 {
-    if (c >= ZC_LATIN1_MIN) {
-        if (u_setup.plain_ascii) {
+	if (c >= ZC_LATIN1_MIN) {
+		if (u_setup.plain_ascii) {
+			char *ptr = latin1_to_ascii + 3 * (c - ZC_LATIN1_MIN);
+			char c1 = *ptr++;
+			char c2 = *ptr++;
+			char c3 = *ptr++;
+			addch(c1);
 
-	  char *ptr = latin1_to_ascii + 3 * (c - ZC_LATIN1_MIN);
-	  char c1 = *ptr++;
-	  char c2 = *ptr++;
-	  char c3 = *ptr++;
+			if (c2 != ' ')
+				addch(c2);
+			if (c3 != ' ')
+				addch(c3);
 
-	  addch(c1);
-
-	  if (c2 != ' ')
-	    addch(c2);
-	  if (c3 != ' ')
-	    addch(c3);
-
-	} else
-	  addch(c);
-	return;
-    }
-    if (c >= ZC_ASCII_MIN && c <= ZC_ASCII_MAX) {
-        addch(c);
-	return;
-    }
-    if (c == ZC_INDENT) {
-      addch(' '); addch(' '); addch(' ');
-      return;
-    }
-    if (c == ZC_GAP) {
-      addch(' '); addch(' ');
-      return;
-    }
-}/* os_display_char */
+#ifndef USE_UTF8
+		} else
+			addch(c);
+#else
+		} else {
+			if(c > 0x7ff) {
+				addch(0xe0 | ((c >> 12) & 0xf));
+				addch(0x80 | ((c >> 6) & 0x3f));
+				addch(0x80 | (c & 0x3f));
+			} else {
+				addch(0xc0 | ((c >> 6) & 0x1f));
+				addch(0x80 | (c & 0x3f));
+			}
+		}
+#endif /* USE_UTF8 */
+		return;
+	}
+	if (c >= ZC_ASCII_MIN && c <= ZC_ASCII_MAX) {
+		addch(c);
+		return;
+	}
+	if (c == ZC_INDENT) {
+		addch(' '); addch(' '); addch(' ');
+		return;
+	}
+	if (c == ZC_GAP) {
+		addch(' '); addch(' ');
+		return;
+	}
+} /* os_display_char */
 
 
 /*
@@ -245,24 +259,33 @@ void os_display_char (zchar c)
  */
 void os_display_string (const zchar *s)
 {
-    zchar c;
+	zchar c;
 
-    while ((c = (unsigned char) *s++) != 0) {
+	while ((c =  *s++) != 0) {
+		if (c == ZC_NEW_FONT || c == ZC_NEW_STYLE) {
+			int arg = (unsigned char) *s++;
+			if (c == ZC_NEW_FONT)
+				os_set_font (arg);
+			if (c == ZC_NEW_STYLE)
+				os_set_text_style (arg);
+		} else
+			os_display_char (c);
+	}
+} /* os_display_string */
 
-        if (c == ZC_NEW_FONT || c == ZC_NEW_STYLE) {
 
-            int arg = (unsigned char) *s++;
-
-            if (c == ZC_NEW_FONT)
-                os_set_font (arg);
-            if (c == ZC_NEW_STYLE)
-                os_set_text_style (arg);
-
-        } else
-	    os_display_char (c);
-    }
-
-}/* os_display_string */
+/*
+ * os_check_unicode
+ *
+ * Return with bit 0 set if the Unicode character can be
+ * displayed, and bit 1 if it can be input.
+ *
+ */
+int os_check_unicode(int UNUSED(font), zchar UNUSED(c))
+{
+	/* Assume full input and output.  */
+	return 3;
+}
 
 
 /*
@@ -271,27 +294,26 @@ void os_display_string (const zchar *s)
  * Return the width of the character in screen units.
  *
  */
-int os_char_width (zchar c)
+int os_char_width(zchar c)
 {
-    if (c >= ZC_LATIN1_MIN && u_setup.plain_ascii) {
+	if (c >= ZC_LATIN1_MIN && u_setup.plain_ascii) {
+		int width = 0;
+		const char *ptr = latin1_to_ascii + 3 * (c - ZC_LATIN1_MIN);
+		char c2, c3;
 
-        int width = 0;
-        const char *ptr = latin1_to_ascii + 3 * (c - ZC_LATIN1_MIN);
-	char c2, c3;
+		ptr++;
+		c2 = *ptr++;
+		c3 = *ptr++;
 
-	ptr++;
-	c2 = *ptr++;
-	c3 = *ptr++;
-
-	width++;
-	if (c2 != ' ')
-	  width++;
-	if (c3 != ' ')
-	  width++;
-	return width;
-    }
-    return 1;
-}/* os_char_width*/
+		width++;
+		if (c2 != ' ')
+			width++;
+		if (c3 != ' ')
+			width++;
+		return width;
+	}
+	return 1;
+} /* os_char_width*/
 
 
 /*
@@ -304,21 +326,20 @@ int os_char_width (zchar c)
  *    NEW_FONT  - next character is a new font
  *
  */
-int os_string_width (const zchar *s)
+int os_string_width(const zchar *s)
 {
-    int width = 0;
-    zchar c;
+	int width = 0;
+	zchar c;
 
-    while ((c = *s++) != 0) {
-
-	if (c == ZC_NEW_STYLE || c == ZC_NEW_FONT) {
-	    s++;
-	    /* No effect */
-	} else
-	    width += os_char_width(c);
-    }
-    return width;
-}/* os_string_width */
+	while ((c = *s++) != 0) {
+		if (c == ZC_NEW_STYLE || c == ZC_NEW_FONT) {
+			s++;
+			/* No effect */
+		} else
+			width += os_char_width(c);
+	}
+	return width;
+} /* os_string_width */
 
 
 /*
@@ -327,11 +348,11 @@ int os_string_width (const zchar *s)
  * Place the text cursor at the given coordinates. Top left is (1,1).
  *
  */
-void os_set_cursor (int y, int x)
+void os_set_cursor(int y, int x)
 {
-    /* Curses thinks the top left is (0,0) */
-    move(--y, --x);
-}/* os_set_cursor */
+	/* Curses thinks the top left is (0,0) */
+	move(--y, --x);
+} /* os_set_cursor */
 
 
 /*
@@ -341,20 +362,20 @@ void os_set_cursor (int y, int x)
  * prompt from the screen.
  *
  */
-void os_more_prompt (void)
+void os_more_prompt(void)
 {
-    int saved_style, saved_x, saved_y;
+	int saved_style, saved_x, saved_y;
 
-    /* Save some useful information */
-    saved_style = u_setup.current_text_style;
-    getyx(stdscr, saved_y, saved_x);
+	/* Save some useful information */
+	saved_style = u_setup.current_text_style;
+	getyx(stdscr, saved_y, saved_x);
 
-    os_set_text_style(0);
-    addstr("[MORE]");
-    os_read_key(0, TRUE);
+	os_set_text_style(0);
+	addstr("[MORE]");
+	os_read_key(0, TRUE);
 
-    move(saved_y, saved_x);
-    addstr("      ");
-    move(saved_y, saved_x);
-    os_set_text_style(saved_style);
-}/* os_more_prompt */
+	move(saved_y, saved_x);
+	addstr("      ");
+	move(saved_y, saved_x);
+	os_set_text_style(saved_style);
+} /* os_more_prompt */

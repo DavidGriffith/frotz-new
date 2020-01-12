@@ -92,7 +92,7 @@ Array AccentList table [;
     like '>>' and '<<'). The Z-Spec says that the character '>>' is
     code 162, and '<<' is 163. However, Inform 6.11 (following the
     Z-Spec 0.2) compiles
-    '@@64>>' as 163, and '@@64<<' as 162. The concensus is that the
+    '@@64>>' as 163, and '@@64<<' as 162. The consensus is that the
     Z-Spec 0.2 and Inform 6.11 are wrong, and Z-Spec 0.99 and later
     are correct.^^";
 

@@ -12,12 +12,8 @@
 /* Things you (the porter) have to edit: */
 
 /* As you might expect, uint32 must be a 32-bit unsigned numeric type,
-    and uint16 a 16-bit unsigned numeric type. You should also uncomment
-    exactly one of the two ENDIAN definitions. */
+    and uint16 a 16-bit unsigned numeric type. */
 
-/* #define BLORB_BIG_ENDIAN */
-
-#define BLORB_LITTLE_ENDIAN
 #include <limits.h>
 #if UINT_MAX == (1UL<<32)-1UL
 typedef unsigned int  uint32;
@@ -53,17 +49,43 @@ typedef int bb_err_t;
 #define bb_method_Memory (1)
 #define bb_method_FilePos (2)
 
-/* Four-byte constants */
-
+/* Making a four-byte constant to describe a chunk type. */
 #define bb_make_id(c1, c2, c3, c4)  \
     (((c1) << 24) | ((c2) << 16) | ((c3) << 8) | (c4))
 
-#define bb_ID_Snd       (bb_make_id('S', 'n', 'd', ' '))
-#define bb_ID_Exec      (bb_make_id('E', 'x', 'e', 'c'))
-#define bb_ID_Pict      (bb_make_id('P', 'i', 'c', 't'))
-#define bb_ID_Copyright (bb_make_id('(', 'c', ')', ' '))
-#define bb_ID_AUTH      (bb_make_id('A', 'U', 'T', 'H'))
-#define bb_ID_ANNO      (bb_make_id('A', 'N', 'N', 'O'))
+/* Four-byte constants */
+#define bb_ID_Snd	(bb_make_id('S','n','d',' '))
+#define bb_ID_Exec	(bb_make_id('E','x','e','c'))
+#define bb_ID_Pict	(bb_make_id('P','i','c','t'))
+#define bb_ID_Copyright	(bb_make_id('(','c',')',' '))
+#define bb_ID_AUTH	(bb_make_id('A','U','T','H'))
+#define bb_ID_ANNO	(bb_make_id('A','N','N','O'))
+#define bb_ID_Snam	(bb_make_id('S','n','a','m'))
+#define bb_ID_IFmd	(bb_make_id('I','F','m','d'))
+#define bb_ID_Fspc	(bb_make_id('F','s','p','c'))
+
+#define bb_ID_ZCOD	(bb_make_id('Z','C','O','D'))
+#define bb_ID_GLUL	(bb_make_id('G','L','U','L'))
+
+#define bb_ID_Loop	(bb_make_id('L','o','o','p'))
+#define bb_ID_FORM	(bb_make_id('F','O','R','M'))
+#define bb_ID_MOD	(bb_make_id('M','O','D',' '))
+#define bb_ID_OGGV	(bb_make_id('O','G','G','V'))
+
+#define bb_ID_APal	(bb_make_id('A','P','a','l'))
+#define bb_ID_RDes	(bb_make_id('R','D','e','s'))
+#define bb_ID_PNG	(bb_make_id('P','N','G',' '))
+#define bb_ID_JPEG	(bb_make_id('J','P','E','G'))
+#define bb_ID_Rect	(bb_make_id('R','e','c','t'))
+
+/* Lower-level four-byte constants. */
+#define bb_ID_IFRS	(bb_make_id('I','F','R','S'))
+#define bb_ID_RIdx	(bb_make_id('R','I','d','x'))
+#define bb_ID_IFhd	(bb_make_id('I','F','h','d'))
+#define bb_ID_Reso	(bb_make_id('R','e','s','o'))
+#define bb_ID_Loop	(bb_make_id('L','o','o','p'))
+#define bb_ID_RelN	(bb_make_id('R','e','l','N'))
+#define bb_ID_Plte	(bb_make_id('P','l','t','e'))
 
 /* bb_result_t: Result when you try to load a chunk. */
 typedef struct bb_result_struct {
@@ -122,6 +144,7 @@ typedef struct bb_zheader_struct {
 /* bb_map_t: Holds the complete description of an open Blorb file.
     This type is opaque for normal interpreter use. */
 typedef struct bb_map_struct bb_map_t;
+
 
 /* Function declarations. These functions are of fairly general use;
     they would apply to any Blorb file. */

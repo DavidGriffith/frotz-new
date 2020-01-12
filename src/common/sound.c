@@ -29,7 +29,7 @@
 #define EFFECT_STOP 3
 #define EFFECT_FINISH_WITH 4
 
-extern int direct_call (zword);
+extern int direct_call(zword);
 
 static zword routine = 0;
 
@@ -46,13 +46,35 @@ static bool playing = FALSE;
  * Initialize sound variables.
  *
  */
-void init_sound (void)
+void init_sound(void)
 {
-    locked = FALSE;
-    playing = FALSE;
+	/* These games use sound effects numbers 1 and 2, which are defined
+	 * as high and low "bleeps" respectively, yet they do not set
+	 * SOUND_FLAG or OLD_SOUND_FLAG.  Note that OLD_SOUND_FLAG uses the
+	 * same bit as does UNDO_FLAG, but the former is only for V3 games
+	 * and the latter for V5+.
+	 *
+	 * Currently os_beep() just rings the terminal, so f_setup.bleep
+	 * isn't yet being used.
+	 */
+	switch (story_id) {
+	case TRINITY:
+	case BUREAUCRACY:
+	case AMFV:
+		f_setup.bleep = TRUE;
+		break;
+	default:
+		break;
+	}
 
-    os_init_sound();
-
+	if ((z_header.flags & SOUND_FLAG)
+	    || (z_header.version == V3 && (z_header.flags & OLD_SOUND_FLAG))) {
+		f_setup.sound = TRUE;
+		locked = FALSE;
+		playing = FALSE;
+		os_init_sound();
+	} else
+		f_setup.sound = FALSE;
 } /* init_sound */
 
 
@@ -62,24 +84,22 @@ void init_sound (void)
  * Call the IO interface to play a sample.
  *
  */
-static void start_sample (int number, int volume, int repeats, zword eos)
+static void start_sample(int number, int volume, int repeats, zword eos)
 {
-    static zbyte lh_repeats[] = {
-	0x00, 0x00, 0x00, 0x01, 0xff,
-	0x00, 0x01, 0x01, 0x01, 0x01,
-	0xff, 0x01, 0x01, 0xff, 0x00,
-	0xff, 0xff, 0xff, 0xff, 0xff
-    };
+	static zbyte lh_repeats[] = {
+		0x00, 0x00, 0x00, 0x01, 0xff,
+		0x00, 0x01, 0x01, 0x01, 0x01,
+		0xff, 0x01, 0x01, 0xff, 0x00,
+		0xff, 0xff, 0xff, 0xff, 0xff
+	};
 
-    if (story_id == LURKING_HORROR)
-	repeats = lh_repeats[number];
+	if (story_id == LURKING_HORROR)
+		repeats = lh_repeats[number];
 
-    os_start_sample (number, volume, repeats, eos);
-
-    routine = eos;
-    playing = TRUE;
-
-}/* start_sample */
+	os_start_sample(number, volume, repeats, eos);
+	routine = eos;
+	playing = TRUE;
+} /* start_sample */
 
 
 /*
@@ -90,15 +110,14 @@ static void start_sample (int number, int volume, int repeats, zword eos)
  * immediately follow other samples.
  *
  */
-static void start_next_sample (void)
+static void start_next_sample(void)
 {
-    if (next_sample != 0)
-	start_sample (next_sample, next_volume, 0, 0);
+	if (next_sample != 0)
+		start_sample(next_sample, next_volume, 0, 0);
 
-    next_sample = 0;
-    next_volume = 0;
-
-}/* start_next_sample */
+	next_sample = 0;
+	next_volume = 0;
+} /* start_next_sample */
 
 
 /*
@@ -109,24 +128,23 @@ static void start_next_sample (void)
  * interrupt (which requires extremely careful programming).
  *
  */
-void end_of_sound (void)
+void end_of_sound(void)
 {
 #if defined(DJGPP) && defined(SOUND_SUPPORT)
-    end_of_sound_flag = 0;
+	end_of_sound_flag = 0;
 #endif
 
-    playing = FALSE;
+	playing = FALSE;
 
-    if (!locked) {
+	if (!locked) {
 
-	if (story_id == LURKING_HORROR)
-	    start_next_sample ();
+		if (story_id == LURKING_HORROR)
+			start_next_sample();
 
-	direct_call (routine);
+		direct_call(routine);
+	}
 
-    }
-
-}/* end_of_sound */
+} /* end_of_sound */
 
 
 /*
@@ -141,63 +159,59 @@ void end_of_sound (void)
  *	 Repeats are stored in the high byte, 255 is infinite loop.
  *
  */
-void z_sound_effect (void)
+void z_sound_effect(void)
 {
-    zword number = zargs[0];
-    zword effect = zargs[1];
-    zword volume = zargs[2];
+	zword number = zargs[0];
+	zword effect = zargs[1];
+	zword volume = zargs[2];
 
-    /* By default play sound 1 at volume 8 */
-    if (zargc < 1)
-	number = 1;
-    if (zargc < 2)
-	effect = EFFECT_PLAY;
-    if (zargc < 3)
-	volume = 8;
+	/* By default play sound 1 at volume 8 */
+	if (zargc < 1)
+		number = 1;
+	if (zargc < 2)
+		effect = EFFECT_PLAY;
+	if (zargc < 3)
+		volume = 8;
 
-    if (number >= 3 || number == 0) {
+	if (number == 1 || number == 2) {
+		os_beep(number);
+		return;
+	}
 
-	locked = TRUE;
+	if (!f_setup.sound) {
+		runtime_error(ERR_PLAY_SOUND);
+		return;
+	}
 
-	if (story_id == LURKING_HORROR && (number == 9 || number == 16)) {
-
-	    if (effect == EFFECT_PLAY) {
-
-		next_sample = number;
-		next_volume = volume;
-
+	if (number >= 3 || number == 0) {
+		locked = TRUE;
+		if (story_id == LURKING_HORROR && (number == 9 || number == 16)) {
+			if (effect == EFFECT_PLAY) {
+				next_sample = number;
+				next_volume = volume;
+				locked = FALSE;
+				if (!playing)
+					start_next_sample();
+			} else
+				locked = FALSE;
+			return;
+		}
+		playing = FALSE;
+		switch (effect) {
+		case EFFECT_PREPARE:
+			os_prepare_sample(number);
+			break;
+		case EFFECT_PLAY:
+			start_sample(number, lo(volume), hi(volume),
+				(zargc == 4) ? zargs[3] : 0);
+			break;
+		case EFFECT_STOP:
+			os_stop_sample(number);
+			break;
+		case EFFECT_FINISH_WITH:
+			os_finish_with_sample(number);
+			break;
+		}
 		locked = FALSE;
-
-		if (!playing)
-		    start_next_sample ();
-
-	    } else locked = FALSE;
-
-	    return;
-
 	}
-
-	playing = FALSE;
-
-	switch (effect) {
-
-	case EFFECT_PREPARE:
-	    os_prepare_sample (number);
-	    break;
-	case EFFECT_PLAY:
-	    start_sample (number, lo (volume), hi (volume), (zargc == 4) ? zargs[3] : 0);
-	    break;
-	case EFFECT_STOP:
-	    os_stop_sample (number);
-	    break;
-	case EFFECT_FINISH_WITH:
-	    os_finish_with_sample (number);
-	    break;
-
-	}
-
-	locked = FALSE;
-
-    } else os_beep (number);
-
-}/* z_sound_effect */
+} /* z_sound_effect */

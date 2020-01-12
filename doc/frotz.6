@@ -1,12 +1,35 @@
 .\" -*- nroff -*-
-.TH FROTZ 6 2.45pre
+.TH FROTZ 6 2.50
 .SH NAME
 frotz \- interpreter for Infocom and other Z-Machine games
 
 
 .SH SYNOPSIS
 .B frotz
-.RI [ options "] " file
+.RI [ options "] " "file " [ blorbfile "]"
+
+At least one file must be specified on the command line.  This can be
+either a plain Z-code file or a Blorb file.  A Z-code file is a compiled
+executable for the Z-Machine.  A Blorb file contains audio, graphics,
+and other things in addition to the game wrapped up into a single file.
+It can also optionally contain the Z-Machine executable.  If a plain
+Z-code file is supplied, then
+.B Frotz
+will check for a Blorb file with the same base name but an extension of
+.B .blb,
+.B .blorb,
+or
+.B .zblorb
+and load it if found.
+
+If the file supplied on the command line is a Blorb file, then
+.B Frotz
+will check to see if a Z-code file is contained within.  If not found, then
+.B Frotz
+will complain and exit.
+
+An alternatively-named Blorb file can be supplied as the optional second
+parameter to the command line invocation.
 
 
 .SH DESCRIPTION
@@ -79,7 +102,7 @@ Frotz to display colors, use this.
 
 .TP
 .B \-h N
-Manually sets the screen height.  Though most curses libraries are intelligent
+Manually sets the text height.  Though most curses libraries are intelligent
 enough to determine the current width from the terminal, it may sometimes
 be necessary to use this option to override the default.
 
@@ -167,10 +190,10 @@ key Alt\-S does not really help).
 
 .TP
 .B \-S N
-Set the transcript width.  By default your transscript files are formatted
-to a width of 80 columns per line, regardless of the current screen width.
+Set the transcript width.  By default your transcript files are formatted
+to a width of 80 columns per line, regardless of the current text width.
 This switch allows you to change this setting. In particular, use \-S 0
-to deactivate automatic line splitting in transscript files.
+to deactivate automatic line splitting in transcript files.
 
 .TP
 .B \-t
@@ -189,8 +212,7 @@ with limited memory.
 
 .TP
 .B \-w N
-Manually sets the screen width.  Again, this should not be necessary
-except in special circumstances.
+Manually sets the text width.
 
 .TP
 .B \-x
@@ -476,18 +498,18 @@ Set the right margin.  This is for those who might have special formatting
 needs.
 
 .PP
-.BR screen_height
+.BR text_height
 \ \ <integer>
 .br
-Manually set screen height.  Most curses libraries are intelligent enough
+Manually set text height.  Most curses libraries are intelligent enough
 to determine the current width of the terminal.  You may need to use this
 option to override the default.
 
 .PP
-.BR screen_width
+.BR text_width
 \ \ <integer>
 .br
-Manually set screen width.  Again, this should not be necessary except in
+Manually set text width.  Again, this should not be necessary except in
 special circumstances.
 
 .PP
@@ -495,7 +517,7 @@ special circumstances.
 \ \ <integer>
 .br
 Set the transcript width.  Default is 80 columns per line, regardless of
-the current screen width.  This switch allows you to change this setting.
+the current text width.  This switch allows you to change this setting.
 You may set this to "0" to deactivate automatic line-splitting in
 transcript files.
 
@@ -530,6 +552,82 @@ objects in the object tree.  Default is "off".
 Watch object movement.  This option enables debugging messages from the
 interpreter which describe the movement of objects in the object tree.
 Default is "off".
+
+.SH COLOR
+Whether or not
+.B Frotz
+will display color depends upon the curses library and the terminal.  In
+general, an xterm or other X11-based terminal emulator will support
+color.  Sometimes the value of $TERM will need to be set to something
+like "xterm-color" or "rxvt-256color".  For a Linux console, $TERM is
+almost always set to "linux".  This will support color.  For a NetBSD or
+OpenBSD console on an x86 or amd64, the default value of $TERM is
+"vt100".  To get color supported there, you need to set $TERM to "pc3".
+A FreeBSD console's $TERM is "xterm" and will support color.  Color on
+text consoles on machines other than x86 or amd64 is untested.
+
+On some operating systems, Xterm will not change the cursor color to
+match that of the text.  To fix this, add the following line to your
+.B .Xresources
+file and type
+.B xrdb -merge $HOME/.Xresources
+
+xterm*cursorColor:      *XtDefaultForeground
+
+This can also be added to a systemwide file such as
+.B /etc/X11/Xresources/x11-common
+or
+.B /etc/X11/app-defaults/XTerm.
+The names and locations of the system-wide files can vary from OS to OS.
+
+.SH UNICODE
+.B Frotz
+supports Unicode glyphs by way of UTF-8 if the terminal used supports
+UTF-8.  If you prefer using xterm, start it as uxterm.  This is a
+wrapper script that sets up xterm with UTF-8 locale.  You can also
+manually tell an xterm to switch into UTF-8 mode by holding CTRL and the
+right mouse button to bring up the VT FONTS menu.  Depending on how
+xterm was installed, you may see an option for "UTF-8 Fonts" which will
+allow Unicode to be properly displayed.
+
+Getting normal xterm to behave like this all the time can vary from
+system to system.  Other terminal emulators have their own ways of being
+set to use UTF-8 character encoding.
+
+.SS LOCALE
+An important means of ensuring the system knows to use UTF-8 is to make
+sure the locale is set appropriately.  This is valid only when
+.B Dumb Frotz
+runs under Unix-ish systems.
+
+Using the command
+.B "locale"
+will tell you what is currently in use.  Using
+.B "locale -a
+
+will show you what's available.  Then set your LANG evironmental
+variable to something appropriate by using one of these commands:
+
+    export LANG=C.UTF-8
+    export LANG=en_US.utf8
+
+This can be put in your shell configuration file, be it
+.B .profile,
+.B .bash_profile,
+.B .login,
+.B .bashrc,
+or whatever.
+
+It can also be set system-wide in the equivalent files in
+.B /etc.
+
+.SS SEE ALSO
+.B ash(1)
+.B bash(1)
+.B csh(1)
+.B ksh(1)
+.B sh(1)
+.B zsh(1)
 
 
 .SH ENVIRONMENT
@@ -571,13 +669,19 @@ repositories.
 .SH CAVEATS
 .PP
 The Z Machine itself has trouble with the concept of resizing a terminal.
-It assumes that once the screen height and width are set, they will never
+It assumes that once the text height and width are set, they will never
 change; even across saves.  This made sense when 24x80 terminals were the
 norm and graphical user interfaces were mostly unknown.  I'm fairly sure
 there's a way around this problem, but for now, don't resize an xterm in
 which frotz is running.  Also, you should try to make sure the terminal
 on which you restore a saved game has the same dimensions as the one on
 which you saved the game.
+
+.PP
+Audio latency might be unreasonably long depending on the settings of
+your operating system.  Linux generally has things right.  The BSDs may
+need some sysctl(8) settings adjusted.  See the sound(4) or audio(4)
+manpages for more information.
 
 .PP
 You can use a path like "/usr/local/games/zcode:$HOME/zcode" with
@@ -599,11 +703,6 @@ http://www.musicwords.net/if/how_to_play.htm
 .br
 http://ifarchive.org/
 
-.PP
-If you prefer a PDF file of how to play, here is one:
-.br
-http://inform-fiction.org/I7Downloads/Examples/dm/IntroductionToIF.pdf
-
 
 .SH BUGS
 This program has no bugs.  no bugs.  no bugs.  no *WHAP* thank you.  If
@@ -620,6 +719,19 @@ The Unix port was done by Galen Hazelwood.
 .br
 The Unix port is currently maintained by David Griffith <dave@661.org>.
 
+.SH CONTRIBUTORS
+In 2019, a Kickstarter campaign was run to raise funds to pay Mark
+McCurry to overhaul the audio subsystem for the curses port of
+.B Frotz.
+The following people contributed $100 towards that effort:
+.br
+Simon Martin
+.br
+Dan Sanderson
+.br
+Justin de Vesine
+.br
+Daniel Sharpe
 
 .SH "SEE ALSO"
 .BR sfrotz (6)

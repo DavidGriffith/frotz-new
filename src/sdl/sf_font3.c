@@ -1,3 +1,24 @@
+/*
+ * sf_font3.c - SDL interface, Z-machine font 3
+ *
+ * This file is part of Frotz.
+ *
+ * Frotz is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Frotz is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * Or visit http://www.fsf.org/
+ */
+
 #include "sf_frotz.h"
 #include <string.h>
 
@@ -98,13 +119,13 @@ static byte Zfont3[] = {
 /*125*/	0xe7,0xc3,0x24,0xe7,0x24,0xc3,0xe7,0xff,
 /*126*/	0xc3,0x99,0xf9,0xf3,0xe7,0xff,0xe7,0xff};
 
-// glyph buffer
+/* glyph buffer */
 static struct {
-  byte dx;
-  byte w, h;
-  char xof, yof;
-  byte bitmap[16];
-  } myglyph = {8,8,8,0,-2};
+	byte dx;
+	byte w, h;
+	char xof, yof;
+	byte bitmap[16];
+} myglyph = {8,8,8,0,-2};
 
 static void nodestroy(SFONT *s){}
 static int myheight(SFONT *s){ return 8;}
@@ -114,34 +135,38 @@ static int myminchar(SFONT *s){ return 32;}
 static int mymaxchar(SFONT *s){ return 126;}
 static int myhasglyph(SFONT *s, word c, int allowdef)
 {
-    return (c >= 32 && c <= 126) || allowdef;
+	return (c >= 32 && c <= 126) || allowdef;
 }
+
+
 static SF_glyph * mygetglyph(SFONT *s, word c, int allowdef)
-  {
-  byte *src;
-  if (c < 32 || c > 126)
-    {
-    if (!allowdef) return NULL;
-    c = 32;
-    }
-  src = Zfont3+8*(c-32);
-  memmove(&(myglyph.bitmap[0]),src,8);
-  myglyph.h = 8;
-  return (SF_glyph *)&myglyph;
-  }
+{
+	byte *src;
+	if (c < 32 || c > 126) {
+		if (!allowdef)
+			return NULL;
+		c = 32;
+	}
+	src = Zfont3+8*(c-32);
+	memmove(&(myglyph.bitmap[0]),src,8);
+	myglyph.h = 8;
+	return (SF_glyph *)&myglyph;
+}
+
 
 static SFONT myfont3 = {
-  0,
-  nodestroy,
-  myheight,
-  myascent,
-  mydescent,
-  myminchar,
-  mymaxchar,
-  myhasglyph,
-  mygetglyph,
-  0,
-  NULL};
+	0,
+	nodestroy,
+	myheight,
+	myascent,
+	mydescent,
+	myminchar,
+	mymaxchar,
+	myhasglyph,
+	mygetglyph,
+	0,
+	NULL
+};
 
 SFONT * SF_font3 = &myfont3;
 
@@ -149,32 +174,36 @@ static int myheight2(SFONT *s){ return 16;}
 static int myascent2(SFONT *s){ return 14;}
 static int mydescent2(SFONT *s){ return 2;}
 static SF_glyph * mygetglyph2(SFONT *s, word c, int allowdef)
-  {
-  byte *src, *dst; int i;
-  if (c < 32 || c > 126)
-    {
-    if (!allowdef) return NULL;
-    c = 32;
-    }
-  src = Zfont3+8*(c-32);
-  dst = &(myglyph.bitmap[0]);
-  for (i=0;i<8;i++)
-	{ dst[0] = dst[1] = src[i]; dst += 2;}
-  myglyph.h = 16;
-  return (SF_glyph *)&myglyph;
-  }
+{
+	byte *src, *dst; int i;
+	if (c < 32 || c > 126) {
+		if (!allowdef)
+			return NULL;
+		c = 32;
+	}
+	src = Zfont3+8*(c-32);
+	dst = &(myglyph.bitmap[0]);
+	for (i=0;i<8;i++) {
+		dst[0] = dst[1] = src[i];
+		dst += 2;
+	}
+	myglyph.h = 16;
+	return (SF_glyph *)&myglyph;
+}
+
 
 static SFONT myfont3dbl = {
-  0,
-  nodestroy,
-  myheight2,
-  myascent2,
-  mydescent2,
-  myminchar,
-  mymaxchar,
-  myhasglyph,
-  mygetglyph2,
-  0,
-  NULL};
+	0,
+	nodestroy,
+	myheight2,
+	myascent2,
+	mydescent2,
+	myminchar,
+	mymaxchar,
+	myhasglyph,
+	mygetglyph2,
+	0,
+	NULL
+};
 
 SFONT * SF_font3double = &myfont3dbl;

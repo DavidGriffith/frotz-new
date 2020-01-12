@@ -3,6 +3,14 @@
  *
  */
 
+typedef enum {
+	FORMAT_NORMAL,
+	FORMAT_UNKNOWN,
+	FORMAT_DISABLED,
+	FORMAT_IRC,
+	FORMAT_ANSI
+} format_t;
+
 typedef struct frotz_setup_struct {
 	int attribute_assignment;
 	int attribute_testing;
@@ -18,9 +26,11 @@ typedef struct frotz_setup_struct {
 	int expand_abbreviations;
 	int script_cols;
 	int sound;
+	int bleep;
 	int err_report_mode;
 
 	char *story_file;
+	char *blorb_file;
         char *story_name;
         char *story_base;
         char *script_name;
@@ -32,15 +42,14 @@ typedef struct frotz_setup_struct {
         char *zcode_path;
 	char *restricted_path;
 
-	bool restore_mode; /* for a save file passed from command line*/
+	format_t format;  /* type of format codes for dumb interface */
+	bool restore_mode; /* for a save file passed from command line */
 	bool use_blorb;
 	bool exec_in_blorb;
 } f_setup_t;
-
 extern f_setup_t f_setup;
 
 /*** Story file header data ***/
-/*
 typedef struct zcode_header_struct {
 	zbyte version;
 	zbyte config;
@@ -76,10 +85,12 @@ typedef struct zcode_header_struct {
 	zword extension_table;
 	zbyte user_name[8];
 
-	zword hx_table_size;
-	zword hx_mouse_x;
-	zword hx_mouse_y;
-	zword hx_unicode_table;
+	zword x_table_size;
+	zword x_mouse_x;
+	zword x_mouse_y;
+	zword x_unicode_table;
+	zword x_flags;
+	zword x_fore_colour;
+	zword x_back_colour;
 } z_header_t;
 extern z_header_t z_header;
-*/

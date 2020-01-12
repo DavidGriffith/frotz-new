@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * Or visit http://www.fsf.org/
  */
 
@@ -29,6 +29,8 @@
 #include <libgen.h>
 #include <math.h>
 
+#include "ux_defines.h"
+
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
 #else
@@ -39,22 +41,26 @@
 #include "ux_blorb.h"
 
 f_setup_t f_setup;
+z_header_t z_header;
 u_setup_t u_setup;
 
 FILE *blorb_fp;
 bb_result_t blorb_res;
 bb_map_t *blorb_map;
 
-static int isblorb(FILE *);
 
 #define UnsignedToFloat(u) (((double)((long)(u - 2147483647L - 1))) + 2147483648.0)
 
+
+#ifndef NO_BLORB
+
+static int isblorb(FILE *);
 
 /*
  * ux_blorb_init
  *
  * Check if we're opening a Blorb file directly.  If not, check
- * to see if there's a seperate Blorb file that looks like it goes
+ * to see if there's a separate Blorb file that looks like it goes
  * along with this Zcode file.  If we have a Blorb file one way or the
  * other, make a Blorb map.  If we opened a Blorb file directly, that
  * means that our executable is in that file and therefore we will look
@@ -63,77 +69,80 @@ static int isblorb(FILE *);
  */
 bb_err_t ux_blorb_init(char *filename)
 {
-    FILE *fp;
-    char *p;
-    char *mystring;
-    int  len1;
-    int  len2;
+	FILE *fp;
+	char *p;
+	char *mystring;
+	int  len1;
+	int  len2;
 
-    bb_err_t blorb_err;
+	bb_err_t blorb_err;
 
-    blorb_map = NULL;
+	blorb_map = NULL;
 
-    if ((fp = os_path_open(filename, "rb")) == NULL)
-	return bb_err_Read;
+	if ((fp = os_path_open(filename, "rb")) == NULL)
+		return bb_err_Read;
 
-    /* Is this really a Blorb file?  If not, maybe we're loading a naked
-     * zcode file and our resources are in a seperate blorb file.
-     */
-    if (isblorb(fp)) {			/* Now we know to look */
-	f_setup.exec_in_blorb = 1;	/* for zcode in the blorb */
-        blorb_fp = fp;
-    } else {
-        fclose(fp);
-	len1 = strlen(filename) + strlen(EXT_BLORB);
-	len2 = strlen(filename) + strlen(EXT_BLORB3);
+	/* Is this really a Blorb file?  If not, maybe we're loading a naked
+	 * zcode file and our resources are in a separate blorb file.
+	 */
+	if (isblorb(fp)) {			/* Now we know to look */
+		f_setup.exec_in_blorb = 1;	/* for zcode in the blorb */
+		blorb_fp = fp;
+	} else {
+		fclose(fp);
+		len1 = strlen(filename) + strlen(EXT_BLORB);
+		len2 = strlen(filename) + strlen(EXT_BLORB3);
+		if (f_setup.blorb_file != NULL)
+			mystring = strdup(f_setup.blorb_file);
+		else {
+			mystring = malloc(MAX(len1, len2) * sizeof(char) + 1);
+			memcpy(mystring, filename, MAX(len1, len2) * sizeof(char));
+			p = strrchr(mystring, '.');
+			if (p != NULL)
+				*p = '\0';
+			strncat(mystring, EXT_BLORB, len1);
+		}
 
-	mystring = malloc(len2 * sizeof(char) + 1);
-        strncpy(mystring, filename, len1 * sizeof(char));
-	p = strrchr(mystring, '.');
-	if (p != NULL)
-	    *p = '\0';
+		/* Check if foo.blb is there. */
+        	if ((fp = os_path_open(mystring, "rb")) == NULL) {
+			p = strrchr(mystring, '.');
+			if (p != NULL)
+				*p = '\0';
+			strncat(mystring, EXT_BLORB3, len2);
+			if (!(fp = os_path_open(mystring, "rb")))
+				return bb_err_NoBlorb;
+		}
+		if (!isblorb(fp)) {
+			fclose(fp);
+			return bb_err_NoBlorb;
+		}
 
-        strncat(mystring, EXT_BLORB, len1 * sizeof(char));
-
-	/* Check if foo.blb is there. */
-        if ((fp = os_path_open(mystring, "rb")) == NULL) {
-	    p = strrchr(mystring, '.');
-	    if (p != NULL)
-		*p = '\0';
-            strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
-	    if (!(fp = os_path_open(mystring, "rb")))
-	        return bb_err_NoBlorb;
+		/* At this point we know that we're using a naked zcode file */
+		/* with resources in a separate Blorb file. */
+		blorb_fp = fp;
+		f_setup.use_blorb = 1;
 	}
-	if (!isblorb(fp)) {
-	    fclose(fp);
-	    return bb_err_NoBlorb;
+
+	/* Create a Blorb map from this file.
+	 * This will fail if the file is not a valid Blorb file.
+	 * From this map, we can now pick out any resource we need.
+	 */
+	blorb_err = bb_create_map(blorb_fp, &blorb_map);
+	if (blorb_err != bb_err_None)
+		return bb_err_Format;
+
+	/* Locate the EXEC chunk within the blorb file and record its
+	 * location so os_load_story() can find it.
+	 */
+	if (f_setup.exec_in_blorb) {
+		blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
+			&blorb_res, bb_ID_ZCOD, 0);
+		f_setup.exec_in_blorb = 1;
 	}
 
-	/* At this point we know that we're using a naked zcode file */
-	/* with resources in a seperate Blorb file. */
-	blorb_fp = fp;
-	f_setup.use_blorb = 1;
-    }
-
-    /* Create a Blorb map from this file.
-     * This will fail if the file is not a valid Blorb file.
-     * From this map, we can now pick out any resource we need.
-     */
-    blorb_err = bb_create_map(blorb_fp, &blorb_map);
-    if (blorb_err != bb_err_None)
-	return bb_err_Format;
-
-    /* Locate the EXEC chunk within the blorb file and record its
-     * location so os_load_story() can find it.
-     */
-    if (f_setup.exec_in_blorb) {
-	blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
-		&blorb_res, bb_ID_ZCOD, 0);
-	f_setup.exec_in_blorb = 1;
-    }
-
-    return blorb_err;
+	return blorb_err;
 }
+#endif
 
 
 /*
@@ -144,10 +153,17 @@ bb_err_t ux_blorb_init(char *filename)
  */
 void ux_blorb_stop(void)
 {
-    if (blorb_fp != NULL)
-	fclose(blorb_fp);
-    blorb_fp = NULL;
+#ifndef NO_BLORB
+	if (blorb_fp != NULL)
+		fclose(blorb_fp);
+	blorb_fp = NULL;
+	bb_destroy_map(blorb_map);
+	blorb_map = NULL;
+#else
+	return;
+#endif
 }
+
 
 /*
  **********************************************
@@ -156,29 +172,30 @@ void ux_blorb_stop(void)
  **********************************************
  */
 
+#ifndef NO_BLORB
 /*
  * isblorb
  *
  * Returns 1 if this file is a Blorb file, 0 if not.
  *
- * FIXME Is there a potential endian problem here?
  */
 static int isblorb(FILE *fp)
 {
-    char mybuf[4];
+	char mybuf[4];
 
-    if (fp == NULL)
-	return 0;
+	if (fp == NULL)
+		return FALSE;
 
-    fread(mybuf, 1, 4, fp);
-    if (strncmp(mybuf, "FORM", 4))
-	return 0;
+	fread(mybuf, 1, 4, fp);
+	if (strncmp(mybuf, "FORM", 4))
+		return FALSE;
 
-    fseek(fp, 4, SEEK_CUR);
-    fread(mybuf, 1, 4, fp);
+	fseek(fp, 4, SEEK_CUR);
+	fread(mybuf, 1, 4, fp);
 
-    if (strncmp(mybuf, "IFRS", 4))
-	return 0;
+	if (strncmp(mybuf, "IFRS", 4))
+		return FALSE;
 
-    return 1;
+	return TRUE;
 }
+#endif

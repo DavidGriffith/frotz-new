@@ -8,11 +8,23 @@
 #ifndef FROTZ_H_
 #define FROTZ_H_
 
-/* Unfortunately, frotz's bool definition conflicts with that of curses.
-   But since no os_* function uses it, it's safe to let the frotz core see
-   this definition, but have the unix port see the curses version. */
 
+/* For now we assume DOS Frotz is always 16-bit */
+#ifdef __TURBOC__
+#define MSDOS_16BIT
+#endif
+
+#ifdef MSDOS_16BIT
+#include "..\dos\defs.h"
+#ifdef USE_UTF8
+#error UTF-8 is not supported in DOS Frotz
+#endif
+#endif
+
+#ifndef MSDOS_16BIT
+#include "defs.h"
 #include "git_hash.h"
+#endif
 
 #ifndef __UNIX_PORT_FILE
 #include <signal.h>
@@ -52,85 +64,71 @@ typedef int bool;
 typedef unsigned char zbyte;
 typedef unsigned short zword;
 
-
-/* This business turns out to interfere with the command history
- * functions in the curses interface code.  Unicode support for DOS
- * Frotz probably won't happen.  I'd like to get it working for Unix
- * Frotz eventually.  The patch I was using was rather old and bugs
- * might have crept in.  If you know how to implement Unicode for the
- * Unix side, please let me know and please test it to make sure it
- * doesn't mess with command history.
- */
-/*
-#ifdef MSDOS_16BIT
+#ifndef USE_UTF8
 typedef unsigned char zchar;
 #else
 typedef unsigned short zchar;
 #endif
-*/
-
-typedef unsigned char zchar;
 
 enum story {
-    ZORK1,
-    ZORK2,
-    ZORK3,
-    ZORK1G,
-    MINIZORK,
-    SAMPLER1,
-    SAMPLER2,
-    ENCHANTER,
-    SORCERER,
-    SPELLBREAKER,
-    PLANETFALL,
-    STATIONFALL,
-    BALLYHOO,
-    BORDER_ZONE,
-    AMFV,
-    HHGG,
-    LGOP,
-    SUSPECT,
-    BEYOND_ZORK,
-    SHERLOCK,
-    ZORK_ZERO,
-    SHOGUN,
-    ARTHUR,
-    JOURNEY,
-    LURKING_HORROR,
-    UNKNOWN
+	ZORK1,
+	ZORK2,
+	ZORK3,
+	ZORK1G,
+	MINIZORK,
+	SAMPLER1,
+	SAMPLER2,
+	ENCHANTER,
+	SORCERER,
+	SPELLBREAKER,
+	PLANETFALL,
+	STATIONFALL,
+	BALLYHOO,
+	BORDER_ZONE,
+	AMFV,
+	HHGG,
+	LGOP,
+	SUSPECT,
+	BEYOND_ZORK,
+	SHERLOCK,
+	ZORK_ZERO,
+	SHOGUN,
+	ARTHUR,
+	JOURNEY,
+	LURKING_HORROR,
+	BUREAUCRACY,
+	TRINITY,
+	UNKNOWN
 };
 
 /*** screen window ***/
-
 typedef struct {
-    zword y_pos;
-    zword x_pos;
-    zword y_size;
-    zword x_size;
-    zword y_cursor;
-    zword x_cursor;
-    zword left;
-    zword right;
-    zword nl_routine;
-    zword nl_countdown;
-    zword style;
-    zword colour;
-    zword font;
-    zword font_size;
-    zword attribute;
-    zword line_count;
-    zword true_fore;
-    zword true_back;
+	zword y_pos;
+	zword x_pos;
+	zword y_size;
+	zword x_size;
+	zword y_cursor;
+	zword x_cursor;
+	zword left;
+	zword right;
+	zword nl_routine;
+	zword nl_countdown;
+	zword style;
+	zword colour;
+	zword font;
+	zword font_size;
+	zword attribute;
+	zword line_count;
+	zword true_fore;
+	zword true_back;
 } Zwindow;
 
 
 #include "setup.h"
-#include "defs.h"
 #include "missing.h"
 #include "unused.h"
 
 /*** Constants that may be set at compile time ***/
-
 #ifndef MAX_UNDO_SLOTS
 #define MAX_UNDO_SLOTS 500
 #endif
@@ -150,7 +148,6 @@ typedef struct {
 extern const char build_timestamp[];
 
 /* Assorted filename extensions */
-
 #define EXT_SAVE	".qzl"
 #define EXT_SCRIPT	".scr"
 #define EXT_BLORB	".blb"
@@ -177,7 +174,6 @@ extern const char build_timestamp[];
 #endif
 
 /*** Story file header format ***/
-
 #define H_VERSION 0
 #define H_CONFIG 1
 #define H_RELEASE 2
@@ -218,7 +214,6 @@ extern const char build_timestamp[];
 #define HX_UNICODE_TABLE 3
 
 /*** Various Z-machine constants ***/
-
 #define V1 1
 #define V2 2
 #define V3 3
@@ -285,10 +280,12 @@ extern const char build_timestamp[];
 #define MEDIUMGREY_COLOUR 11 	/* INTERP_AMIGA only */
 #define DARKGREY_COLOUR 12 	/* INTERP_AMIGA only */
 
+#define NORMAL_STYLE 0
 #define REVERSE_STYLE 1
 #define BOLDFACE_STYLE 2
 #define EMPHASIS_STYLE 4
 #define FIXED_WIDTH_STYLE 8
+#define PICTURE_STYLE 16
 
 #define TEXT_FONT 1
 #define PICTURE_FONT 2
@@ -299,13 +296,11 @@ extern const char build_timestamp[];
 #define BEEP_LOW	2
 
 /*** Constants for os_restart_game */
-
 #define RESTART_BEGIN 0
 #define RESTART_WPROP_SET 1
 #define RESTART_END 2
 
 /*** Character codes ***/
-
 #define ZC_TIME_OUT 0x00
 #define ZC_NEW_STYLE 0x01
 #define ZC_NEW_FONT 0x02
@@ -409,69 +404,82 @@ extern zbyte *zmp;
 #define lo(v)   ((zbyte *)&v)[0]
 #define hi(v)   ((zbyte *)&v)[1]
 
-#define SET_WORD(addr,v) asm {\
-    les bx,zmp;\
-    add bx,addr;\
-    mov ax,v;\
-    xchg al,ah;\
-    mov es:[bx],ax }
+/*
+ * Turbo C has a strange limitation with passing members of structs to
+ * assembly code within a macro.  If more than one struct have members
+ * of the same name, then Turbo C is unable to tell the difference.  In
+ * other words, suppose you have foo.a and bar.a.  Doing
+ * "SET_WORD(H_STUFF, foo.a);" will make Turbo C complain about
+ * "Ambiguous member name 'a' in function frobnitz".  The solution is to
+ * use the "pseudoregister" _AX to pass values in and out a macro.  Right
+ * now, just SET_WORD() and LOW_WORD() are being passed troublesome
+ * struct members.
+ *
+ */
 
-#define LOW_WORD(addr,v) asm {\
-    les bx,zmp;\
-    add bx,addr;\
-    mov ax,es:[bx];\
-    xchg al,ah;\
-    mov v,ax }
+#define SET_WORD(addr, v) do {\
+	asm les bx,zmp;\
+	asm add bx,addr;\
+	_AX = (v); \
+	asm xchg al,ah;\
+	asm mov es:[bx],ax; } while (0);
+
+#define LOW_WORD(addr,v) do {\
+	asm les bx,zmp;\
+	asm add bx,addr;\
+	asm mov ax,es:[bx];\
+	asm xchg al,ah;\
+	(v) = _AX; } while (0);
 
 #define HIGH_WORD(addr,v) asm {\
-    mov bx,word ptr zmp;\
-    add bx,word ptr addr;\
-    mov al,bh;\
-    mov bh,0;\
-    mov ah,0;\
-    adc ah,byte ptr addr+2;\
-    mov cl,4;\
-    shl ax,cl;\
-    add ax,word ptr zmp+2;\
-    mov es,ax;\
-    mov ax,es:[bx];\
-    xchg al,ah;\
-    mov v,ax }
+	mov bx,word ptr zmp;\
+	add bx,word ptr addr;\
+	mov al,bh;\
+	mov bh,0;\
+	mov ah,0;\
+	adc ah,byte ptr addr+2;\
+	mov cl,4;\
+	shl ax,cl;\
+	add ax,word ptr zmp+2;\
+	mov es,ax;\
+	mov ax,es:[bx];\
+	xchg al,ah;\
+	mov v,ax }
 
 #define CODE_WORD(v) asm {\
-    les bx,pcp;\
-    mov ax,es:[bx];\
-    xchg al,ah;\
-    mov v,ax;\
-    add word ptr pcp,2 }
+	les bx,pcp;\
+	mov ax,es:[bx];\
+	xchg al,ah;\
+	mov v,ax;\
+	add word ptr pcp,2 }
 
 #define GET_PC(v) asm {\
-    mov bx,word ptr pcp+2;\
-    sub bx,word ptr zmp+2;\
-    mov ax,bx;\
-    mov cl,4;\
-    shl bx,cl;\
-    mov cl,12;\
-    shr ax,cl;\
-    add bx,word ptr pcp;\
-    adc al,0;\
-    sub bx,word ptr zmp;\
-    sbb al,0;\
-    mov word ptr v,bx;\
-    mov word ptr v+2,ax }
+	mov bx,word ptr pcp+2;\
+	sub bx,word ptr zmp+2;\
+	mov ax,bx;\
+	mov cl,4;\
+	shl bx,cl;\
+	mov cl,12;\
+	shr ax,cl;\
+	add bx,word ptr pcp;\
+	adc al,0;\
+	sub bx,word ptr zmp;\
+	sbb al,0;\
+	mov word ptr v,bx;\
+	mov word ptr v+2,ax }
 
 #define SET_PC(v) asm {\
-    mov bx,word ptr zmp;\
-    add bx,word ptr v;\
-    mov al,bh;\
-    mov bh,0;\
-    mov ah,0;\
-    adc ah,byte ptr v+2;\
-    mov cl,4;\
-    shl ax,cl;\
-    add ax,word ptr zmp+2;\
-    mov word ptr pcp,bx;\
-    mov word ptr pcp+2,ax }
+	mov bx,word ptr zmp;\
+	add bx,word ptr v;\
+	mov al,bh;\
+	mov bh,0;\
+	mov ah,0;\
+	adc ah,byte ptr v+2;\
+	mov cl,4;\
+	shl ax,cl;\
+	add ax,word ptr zmp+2;\
+	mov word ptr pcp,bx;\
+	mov word ptr pcp+2,ax }
 
 #endif /* MSDOS_16BIT */
 
@@ -493,49 +501,6 @@ extern zbyte *zmp;
 
 #endif
 
-
-/*** Story file header data ***/
-extern zbyte h_version;
-extern zbyte h_config;
-extern zword h_release;
-extern zword h_resident_size;
-extern zword h_start_pc;
-extern zword h_dictionary;
-extern zword h_objects;
-extern zword h_globals;
-extern zword h_dynamic_size;
-extern zword h_flags;
-extern zbyte h_serial[6];
-extern zword h_abbreviations;
-extern zword h_file_size;
-extern zword h_checksum;
-extern zbyte h_interpreter_number;
-extern zbyte h_interpreter_version;
-extern zbyte h_screen_rows;
-extern zbyte h_screen_cols;
-extern zword h_screen_width;
-extern zword h_screen_height;
-extern zbyte h_font_height;
-extern zbyte h_font_width;
-extern zword h_functions_offset;
-extern zword h_strings_offset;
-extern zbyte h_default_background;
-extern zbyte h_default_foreground;
-extern zword h_terminating_keys;
-extern zword h_line_width;
-extern zbyte h_standard_high;
-extern zbyte h_standard_low;
-extern zword h_alphabet;
-extern zword h_extension_table;
-extern zbyte h_user_name[8];
-
-extern zword hx_table_size;
-extern zword hx_mouse_x;
-extern zword hx_mouse_y;
-extern zword hx_unicode_table;
-extern zword hx_flags;
-extern zword hx_fore_colour;
-extern zword hx_back_colour;
 
 /*** Various data ***/
 
@@ -576,127 +541,128 @@ extern char *option_zcode_path;	/* dg */
 
 extern long reserve_mem;
 
+extern int zoptind;
+extern int zoptopt;
+extern char *zoptarg;
 
 /*** Z-machine opcodes ***/
+void 	z_add(void);
+void 	z_and(void);
+void 	z_art_shift(void);
+void 	z_buffer_mode(void);
+void 	z_call_n(void);
+void 	z_call_s(void);
+void 	z_catch(void);
+void 	z_check_arg_count(void);
+void	z_check_unicode(void);
+void 	z_clear_attr(void);
+void 	z_copy_table(void);
+void 	z_dec(void);
+void 	z_dec_chk(void);
+void 	z_div(void);
+void 	z_draw_picture(void);
+void 	z_encode_text(void);
+void 	z_erase_line(void);
+void 	z_erase_picture(void);
+void 	z_erase_window(void);
+void 	z_get_child(void);
+void 	z_get_cursor(void);
+void 	z_get_next_prop(void);
+void 	z_get_parent(void);
+void 	z_get_prop(void);
+void 	z_get_prop_addr(void);
+void 	z_get_prop_len(void);
+void 	z_get_sibling(void);
+void 	z_get_wind_prop(void);
+void 	z_inc(void);
+void 	z_inc_chk(void);
+void 	z_input_stream(void);
+void 	z_insert_obj(void);
+void 	z_je(void);
+void 	z_jg(void);
+void 	z_jin(void);
+void 	z_jl(void);
+void 	z_jump(void);
+void 	z_jz(void);
+void 	z_load(void);
+void 	z_loadb(void);
+void 	z_loadw(void);
+void 	z_log_shift(void);
+void 	z_make_menu(void);
+void 	z_mod(void);
+void 	z_mouse_window(void);
+void 	z_move_window(void);
+void 	z_mul(void);
+void 	z_new_line(void);
+void 	z_nop(void);
+void 	z_not(void);
+void 	z_or(void);
+void 	z_output_stream(void);
+void 	z_picture_data(void);
+void 	z_picture_table(void);
+void 	z_piracy(void);
+void 	z_pop(void);
+void 	z_pop_stack(void);
+void 	z_print(void);
+void 	z_print_addr(void);
+void 	z_print_char(void);
+void 	z_print_form(void);
+void 	z_print_num(void);
+void 	z_print_obj(void);
+void 	z_print_paddr(void);
+void 	z_print_ret(void);
+void 	z_print_table(void);
+void	z_print_unicode(void);
+void 	z_pull(void);
+void 	z_push(void);
+void 	z_push_stack(void);
+void 	z_put_prop(void);
+void 	z_put_wind_prop(void);
+void 	z_quit(void);
+void 	z_random(void);
+void 	z_read(void);
+void 	z_read_char(void);
+void 	z_read_mouse(void);
+void 	z_remove_obj(void);
+void 	z_restart(void);
+void 	z_restore(void);
+void 	z_restore_undo(void);
+void 	z_ret(void);
+void 	z_ret_popped(void);
+void 	z_rfalse(void);
+void 	z_rtrue(void);
+void 	z_save(void);
+void 	z_save_undo(void);
+void 	z_scan_table(void);
+void 	z_scroll_window(void);
+void 	z_set_attr(void);
+void 	z_set_font(void);
+void 	z_set_colour(void);
+void 	z_set_cursor(void);
+void 	z_set_margins(void);
+void 	z_set_window(void);
+void 	z_set_text_style(void);
+void 	z_show_status(void);
+void 	z_sound_effect(void);
+void 	z_split_window(void);
+void 	z_store(void);
+void 	z_storeb(void);
+void 	z_storew(void);
+void 	z_sub(void);
+void 	z_test(void);
+void 	z_test_attr(void);
+void 	z_throw(void);
+void 	z_tokenise(void);
+void 	z_verify(void);
+void 	z_window_size(void);
+void 	z_window_style(void);
 
-void 	z_add (void);
-void 	z_and (void);
-void 	z_art_shift (void);
-void 	z_buffer_mode (void);
-void 	z_call_n (void);
-void 	z_call_s (void);
-void 	z_catch (void);
-void 	z_check_arg_count (void);
-void	z_check_unicode (void);
-void 	z_clear_attr (void);
-void 	z_copy_table (void);
-void 	z_dec (void);
-void 	z_dec_chk (void);
-void 	z_div (void);
-void 	z_draw_picture (void);
-void 	z_encode_text (void);
-void 	z_erase_line (void);
-void 	z_erase_picture (void);
-void 	z_erase_window (void);
-void 	z_get_child (void);
-void 	z_get_cursor (void);
-void 	z_get_next_prop (void);
-void 	z_get_parent (void);
-void 	z_get_prop (void);
-void 	z_get_prop_addr (void);
-void 	z_get_prop_len (void);
-void 	z_get_sibling (void);
-void 	z_get_wind_prop (void);
-void 	z_inc (void);
-void 	z_inc_chk (void);
-void 	z_input_stream (void);
-void 	z_insert_obj (void);
-void 	z_je (void);
-void 	z_jg (void);
-void 	z_jin (void);
-void 	z_jl (void);
-void 	z_jump (void);
-void 	z_jz (void);
-void 	z_load (void);
-void 	z_loadb (void);
-void 	z_loadw (void);
-void 	z_log_shift (void);
-void 	z_make_menu (void);
-void 	z_mod (void);
-void 	z_mouse_window (void);
-void 	z_move_window (void);
-void 	z_mul (void);
-void 	z_new_line (void);
-void 	z_nop (void);
-void 	z_not (void);
-void 	z_or (void);
-void 	z_output_stream (void);
-void 	z_picture_data (void);
-void 	z_picture_table (void);
-void 	z_piracy (void);
-void 	z_pop (void);
-void 	z_pop_stack (void);
-void 	z_print (void);
-void 	z_print_addr (void);
-void 	z_print_char (void);
-void 	z_print_form (void);
-void 	z_print_num (void);
-void 	z_print_obj (void);
-void 	z_print_paddr (void);
-void 	z_print_ret (void);
-void 	z_print_table (void);
-void	z_print_unicode (void);
-void 	z_pull (void);
-void 	z_push (void);
-void 	z_push_stack (void);
-void 	z_put_prop (void);
-void 	z_put_wind_prop (void);
-void 	z_quit (void);
-void 	z_random (void);
-void 	z_read (void);
-void 	z_read_char (void);
-void 	z_read_mouse (void);
-void 	z_remove_obj (void);
-void 	z_restart (void);
-void 	z_restore (void);
-void 	z_restore_undo (void);
-void 	z_ret (void);
-void 	z_ret_popped (void);
-void 	z_rfalse (void);
-void 	z_rtrue (void);
-void 	z_save (void);
-void 	z_save_undo (void);
-void 	z_scan_table (void);
-void 	z_scroll_window (void);
-void 	z_set_attr (void);
-void 	z_set_font (void);
-void 	z_set_colour (void);
-void 	z_set_cursor (void);
-void 	z_set_margins (void);
-void 	z_set_window (void);
-void 	z_set_text_style (void);
-void 	z_show_status (void);
-void 	z_sound_effect (void);
-void 	z_split_window (void);
-void 	z_store (void);
-void 	z_storeb (void);
-void 	z_storew (void);
-void 	z_sub (void);
-void 	z_test (void);
-void 	z_test_attr (void);
-void 	z_throw (void);
-void 	z_tokenise (void);
-void 	z_verify (void);
-void 	z_window_size (void);
-void 	z_window_style (void);
 
 /* Definitions for error handling functions and error codes. */
-
 /* extern int err_report_mode; */
+void	init_err(void);
+void	runtime_error(int);
 
-void	init_err (void);
-void	runtime_error (int);
- 
 /* Error codes */
 #define ERR_TEXT_BUF_OVF 1	/* Text buffer overflow */
 #define ERR_STORE_RANGE 2	/* Store out of dynamic memory */
@@ -733,116 +699,125 @@ void	runtime_error (int);
 #define ERR_MOVE_OBJECT_TO_0 30	/* @move_object called moving into object 0 */
 #define ERR_REMOVE_OBJECT_0 31	/* @remove_object called with object 0 */
 #define ERR_GET_NEXT_PROP_0 32	/* @get_next_prop called with object 0 */
-#define ERR_NUM_ERRORS (32)
- 
-/* There are four error reporting modes: never report errors;
-  report only the first time a given error type occurs; report
-  every time an error occurs; or treat all errors as fatal
-  errors, killing the interpreter. I strongly recommend
-  "report once" as the default. But you can compile in a
-  different default by changing the definition of
-  ERR_DEFAULT_REPORT_MODE. In any case, the player can
-  specify a report mode on the command line by typing "-Z 0"
-  through "-Z 3". */
+#define ERR_PLAY_SOUND 33	/* @play_sound called without SOUND_FLAG or OLD_SOUND_FLAG set */
+#define ERR_NUM_ERRORS (33)
 
+/*
+ * There are four error reporting modes: never report errors;
+ * report only the first time a given error type occurs; report
+ * every time an error occurs; or treat all errors as fatal
+ * errors, killing the interpreter. I strongly recommend
+ * "report once" as the default. But you can compile in a
+ * different default by changing the definition of
+ * ERR_DEFAULT_REPORT_MODE. In any case, the player can
+ * specify a report mode on the command line by typing "-Z 0"
+ * through "-Z 3".
+ *
+ */
 #define ERR_REPORT_NEVER (0)
 #define ERR_REPORT_ONCE (1)
 #define ERR_REPORT_ALWAYS (2)
 #define ERR_REPORT_FATAL (3)
-
 #define ERR_DEFAULT_REPORT_MODE ERR_REPORT_ONCE
 
 /*** Assorted initialization functions ***/
-void   init_buffer (void);
-void   init_process (void);
-void   init_sound (void);
+void   init_header(void);
+void   init_setup(void);
+void   init_buffer(void);
+void   init_process(void);
+void   init_sound(void);
 
 /*** Various global functions ***/
+zchar	translate_from_zscii(zbyte);
+zbyte	translate_to_zscii(zchar);
 
-zchar	translate_from_zscii (zbyte);
-zbyte	translate_to_zscii (zchar);
+void 	flush_buffer(void);
+void	new_line(void);
+void	print_char(zchar);
+void	print_num(zword);
+void	print_object(zword);
+void 	print_string(const char *);
 
-void 	flush_buffer (void);
-void	new_line (void);
-void	print_char (zchar);
-void	print_num (zword);
-void	print_object (zword);
-void 	print_string (const char *);
+void 	stream_mssg_on(void);
+void 	stream_mssg_off(void);
 
-void 	stream_mssg_on (void);
-void 	stream_mssg_off (void);
+void	ret(zword);
+void 	store(zword);
+void 	branch(bool);
 
-void	ret (zword);
-void 	store (zword);
-void 	branch (bool);
+void	storeb(zword, zbyte);
+void	storew(zword, zword);
 
-void	storeb (zword, zbyte);
-void	storew (zword, zword);
+void	end_of_sound(void);
 
-void end_of_sound (void);
+int	completion(const zchar *buffer, zchar *result);
 
-int completion (const zchar *buffer, zchar *result);
+bool is_terminator(zchar);
+void read_string(int max, zchar *buffer);
+bool read_yes_or_no(const char *);
 
-bool is_terminator (zchar);
-void read_string (int max, zchar *buffer);
-bool read_yes_or_no (const char *);
+void screen_new_line(void);
 
-void screen_new_line (void);
+#ifndef MSDOS_16BIT
+#define cdecl
+#endif
 
-	/*** returns the current window ***/
-Zwindow * curwinrec( void);
+int cdecl zgetopt(int, char **, const char *);
+
+/*** returns the current window ***/
+Zwindow * curwinrec(void);
 
 
 /*** Interface functions ***/
-
-void 	os_beep (int);
-int  	os_char_width (zchar);
-void 	os_display_char (zchar);
-void 	os_display_string (const zchar *);
-void 	os_draw_picture (int, int, int);
-void 	os_erase_area (int, int, int, int, int);
-void 	os_fatal (const char *, ...);
-void 	os_finish_with_sample ();
-int  	os_font_data (int, int *, int *);
-void 	os_init_screen (void);
-void	os_init_sound (void);
-FILE	*os_load_story (void);
-void 	os_more_prompt (void);
-int  	os_peek_colour (void);
-int  	os_picture_data (int, int *, int *);
-void 	os_prepare_sample (int);
-void 	os_process_arguments (int, char *[]);
-int	os_random_seed (void);
-char  	*os_read_file_name (const char *, int);
-zchar	os_read_key (int, int);
-zchar	os_read_line (int, zchar *, int, int, int);
-void 	os_reset_screen (void);
-void 	os_restart_game (int);
-void 	os_scroll_area (int, int, int, int, int);
-void 	os_set_colour (int, int);
-void 	os_set_cursor (int, int);
-void 	os_set_font (int);
-void 	os_set_text_style (int);
-void 	os_start_sample (int, int, int, zword);
-void 	os_stop_sample ();
-int	os_storyfile_seek (FILE *, long, int);
-int	os_storyfile_tell (FILE *);
-int  	os_string_width (const zchar *);
-void	os_init_setup (void);
-void 	os_warn (const char *, ...);
-void	os_quit (void);
+void 	os_beep(int);
+int  	os_char_width(zchar);
+int  	os_check_unicode(int, zchar);
+void 	os_display_char(zchar);
+void 	os_display_string(const zchar *);
+void 	os_draw_picture(int, int, int);
+void 	os_erase_area(int, int, int, int, int);
+void 	os_fatal(const char *, ...);
+void 	os_finish_with_sample(int);
+int  	os_font_data(int, int *, int *);
+void 	os_init_screen(void);
+void	os_init_sound(void);
+FILE	*os_load_story(void);
+void 	os_more_prompt(void);
+int  	os_peek_colour(void);
+int  	os_picture_data(int, int *, int *);
+void 	os_prepare_sample(int);
+void 	os_process_arguments(int, char *[]);
+int	os_random_seed(void);
+char  	*os_read_file_name(const char *, int);
+zchar	os_read_key(int, int);
+zchar	os_read_line(int, zchar *, int, int, int);
+void 	os_reset_screen(void);
+void 	os_restart_game(int);
+void 	os_scroll_area(int, int, int, int, int);
+void 	os_set_colour(int, int);
+void 	os_set_cursor(int, int);
+void 	os_set_font(int);
+void 	os_set_text_style(int);
+void 	os_start_sample(int, int, int, zword);
+void 	os_stop_sample(int);
+int	os_storyfile_seek(FILE *, long, int);
+int	os_storyfile_tell(FILE *);
+int  	os_string_width(const zchar *);
+void	os_init_setup(void);
+void 	os_warn(const char *, ...);
+void	os_quit(int);
 
 /**
  * Called regularly by the interpreter, at least every few instructions
  * (only when interpreting: e.g., not when waiting for input).
  */
-void    os_tick (void);
+void    os_tick(void);
 
 /* Front ends call this if the terminal size changes. */
 void    resize_screen(void);
 
 /* This is callable only from resize_screen. */
-bool    os_repaint_window (int win, int ypos_old, int ypos_new, int xpos,
-                           int ysize, int xsize);
+bool    os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
+				int ysize, int xsize);
 
 #endif

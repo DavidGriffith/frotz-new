@@ -1,12 +1,35 @@
 .\" -*- nroff -*-
-.TH DFROTZ 6 2.45pre
+.TH DFROTZ 6 2.50
 .SH NAME
 dfrotz \- interpreter for Infocom and other Z-Machine games (dumb interface)
 
 
 .SH SYNOPSIS
 .B dfrotz
-.RI [ options "] " file
+.RI [ options "] " "file " [ blorbfile "]"
+
+At least one file must be specified on the command line.  This can be
+either a plain Z-code file or a Blorb file.  A Z-code file is a compiled
+executable for the Z-Machine.  A Blorb file contains audio, graphics,
+and other things in addition to the game wrapped up into a single file.
+It can also optionally contain the Z-Machine executable.  If a plain
+Z-code file is supplied, then
+.B Frotz
+will check for a Blorb file with the same base name but an extension of
+.B .blb,
+.B .blorb,
+or
+.B .zblorb
+and load it if found.
+
+If the file supplied on the command line is a Blorb file, then
+.B Frotz
+will check to see if a Z-code file is contained within.  If not found, then
+.B Frotz
+will complain and exit.
+
+An alternatively-named Blorb file can be supplied as the optional second
+parameter to the command line invocation.
 
 
 .SH DESCRIPTION
@@ -40,8 +63,18 @@ Watch attribute testing.  Every time the Z-machine tests an attribute
 value, the test and the result will be reported.
 
 .TP
+.B \-f [irc | normal]
+Select type of format codes.  Dumb Frotz can optionally mark up its
+output with codes for color, bold, underline, and so on.  Right now only
+.B irc
+color codes are supported.  Specifying
+.B normal
+or not using this flag at all will result in Dumb Frotz's normal
+behavior of not using any sort of markup.
+
+.TP
 .B \-h N
-Screen height.  Every N lines, a MORE prompt will be printed.  Use of
+Text height.  Every N lines, a MORE prompt will be printed.  Use of
 the
 .B \-m
 option renders this option moot.
@@ -126,10 +159,10 @@ key Alt\-S does not really help).
 
 .TP
 .B \-S N
-Set the transcript width.  By default your transscript files are formatted
-to a width of 80 columns per line, regardless of the current screen width.
+Set the transcript width.  By default your transcript files are formatted
+to a width of 80 columns per line, regardless of the current text width.
 This switch allows you to change this setting. In particular, use \-S 0
-to deactivate automatic line splitting in transscript files.
+to deactivate automatic line splitting in transcript files.
 
 .TP
 .B \-t
@@ -148,13 +181,13 @@ with limited memory.
 
 .TP
 .B \-w N
-Manually sets the screen width.  This should not be necessary except in
+Manually sets the text width.  This should not be necessary except in
 special circumstances.
 
 .TP
 .B \-x
 Expand the abbreviations "g", "x", and "z" to "again", "examine", and
-"wait".  This switch is for use iwth old Infocom games that lack these
+"wait".  This switch is for use with old Infocom games that lack these
 common abbreviations which were introduced in later games.  Use it with
 caution: A few games might use "g", "x" or "z" for different purposes.
 
@@ -392,6 +425,62 @@ A blank line emitted as part of span compression.
 (blank) Any other output line.
 
 
+.SH UNICODE
+.B Dumb Frotz
+supports Unicode glyphs by way of UTF-8 if the terminal used supports
+UTF-8.  If you prefer using xterm, start it as uxterm.  This is a
+wrapper script that sets up xterm with UTF-8 locale.  You can also
+manually tell an xterm to switch into UTF-8 mode by holding CTRL and the
+right mouse button to bring up the VT FONTS menu.  Depending on how
+xterm was installed, you may see an option for "UTF-8 Fonts" which will
+allow Unicode to be properly displayed.
+
+Getting normal xterm to behave like this all the time can vary from
+system to system.  Other terminal emulators have their own ways of being
+set to use UTF-8 character encoding.
+
+If you are using some sort of wrapper around
+.B dfrotz,
+and want to make use of Unicode, it is the responsibility of the wrapper
+to make sense of characters passed back and forth.
+
+
+.SS LOCALE
+An important means of ensuring the system knows to use UTF-8 is to make
+sure the locale is set appropriately.  This is valid only when
+.B Dumb Frotz
+runs under Unix-ish systems.
+
+Using the command
+.B "locale"
+will tell you what is currently in use.  Using
+.B "locale -a"
+
+will show you what's available.  Then set your LANG evironmental
+variable to something appropriate by using one of these commands:
+
+    export LANG=C.UTF-8
+    export LANG=en_US.utf8
+
+This can be put in your shell configuration file, be it
+.B .profile,
+.B .bash_profile,
+.B .login,
+.B .bashrc,
+or whatever.
+
+It can also be set system-wide in the equivalent files in
+.B /etc.
+
+.SS SEE ALSO
+.B ash(1)
+.B bash(1)
+.B csh(1)
+.B ksh(1)
+.B sh(1)
+.B zsh(1)
+
+
 .SH ENVIRONMENT
 Unlike it's curses-using sibling,
 .B dfrotz
@@ -423,7 +512,7 @@ repositories.
 .SH CAVEATS
 .PP
 The Z Machine itself has trouble with the concept of resizing a terminal.
-It assumes that once the screen height and width are set, they will never
+It assumes that once the text height and width are set, they will never
 change; even across saves.  This made sense when 24x80 terminals were the
 norm and graphical user interfaces were mostly unknown.  I'm fairly sure
 there's a way around this problem, but for now, don't resize an xterm in
@@ -443,11 +532,6 @@ http://www.brasslantern.org/beginners/
 http://www.musicwords.net/if/how_to_play.htm
 .br
 http://ifarchive.org/
-
-.PP
-If you prefer a PDF file of how to play, here is one:
-.br
-http://inform-fiction.org/I7Downloads/Examples/dm/IntroductionToIF.pdf
 
 
 .SH BUGS

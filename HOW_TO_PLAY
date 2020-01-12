@@ -87,7 +87,7 @@ the word "AND" or by a comma.  Here are some examples:
 
 You can include several inputs on one line if you separate them by the
 word "THEN" or by a period.  Each input will be handled in order, as
-though you had typed them individually at seperate prompts.  For example,
+though you had typed them individually at separate prompts.  For example,
 you could type all of the following at once, before pressing the ENTER (or
 RETURN) key:
 

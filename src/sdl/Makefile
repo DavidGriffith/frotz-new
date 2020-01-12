@@ -1,4 +1,5 @@
-# For GNU Make.
+# Makefile for Unix Frotz
+# GNU make is required
 
 SDL_PKGS ?= libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 
@@ -6,13 +7,13 @@ SDL_PKGS ?= libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 CC = gcc
 #CC = clang
 
-CFLAGS += `pkg-config $(SDL_PKGS) --cflags`
+PKG_CONFIG ?= pkg-config
 
 SOURCES = sf_fonts.c sf_msg_en.c sf_resource.c sf_util.c \
 	sf_deffont.c sf_ftype.c sf_osfdlg.c sf_sig.c sf_video.c \
 	sf_font3.c sf_images.c sf_sound.c generic.c
 
-HEADERS = samplerate.h  sf_frotz.h
+HEADERS = sf_frotz.h
 
 OBJECTS = $(SOURCES:.c=.o)
 
@@ -33,10 +34,7 @@ $(TARGET): $(OBJECTS)
 clean:
 	-rm -f $(TARGET) $(OBJECTS) $(DEPS)
 
+%.o: override CFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --cflags) $(SDL_CFLAGS)
+
 %.o: %.c
-%.o: %.c %.d
-	$(CC) -MMD -MP $(CFLAGS) -fPIC -fpic -c $<
-
-$(DEPS):;
-
-include $(wildcard $(DEPS))
+	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<

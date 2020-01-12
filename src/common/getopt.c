@@ -15,58 +15,48 @@
 #define cdecl
 #endif
 
-int optind = 1;
-int optopt = 0;
+int zoptind = 1;
+int zoptopt = 0;
+char *zoptarg = NULL;
 
-const char *optarg = NULL;
-
-int cdecl getopt (int argc, char *argv[], const char *options)
+int cdecl zgetopt (int argc, char *argv[], const char *options)
 {
-    static int pos = 1;
+	static int pos = 1;
+	const char *p;
 
-    const char *p;
+	if (zoptind >= argc || argv[zoptind][0] != '-' || argv[zoptind][1] == 0)
+		return EOF;
 
-    if (optind >= argc || argv[optind][0] != '-' || argv[optind][1] == 0)
-	return EOF;
+	zoptopt = argv[zoptind][pos++];
+	zoptarg = NULL;
 
-    optopt = argv[optind][pos++];
-    optarg = NULL;
-
-    if (argv[optind][pos] == 0)
-	{ pos = 1; optind++; }
-
-    p = strchr (options, optopt);
-
-    if (optopt == ':' || p == NULL) {
-
-	fputs ("illegal option -- ", stdout);
-	goto error;
-
-    } else if (p[1] == ':') {
-
-	if (optind >= argc) {
-
-	    fputs ("option requires an argument -- ", stdout);
-	    goto error;
-
-	} else {
-
-	    optarg = argv[optind];
-
-	    if (pos != 1)
-		optarg += pos;
-
-	    pos = 1; optind++;
-
+	if (argv[zoptind][pos] == 0) {
+		pos = 1;
+		zoptind++;
 	}
-    }
-    return optopt;
+
+	p = strchr(options, zoptopt);
+
+	if (zoptopt == ':' || p == NULL) {
+		fputs("illegal option -- ", stdout);
+		goto error;
+	} else if (p[1] == ':') {
+		if (zoptind >= argc) {
+			fputs("option requires an argument -- ", stdout);
+			goto error;
+		} else {
+			zoptarg = argv[zoptind];
+			if (pos != 1)
+				zoptarg += pos;
+			pos = 1;
+			zoptind++;
+		}
+	}
+	return zoptopt;
 
 error:
+	fputc(zoptopt, stdout);
+	fputc('\n', stdout);
 
-    fputc (optopt, stdout);
-    fputc ('\n', stdout);
-
-    return '?';
-
-}/* getopt */
+	return '?';
+} /* zgetopt */
