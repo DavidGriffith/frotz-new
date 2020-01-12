@@ -510,10 +510,12 @@ FILE *os_load_story(void)
 
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
-    return 0;
+    /* No blorb in X11 for now, so just use fseek */
+    return fseek(fp, offset, whence);
 }
 
 int os_storyfile_tell(FILE * fp)
 {
-    return 0;
+    /* No blorb in X11 for now, so just use ftell */
+     return ftell(fp);
 }
