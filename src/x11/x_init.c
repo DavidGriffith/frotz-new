@@ -34,12 +34,12 @@ char *x_name;
  * Display error message and exit program.
  *
  */
-
-void os_fatal (const char *s, ...)
+void os_fatal(const char *s, ...)
 {
-  fprintf(stderr, "%s\n", s);
-  exit(1);
-}/* os_fatal */
+	fprintf(stderr, "%s\n", s);
+	exit(1);
+} /* os_fatal */
+
 
 /*
  * os_process_arguments
@@ -63,223 +63,253 @@ void os_fatal (const char *s, ...)
  * The global pointer "story_name" is set to the story file name.
  *
  */
-
-static void parse_boolean(char *value, void *parsed) {
-  int *parsed_var = (int *) parsed;
-
-  if (! strcasecmp(value, "on") || ! strcasecmp(value, "true") ||
-      ! strcasecmp(value, "yes"))
-    *parsed_var = 1;
-  else if (! strcasecmp(value, "off") || ! strcasecmp(value, "false") ||
-           ! strcasecmp(value, "no"))
-    *parsed_var = 0;
-  else
-    fprintf(stderr, "Warning: invalid boolean resource `%s'\n", value);
-}
-
-static void parse_int(char *value, void *parsed) {
-  int *parsed_var = (int *) parsed;
-  char *parse_end;
-
-  int result = (int) strtol(value, &parse_end, 10);
-  if (*parse_end || !(*value))
-    fprintf(stderr, "Warning: invalid integer resource `%s'\n", value);
-  else
-    *parsed_var = result;
-}
-
-static void parse_zstrict(char *value, void *parsed) {
-  int *parsed_var = (int *) parsed;
-
-  if (! strcasecmp(value, "on") || ! strcasecmp(value, "true") ||
-      ! strcasecmp(value, "yes") || ! strcasecmp(value, "always"))
-    *parsed_var = ERR_REPORT_ALWAYS;
-  else if (! strcasecmp(value, "off") || ! strcasecmp(value, "false") ||
-           ! strcasecmp(value, "no") || ! strcasecmp(value, "never"))
-    *parsed_var = ERR_REPORT_NEVER;
-  else if (! strcasecmp(value, "once"))
-    *parsed_var = ERR_REPORT_ONCE;
-  else if (! strcasecmp(value, "fatal"))
-    *parsed_var = ERR_REPORT_FATAL;
-  else {
-    char *parse_end;
-    int result = (int) strtol(value, &parse_end, 10);
-
-    if (*parse_end || !(*value) || result < ERR_REPORT_NEVER ||
-        result > ERR_REPORT_FATAL)
-      fprintf(stderr, "Warning: invalid zstrict level resource `%s'\n",
-              value);
-    else
-      *parsed_var = result;
-  }
-}
-
-static void parse_string(char *value, void *parsed) {
-  *((char **) parsed) = value;
-}
-
-void os_process_arguments (int argc, char *argv[])
+static void parse_boolean(char *value, void *parsed)
 {
-  static XrmOptionDescRec options[] = {
-    { "-aa", ".watchAttrAssign", XrmoptionNoArg, (void *) "true" },
-    { "+aa", ".watchAttrAssign", XrmoptionNoArg, (void *) "false" },
-    { "-at", ".watchAttrTest", XrmoptionNoArg, (void *) "true" },
-    { "+at", ".watchAttrTest", XrmoptionNoArg, (void *) "false" },
-    { "-c", ".contextLines", XrmoptionSepArg, (void *) NULL },
-    { "-ol", ".watchObjLocating", XrmoptionNoArg, (void *) "true" },
-    { "+ol", ".watchObjLocating", XrmoptionNoArg, (void *) "false" },
-    { "-om", ".watchObjMovement", XrmoptionNoArg, (void *) "true" },
-    { "+om", ".watchObjMovement", XrmoptionNoArg, (void *) "false" },
-    { "-lm", ".leftMargin", XrmoptionSepArg, (void *) NULL },
-    { "-rm", ".rightMargin", XrmoptionSepArg, (void *) NULL },
-    { "-e", ".ignoreErrors", XrmoptionNoArg, (void *) "true" },
-    { "+e", ".ignoreErrors", XrmoptionNoArg, (void *) "false" },
-    { "-p", ".piracy", XrmoptionNoArg, (void *) "true" },
-    { "+p", ".piracy", XrmoptionNoArg, (void *) "false" },
-    { "-t", ".tandy", XrmoptionNoArg, (void *) "true" },
-    { "+t", ".tandy", XrmoptionNoArg, (void *) "false" },
-    { "-u", ".undoSlots", XrmoptionSepArg, (void *) NULL },
-    { "-x", ".expandAbbrevs", XrmoptionNoArg, (void *) "true" },
-    { "+x", ".expandAbbrevs", XrmoptionNoArg, (void *) "false" },
-    { "-sc", ".scriptColumns", XrmoptionSepArg, (void *) NULL },
-    { "-rs", ".randomSeed", XrmoptionSepArg, (void *) NULL },
-    { "-zs", ".zStrict", XrmoptionSepArg, (void *) NULL },
-    /* I can never remember whether it's zstrict or strictz */
-    { "-sz", ".zStrict", XrmoptionSepArg, (void *) NULL },
-    { "-fn-b", ".fontB", XrmoptionSepArg, (void *) NULL },
-    { "-fn-i", ".fontI", XrmoptionSepArg, (void *) NULL },
-    { "-fn-bi", ".fontBI", XrmoptionSepArg, (void *) NULL },
-    { "-fn-f", ".fontF", XrmoptionSepArg, (void *) NULL },
-    { "-fn-fb", ".fontFB", XrmoptionSepArg, (void *) NULL },
-    { "-fn-fi", ".fontFI", XrmoptionSepArg, (void *) NULL },
-    { "-fn-fbi", ".fontFBI", XrmoptionSepArg, (void *) NULL },
-    { "-fn-z", ".fontZ", XrmoptionSepArg, (void *) NULL }
-  };
-  static struct {
-    char *class;
-    char *name;
-    void (*parser)(char *, void *);
-    void *ptr;
-  } vars[] = {
-    { ".WatchAttribute", ".watchAttrAssign", parse_boolean,
-      &f_setup.attribute_assignment },
-    { ".WatchAttribute", ".watchAttrTest", parse_boolean,
-      &f_setup.attribute_testing },
-    { ".ContextLines", ".contextLines", parse_int,
-      &f_setup.context_lines },
-    { ".WatchObject", ".watchObjLocating", parse_boolean,
-      &f_setup.object_locating },
-    { ".WatchObject", ".watchObjMovement", parse_boolean,
-      &f_setup.object_movement },
-    { ".Margin", ".leftMargin", parse_int,
-      &f_setup.left_margin },
-    { ".Margin", ".rightMargin", parse_int,
-      &f_setup.right_margin },
-    { ".IgnoreErrors", ".ignoreErrors", parse_boolean,
-      &f_setup.ignore_errors },
-    { ".Piracy", ".piracy", parse_boolean,
-      &f_setup.piracy },
-    { ".Tandy", ".tandy", parse_boolean,
-      &x_setup.tandy_bit },
-    { ".UndoSlots", ".undoSlots", parse_int,
-      &f_setup.undo_slots },
-    { ".ExpandAbbrevs", ".expandAbbrevs", parse_boolean,
-      &f_setup.expand_abbreviations },
-    { ".ScriptColumns", ".scriptColumns", parse_int,
-      &f_setup.script_cols },
-    { ".RandomSeed", ".randomSeed", parse_int,
-      &x_setup.random_seed },
-    { ".ZStrict", ".zStrict", parse_zstrict,
-      &f_setup.err_report_mode },
-    { ".Background", ".background", parse_string,
-      &user_bg },
-    { ".Foreground", ".foreground", parse_string,
-      &user_fg },
-    { ".Font", ".font", parse_string,
-      &font_names[0] },
-    { ".Font", ".fontB", parse_string,
-      &font_names[1] },
-    { ".Font", ".fontI", parse_string,
-      &font_names[2] },
-    { ".Font", ".fontBI", parse_string,
-      &font_names[3] },
-    { ".Font", ".fontF", parse_string,
-      &font_names[4] },
-    { ".Font", ".fontFB", parse_string,
-      &font_names[5] },
-    { ".Font", ".fontFI", parse_string,
-      &font_names[6] },
-    { ".Font", ".fontFBI", parse_string,
-      &font_names[7] },
-    { ".Font", ".fontZ", parse_string,
-      &font_names[8] }
-  };
-  XtAppContext app_context;
-  char *str_type_return;
-  char *class_buf, *name_buf, *class_append, *name_append;
-  char *p;
-  int i;
-  XrmValue value;
+	int *parsed_var = (int *)parsed;
 
-  saved_argv = malloc(sizeof(char *) * argc);
-  memcpy(saved_argv, argv, sizeof(char *) * argc);
-  saved_argc = argc;
-  app_context = XtCreateApplicationContext();
-  dpy = XtOpenDisplay(app_context, NULL, NULL, "XFrotz",
-                      options, XtNumber(options), &argc, argv);
-  if (dpy == NULL)
-    os_fatal("Could not open display.");
-  if (argc != 2)
-    os_fatal("Usage: xfrotz [options] storyfile");
+	if (!strcasecmp(value, "on") || !strcasecmp(value, "true") ||
+	    !strcasecmp(value, "yes"))
+		*parsed_var = 1;
+	else if (!strcasecmp(value, "off") || !strcasecmp(value, "false") ||
+		 !strcasecmp(value, "no"))
+		*parsed_var = 0;
+	else
+		fprintf(stderr, "Warning: invalid boolean resource `%s'\n",
+			value);
+}
 
-  f_setup.story_file = strdup(argv[1]);
-  f_setup.story_name = strdup(basename(argv[1]));
 
-  /* Now strip off the extension */
-  p = strrchr(f_setup.story_name, '.');
-  if ( p != NULL )
-    *p = '\0';  /* extension removed */
+static void parse_int(char *value, void *parsed)
+{
+	int *parsed_var = (int *)parsed;
+	char *parse_end;
 
-  /* Create nice default file names */
-  f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char) + 1);
-  memcpy(f_setup.script_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char));
-  strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
+	int result = (int)strtol(value, &parse_end, 10);
+	if (*parse_end || !(*value))
+		fprintf(stderr, "Warning: invalid integer resource `%s'\n",
+			value);
+	else
+		*parsed_var = result;
+}
 
-  f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char) + 1);
-  memcpy(f_setup.command_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char));
-  strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
-  if (!f_setup.restore_mode) {
-    f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-    memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
-    strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-  } else {  /*Set our auto load save as the name_save*/
-    f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-    memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char));
-    free(f_setup.tmp_save_name);
-  }
+static void parse_zstrict(char *value, void *parsed)
+{
+	int *parsed_var = (int *)parsed;
 
-  f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
-  memcpy(f_setup.aux_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
-  strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
+	if (!strcasecmp(value, "on") || !strcasecmp(value, "true") ||
+	    !strcasecmp(value, "yes") || !strcasecmp(value, "always"))
+		*parsed_var = ERR_REPORT_ALWAYS;
+	else if (!strcasecmp(value, "off") || !strcasecmp(value, "false") ||
+		 !strcasecmp(value, "no") || !strcasecmp(value, "never"))
+		*parsed_var = ERR_REPORT_NEVER;
+	else if (!strcasecmp(value, "once"))
+		*parsed_var = ERR_REPORT_ONCE;
+	else if (!strcasecmp(value, "fatal"))
+		*parsed_var = ERR_REPORT_FATAL;
+	else {
+		char *parse_end;
+		int result = (int)strtol(value, &parse_end, 10);
 
-  XtGetApplicationNameAndClass(dpy, &x_name, &x_class);
+		if (*parse_end || !(*value) || result < ERR_REPORT_NEVER ||
+		    result > ERR_REPORT_FATAL)
+			fprintf(stderr,
+				"Warning: invalid zstrict level resource `%s'\n",
+				value);
+		else
+			*parsed_var = result;
+	}
+}
 
-  class_buf = malloc(strlen(x_class) + 20);
-  strcpy(class_buf, x_class);
-  class_append = strchr(class_buf, 0);
-  name_buf = malloc(strlen(x_name) + 20);
-  strcpy(name_buf, x_name);
-  name_append = strchr(name_buf, 0);
 
-  for (i = 0; i < XtNumber(vars); i++) {
-    strcpy(class_append, vars[i].class);
-    strcpy(name_append, vars[i].name);
-    if (XrmGetResource(XtDatabase(dpy), name_buf, class_buf,
-                       &str_type_return, &value))
-      vars[i].parser((char *) value.addr, vars[i].ptr);
-  }
-}/* os_process_arguments */
+static void parse_string(char *value, void *parsed)
+{
+	*((char **)parsed) = value;
+}
+
+
+void os_process_arguments(int argc, char *argv[])
+{
+	static XrmOptionDescRec options[] = {
+		{"-aa", ".watchAttrAssign", XrmoptionNoArg, (void *)"true"},
+		{"+aa", ".watchAttrAssign", XrmoptionNoArg, (void *)"false"},
+		{"-at", ".watchAttrTest", XrmoptionNoArg, (void *)"true"},
+		{"+at", ".watchAttrTest", XrmoptionNoArg, (void *)"false"},
+		{"-c", ".contextLines", XrmoptionSepArg, (void *)NULL},
+		{"-ol", ".watchObjLocating", XrmoptionNoArg, (void *)"true"},
+		{"+ol", ".watchObjLocating", XrmoptionNoArg, (void *)"false"},
+		{"-om", ".watchObjMovement", XrmoptionNoArg, (void *)"true"},
+		{"+om", ".watchObjMovement", XrmoptionNoArg, (void *)"false"},
+		{"-lm", ".leftMargin", XrmoptionSepArg, (void *)NULL},
+		{"-rm", ".rightMargin", XrmoptionSepArg, (void *)NULL},
+		{"-e", ".ignoreErrors", XrmoptionNoArg, (void *)"true"},
+		{"+e", ".ignoreErrors", XrmoptionNoArg, (void *)"false"},
+		{"-p", ".piracy", XrmoptionNoArg, (void *)"true"},
+		{"+p", ".piracy", XrmoptionNoArg, (void *)"false"},
+		{"-t", ".tandy", XrmoptionNoArg, (void *)"true"},
+		{"+t", ".tandy", XrmoptionNoArg, (void *)"false"},
+		{"-u", ".undoSlots", XrmoptionSepArg, (void *)NULL},
+		{"-x", ".expandAbbrevs", XrmoptionNoArg, (void *)"true"},
+		{"+x", ".expandAbbrevs", XrmoptionNoArg, (void *)"false"},
+		{"-sc", ".scriptColumns", XrmoptionSepArg, (void *)NULL},
+		{"-rs", ".randomSeed", XrmoptionSepArg, (void *)NULL},
+		{"-zs", ".zStrict", XrmoptionSepArg, (void *)NULL},
+		/* I can never remember whether it's zstrict or strictz */
+		{"-sz", ".zStrict", XrmoptionSepArg, (void *)NULL},
+		{"-fn-b", ".fontB", XrmoptionSepArg, (void *)NULL},
+		{"-fn-i", ".fontI", XrmoptionSepArg, (void *)NULL},
+		{"-fn-bi", ".fontBI", XrmoptionSepArg, (void *)NULL},
+		{"-fn-f", ".fontF", XrmoptionSepArg, (void *)NULL},
+		{"-fn-fb", ".fontFB", XrmoptionSepArg, (void *)NULL},
+		{"-fn-fi", ".fontFI", XrmoptionSepArg, (void *)NULL},
+		{"-fn-fbi", ".fontFBI", XrmoptionSepArg, (void *)NULL},
+		{"-fn-z", ".fontZ", XrmoptionSepArg, (void *)NULL}
+	};
+	static struct {
+		char *class;
+		char *name;
+		void (*parser)(char *, void *);
+		void *ptr;
+	} vars[] = {
+		{".WatchAttribute", ".watchAttrAssign", parse_boolean,
+		 &f_setup.attribute_assignment},
+		{".WatchAttribute", ".watchAttrTest", parse_boolean,
+		 &f_setup.attribute_testing},
+		{".ContextLines", ".contextLines", parse_int,
+		 &f_setup.context_lines},
+		{".WatchObject", ".watchObjLocating", parse_boolean,
+		 &f_setup.object_locating},
+		{".WatchObject", ".watchObjMovement", parse_boolean,
+		 &f_setup.object_movement},
+		{".Margin", ".leftMargin", parse_int,
+		 &f_setup.left_margin},
+		{".Margin", ".rightMargin", parse_int,
+		 &f_setup.right_margin},
+		{".IgnoreErrors", ".ignoreErrors", parse_boolean,
+		 &f_setup.ignore_errors},
+		{".Piracy", ".piracy", parse_boolean,
+		 &f_setup.piracy},
+		{".Tandy", ".tandy", parse_boolean,
+		 &x_setup.tandy_bit},
+		{".UndoSlots", ".undoSlots", parse_int,
+		 &f_setup.undo_slots},
+		{".ExpandAbbrevs", ".expandAbbrevs", parse_boolean,
+		 &f_setup.expand_abbreviations},
+		{".ScriptColumns", ".scriptColumns", parse_int,
+		 &f_setup.script_cols},
+		{".RandomSeed", ".randomSeed", parse_int,
+		 &x_setup.random_seed},
+		{".ZStrict", ".zStrict", parse_zstrict,
+		 &f_setup.err_report_mode},
+		{".Background", ".background", parse_string,
+		 &user_bg},
+		{".Foreground", ".foreground", parse_string,
+		 &user_fg},
+		{".Font", ".font", parse_string,
+		 &font_names[0]},
+		{".Font", ".fontB", parse_string,
+		 &font_names[1]},
+		{".Font", ".fontI", parse_string,
+		 &font_names[2]},
+		{".Font", ".fontBI", parse_string,
+		 &font_names[3]},
+		{".Font", ".fontF", parse_string,
+		 &font_names[4]},
+		{".Font", ".fontFB", parse_string,
+		 &font_names[5]},
+		{".Font", ".fontFI", parse_string,
+		 &font_names[6]},
+		{".Font", ".fontFBI", parse_string,
+		 &font_names[7]},
+		{".Font", ".fontZ", parse_string,
+		 &font_names[8]}
+	};
+	XtAppContext app_context;
+	char *str_type_return;
+	char *class_buf, *name_buf, *class_append, *name_append;
+	char *p;
+	int i;
+	XrmValue value;
+
+	saved_argv = malloc(sizeof(char *) * argc);
+	memcpy(saved_argv, argv, sizeof(char *) * argc);
+	saved_argc = argc;
+	app_context = XtCreateApplicationContext();
+	dpy = XtOpenDisplay(app_context, NULL, NULL, "XFrotz",
+			    options, XtNumber(options), &argc, argv);
+	if (dpy == NULL)
+		os_fatal("Could not open display.");
+	if (argc != 2)
+		os_fatal("Usage: xfrotz [options] storyfile");
+
+	f_setup.story_file = strdup(argv[1]);
+	f_setup.story_name = strdup(basename(argv[1]));
+
+	/* Now strip off the extension */
+	p = strrchr(f_setup.story_name, '.');
+	if (p != NULL)
+		*p = '\0';	/* extension removed */
+
+	/* Create nice default file names */
+	f_setup.script_name =
+	    malloc((strlen(f_setup.story_name) +
+		    strlen(EXT_SCRIPT)) * sizeof(char) + 1);
+	memcpy(f_setup.script_name, f_setup.story_name,
+	       (strlen(f_setup.story_name) +
+		strlen(EXT_SCRIPT)) * sizeof(char));
+	strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT) + 1);
+
+	f_setup.command_name =
+	    malloc((strlen(f_setup.story_name) +
+		    strlen(EXT_COMMAND)) * sizeof(char) + 1);
+	memcpy(f_setup.command_name, f_setup.story_name,
+	       (strlen(f_setup.story_name) +
+		strlen(EXT_COMMAND)) * sizeof(char));
+	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
+
+	if (!f_setup.restore_mode) {
+		f_setup.save_name =
+		    malloc((strlen(f_setup.story_name) +
+			    strlen(EXT_SAVE)) * sizeof(char) + 1);
+		memcpy(f_setup.save_name, f_setup.story_name,
+		       (strlen(f_setup.story_name) +
+			strlen(EXT_SAVE)) * sizeof(char));
+		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
+	} else {		/*Set our auto load save as the name_save */
+		f_setup.save_name =
+		    malloc((strlen(f_setup.tmp_save_name) +
+			    strlen(EXT_SAVE)) * sizeof(char) + 1);
+		memcpy(f_setup.save_name, f_setup.tmp_save_name,
+		       (strlen(f_setup.tmp_save_name) +
+			strlen(EXT_SAVE)) * sizeof(char));
+		free(f_setup.tmp_save_name);
+	}
+
+	f_setup.aux_name =
+	    malloc((strlen(f_setup.story_name) +
+		    strlen(EXT_AUX)) * sizeof(char) + 1);
+	memcpy(f_setup.aux_name, f_setup.story_name,
+	       (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
+	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
+
+	XtGetApplicationNameAndClass(dpy, &x_name, &x_class);
+
+	class_buf = malloc(strlen(x_class) + 20);
+	strcpy(class_buf, x_class);
+	class_append = strchr(class_buf, 0);
+	name_buf = malloc(strlen(x_name) + 20);
+	strcpy(name_buf, x_name);
+	name_append = strchr(name_buf, 0);
+
+	for (i = 0; i < XtNumber(vars); i++) {
+		strcpy(class_append, vars[i].class);
+		strcpy(name_append, vars[i].name);
+		if (XrmGetResource(XtDatabase(dpy), name_buf, class_buf,
+				   &str_type_return, &value))
+			vars[i].parser((char *)value.addr, vars[i].ptr);
+	}
+} /* os_process_arguments */
+
 
 /*
  * os_init_screen
@@ -308,133 +338,140 @@ void os_process_arguments (int argc, char *argv[])
  *  ugly hacks, neener neener neener. --GH :)
  *
  */
-
 Display *dpy;
 Window main_window = 0;
 const XFontStruct *current_font_info;
 GC normal_gc, reversed_gc, bw_gc, cursor_gc, current_gc;
 
-void os_init_screen (void)
+void os_init_screen(void)
 {
-  XSetWindowAttributes window_attrs;
-  XSizeHints *size_hints;
-  XWMHints *wm_hints;
-  XClassHint *class_hint;
-  const char *story_basename;
-  char *window_title;
-  int font_width, font_height;
-  XGCValues gc_setup;
+	XSetWindowAttributes window_attrs;
+	XSizeHints *size_hints;
+	XWMHints *wm_hints;
+	XClassHint *class_hint;
+	const char *story_basename;
+	char *window_title;
+	int font_width, font_height;
+	XGCValues gc_setup;
 
-  /* First, configuration parameters get set up */
-  if (z_header.version == V3 && user_tandy_bit != 0)
-    z_header.config |= CONFIG_TANDY;
-  if (z_header.version == V3)
-    z_header.config |= CONFIG_SPLITSCREEN | CONFIG_PROPORTIONAL;
-  if (z_header.version >= V4)
-    z_header.config |= CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED;
-  if (z_header.version >= V5) {
-    z_header.flags |= GRAPHICS_FLAG | UNDO_FLAG | MOUSE_FLAG | COLOUR_FLAG;
+	/* First, configuration parameters get set up */
+	if (z_header.version == V3 && user_tandy_bit != 0)
+		z_header.config |= CONFIG_TANDY;
+	if (z_header.version == V3)
+		z_header.config |= CONFIG_SPLITSCREEN | CONFIG_PROPORTIONAL;
+	if (z_header.version >= V4)
+		z_header.config |=
+		    CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED;
+	if (z_header.version >= V5) {
+		z_header.flags |=
+		    GRAPHICS_FLAG | UNDO_FLAG | MOUSE_FLAG | COLOUR_FLAG;
 #ifdef NO_SOUND
-    z_header.flags &= ~SOUND_FLAG;
+		z_header.flags &= ~SOUND_FLAG;
 #else
-    z_header.flags |= SOUND_FLAG;
+		z_header.flags |= SOUND_FLAG;
 #endif
-  }
-  if (z_header.version >= V6) {
-    z_header.config |= CONFIG_PICTURES;
-    z_header.flags &= ~MENU_FLAG;
-  }
+	}
+	if (z_header.version >= V6) {
+		z_header.config |= CONFIG_PICTURES;
+		z_header.flags &= ~MENU_FLAG;
+	}
 
-  if (z_header.version >= V5 && (z_header.flags & UNDO_FLAG) && f_setup.undo_slots == 0)
-    z_header.flags &= ~UNDO_FLAG;
+	if (z_header.version >= V5 && (z_header.flags & UNDO_FLAG)
+	    && f_setup.undo_slots == 0)
+		z_header.flags &= ~UNDO_FLAG;
 
-  z_header.interpreter_number = INTERP_DEC_20;
-  z_header.interpreter_version = 'F';
+	z_header.interpreter_number = INTERP_DEC_20;
+	z_header.interpreter_version = 'F';
 
-  x_init_colour(user_bg, user_fg);
+	x_init_colour(user_bg, user_fg);
 
-  window_attrs.background_pixel = def_bg_pixel;
-  window_attrs.backing_store = Always /* NotUseful */;
-  window_attrs.save_under = FALSE;
-  window_attrs.event_mask = ExposureMask | KeyPressMask | ButtonPressMask;
-  window_attrs.override_redirect = FALSE;
-  main_window = XCreateWindow(dpy, DefaultRootWindow(dpy),
-                              0, 0, 800, 600, 0, CopyFromParent,
-                              InputOutput, CopyFromParent,
-                              CWBackPixel | CWBackingStore |
-                              CWOverrideRedirect | CWSaveUnder | CWEventMask,
-                              &window_attrs);
+	window_attrs.background_pixel = def_bg_pixel;
+	window_attrs.backing_store = Always /* NotUseful */ ;
+	window_attrs.save_under = FALSE;
+	window_attrs.event_mask = ExposureMask | KeyPressMask | ButtonPressMask;
+	window_attrs.override_redirect = FALSE;
+	main_window = XCreateWindow(dpy, DefaultRootWindow(dpy),
+				    0, 0, 800, 600, 0, CopyFromParent,
+				    InputOutput, CopyFromParent,
+				    CWBackPixel | CWBackingStore |
+				    CWOverrideRedirect | CWSaveUnder |
+				    CWEventMask, &window_attrs);
 
-  size_hints = XAllocSizeHints();
-  size_hints->min_width = size_hints->max_width = size_hints->base_width = 800;
-  size_hints->min_height = size_hints->max_height =
-    size_hints->base_height = 600;
-  size_hints->flags = PMinSize | PMaxSize | PBaseSize;
+	size_hints = XAllocSizeHints();
+	size_hints->min_width = size_hints->max_width = size_hints->base_width =
+	    800;
+	size_hints->min_height = size_hints->max_height =
+	    size_hints->base_height = 600;
+	size_hints->flags = PMinSize | PMaxSize | PBaseSize;
 
-  wm_hints = XAllocWMHints();
-  wm_hints->input = TRUE;
-  wm_hints->initial_state = NormalState;
-  wm_hints->flags = InputHint | StateHint;
+	wm_hints = XAllocWMHints();
+	wm_hints->input = TRUE;
+	wm_hints->initial_state = NormalState;
+	wm_hints->flags = InputHint | StateHint;
 
-  class_hint = XAllocClassHint();
-  class_hint->res_name = x_name;
-  class_hint->res_class = x_class;
+	class_hint = XAllocClassHint();
+	class_hint->res_name = x_name;
+	class_hint->res_class = x_class;
 
-printf("%s\n\n", f_setup.story_name);
+	printf("%s\n\n", f_setup.story_name);
 
-  story_basename = strrchr(f_setup.story_name, '/');
-  if (story_basename == NULL)
-    story_basename = f_setup.story_name;
-  else
-    story_basename++;
-  window_title = malloc(strlen(story_basename) + 14);
-  sprintf(window_title, "XFrotz (V%d): %s", z_header.version, story_basename);
+	story_basename = strrchr(f_setup.story_name, '/');
+	if (story_basename == NULL)
+		story_basename = f_setup.story_name;
+	else
+		story_basename++;
+	window_title = malloc(strlen(story_basename) + 14);
+	sprintf(window_title, "XFrotz (V%d): %s", z_header.version,
+		story_basename);
 
-  XmbSetWMProperties(dpy, main_window, window_title, story_basename,
-                     saved_argv, saved_argc, size_hints, wm_hints, class_hint);
+	XmbSetWMProperties(dpy, main_window, window_title, story_basename,
+			   saved_argv, saved_argc, size_hints, wm_hints,
+			   class_hint);
 
-  XMapWindow(dpy, main_window);
-  free(window_title);
+	XMapWindow(dpy, main_window);
+	free(window_title);
 
-  current_font_info = get_font(TEXT_FONT, 0);
-  if (! current_font_info)
-    os_fatal("Could not open default font");
+	current_font_info = get_font(TEXT_FONT, 0);
+	if (!current_font_info)
+		os_fatal("Could not open default font");
 
-  z_header.screen_width = 800;
-  z_header.screen_height = 600;
-  os_font_data(FIXED_WIDTH_FONT, &font_height, &font_width);
-  z_header.font_height = font_height; z_header.font_width = font_width;
-  z_header.screen_cols = 800 / z_header.font_width;
-  z_header.screen_rows = 600 / z_header.font_height;
+	z_header.screen_width = 800;
+	z_header.screen_height = 600;
+	os_font_data(FIXED_WIDTH_FONT, &font_height, &font_width);
+	z_header.font_height = font_height;
+	z_header.font_width = font_width;
+	z_header.screen_cols = 800 / z_header.font_width;
+	z_header.screen_rows = 600 / z_header.font_height;
 
-  fg_pixel = def_fg_pixel;
-  bg_pixel = def_bg_pixel;
+	fg_pixel = def_fg_pixel;
+	bg_pixel = def_bg_pixel;
 
-  gc_setup.function = GXcopy;
-  gc_setup.foreground = fg_pixel;
-  gc_setup.background = bg_pixel;
-  gc_setup.fill_style = FillSolid;
-  gc_setup.font = current_font_info->fid;
-  normal_gc = XCreateGC(dpy, main_window,
-                        GCFunction | GCForeground | GCBackground |
-                        GCFillStyle | GCFont, &gc_setup);
-  gc_setup.foreground = bg_pixel;
-  gc_setup.background = fg_pixel;
-  reversed_gc = XCreateGC(dpy, main_window,
-                          GCFunction | GCForeground | GCBackground |
-                          GCFillStyle | GCFont, &gc_setup);
-  gc_setup.foreground = ~0UL;
-  gc_setup.background = 0UL;
-  bw_gc = XCreateGC(dpy, main_window,
-                    GCFunction | GCForeground | GCBackground |
-                    GCFillStyle | GCFont, &gc_setup);
-  gc_setup.background = 0UL;
-  gc_setup.foreground = bg_pixel ^ fg_pixel;
-  gc_setup.function = GXxor;
-  cursor_gc = XCreateGC(dpy, main_window,
-                        GCFunction | GCForeground | GCBackground |
-                        GCFillStyle, &gc_setup);
-}/* os_init_screen */
+	gc_setup.function = GXcopy;
+	gc_setup.foreground = fg_pixel;
+	gc_setup.background = bg_pixel;
+	gc_setup.fill_style = FillSolid;
+	gc_setup.font = current_font_info->fid;
+	normal_gc = XCreateGC(dpy, main_window,
+			      GCFunction | GCForeground | GCBackground |
+			      GCFillStyle | GCFont, &gc_setup);
+	gc_setup.foreground = bg_pixel;
+	gc_setup.background = fg_pixel;
+	reversed_gc = XCreateGC(dpy, main_window,
+				GCFunction | GCForeground | GCBackground |
+				GCFillStyle | GCFont, &gc_setup);
+	gc_setup.foreground = ~0UL;
+	gc_setup.background = 0UL;
+	bw_gc = XCreateGC(dpy, main_window,
+			  GCFunction | GCForeground | GCBackground |
+			  GCFillStyle | GCFont, &gc_setup);
+	gc_setup.background = 0UL;
+	gc_setup.foreground = bg_pixel ^ fg_pixel;
+	gc_setup.function = GXxor;
+	cursor_gc = XCreateGC(dpy, main_window,
+			      GCFunction | GCForeground | GCBackground |
+			      GCFillStyle, &gc_setup);
+} /* os_init_screen */
+
 
 /*
  * os_reset_screen
@@ -442,14 +479,14 @@ printf("%s\n\n", f_setup.story_name);
  * Reset the screen before the program stops.
  *
  */
-
-void os_reset_screen (void)
+void os_reset_screen(void)
 {
-  os_set_text_style(0);
-  print_string("[Hit any key to exit.]");
-  flush_buffer();
-  os_read_key(0, FALSE);
-}/* os_reset_screen */
+	os_set_text_style(0);
+	print_string("[Hit any key to exit.]");
+	flush_buffer();
+	os_read_key(0, FALSE);
+} /* os_reset_screen */
+
 
 /*
  * os_quit
@@ -459,8 +496,9 @@ void os_reset_screen (void)
  */
 void os_quit(int status)
 {
-        exit(status);
+	exit(status);
 } /* os_quit */
+
 
 /*
  * os_restart_game
@@ -473,10 +511,10 @@ void os_quit(int status)
  *     RESTART_END - restart is complete
  *
  */
-
-void os_restart_game (int stage)
+void os_restart_game(int stage)
 {
 }
+
 
 /*
  * os_random_seed
@@ -485,37 +523,39 @@ void os_restart_game (int stage)
  * 32767, possibly by using the current system time.
  *
  */
-
-int os_random_seed (void)
+int os_random_seed(void)
 {
-  if (user_random_seed == -1)
-    return time(0) & 0x7fff;
-  else
-    return user_random_seed;
-}/* os_random_seed */
+	if (user_random_seed == -1)
+		return time(0) & 0x7fff;
+	else
+		return user_random_seed;
+} /* os_random_seed */
 
 
 void os_init_setup(void)
 {
-    return;
+	return;
 }
+
 
 FILE *os_load_story(void)
 {
-    FILE *fp;
+	FILE *fp;
 
-    fp = fopen(f_setup.story_file, "rb");
-    return fp;
+	fp = fopen(f_setup.story_file, "rb");
+	return fp;
 }
+
 
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
-    /* No blorb in X11 for now, so just use fseek */
-    return fseek(fp, offset, whence);
+	/* No blorb in X11 for now, so just use fseek */
+	return fseek(fp, offset, whence);
 }
+
 
 int os_storyfile_tell(FILE * fp)
 {
-    /* No blorb in X11 for now, so just use ftell */
-     return ftell(fp);
+	/* No blorb in X11 for now, so just use ftell */
+	return ftell(fp);
 }
