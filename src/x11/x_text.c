@@ -15,129 +15,139 @@
 int curr_x = 0;
 int curr_y = 0;
 
-unsigned long bg_pixel = 0, fg_pixel = 0,
-  def_bg_pixel = 0, def_fg_pixel = 0;
+unsigned long bg_pixel = 0, fg_pixel = 0, def_bg_pixel = 0, def_fg_pixel = 0;
 
 static int char_width(const XFontStruct *, zchar);
 
-/* Try to allocate the specified standard colour. */
-static int x_alloc_colour(int index, unsigned long *result) {
-  char *str_type_return;
-  char *class_buf, *name_buf, *colour_name;
-  static char *fallback_names[] = {
-    "black", "red3", "green3", "yellow3", "blue3", "magenta3", "cyan3",
-    "gray80", "gray50"
-  };
-  XColor screen, exact;
-  int retval;
-  XrmValue value;
 
-  class_buf = (char *) malloc(strlen(x_class) + 9);
-  name_buf = (char *) malloc(strlen(x_name) + 9);
-  sprintf(class_buf, "%s.Color%d", x_class, index);
-  sprintf(name_buf, "%s.color%d", x_name, index);
-  if (XrmGetResource(XtDatabase(dpy), name_buf, class_buf,
-                     &str_type_return, &value))
-    colour_name = (char *) value.addr;
-  else
-    colour_name = fallback_names[index - 2];
-  retval = XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)),
-                            colour_name, &screen, &exact);
-  if (retval)
-    *result = screen.pixel;
-  free(class_buf);
-  free(name_buf);
-  return retval;
+/* Try to allocate the specified standard colour. */
+static int x_alloc_colour(int index, unsigned long *result)
+{
+	char *str_type_return;
+	char *class_buf, *name_buf, *colour_name;
+	static char *fallback_names[] = {
+		"black", "red3", "green3", "yellow3", "blue3", "magenta3",
+		    "cyan3",
+		"gray80", "gray50"
+	};
+	XColor screen, exact;
+	int retval;
+	XrmValue value;
+
+	class_buf = (char *)malloc(strlen(x_class) + 9);
+	name_buf = (char *)malloc(strlen(x_name) + 9);
+	sprintf(class_buf, "%s.Color%d", x_class, index);
+	sprintf(name_buf, "%s.color%d", x_name, index);
+	if (XrmGetResource(XtDatabase(dpy), name_buf, class_buf,
+			   &str_type_return, &value))
+		colour_name = (char *)value.addr;
+	else
+		colour_name = fallback_names[index - 2];
+	retval = XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)),
+				  colour_name, &screen, &exact);
+	if (retval)
+		*result = screen.pixel;
+	free(class_buf);
+	free(name_buf);
+	return retval;
 }
+
 
 unsigned long pixel_values[17];
 
 /* Process the given color name, and return an index corresponding to
    it */
 static int x_bg_fg_color(unsigned long *pixel, int index, char *color_name,
-                         int def_index) {
-  char extra;
-  int z_num;
-  XColor screen, exact;
+			 int def_index)
+{
+	char extra;
+	int z_num;
+	XColor screen, exact;
 
-  if (color_name == NULL) {
-    *pixel = pixel_values[index] = pixel_values[def_index];
-    return def_index;
-  }
-  if (sscanf(color_name, "z:%d%c", &z_num, &extra) == 1) {
-    if (z_num < BLACK_COLOUR || z_num > GREY_COLOUR) {
-      fprintf(stderr, "Invalid Z-machine color %d\n", z_num);
-      exit(1);
-    }
-    *pixel = pixel_values[index] = pixel_values[z_num];
-    return z_num;
-  }
-  if (XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)),
-                       color_name, &screen, &exact)) {
-    pixel_values[index] = screen.pixel;
-    for (z_num = BLACK_COLOUR; z_num <= GREY_COLOUR; z_num++)
-      if (pixel_values[z_num] == pixel_values[index])
-        return z_num;
-    return index;
-  }
-  else {
-    fprintf(stderr, "Warning: could not allocate user color %s\n",
-            color_name);
-    *pixel = pixel_values[index] = pixel_values[def_index];
-    return def_index;
-  }
+	if (color_name == NULL) {
+		*pixel = pixel_values[index] = pixel_values[def_index];
+		return def_index;
+	}
+	if (sscanf(color_name, "z:%d%c", &z_num, &extra) == 1) {
+		if (z_num < BLACK_COLOUR || z_num > GREY_COLOUR) {
+			fprintf(stderr, "Invalid Z-machine color %d\n", z_num);
+			exit(1);
+		}
+		*pixel = pixel_values[index] = pixel_values[z_num];
+		return z_num;
+	}
+	if (XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)),
+			     color_name, &screen, &exact)) {
+		pixel_values[index] = screen.pixel;
+		for (z_num = BLACK_COLOUR; z_num <= GREY_COLOUR; z_num++)
+			if (pixel_values[z_num] == pixel_values[index])
+				return z_num;
+		return index;
+	} else {
+		fprintf(stderr, "Warning: could not allocate user color %s\n",
+			color_name);
+		*pixel = pixel_values[index] = pixel_values[def_index];
+		return def_index;
+	}
 }
+
 
 /* Try to allocate the standard Z machine colours, and in any case try
    to allocate the default background and foreground colours. */
-void x_init_colour(char *bg_name, char *fg_name) {
-  int use_color, i;
+void x_init_colour(char *bg_name, char *fg_name)
+{
+	int use_color, i;
 
-  for (i = 0; i < 17; i++)
-    pixel_values[i] = BlackPixel(dpy, DefaultScreen(dpy));
-  if (DefaultDepth(dpy, DefaultScreen(dpy)) == 1)
-    use_color = 0;
-  else {
-    for (i = BLACK_COLOUR; i <= GREY_COLOUR; i++) {
-      use_color = x_alloc_colour(i, &pixel_values[i]);
-      if (! use_color)
-        break;
-    }
-    if (! use_color) {
-      fprintf(stderr, "Warning: could not allocate standard colors\n");
-      XFreeColors(dpy, DefaultColormap(dpy, DefaultScreen(dpy)),
-                  &pixel_values[BLACK_COLOUR], i - BLACK_COLOUR,
-                  AllPlanes);
-      for (i--; i >= BLACK_COLOUR; i--)
-        pixel_values[i] = BlackPixel(dpy, DefaultScreen(dpy));
-    }
-  }
-  if (use_color) {
-    z_header.config |= CONFIG_COLOUR;
-    z_header.flags |= COLOUR_FLAG;
-  }
-  else {
-    z_header.flags &= ~COLOUR_FLAG;
-    pixel_values[WHITE_COLOUR] = WhitePixel(dpy, DefaultScreen(dpy));
-  }
+	for (i = 0; i < 17; i++)
+		pixel_values[i] = BlackPixel(dpy, DefaultScreen(dpy));
+	if (DefaultDepth(dpy, DefaultScreen(dpy)) == 1)
+		use_color = 0;
+	else {
+		for (i = BLACK_COLOUR; i <= GREY_COLOUR; i++) {
+			use_color = x_alloc_colour(i, &pixel_values[i]);
+			if (!use_color)
+				break;
+		}
+		if (!use_color) {
+			fprintf(stderr,
+				"Warning: could not allocate standard colors\n");
+			XFreeColors(dpy,
+				    DefaultColormap(dpy, DefaultScreen(dpy)),
+				    &pixel_values[BLACK_COLOUR],
+				    i - BLACK_COLOUR, AllPlanes);
+			for (i--; i >= BLACK_COLOUR; i--)
+				pixel_values[i] =
+				    BlackPixel(dpy, DefaultScreen(dpy));
+		}
+	}
+	if (use_color) {
+		z_header.config |= CONFIG_COLOUR;
+		z_header.flags |= COLOUR_FLAG;
+	} else {
+		z_header.flags &= ~COLOUR_FLAG;
+		pixel_values[WHITE_COLOUR] =
+		    WhitePixel(dpy, DefaultScreen(dpy));
+	}
 
-  z_header.default_background =
-    x_bg_fg_color(&def_bg_pixel, 14, bg_name, 9);
-  z_header.default_foreground =
-    x_bg_fg_color(&def_fg_pixel, 15, fg_name, 2);
+	z_header.default_background =
+	    x_bg_fg_color(&def_bg_pixel, 14, bg_name, 9);
+	z_header.default_foreground =
+	    x_bg_fg_color(&def_fg_pixel, 15, fg_name, 2);
 }
 
+
 char *font_names[9] = {
-  "-adobe-times-medium-r-normal--14-*-*-*-*-*-iso8859-1",
-  "-adobe-times-bold-r-normal--14-*-*-*-*-*-iso8859-1",
-  "-adobe-times-medium-i-normal--14-*-*-*-*-*-iso8859-1",
-  "-adobe-times-bold-i-normal--14-*-*-*-*-*-iso8859-1",
-  "-adobe-courier-medium-r-normal--12-*-*-*-*-*-iso8859-1",
-  "-adobe-courier-bold-r-normal--12-*-*-*-*-*-iso8859-1",
-  "-adobe-courier-medium-o-normal--12-*-*-*-*-*-iso8859-1",
-  "-adobe-courier-bold-o-normal--12-*-*-*-*-*-iso8859-1",
-  "-*-Zork-*-*-*--13-*-*-*-*-*-*-*"
+	"-adobe-times-medium-r-normal--14-*-*-*-*-*-iso8859-1",
+	"-adobe-times-bold-r-normal--14-*-*-*-*-*-iso8859-1",
+	"-adobe-times-medium-i-normal--14-*-*-*-*-*-iso8859-1",
+	"-adobe-times-bold-i-normal--14-*-*-*-*-*-iso8859-1",
+	"-adobe-courier-medium-r-normal--12-*-*-*-*-*-iso8859-1",
+	"-adobe-courier-bold-r-normal--12-*-*-*-*-*-iso8859-1",
+	"-adobe-courier-medium-o-normal--12-*-*-*-*-*-iso8859-1",
+	"-adobe-courier-bold-o-normal--12-*-*-*-*-*-iso8859-1",
+	"-*-Zork-*-*-*--13-*-*-*-*-*-*-*"
 };
+
 
 /*
  * os_font_data
@@ -154,20 +164,21 @@ char *font_names[9] = {
  * be changed.
  *
  */
-
-int os_font_data (int font, int *height, int *width)
+int os_font_data(int font, int *height, int *width)
 {
-  const XFontStruct *font_info;
+	const XFontStruct *font_info;
 
-  if (font != TEXT_FONT && font != GRAPHICS_FONT && font != FIXED_WIDTH_FONT)
-    return 0;
-  font_info = get_font(font, 0);
-  if (! font_info)
-    return 0;
-  *height = font_info->ascent + font_info->descent;
-  *width = char_width(font_info, '0');
-  return 1;
-}/* os_font_data */
+	if (font != TEXT_FONT && font != GRAPHICS_FONT
+	    && font != FIXED_WIDTH_FONT)
+		return 0;
+	font_info = get_font(font, 0);
+	if (!font_info)
+		return 0;
+	*height = font_info->ascent + font_info->descent;
+	*width = char_width(font_info, '0');
+	return 1;
+} /* os_font_data */
+
 
 /*
  * os_set_colour
@@ -198,36 +209,38 @@ int os_font_data (int font, int *height, int *width)
  * remarks on os_peek_colour.
  *
  */
-
-void os_set_colour (int new_foreground, int new_background)
+void os_set_colour(int new_foreground, int new_background)
 {
-  if (new_foreground == 1)
-    new_foreground = z_header.default_foreground;
-  if (new_background == 1)
-    new_background = z_header.default_background;
+	if (new_foreground == 1)
+		new_foreground = z_header.default_foreground;
+	if (new_background == 1)
+		new_background = z_header.default_background;
 
-  fg_pixel = pixel_values[new_foreground];
-  bg_pixel = pixel_values[new_background];
+	fg_pixel = pixel_values[new_foreground];
+	bg_pixel = pixel_values[new_background];
 
-  XSetForeground(dpy, normal_gc, fg_pixel);
-  XSetBackground(dpy, normal_gc, bg_pixel);
-  XSetForeground(dpy, reversed_gc, bg_pixel);
-  XSetBackground(dpy, reversed_gc, fg_pixel);
-  XSetForeground(dpy, cursor_gc, bg_pixel ^ fg_pixel);
-}/* os_set_colour */
+	XSetForeground(dpy, normal_gc, fg_pixel);
+	XSetBackground(dpy, normal_gc, bg_pixel);
+	XSetForeground(dpy, reversed_gc, bg_pixel);
+	XSetBackground(dpy, reversed_gc, fg_pixel);
+	XSetForeground(dpy, cursor_gc, bg_pixel ^ fg_pixel);
+} /* os_set_colour */
 
-static XFontStruct * font_info_cache[9];
 
-const XFontStruct *get_font(int font, int style) {
-  style = (style >> 1) & 7;     /* Ignore REVERSE_STYLE bit (= 1) */
-  if (font == FIXED_WIDTH_FONT)
-    style |= (FIXED_WIDTH_STYLE >> 1);
-  if (font == GRAPHICS_FONT)
-    style = 8;
-  if (! font_info_cache[style])
-    font_info_cache[style] = XLoadQueryFont(dpy, font_names[style]);
-  return font_info_cache[style];
+static XFontStruct *font_info_cache[9];
+
+const XFontStruct *get_font(int font, int style)
+{
+	style = (style >> 1) & 7;	/* Ignore REVERSE_STYLE bit (= 1) */
+	if (font == FIXED_WIDTH_FONT)
+		style |= (FIXED_WIDTH_STYLE >> 1);
+	if (font == GRAPHICS_FONT)
+		style = 8;
+	if (!font_info_cache[style])
+		font_info_cache[style] = XLoadQueryFont(dpy, font_names[style]);
+	return font_info_cache[style];
 }
+
 
 /*
  * os_set_text_style
@@ -240,26 +253,27 @@ const XFontStruct *get_font(int font, int style) {
  *     FIXED_WIDTH_STYLE
  *
  */
-
 static int current_zfont = TEXT_FONT;
 static int current_style = 0;
 
-void os_set_text_style (int new_style)
+void os_set_text_style(int new_style)
 {
-  if (new_style & REVERSE_STYLE)
-    current_gc = reversed_gc;
-  else
-    current_gc = normal_gc;
+	if (new_style & REVERSE_STYLE)
+		current_gc = reversed_gc;
+	else
+		current_gc = normal_gc;
 
-  current_font_info = get_font(current_zfont, new_style);
-  if (current_font_info == NULL) {
-    fprintf(stderr, "Could not find font for style %d\n", new_style);
-    current_font_info = get_font(current_zfont, 0);
-  }
-  XSetFont(dpy, current_gc, current_font_info->fid);
+	current_font_info = get_font(current_zfont, new_style);
+	if (current_font_info == NULL) {
+		fprintf(stderr, "Could not find font for style %d\n",
+			new_style);
+		current_font_info = get_font(current_zfont, 0);
+	}
+	XSetFont(dpy, current_gc, current_font_info->fid);
 
-  current_style = new_style;
-}/* os_set_text_style */
+	current_style = new_style;
+} /* os_set_text_style */
+
 
 /*
  * os_set_font
@@ -268,12 +282,12 @@ void os_set_text_style (int new_style)
  * choose fonts which aren't supported by the interface.
  *
  */
-
-void os_set_font (int new_font)
+void os_set_font(int new_font)
 {
-  current_zfont = new_font;
-  os_set_text_style(current_style);
-}/* os_set_font */
+	current_zfont = new_font;
+	os_set_text_style(current_style);
+} /* os_set_font */
+
 
 /*
  * os_display_char
@@ -286,35 +300,38 @@ void os_set_font (int new_font)
  * bottom right corner.
  *
  */
-
-void os_display_char (zchar c)
+void os_display_char(zchar c)
 {
-  switch (c) {
-  case ZC_GAP:
-    os_display_char(' ');
-    c = ' ';
-    break;
-  case ZC_INDENT:
-    os_display_char(' ');
-    os_display_char(' ');
-    c = ' ';
-    break;
-  }
-  XDrawImageString(dpy, main_window, current_gc,
-                   curr_x, curr_y + current_font_info->ascent, (char *) &c, 1);
-  curr_x += os_char_width(c);
-}/* os_display_char */
+	switch (c) {
+	case ZC_GAP:
+		os_display_char(' ');
+		c = ' ';
+		break;
+	case ZC_INDENT:
+		os_display_char(' ');
+		os_display_char(' ');
+		c = ' ';
+		break;
+	}
+	XDrawImageString(dpy, main_window, current_gc,
+			 curr_x, curr_y + current_font_info->ascent, (char *)&c,
+			 1);
+	curr_x += os_char_width(c);
+} /* os_display_char */
+
 
 /* Delete the given character backwards from the current position --
    used to implement backspace in os_read_line */
-void x_del_char(zchar c) {
-  int char_width = os_char_width(c);
+void x_del_char(zchar c)
+{
+	int char_width = os_char_width(c);
 
-  curr_x -= char_width;
-  os_erase_area(curr_y + 1, curr_x + 1,
-                curr_y + current_font_info->ascent +
-                current_font_info->descent, curr_x + char_width, 0);
+	curr_x -= char_width;
+	os_erase_area(curr_y + 1, curr_x + 1,
+		      curr_y + current_font_info->ascent +
+		      current_font_info->descent, curr_x + char_width, 0);
 }
+
 
 /*
  * os_display_string
@@ -322,21 +339,20 @@ void x_del_char(zchar c) {
  * Pass a string of characters to os_display_char.
  *
  */
-
-void os_display_string (const zchar *s)
+void os_display_string(const zchar * s)
 {
-  while (*s) {
-    if (*s == ZC_NEW_FONT || *s == ZC_NEW_STYLE) {
-      s++;
-      if (s[-1] == ZC_NEW_FONT)
-        os_set_font(*s++);
-      else
-        os_set_text_style(*s++);
-    }
-    else
-      os_display_char(*s++);
-  }
-}/* os_display_string */
+	while (*s) {
+		if (*s == ZC_NEW_FONT || *s == ZC_NEW_STYLE) {
+			s++;
+			if (s[-1] == ZC_NEW_FONT)
+				os_set_font(*s++);
+			else
+				os_set_text_style(*s++);
+		} else
+			os_display_char(*s++);
+	}
+} /* os_display_string */
+
 
 /*
  * os_check_unicode
@@ -347,8 +363,8 @@ void os_display_string (const zchar *s)
  */
 int os_check_unicode(int UNUSED(font), zchar UNUSED(c))
 {
-        /* Assume full input and output.  */
-        return 3;
+	/* Assume full input and output. */
+	return 3;
 }
 
 
@@ -358,21 +374,21 @@ int os_check_unicode(int UNUSED(font), zchar UNUSED(c))
  * Return the width of the character in screen units.
  *
  */
-
-static int char_width(const XFontStruct *font_info, zchar c)
+static int char_width(const XFontStruct * font_info, zchar c)
 {
-  int direction, font_ascent, font_descent;
-  XCharStruct size;
+	int direction, font_ascent, font_descent;
+	XCharStruct size;
 
-  XTextExtents((XFontStruct *) font_info, (char *)&c, 1, &direction,
-               &font_ascent, &font_descent, &size);
-  return size.width;
+	XTextExtents((XFontStruct *) font_info, (char *)&c, 1, &direction,
+		     &font_ascent, &font_descent, &size);
+	return size.width;
 }
 
-int os_char_width (zchar c)
+int os_char_width(zchar c)
 {
-  return char_width(current_font_info, c);
-}/* os_char_width */
+	return char_width(current_font_info, c);
+} /* os_char_width */
+
 
 /*
  * os_string_width
@@ -384,19 +400,19 @@ int os_char_width (zchar c)
  *    NEW_FONT  - next character is a new font
  *
  */
-
-int os_string_width (const zchar *s)
+int os_string_width(const zchar * s)
 {
-  int width = 0;
+	int width = 0;
 
-  while (*s) {
-    if (*s == ZC_NEW_STYLE || *s == ZC_NEW_FONT)
-      s += 2;
-    else
-      width += os_char_width(*s++);
-  }
-  return width;
-}/* os_string_width */
+	while (*s) {
+		if (*s == ZC_NEW_STYLE || *s == ZC_NEW_FONT)
+			s += 2;
+		else
+			width += os_char_width(*s++);
+	}
+	return width;
+} /* os_string_width */
+
 
 /*
  * os_set_cursor
@@ -404,12 +420,12 @@ int os_string_width (const zchar *s)
  * Place the text cursor at the given coordinates. Top left is (1,1).
  *
  */
-
-void os_set_cursor (int y, int x)
+void os_set_cursor(int y, int x)
 {
-  curr_y = y - 1;
-  curr_x = x - 1;
-}/* os_set_cursor */
+	curr_y = y - 1;
+	curr_x = x - 1;
+} /* os_set_cursor */
+
 
 /*
  * os_more_prompt
@@ -418,25 +434,23 @@ void os_set_cursor (int y, int x)
  * prompt from the screen.
  *
  */
-
-void os_more_prompt (void)
+void os_more_prompt(void)
 {
-  int saved_x, new_x;
-  const char *p = "[MORE]";
+	int saved_x, new_x;
+	const char *p = "[MORE]";
 
-  /* Save some useful information */
-  saved_x = curr_x;
+	/* Save some useful information */
+	saved_x = curr_x;
 
-  /*  os_set_text_style(0); */
-  while(*p)
-    os_display_char((zchar) (*p++));
-  os_read_key(0, TRUE);
+	/*  os_set_text_style(0); */
+	while (*p)
+		os_display_char((zchar) (*p++));
+	os_read_key(0, TRUE);
 
-  new_x = curr_x;
-  curr_x = saved_x;
-  os_erase_area(curr_y + 1, saved_x + 1,
-                curr_y + current_font_info->ascent +
-                current_font_info->descent,
-                new_x + 1, 0);
-  /*  os_set_text_style(saved_style); */
-}/* os_more_prompt */
+	new_x = curr_x;
+	curr_x = saved_x;
+	os_erase_area(curr_y + 1, saved_x + 1,
+		      curr_y + current_font_info->ascent +
+		      current_font_info->descent, new_x + 1, 0);
+	/*  os_set_text_style(saved_style); */
+} /* os_more_prompt */
