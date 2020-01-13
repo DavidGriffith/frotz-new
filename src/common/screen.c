@@ -1506,7 +1506,22 @@ void z_show_status(void)
 	/* A header flag tells us whether we have to display the current
 	   time or the score/moves information */
 	if (z_header.config & CONFIG_TIME) {	/* print hours and minutes */
-		zword hours = (global1 + 11) % 12 + 1;
+		zword hours;
+
+		/* Cutthroats puts 111 in the hour when the PC is not
+		 * wearing a watch.  Most (all?) Infocom's interpreters
+		 * save for the Amiga one would handle 24-hour conversion
+		 * to am/pm notation by subtracting 12 from the hour if it's
+		 * greater than 12.  So, by putting 111 in there,
+		 * subtracting 12 results in 99.  The Amiga interpreter and
+		 * all modern interpreters do the conversion correctly.
+		 * The result is 3.
+		 */
+		if (story_id == CUTTHROATS && global1 >= 12)
+			hours = 99;
+		else
+			hours = (global1 + 11) % 12 + 1;
+
 		pad_status_line(brief ? 15 : 20);
 		print_string("Time: ");
 		if (hours < 10)
