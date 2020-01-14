@@ -388,7 +388,7 @@ void os_init_screen(void)
 	window_attrs.background_pixel = def_bg_pixel;
 	window_attrs.backing_store = Always /* NotUseful */ ;
 	window_attrs.save_under = FALSE;
-	window_attrs.event_mask = ExposureMask | KeyPressMask | ButtonPressMask;
+	window_attrs.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;;
 	window_attrs.override_redirect = FALSE;
 	main_window = XCreateWindow(dpy, DefaultRootWindow(dpy),
 				    0, 0, 800, 600, 0, CopyFromParent,
@@ -470,6 +470,14 @@ void os_init_screen(void)
 	cursor_gc = XCreateGC(dpy, main_window,
 			      GCFunction | GCForeground | GCBackground |
 			      GCFillStyle, &gc_setup);
+
+	for(;;) {
+		XEvent e;
+		XNextEvent(dpy, &e);
+		if (e.type == MapNotify)
+			break;
+	}
+
 } /* os_init_screen */
 
 
