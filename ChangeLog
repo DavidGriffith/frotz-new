@@ -13,6 +13,9 @@ NEW FEATURES
 
 BUG FIXES
 
+- Added an idiosyncrasy fix for Cutthroats, which assumes a
+  quick-and-dirty conversion of 24-hour notation to am/pm notation.
+
 - Fixed where the Makefile used spaces instead of a tab in a rarely-used
   recipe.
 
