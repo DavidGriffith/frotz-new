@@ -435,7 +435,9 @@ ifeq ($(EXPORT_TYPE), dos)
 	@echo "#define MSDOS_16BIT" >> $@
 else
 ifeq ($(EXPORT_TYPE), tops20)
+	@echo "#ifndef TOPS20" >> $@
 	@echo "#define TOPS20" >> $@
+	@echo "#endif" >> $@
 	@echo "#define NO_STRDUP" >> $@
 	@echo "#define NO_BASENAME" >> $@
 	@echo "#define MAXPATHLEN 39" >> $@
