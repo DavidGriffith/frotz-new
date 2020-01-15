@@ -169,7 +169,6 @@ else
 	GIT_HASH_SHORT = "$Format:%h$"
 	GIT_DATE = "$Format:%ci$"
 endif
-BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
 export CFLAGS
 
 
@@ -431,7 +430,6 @@ ifeq ($(wildcard $(HASH)), )
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
-	@echo "#define BUILD_DATE \"$(BUILD_DATE)\"" >> $@
 endif
 
 
