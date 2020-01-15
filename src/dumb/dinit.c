@@ -398,7 +398,7 @@ static void print_version(void)
 {
 	printf("FROTZ V%s\t", VERSION);
 	printf("Dumb interface.\n");
-	printf("Build date:\t%s\n", BUILD_DATE);
+	printf("Build date:\t%s %s\n", __DATE__, __TIME__);
 	printf("Commit date:\t%s\n", GIT_DATE);
 	printf("Git commit:\t%s\n", GIT_HASH);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");

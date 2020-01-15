@@ -1139,7 +1139,7 @@ static void print_version(void)
 #else
 	printf("Audio output disabled.");
 #endif
-	printf("\nBuild date:\t%s\n", BUILD_DATE);
+	printf("\nBuild date:\t%s %s\n", __DATE__, __TIME__);
 	printf("Commit date:\t%s\n", GIT_DATE);
 	printf("Git commit:\t%s\n", GIT_HASH);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");
