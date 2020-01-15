@@ -751,12 +751,6 @@ void z_restore(void)
 		/* Close auxilary file */
 		fclose (gfp);
 	} else {
-
-//	long pc;
-//	zword release;
-//	zword addr;
-//	int i;
-
 		/* Get the file name */
 		new_name = os_read_file_name(f_setup.save_name, FILE_RESTORE);
 		if (new_name == NULL)
@@ -978,13 +972,6 @@ void z_save(void)
 		fclose(gfp);
 
 	} else {
-
-//	long pc;
-//	zword addr;
-//	zword nsp, nfp;
-//	int skip;
-//	int i;
-
 		/* Get the file name */
 		new_name = os_read_file_name(f_setup.save_name, FILE_SAVE);
 		if (new_name == NULL)
