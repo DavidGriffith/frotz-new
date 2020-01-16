@@ -342,6 +342,7 @@ Display *dpy;
 Window main_window = 0;
 const XFontStruct *current_font_info;
 GC normal_gc, reversed_gc, bw_gc, cursor_gc, current_gc;
+Pixmap bgpm;
 
 void os_init_screen(void)
 {
@@ -391,7 +392,7 @@ void os_init_screen(void)
 	window_attrs.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;;
 	window_attrs.override_redirect = FALSE;
 	main_window = XCreateWindow(dpy, DefaultRootWindow(dpy),
-				    0, 0, 800, 600, 0, CopyFromParent,
+				    0, 0, X_WIDTH, X_HEIGHT, 0, CopyFromParent,
 				    InputOutput, CopyFromParent,
 				    CWBackPixel | CWBackingStore |
 				    CWOverrideRedirect | CWSaveUnder |
@@ -399,9 +400,9 @@ void os_init_screen(void)
 
 	size_hints = XAllocSizeHints();
 	size_hints->min_width = size_hints->max_width = size_hints->base_width =
-	    800;
+	    X_WIDTH;
 	size_hints->min_height = size_hints->max_height =
-	    size_hints->base_height = 600;
+	    size_hints->base_height = X_HEIGHT;
 	size_hints->flags = PMinSize | PMaxSize | PBaseSize;
 
 	wm_hints = XAllocWMHints();
@@ -435,13 +436,13 @@ void os_init_screen(void)
 	if (!current_font_info)
 		os_fatal("Could not open default font");
 
-	z_header.screen_width = 800;
-	z_header.screen_height = 600;
+	z_header.screen_width = X_WIDTH;
+	z_header.screen_height = X_HEIGHT;
 	os_font_data(FIXED_WIDTH_FONT, &font_height, &font_width);
 	z_header.font_height = font_height;
 	z_header.font_width = font_width;
-	z_header.screen_cols = 800 / z_header.font_width;
-	z_header.screen_rows = 600 / z_header.font_height;
+	z_header.screen_cols = X_WIDTH / z_header.font_width;
+	z_header.screen_rows = X_HEIGHT / z_header.font_height;
 
 	fg_pixel = def_fg_pixel;
 	bg_pixel = def_bg_pixel;
@@ -477,6 +478,8 @@ void os_init_screen(void)
 		if (e.type == MapNotify)
 			break;
 	}
+	bgpm = XCreatePixmap(dpy, main_window, X_WIDTH, X_HEIGHT, DefaultDepth(dpy,DefaultScreen(dpy)));
+	XSetWindowBackgroundPixmap(dpy, main_window, bgpm);
 
 } /* os_init_screen */
 
