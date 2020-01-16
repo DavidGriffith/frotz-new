@@ -111,11 +111,11 @@ zchar os_read_key(int timeout, int cursor)
 	KeySym symbol;
 	int text_height;
 
-	XCopyArea(dpy, main_window, bgpm, current_gc, 0, 0, X_WIDTH, X_HEIGHT, 0, 0);
 	text_height = current_font_info->ascent + current_font_info->descent;
 	if (cursor)
 		XFillRectangle(dpy, main_window, cursor_gc,
 			       curr_x, curr_y, 2, text_height);
+	XCopyArea(dpy, main_window, bgpm, current_gc, 0, 0, X_WIDTH, X_HEIGHT, 0, 0);
 	for (;;) {
 		XNextEvent(dpy, &ev);
 		if (ev.type == KeyPress) {
