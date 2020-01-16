@@ -16,6 +16,10 @@
 
 #include <X11/Xlib.h>
 
+/* Xfrotz currently only supports a fixed sized window */
+#define X_WIDTH  800
+#define X_HEIGHT 600
+
 /* X connection */
 extern Display *dpy;
 
