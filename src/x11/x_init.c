@@ -342,6 +342,7 @@ Display *dpy;
 Window main_window = 0;
 const XFontStruct *current_font_info;
 GC normal_gc, reversed_gc, bw_gc, cursor_gc, current_gc;
+Pixmap bgpm;
 
 void os_init_screen(void)
 {
@@ -477,6 +478,8 @@ void os_init_screen(void)
 		if (e.type == MapNotify)
 			break;
 	}
+	bgpm = XCreatePixmap(dpy, main_window, X_WIDTH, X_HEIGHT, DefaultDepth(dpy,DefaultScreen(dpy)));
+	XSetWindowBackgroundPixmap(dpy, main_window, bgpm);
 
 } /* os_init_screen */
 

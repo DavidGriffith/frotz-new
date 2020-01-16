@@ -17,6 +17,7 @@
 
 extern bool is_terminator(zchar key);
 extern void x_del_char(zchar c);
+extern Pixmap bgpm;
 
 
 /*
@@ -110,6 +111,7 @@ zchar os_read_key(int timeout, int cursor)
 	KeySym symbol;
 	int text_height;
 
+	XCopyArea(dpy, main_window, bgpm, current_gc, 0, 0, X_WIDTH, X_HEIGHT, 0, 0);
 	text_height = current_font_info->ascent + current_font_info->descent;
 	if (cursor)
 		XFillRectangle(dpy, main_window, cursor_gc,
