@@ -2,11 +2,12 @@
 # GNU make is required.
 
 # Your C compiler
-CC ?= gcc
-#CC ?= clang
+ifeq ($(origin CC),default)
+CC = gcc
+endif
 
 # Enable compiler warnings. This is an absolute minimum.
-CFLAGS += -Wall -std=c99 -O3 #-Wextra
+CFLAGS += -Wall -std=gnu99 -O3 #-Wextra
 
 # Define your optimization flags.
 #
@@ -14,6 +15,13 @@ CFLAGS += -Wall -std=c99 -O3 #-Wextra
 #CFLAGS += -O2 -fomit-frame-pointer -falign-functions=2 -falign-loops=2 -falign-jumps=2
 # These are handy for debugging.
 CFLAGS += -g
+
+ifneq ($(MAKECMDGOALS),djgpp)
+EXTRA_CFLAGS = -fPIC -fpic
+else
+EXTRA_CFLAGS = -march=i386
+LDFLAGS += -Xlinker -Map=output.map -T djgpp.ld
+endif
 
 # Define where you want Frotz installed
 PREFIX ?= /usr/local
@@ -76,6 +84,9 @@ CURSES ?= ncursesw
 # For missing strrchr()
 #NO_STRRCHR = yes
 
+# For missing basename()
+#NO_BASENAME = yes
+
 # Uncomment to disable format codes for dumb interface
 #DISABLE_FORMATS = yes
 
@@ -133,8 +144,16 @@ ifneq ($(OS),Windows_NT)
     endif
 endif
 
-RANLIB ?= $(shell which ranlib)
-AR ?= $(shell which ar)
+
+ifeq ($(MAKECMDGOALS),tops20)
+    EXPORT_TYPE = tops20
+endif
+ifeq ($(MAKECMDGOALS),dos)
+    EXPORT_TYPE = dos
+endif
+
+
+RANLIB ?= ranlib
 PKG_CONFIG ?= pkg-config
 
 MKFONTDIR ?= $(shell which mkfontdir)
@@ -143,6 +162,7 @@ MKFONTDIR ?= $(shell which mkfontdir)
 XSET ?= $(shell which xset)
 
 export CC
+export EXTRA_CFLAGS
 export CFLAGS
 export CURSES_CFLAGS
 export NPROCS
@@ -174,7 +194,6 @@ else
 	GIT_HASH_SHORT = "$Format:%h$"
 	GIT_DATE = "$Format:%ci$"
 endif
-BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
 export CFLAGS
 
 
@@ -202,7 +221,9 @@ SRCDIR = src
 COMMON_DIR = $(SRCDIR)/common
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
 COMMON_DEFINES = $(COMMON_DIR)/defs.h
-HASH = $(COMMON_DIR)/git_hash.h
+HASH = $(COMMON_DIR)/hash.h
+
+MISC_DIR = $(SRCDIR)/misc
 
 BLORB_DIR = $(SRCDIR)/blorb
 BLORB_LIB = $(BLORB_DIR)/blorblib.a
@@ -233,7 +254,11 @@ SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
 
 DOS_DIR = $(SRCDIR)/dos
 
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
+DJGPP_DIR = $(SRCDIR)/djgpp
+DJGPP_LIB = $(DJGPP_DIR)/frotz_djgpp.a
+
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR) $(DJGPP_DIR)
+
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 FROTZ_BIN = frotz$(EXTENSION)
@@ -241,12 +266,16 @@ DFROTZ_BIN = dfrotz$(EXTENSION)
 XFROTZ_BIN = xfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
+DJGPP_BIN = frotz32.exe
 
 FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
 XFROTZ_LIBS = $(COMMON_LIB) $(X11_LIB) $(BLORB_LIB) $(COMMON_LIB)
 SFROTZ_LIBS = $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 
+# Tools
+SNAVIG = $(MISC_DIR)/snavig.pl
+SNAVIG_DIR = snavig
 
 ifdef NO_BLORB
   SOUND_TYPE = none
@@ -307,6 +336,12 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
+djgpp: USE_UTF8 = no
+djgpp: $(DJGPP_BIN)
+$(DJGPP_BIN): $(COMMON_LIB) $(DJGPP_LIB) $(BLORB_LIB) $(COMMON_LIB)
+	$(CC) $+ -o $@ $(LDFLAGS)
+	@echo "** Done building Frotz with DJGPP interface."
+
 dos: $(DOS_BIN)
 $(DOS_BIN):
 	@echo
@@ -328,6 +363,23 @@ else
 endif
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN) $(XFROTZ_BIN)
+snavig:
+	@echo "Snavig: Change an object's shape..."
+	@echo "Possible snavig-processed targets:"
+	@echo "  tops20 (working on it)"
+	@echo "  its    (not even started)"
+	@echo "  tops10 (not even started)"
+	@echo "  tenex  (not even started)"
+	@echo "  waits  (not even started)"
+	@echo "That's all for now."
+
+tops20: clean $(COMMON_DEFINES) $(HASH)
+	@rm -rf $(SNAVIG_DIR)
+	@mkdir $(SNAVIG_DIR)
+	@echo "*************************************************************"
+	@echo Producing snavig-processed source for $(EXPORT_TYPE)
+	@$(SNAVIG) $(COMMON_DIR) $(DUMB_DIR) $(BLORB_DIR) $(SNAVIG_DIR)
+	@echo Now, get this into a $(EXPORT_TYPE) machine for compilation.
 
 common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
@@ -355,6 +407,12 @@ $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 $(BLORB_LIB): $(COMMON_DEFINES)
 	$(MAKE) -C $(BLORB_DIR)
 
+$(DJGPP_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(DJGPP_DIR)
+
+#$(SUBDIRS):
+#	$(MAKE) -C $@
+
 $(SUB_CLEAN):
 	-$(MAKE) -C $(@:%-clean=%) clean
 
@@ -368,8 +426,29 @@ ifeq ($(wildcard $(COMMON_DEFINES)), )
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
+ifeq ($(MAKECMDGOALS),djgpp)
+	@echo "#define SOUND_SUPPORT" >> $@
+else
+
+ifeq ($(EXPORT_TYPE), dos)
+	@echo "#define MSDOS_16BIT" >> $@
+else
+ifeq ($(EXPORT_TYPE), tops20)
+	@echo "#ifndef TOPS20" >> $@
+	@echo "#define TOPS20" >> $@
+	@echo "#endif" >> $@
+	@echo "#define NO_STRDUP" >> $@
+	@echo "#define NO_BASENAME" >> $@
+	@echo "#define MAXPATHLEN 39" >> $@
+else
+
 ifeq ($(OS_TYPE), unix)
 	@echo "#define UNIX" >> $@
+	@echo "" >> $@
+endif
+endif
+endif
+
 endif
 	@echo "#define MAX_UNDO_SLOTS $(MAX_UNDO_SLOTS)" >> $@
 	@echo "#define MAX_FILE_NAME $(MAX_FILE_NAME)" >> $@
@@ -394,9 +473,11 @@ endif
 ifdef NO_EXECINFO_H
 	@echo "#define NO_EXECINFO_H" >> $@
 endif
-ifeq ($(USE_UTF8), yes)
-	@echo "#define USE_UTF8" >> $@
+
+ifneq ($(EXPORT_TYPE), tops20)
+	$(if $(findstring yes,$(USE_UTF8)), @echo "#define USE_UTF8" >> $@)
 endif
+
 ifdef FREEBSD
 	@echo "#define __BSD_VISIBLE 1" >> $@
 endif
@@ -459,7 +540,6 @@ ifeq ($(wildcard $(HASH)), )
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
-	@echo "#define BUILD_DATE \"$(BUILD_DATE)\"" >> $@
 endif
 
 
@@ -541,11 +621,11 @@ clean: $(SUB_CLEAN)
 	rm -rf $(COMMON_DEFINES) \
 		$(CURSES_DEFINES) \
 		$(HASH)
-	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
+	rm -f frotz.bak $(DOS_BIN) $(DJGPP_BIN) frotz.lib frotz.dsk *.obj
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) xfrotz$(EXTENTION) a.out
-	rm -rf $(NAME)src
+	rm -rf $(NAME)src $(SNAVIG_DIR)
 	rm -f $(NAME)*.tar.gz $(NAME)src.zip
 
 help:
@@ -557,10 +637,12 @@ help:
 	@echo "    x11: for X11 graphics"
 	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    dos: Make a zip file containing DOS Frotz source code"
+	@echo "    tops20: Process source files for building on TOPS20"
 	@echo "    install      / uninstall (for curses edition)"
 	@echo "    install_dumb / uninstall_dumb"
 	@echo "    install_sdl  / uninstall_sdl"
 	@echo "    install_x11  / uninstall_x11"
+	@echo "    install_all  / uninstall_all"
 	@echo "    clean: clean up files created by compilation"
 	@echo "    distclean: like clean, but also delete executables"
 	@echo "    dist: create a source tarball"
@@ -569,8 +651,8 @@ help:
 .SUFFIXES:
 .SUFFIXES: .c .o .h
 
-.PHONY: all clean dist curses ncurses dumb sdl hash help \
-	common_defines curses_defines nosound nosound_helper\
+.PHONY: all clean dist curses ncurses dumb sdl hash help snavig \
+	common_defines curses_defines nosound nosound_helper \
 	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install uninstall \

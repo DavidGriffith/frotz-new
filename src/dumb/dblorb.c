@@ -28,7 +28,6 @@
 #include <string.h>
 
 #include <unistd.h>
-#include <libgen.h>
 #include <math.h>
 
 #ifndef NO_BLORB

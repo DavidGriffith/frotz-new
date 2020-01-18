@@ -1,5 +1,5 @@
 /*
- * bctext.c - DOS interface, text functions
+ * djtext.c - DJGPP interface, text functions
  *
  * This file is part of Frotz.
  *
@@ -19,18 +19,19 @@
  * Or visit http://www.fsf.org/
  */
 
-#include <alloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <conio.h>
 #include <dos.h>
+#include <pc.h>
+#include <dpmi.h>
+#include <go32.h>
+#include <sys/farptr.h>
 #include "frotz.h"
-#include "BCfrotz.h"
+#include "djfrotz.h"
 #include "fontdata.h"
 
-extern byte far *get_scrnptr(int);
-
-extern int graphics_adapter;
+extern unsigned long get_scrnptr(int);
 
 int current_bg = 0;
 int current_fg = 0;
@@ -69,11 +70,11 @@ char latin1_to_ibm[] = {
 	0x9b, 0x97, 0xa3, 0x96, 0x81, 0xec, 0xe7, 0x98
 };
 
-static byte far *graphics_font = NULL;
-static byte far *mcga_font = NULL;
-static byte far *mcga_width = NULL;
-static word far *serif_font = NULL;
-static byte far *serif_width = NULL;
+static byte *graphics_font = NULL;
+static byte *mcga_font = NULL;
+static byte *mcga_width = NULL;
+static word *serif_font = NULL;
+static byte *serif_width = NULL;
 
 
 /*
@@ -85,7 +86,7 @@ static byte far *serif_width = NULL;
  */
 void load_fonts(void)
 {
-	static chunk_offset[] = {
+	static int chunk_offset[] = {
 		0x6660,
 		0x6300,
 		0x4A40,
@@ -209,6 +210,7 @@ static void adjust_style(void)
 
 	static byte palette_bg = 0xff;
 	static byte palette_fg = 0xff;
+	__dpmi_regs regs;
 
 	fg = current_fg;
 	bg = current_bg;
@@ -223,12 +225,12 @@ static void adjust_style(void)
 			byte G = amiga_palette[fg - 2][1];
 			byte B = amiga_palette[fg - 2][2];
 
-			asm mov ax, 0x1010
-			asm mov bx, 79
-			asm mov dh, R
-			asm mov ch, G
-			asm mov cl, B
-			asm int 0x10
+			regs.x.ax = 0x1010;
+			regs.x.bx = 79;
+			regs.h.dh = R;
+			regs.h.ch = G;
+			regs.h.cl = B;
+			__dpmi_int (0x10, &regs);
 
 			palette_fg = fg;
 		}
@@ -238,12 +240,12 @@ static void adjust_style(void)
 			byte G = amiga_palette[bg - 2][1];
 			byte B = amiga_palette[bg - 2][2];
 
-			asm mov ax, 0x1010
-			asm mov bx, 64
-			asm mov dh, R
-			asm mov ch, G
-			asm mov cl, B
-			asm int 0x10
+			regs.x.ax = 0x1010;
+			regs.x.bx = 64;
+			regs.h.dh = R;
+			regs.h.ch = G;
+			regs.h.cl = B;
+			__dpmi_int (0x10, &regs);
 
 			palette_bg = bg;
 
@@ -385,34 +387,31 @@ void os_set_font(int new_font)
  * Helper function for drawing characters in EGA and Amiga mode.
  *
  */
-void write_pattern(byte far * screen, byte val, byte mask)
+void write_pattern(unsigned long screen, byte val, byte mask)
 {
+	_farsetsel(_dos_ds);
 	if (mask != 0) {
 		if (display == _CGA_) {
 			if (text_bg == BLACK)
-				*screen &= ~mask;
+				_farnspokeb(screen, _farnspeekb(screen) & ~mask);
 			if (text_bg == WHITE)
-				*screen |= mask;
+				_farnspokeb(screen, _farnspeekb(screen) | mask);
 			if (text_fg != text_bg)
-				*screen ^= val;
+				_farnspokeb(screen, _farnspeekb(screen) ^ val);
 		} else if (display == _MCGA_) {
 			byte i;
 
-			for (i = 0x80; (mask & i) != 0; i >>= 1)
-				*screen++ = (val & i) ? text_fg : text_bg;
+			for (i = 0x80; (mask & i) != 0; i >>= 1) {
+				_farnspokeb(screen, (val & i) ? text_fg : text_bg);
+				screen++;
+			}
 		} else {
-			asm mov dx, 0x03cf
-			asm mov al, mask
-			asm out dx, al
-			asm les bx, screen
-			asm mov ch, text_bg
-			asm mov al, es:[bx]
-			asm mov es:[bx], ch
-			asm mov al, val
-			asm out dx, al
-			asm mov ch, text_fg
-			asm mov al, es:[bx]
-			asm mov es:[bx], ch
+			outportb (0x3cf, mask);
+			(void)_farnspeekb(screen);
+			_farnspokeb(screen, text_bg);
+			outportb (0x3cf, val);
+			(void)_farnspeekb(screen);
+			_farnspokeb(screen, text_fg);
 		}
 	}
 } /* write_pattern */
@@ -428,13 +427,15 @@ void write_pattern(byte far * screen, byte val, byte mask)
  * indentation). The screen should not be scrolled after printing to the
  * bottom right corner.
  *
- */ void os_display_char(zchar c)
+ */
+void os_display_char(zchar c)
 {
 	int width = os_char_width(c);
+	__dpmi_regs regs;
 
 	/* Handle accented characters */
 	if (c >= ZC_LATIN1_MIN
-	    && (story_id != BEYOND_ZORK || (z_header.flags & GRAPHICS_FLAG)))
+	    && (story_id != BEYOND_ZORK || (z_header.flags & GRAPHICS_FLAG))) {
 		if (display == _CGA_ || display == _MCGA_) {
 			char *ptr = latin1_to_ascii + 3 * (c - ZC_LATIN1_MIN);
 
@@ -458,10 +459,9 @@ void write_pattern(byte far * screen, byte val, byte mask)
 			if (c >= ZC_LATIN1_MIN)
 				c -= 32;
 		} else {
-			if (graphics_adapter > EGA_ADAPTER || display != _TEXT_) {
-				c = latin1_to_ibm[c - ZC_LATIN1_MIN];
-			}
+			c = latin1_to_ibm[c - ZC_LATIN1_MIN];
 		}
+	}
 
 	/* Handle special indentations */
 	if (c == ZC_INDENT) {
@@ -478,25 +478,23 @@ void write_pattern(byte far * screen, byte val, byte mask)
 
 	/* Display character */
 	if (display <= _TEXT_) {
-		asm mov ah, 2
-		asm mov bh, 0
-		asm mov dh, byte ptr cursor_y
-		asm mov dl, byte ptr cursor_x
-		asm int 0x10
-		asm mov ah, 9
-		asm mov bh, 0
-		asm mov bl, byte ptr text_bg
-		asm mov cl, 4
-		asm shl bl, cl
-		asm or bl, byte ptr text_fg
-		asm mov cx, 1
-		asm mov al, byte ptr c
-		asm int 0x10
+		regs.h.ah = 2;
+		regs.h.bh = 0;
+		regs.h.dh = cursor_y;
+		regs.h.dl = cursor_x;
+		__dpmi_int (0x10, &regs);
+		regs.h.ah = 9;
+		regs.h.bh = 0;
+		regs.h.bl = text_bg << 4 | text_fg;
+		regs.x.cx = 1;
+		regs.h.al = c;
+		__dpmi_int (0x10, &regs);
 	} else {
 
-		void far *table;
+		void *table = NULL;
+		unsigned long dos_table = 0;
 		word mask;
-		word val;
+		word val = 0;
 		byte mask0;
 		byte mask1;
 		int align;
@@ -526,19 +524,20 @@ void write_pattern(byte far * screen, byte val, byte mask)
 			align = 0;
 			type = 2;
 		} else if (display == _CGA_) {
-			table = (byte far *) MK_FP(0xf000, 0xfa6e) + 8 * c;
+			dos_table = 0xf0000 + 0xfa6e + 8 * c;
 			mask = 0xff;
 			underline = 7;
 			boldface = (user_bold_typing != -1) ? 1 : -1;
 			align = 0;
-			type = 3;
+			type = 4;
 		} else if (display >= _EGA_) {
-			table = (byte far *) getvect(0x43) + z_header.font_height * c;
+			dos_table = _farpeekl(_dos_ds, 0x43 << 2);
+			dos_table = RM_TO_LINEAR(dos_table) + z_header.font_height * c;
 			mask = 0xff;
 			underline = z_header.font_height - 1;
 			boldface = (user_bold_typing != -1) ? 1 : -1;
 			align = 0;
-			type = 3;
+			type = 4;
 		} else {
 			table = mcga_font + 8 * (c - 32);
 			mask = 0xff & (0xff << (8 - width));
@@ -557,22 +556,24 @@ void write_pattern(byte far * screen, byte val, byte mask)
 			underline = -1;
 
 		if (display >= _EGA_) {
-			outport(0x03ce, 0x0205);
-			outport(0x03ce, 0xff08);
+			outportw(0x03ce, 0x0205);
+			outportw(0x03ce, 0xff08);
 		}
 
 		for (i = 0; i < z_header.font_height; i++) {
-			byte far *screen = get_scrnptr(cursor_y + i) + offset;
+			unsigned long screen = get_scrnptr(cursor_y + i) + offset;
 
 			if (type == 1) {
 				val =
-				    *((byte far *) table +
+				    *((byte *) table +
 				      8 * i / z_header.font_height);
 			}
 			if (type == 2)
-				val = *((word far *) table + i);
+				val = *((word *) table + i);
 			if (type == 3)
-				val = *((byte far *) table + i);
+				val = *((byte *) table + i);
+			if (type == 4)
+				val = _farpeekb(_dos_ds, dos_table + i);
 
 			if (align != 0)
 				val >>= align;
@@ -633,7 +634,7 @@ int os_char_width(zchar c)
 {
 	/* Handle accented characters */
 	if (c >= ZC_LATIN1_MIN
-	    && (story_id != BEYOND_ZORK || (z_header.flags & GRAPHICS_FLAG)))
+	    && (story_id != BEYOND_ZORK || (z_header.flags & GRAPHICS_FLAG))) {
 		if (display == _CGA_ || display == _MCGA_) {
 
 			const char *ptr =
@@ -656,9 +657,11 @@ int os_char_width(zchar c)
 
 		} else if (display == _AMIGA_ && current_font == TEXT_FONT
 			   && !(current_style & FIXED_WIDTH_STYLE)
-			   && user_font != 0)
+			   && user_font != 0) {
 			if (c >= ZC_LATIN1_MIN)
 				c -= 32;
+		}
+	}
 
 	/* Handle special indentations */
 	if (c == ZC_INDENT)

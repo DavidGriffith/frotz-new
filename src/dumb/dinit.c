@@ -19,7 +19,6 @@
  * Or visit http://www.fsf.org/
  */
 
-#include <libgen.h>
 #include "dfrotz.h"
 #include "dblorb.h"
 
@@ -198,8 +197,12 @@ void os_process_arguments(int argc, char *argv[])
 
 	/* Save the story file name */
 	f_setup.story_file = strdup(argv[zoptind]);
-	f_setup.story_name = strdup(basename(argv[zoptind]));
 
+#ifdef NO_BASENAME
+	f_setup.story_name = strdup(f_setup.story_file);
+#else
+	f_setup.story_name = strdup(basename(argv[zoptind]));
+#endif
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
@@ -398,7 +401,6 @@ static void print_version(void)
 {
 	printf("FROTZ V%s\t", VERSION);
 	printf("Dumb interface.\n");
-	printf("Build date:\t%s\n", BUILD_DATE);
 	printf("Commit date:\t%s\n", GIT_DATE);
 	printf("Git commit:\t%s\n", GIT_HASH);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");

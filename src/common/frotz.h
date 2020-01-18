@@ -23,7 +23,7 @@
 
 #ifndef MSDOS_16BIT
 #include "defs.h"
-#include "git_hash.h"
+#include "hash.h"
 #endif
 
 #ifndef __UNIX_PORT_FILE
@@ -98,6 +98,7 @@ enum story {
 	LURKING_HORROR,
 	BUREAUCRACY,
 	TRINITY,
+	CUTTHROATS,
 	UNKNOWN
 };
 

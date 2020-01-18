@@ -15,10 +15,15 @@
     and uint16 a 16-bit unsigned numeric type. */
 
 #include <limits.h>
+
+#ifdef TOPS20
+typedef unsigned int uint32;
+#else
 #if UINT_MAX == (1UL<<32)-1UL
 typedef unsigned int  uint32;
 #else
 typedef unsigned long  uint32;
+#endif
 #endif
 
 typedef unsigned short uint16;
