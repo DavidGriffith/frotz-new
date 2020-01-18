@@ -20,7 +20,6 @@
  */
 
 #include <string.h>
-#include <libgen.h>
 
 #include "dfrotz.h"
 
@@ -485,8 +484,15 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 char *os_read_file_name (const char *default_name, int flag)
 {
 	char file_name[FILENAME_MAX + 1];
-	char fullpath[INPUT_BUFFER_SIZE], prompt[INPUT_BUFFER_SIZE];
+	char prompt[INPUT_BUFFER_SIZE];
+
+#ifndef NO_BASENAME
+	char fullpath[INPUT_BUFFER_SIZE];
 	char *buf;
+#else
+	char buf[INPUT_BUFFER_SIZE];
+#endif
+
 	FILE *fp;
 	char *tempname;
 	char path_separator[2];
@@ -512,8 +518,13 @@ char *os_read_file_name (const char *default_name, int flag)
 			sprintf(prompt, "Please enter a filename [%s]: ", tempname);
 		} else
 			sprintf(prompt, "Please enter a filename [%s]: ", default_name);
+#ifndef NO_BASENAME
 		dumb_read_misc_line(fullpath, prompt);
 		buf = basename (fullpath);
+#else
+		dumb_read_misc_line(buf, prompt);
+#endif
+
 		if (strlen(buf) > MAX_FILE_NAME) {
 			printf("Filename too long\n");
 			return NULL;
