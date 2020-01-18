@@ -345,9 +345,10 @@ snavig:
 	@echo "  waits  (not even started)"
 	@echo "That's all for now."
 
-tops20: $(COMMON_DEFINES) $(HASH)
+tops20: clean $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
 	@mkdir $(SNAVIG_DIR)
+	@echo "*************************************************************"
 	@echo Producing snavig-processed source for $(EXPORT_TYPE)
 	@$(SNAVIG) $(COMMON_DIR) $(DUMB_DIR) $(BLORB_DIR) $(SNAVIG_DIR)
 	@echo Now, get this into a $(EXPORT_TYPE) machine for compilation.
