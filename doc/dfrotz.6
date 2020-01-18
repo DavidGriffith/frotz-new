@@ -63,6 +63,16 @@ Watch attribute testing.  Every time the Z-machine tests an attribute
 value, the test and the result will be reported.
 
 .TP
+.B \-f [irc | normal]
+Select type of format codes.  Dumb Frotz can optionally mark up its
+output with codes for color, bold, underline, and so on.  Right now only
+.B irc
+color codes are supported.  Specifying
+.B normal
+or not using this flag at all will result in Dumb Frotz's normal
+behavior of not using any sort of markup.
+
+.TP
 .B \-h N
 Text height.  Every N lines, a MORE prompt will be printed.  Use of
 the

@@ -87,6 +87,9 @@ CURSES ?= ncursesw
 # For missing basename()
 #NO_BASENAME = yes
 
+# Uncomment to disable format codes for dumb interface
+#DISABLE_FORMATS = yes
+
 # Assorted constants
 MAX_UNDO_SLOTS = 500
 MAX_FILE_NAME = 80
@@ -186,7 +189,6 @@ else
 	GIT_HASH_SHORT = "$Format:%h$"
 	GIT_DATE = "$Format:%ci$"
 endif
-BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
 export CFLAGS
 
 
@@ -455,6 +457,9 @@ ifdef MACOS
 	@echo "#define _DARWIN_C_SOURCE" >> $@
 	@echo "#define _XOPEN_SOURCE 600" >> $@
 endif
+ifdef DISABLE_FORMATS
+	@echo "#define DISABLE_FORMATS" >> $@
+endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 endif
 
@@ -507,7 +512,6 @@ ifeq ($(wildcard $(HASH)), )
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
-	@echo "#define BUILD_DATE \"$(BUILD_DATE)\"" >> $@
 endif
 
 

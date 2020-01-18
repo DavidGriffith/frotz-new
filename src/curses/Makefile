@@ -15,7 +15,9 @@ ARFLAGS = rc
 SOUND_TYPE ?= ao
 
 ifeq ($(SOUND_TYPE), ao)
-  CFLAGS += -pthread
+    ifneq ($(UNAME_S),Haiku)
+	CFLAGS += -pthread
+    endif
 else ifeq ($(SOUND_TYPE), none)
 
 else ifndef SOUND_TYPE

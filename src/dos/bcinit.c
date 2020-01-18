@@ -387,7 +387,6 @@ static void parse_options(int argc, char **argv)
 			f_setup.undo_slots = num;
 		if (c == 'v') {
 			printf("FROTZ V%s - MSDOS / PCDOS Edition\n", VERSION);
-			printf("Build date:\t%s %s\n", __DATE__, __TIME__);
 			printf("Commit date:\t%s\n", GIT_DATE);
 			printf("Git commit:\t%s\n", GIT_HASH);
 			printf("  Frotz was originally written by Stefan Jokisch.\n");

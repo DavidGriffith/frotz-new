@@ -32,8 +32,9 @@
 
 #include <unistd.h>
 #include <ctype.h>
-#include <signal.h>
 #include <libgen.h>
+
+#include "ux_defines.h"
 
 #ifdef USE_NCURSES_H
 #include <ncurses.h>
@@ -205,7 +206,7 @@ void os_process_arguments (int argc, char *argv[])
 
 	zoptarg = NULL;
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__HAIKU__)
 	if ((getuid() == 0) || (geteuid() == 0)) {
 		printf("I won't run as root!\n");
 		exit(EXIT_FAILURE);
@@ -371,7 +372,7 @@ void os_process_arguments (int argc, char *argv[])
 		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
 	} else {  /*Set our auto load save as the name_save*/
 		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
-		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
+		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char));
 		free(f_setup.tmp_save_name);
 	}
 
@@ -1138,8 +1139,7 @@ static void print_version(void)
 #else
 	printf("Audio output disabled.");
 #endif
-	printf("\nBuild date:\t%s\n", BUILD_DATE);
-	printf("Commit date:\t%s\n", GIT_DATE);
+	printf("\nCommit date:\t%s\n", GIT_DATE);
 	printf("Git commit:\t%s\n", GIT_HASH);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");
 	printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");

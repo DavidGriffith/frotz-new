@@ -20,6 +20,7 @@
  */
 
 #include <string.h>
+#include <libgen.h>
 
 #include "dfrotz.h"
 
@@ -484,7 +485,8 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 char *os_read_file_name (const char *default_name, int flag)
 {
 	char file_name[FILENAME_MAX + 1];
-	char buf[INPUT_BUFFER_SIZE], prompt[INPUT_BUFFER_SIZE];
+	char fullpath[INPUT_BUFFER_SIZE], prompt[INPUT_BUFFER_SIZE];
+	char *buf;
 	FILE *fp;
 	char *tempname;
 	char path_separator[2];
@@ -510,7 +512,8 @@ char *os_read_file_name (const char *default_name, int flag)
 			sprintf(prompt, "Please enter a filename [%s]: ", tempname);
 		} else
 			sprintf(prompt, "Please enter a filename [%s]: ", default_name);
-		dumb_read_misc_line(buf, prompt);
+		dumb_read_misc_line(fullpath, prompt);
+		buf = basename (fullpath);
 		if (strlen(buf) > MAX_FILE_NAME) {
 			printf("Filename too long\n");
 			return NULL;
@@ -518,7 +521,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	}
 
 	if (buf[0])
-		strncpy(file_name, buf, FILENAME_MAX);
+		strncpy(file_name, fullpath, FILENAME_MAX);
 	else
 		strncpy(file_name, default_name, FILENAME_MAX);
 
@@ -544,8 +547,8 @@ char *os_read_file_name (const char *default_name, int flag)
 	if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX || flag == FILE_RECORD)
 		&& ((fp = fopen(file_name, "rb")) != NULL)) {
 		fclose (fp);
-		dumb_read_misc_line(buf, "Overwrite existing file? ");
-		if (tolower(buf[0]) != 'y')
+		dumb_read_misc_line(fullpath, "Overwrite existing file? ");
+		if (tolower(fullpath[0]) != 'y')
 			return NULL;
 	}
 	return strdup(file_name);

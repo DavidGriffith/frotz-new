@@ -98,6 +98,7 @@ enum story {
 	LURKING_HORROR,
 	BUREAUCRACY,
 	TRINITY,
+	CUTTHROATS,
 	UNKNOWN
 };
 
@@ -280,10 +281,12 @@ extern const char build_timestamp[];
 #define MEDIUMGREY_COLOUR 11 	/* INTERP_AMIGA only */
 #define DARKGREY_COLOUR 12 	/* INTERP_AMIGA only */
 
+#define NORMAL_STYLE 0
 #define REVERSE_STYLE 1
 #define BOLDFACE_STYLE 2
 #define EMPHASIS_STYLE 4
 #define FIXED_WIDTH_STYLE 8
+#define PICTURE_STYLE 16
 
 #define TEXT_FONT 1
 #define PICTURE_FONT 2

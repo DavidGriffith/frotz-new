@@ -33,14 +33,15 @@ An interpreter for all Infocom and other Z-Machine games.\n\
 Syntax: dfrotz [options] story-file\n\
   -a   watch attribute setting    \t -P   alter piracy opcode\n\
   -A   watch attribute testing    \t -R <path> restricted read/write\n\
-  -h # text height                \t -s # random number seed value\n\
-  -i   ignore fatal errors        \t -S # transcript width\n\
-  -I # interpreter number         \t -t   set Tandy bit\n\
-  -o   watch object movement      \t -u # slots for multiple undo\n\
-  -O   watch object locating      \t -v   show version information\n\
-  -L <file> load this save file   \t -w # text width\n\
-  -m   turn off MORE prompts      \t -x   expand abbreviations g/x/z\n\
-  -p   plain ASCII output only    \t -Z # error checking (see below)\n"
+  -f <type> type of format codes  \t -s # random number seed value\n\
+  -h # screen height              \t -S # transcript width\n\
+  -i   ignore fatal errors        \t -t   set Tandy bit\n\
+  -I # interpreter number         \t -u # slots for multiple undo\n\
+  -o   watch object movement      \t -v   show version information\n\
+  -O   watch object locating      \t -w # screen width\n\
+  -L <file> load this save file   \t -x   expand abbreviations g/x/z\n\
+  -m   turn off MORE prompts      \t -Z # error checking (see below)\n\
+  -p   plain ASCII output only\n"
 
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
@@ -64,21 +65,40 @@ static bool plain_ascii = FALSE;
  */
 void os_process_arguments(int argc, char *argv[])
 {
-	int c;
+	int c, num;
 	char *p = NULL;
+	char *format_orig = NULL;
 
 	zoptarg = NULL;
 
 	do_more_prompts = TRUE;
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "-aAh:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
+		c = zgetopt(argc, argv, "-aAf:h:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
 		switch(c) {
 		case 'a':
 			f_setup.attribute_assignment = 1;
 			break;
 		case 'A':
 			f_setup.attribute_testing = 1;
+			break;
+		case 'f':
+#ifdef DISABLE_FORMATS
+			f_setup.format = FORMAT_DISABLED;
+			break;
+#endif
+			f_setup.format = FORMAT_NORMAL;
+			format_orig = strdup(zoptarg);
+			for (num = 0; zoptarg[num] != 0; num++)
+				zoptarg[num] = tolower((int) zoptarg[num]);
+			if (strcmp(zoptarg, "irc") == 0) {
+				f_setup.format = FORMAT_IRC;
+			} else if (strcmp(zoptarg, "ansi") == 0) {
+				f_setup.format = FORMAT_ANSI;
+			} else if ((strcmp(zoptarg, "none") == 0) ||
+				(strcmp(zoptarg, "normal") == 0)) {
+			} else
+				f_setup.format = FORMAT_UNKNOWN;
 			break;
 		case 'h':
 			user_text_height = atoi(zoptarg);
@@ -153,6 +173,28 @@ void os_process_arguments(int argc, char *argv[])
 		os_quit(EXIT_SUCCESS);
 	}
 
+	switch (f_setup.format) {
+	case FORMAT_IRC:
+		printf("Using IRC formatting.\n");
+		break;
+	case FORMAT_ANSI:
+		printf("Using ANSI formatting.\n");
+		f_setup.format = FORMAT_ANSI;
+		break;
+	case FORMAT_UNKNOWN:
+		printf("Unknown formatting \"%s\".\n", format_orig);
+		f_setup.format = FORMAT_NORMAL;
+		break;
+	case FORMAT_DISABLED:
+		printf("Format selection disabled at compile time.\n");
+		f_setup.format = FORMAT_NORMAL;
+		break;
+	default:
+		break;
+	}
+	if (f_setup.format == FORMAT_NORMAL)
+		printf("Using normal formatting.\n");
+
 	/* Save the story file name */
 	f_setup.story_file = strdup(argv[zoptind]);
 
@@ -197,7 +239,7 @@ void os_process_arguments(int argc, char *argv[])
 	} else { /* Set our auto load save as the name save */
 		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) +
 			strlen(EXT_SAVE)) * sizeof(char) + 1);
-		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
+		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char));
 		free(f_setup.tmp_save_name);
 	}
 
@@ -359,7 +401,6 @@ static void print_version(void)
 {
 	printf("FROTZ V%s\t", VERSION);
 	printf("Dumb interface.\n");
-	printf("Build date:\t%s\n", BUILD_DATE);
 	printf("Commit date:\t%s\n", GIT_DATE);
 	printf("Git commit:\t%s\n", GIT_HASH);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");

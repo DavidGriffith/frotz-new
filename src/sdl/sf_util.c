@@ -358,7 +358,6 @@ static void parse_options(int argc, char **argv)
 static void print_version(void)
 {
 	printf("FROTZ V%s\tSDL interface.\n", VERSION);
-	printf("Build date:\t%s\n", BUILD_DATE);
 	printf("Commit date:\t%s\n", GIT_DATE);
 	printf("Git commit:\t%s\n", GIT_HASH);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");
@@ -468,7 +467,7 @@ void os_process_arguments(int argc, char *argv[])
 		f_setup.save_name =
 		    malloc((strlen(f_setup.tmp_save_name) +
 			    strlen(EXT_SAVE)) * sizeof(char) + 1);
-		memcpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.story_name) * sizeof(char));
+		memcpy(f_setup.save_name, f_setup.tmp_save_name, strlen(f_setup.tmp_save_name) * sizeof(char));
 		free(f_setup.tmp_save_name);
 	}
 
