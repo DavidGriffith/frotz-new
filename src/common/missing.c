@@ -86,3 +86,15 @@ char *my_strndup(const char *src, size_t n)
 	return str;
 }
 #endif /* NO_STRDUP */
+
+
+#ifdef NO_BASENAME
+/*
+ * Simply return the string supplied if we don't have basename available.
+ *
+ */
+char *basename(char *foo)
+{
+	return foo;
+}
+#endif /* NO_BASENAME */
