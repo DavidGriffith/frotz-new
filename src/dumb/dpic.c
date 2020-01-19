@@ -25,6 +25,7 @@
 f_setup_t f_setup;
 z_header_t z_header;
 
+#ifndef NO_BLORB
 
 static struct {
 	int z_num;
@@ -35,8 +36,6 @@ static struct {
 	uint32 type;
 } *pict_info;
 static int num_pictures = 0;
-
-#ifndef NO_BLORB
 
 bb_map_t *blorb_map;
 
@@ -49,7 +48,7 @@ static int round_div(int x, int y)
 		quotient++;
 	return quotient;
 }
-#endif
+#endif /* NO_BLORB */
 
 
 bool dumb_init_pictures (void)
@@ -155,6 +154,7 @@ bool dumb_init_pictures (void)
 
 
 /* Convert a Z picture number to an index into pict_info.  */
+#ifndef NO_BLORB
 static int z_num_to_index(int n)
 {
 	int i;
@@ -164,10 +164,12 @@ static int z_num_to_index(int n)
 	}
 	return -1;
 }
+#endif
 
 
 bool os_picture_data(int num, int *height, int *width)
 {
+#ifndef NO_BLORB
 	int index;
 
 	*height = 0;
@@ -181,7 +183,7 @@ bool os_picture_data(int num, int *height, int *width)
 
 	*height = pict_info[index].height;
 	*width = pict_info[index].width;
-
+#endif
 	return TRUE;
 }
 

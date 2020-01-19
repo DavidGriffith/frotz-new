@@ -352,7 +352,7 @@ tops20: clean $(COMMON_DEFINES) $(HASH)
 	@mkdir $(SNAVIG_DIR)
 	@echo "*************************************************************"
 	@echo Producing snavig-processed source for $(EXPORT_TYPE)
-	@$(SNAVIG) $(COMMON_DIR) $(DUMB_DIR) $(BLORB_DIR) $(SNAVIG_DIR)
+	@$(SNAVIG) $(COMMON_DIR) $(DUMB_DIR) $(SNAVIG_DIR)
 	@echo Now, get this into a $(EXPORT_TYPE) machine for compilation.
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
@@ -412,6 +412,7 @@ ifeq ($(EXPORT_TYPE), tops20)
 	@echo "#define NO_STRDUP" >> $@
 	@echo "#define NO_BASENAME" >> $@
 	@echo "#define MAXPATHLEN 39" >> $@
+	@echo "#define NO_BLORB" >> $@
 else
 
 ifeq ($(OS_TYPE), unix)
