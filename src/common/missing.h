@@ -26,7 +26,10 @@ char *my_strndup(const char *, size_t);
 #endif
 
 #ifdef NO_BASENAME
-char *basename(char *);
+#ifdef basename
+#undef basename
+#endif
+#define basename(c) c
 #endif
 
 #endif /* MISSING_H */
