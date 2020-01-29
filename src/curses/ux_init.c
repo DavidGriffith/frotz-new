@@ -163,7 +163,7 @@ void os_fatal (const char *s, ...)
 		} else {
 			os_reset_screen();
 			ux_blorb_stop();
-			exit(EXIT_FAILURE);
+			os_quit(EXIT_FAILURE);
 		}
 	}
 
@@ -176,7 +176,7 @@ void os_fatal (const char *s, ...)
 
 	fputs ("\n\n", stderr);
 
-	exit (EXIT_FAILURE);
+	os_quit (EXIT_FAILURE);
 } /* os_fatal */
 
 /* extern char script_name[]; */
@@ -209,7 +209,7 @@ void os_process_arguments (int argc, char *argv[])
 #if !defined(WIN32) && !defined(__HAIKU__)
 	if ((getuid() == 0) || (geteuid() == 0)) {
 		printf("I won't run as root!\n");
-		exit(EXIT_FAILURE);
+		os_quit(EXIT_FAILURE);
 	}
 #endif
 
@@ -221,7 +221,7 @@ void os_process_arguments (int argc, char *argv[])
 
 	if ((home = getenv(HOMEDIR)) == NULL) {
 		printf("Hard drive on fire!\n");
-		exit(EXIT_FAILURE);
+		os_quit(EXIT_FAILURE);
 	}
 
 
@@ -311,7 +311,7 @@ void os_process_arguments (int argc, char *argv[])
 		case 'S': f_setup.script_cols = atoi(zoptarg); break;
 		case 't': u_setup.tandy_bit = 1; break;
 		case 'u': f_setup.undo_slots = atoi(zoptarg); break;
-		case 'v': print_version(); exit(EXIT_SUCCESS); break;
+		case 'v': print_version(); os_quit(EXIT_SUCCESS); break;
 		case 'w': u_setup.screen_width = atoi(zoptarg); break;
 		case 'x': f_setup.expand_abbreviations = 1; break;
 		case 'Z':
@@ -335,7 +335,7 @@ void os_process_arguments (int argc, char *argv[])
 
 		puts (INFORMATION);
 		puts (INFO2);
-		exit (EXIT_SUCCESS);
+		os_quit (EXIT_SUCCESS);
 	}
 
 	/* This section is exceedingly messy and really can't be fixed
@@ -453,7 +453,7 @@ void os_init_screen (void)
 
 	if (initscr() == NULL) {    /* Set up curses */
 		os_fatal("Unable to initialize curses. Maybe your $TERM setting is bad.");
-		exit(EXIT_FAILURE);
+		os_quit(EXIT_FAILURE);
 	}
 	u_setup.curses_active = 1;	/* Let os_fatal know curses is running */
 	raw();				/* Raw input mode, no line processing */
@@ -1073,13 +1073,7 @@ static void sigwinch_handler(int UNUSED(sig))
 static void sigint_handler(int UNUSED(dummy))
 {
 	signal(SIGINT, sigint_handler);
-
-	os_stop_sample(0);
-	scrollok(stdscr, TRUE);
-	scroll(stdscr);
-	refresh();
-	endwin();
-	exit(1);
+	os_quit(EXIT_FAILURE);
 } /* sigint_handler */
 
 

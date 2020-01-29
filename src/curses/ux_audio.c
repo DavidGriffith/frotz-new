@@ -882,7 +882,7 @@ os_init_sound(void)
 	err = pthread_create(&unused_id, &attr, &audio_loop, NULL);
 	if (err != 0) {
 		fprintf(stderr, "Can't create audio thread :[%s]", strerror(err));
-		exit(EXIT_FAILURE);
+		os_quit(EXIT_FAILURE);
 	}
 }
 
