@@ -22,6 +22,9 @@ BUG FIXES
 - Fixed a memory allocation problem with restoring a game at the command
   line using the -L option.
 
+- Fixed an oversight in which curses wasn't being shut down properly
+  when fatal zcode errors were encountered.
+
 
 Summary of changes between Frotz 2.44 and Frotz 2.50:
 =====================================================
