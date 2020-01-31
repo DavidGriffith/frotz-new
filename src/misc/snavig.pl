@@ -104,7 +104,11 @@ open my $mapfile, '>', $sedfile;
 for my $k (reverse(sort(keys %symbolmap))) {
 	my $symbol = $symbolmap{$k}{'original'};
 	my $newsym = $symbolmap{$k}{'new'};
-	print $mapfile "s/$symbol/$newsym/g\n";
+	if ($newsym =~ /A\d*/) {
+		print $mapfile "s/\\b$symbol\\b/$newsym/g\n";
+	} else {
+		print $mapfile "s/$symbol/$newsym/g\n";
+	}		
 }
 
 #print $mapfile 's/^\\s*\/\///g';
