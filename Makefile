@@ -383,7 +383,7 @@ snavig:
 	@echo "  waits  (not even started)"
 	@echo "That's all for now."
 
-tops20: clean $(COMMON_DEFINES) $(HASH)
+tops20: distclean $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
 	@mkdir $(SNAVIG_DIR)
 	@echo "*************************************************************"
