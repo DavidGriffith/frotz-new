@@ -23,7 +23,7 @@
 
 #define DEFAULT_DUMB_COLOUR 31
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 
 static bool show_line_numbers = FALSE;
 static bool show_line_types = -1;
