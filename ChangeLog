@@ -8,7 +8,8 @@ This is a minor release focusing on minor enhancements and bug fixes.
 NEW FEATURES
 
 - Added an -f option for Dumb Frotz to mark up the output with color and
-  formatting codes.  Currently only "irc" and "normal" modes are supported.
+  formatting codes.  Currently "irc", "ansi", and "normal" modes are
+  supported.
 
 
 BUG FIXES
