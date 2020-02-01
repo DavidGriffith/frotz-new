@@ -40,7 +40,7 @@
 #include "ux_frotz.h"
 #include "ux_blorb.h"
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 extern z_header_t z_header;
 u_setup_t u_setup;
 
