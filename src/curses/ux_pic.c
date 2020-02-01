@@ -44,7 +44,7 @@
 #define PIC_HEADER_WIDTH 2
 #define PIC_HEADER_HEIGHT 4
 
-bb_map_t *blorb_map;
+extern bb_map_t *blorb_map;
 
 static struct {
 	int z_num;
