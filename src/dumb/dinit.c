@@ -56,6 +56,7 @@ static int user_random_seed = -1;
 static int user_tandy_bit = 0;
 static bool plain_ascii = FALSE;
 
+bool do_more_prompts;
 
 /*
  * os_process_arguments
