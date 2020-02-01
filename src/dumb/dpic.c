@@ -38,7 +38,7 @@ static int num_pictures = 0;
 
 #ifndef NO_BLORB
 
-bb_map_t *blorb_map;
+extern bb_map_t *blorb_map;
 
 static int round_div(int x, int y)
 {

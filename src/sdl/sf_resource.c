@@ -40,7 +40,7 @@ zword hx_fore_colour;
 zword hx_back_colour;
 
 extern z_header_t z_header;
-bb_map_t *blorb_map;
+extern bb_map_t *blorb_map;
 
 extern FILE *blorb_fp;
 
