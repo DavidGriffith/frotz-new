@@ -5,6 +5,9 @@
  *
  */
 
+#ifndef CURSES_UX_BLORB_H
+#define CURSES_UX_BLORB_H
+
 #include "../blorb/blorb.h"
 #include "../blorb/blorblow.h"
 
@@ -38,3 +41,5 @@ extern FILE *blorb_fp;
 
 bb_err_t ux_blorb_init(char *);
 void ux_blorb_stop(void);
+
+#endif
