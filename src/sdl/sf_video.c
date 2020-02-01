@@ -47,7 +47,7 @@ static void sf_quitconf();
 static bool ApplyPalette(sf_picture *);
 static ulong screen_palette[16];
 
-z_header_t z_header;
+extern z_header_t z_header;
 
 /* clipping region */
 static int xmin, xmax, ymin, ymax;

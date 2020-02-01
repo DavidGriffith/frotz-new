@@ -23,7 +23,7 @@
 #include "dblorb.h"
 
 f_setup_t f_setup;
-z_header_t z_header;
+extern z_header_t z_header;
 
 
 static struct {
@@ -38,7 +38,7 @@ static int num_pictures = 0;
 
 #ifndef NO_BLORB
 
-bb_map_t *blorb_map;
+extern bb_map_t *blorb_map;
 
 static int round_div(int x, int y)
 {

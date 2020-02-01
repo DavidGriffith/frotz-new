@@ -24,7 +24,7 @@
 #include "dblorb.h"
 
 f_setup_t f_setup;
-z_header_t z_header;
+extern z_header_t z_header;
 
 static void print_version(void);
 
@@ -56,6 +56,7 @@ static int user_random_seed = -1;
 static int user_tandy_bit = 0;
 static bool plain_ascii = FALSE;
 
+bool do_more_prompts;
 
 /*
  * os_process_arguments
