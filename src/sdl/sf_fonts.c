@@ -37,7 +37,7 @@ typedef struct {
 
 char *m_fontfiles[9];
 
-z_header_t z_header;
+extern z_header_t z_header;
 
 static char s[1026];
 

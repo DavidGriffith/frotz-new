@@ -54,7 +54,7 @@
 #endif
 
 f_setup_t f_setup;
-z_header_t z_header;
+extern z_header_t z_header;
 
 volatile sig_atomic_t terminal_resized = 0;
 
