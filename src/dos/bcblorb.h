@@ -1,3 +1,6 @@
+#ifndef DOS_BCBLORB_H
+#define DOS_BCBLORB_H
+
 #include "blorb.h"
 #include "blorblow.h"
 
@@ -23,7 +26,4 @@ double ReadExtended(const unsigned char *bytes);
 
 #define UnsignedToFloat(u) (((double)((long)(u - 2147483647L - 1))) + 2147483648.0)
 
-
-
-
-
+#endif

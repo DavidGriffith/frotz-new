@@ -1,3 +1,6 @@
+#ifndef CURSES_UX_SETUP_H
+#define CURSES_UX_SETUP_H
+
 typedef struct unix_setup_struct {
 	int disable_color;
 	int force_color;
@@ -17,3 +20,4 @@ typedef struct unix_setup_struct {
 
 extern u_setup_t u_setup;
 
+#endif
