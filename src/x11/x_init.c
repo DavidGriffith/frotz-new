@@ -8,6 +8,7 @@
  */
 
 #include "x_frotz.h"
+#include "x_info.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -130,6 +131,7 @@ static void parse_string(char *value, void *parsed)
 
 void os_process_arguments(int argc, char *argv[])
 {
+	static bool show_version;
 	static XrmOptionDescRec options[] = {
 		{"-aa", ".watchAttrAssign", XrmoptionNoArg, (void *)"true"},
 		{"+aa", ".watchAttrAssign", XrmoptionNoArg, (void *)"false"},
@@ -149,6 +151,7 @@ void os_process_arguments(int argc, char *argv[])
 		{"-t", ".tandy", XrmoptionNoArg, (void *)"true"},
 		{"+t", ".tandy", XrmoptionNoArg, (void *)"false"},
 		{"-u", ".undoSlots", XrmoptionSepArg, (void *)NULL},
+		{"-v", ".showVersion", XrmoptionNoArg, (void *)"true"},
 		{"-x", ".expandAbbrevs", XrmoptionNoArg, (void *)"true"},
 		{"+x", ".expandAbbrevs", XrmoptionNoArg, (void *)"false"},
 		{"-sc", ".scriptColumns", XrmoptionSepArg, (void *)NULL},
@@ -193,6 +196,8 @@ void os_process_arguments(int argc, char *argv[])
 		 &x_setup.tandy_bit},
 		{".UndoSlots", ".undoSlots", parse_int,
 		 &f_setup.undo_slots},
+		{".ShowVersion", ".showVersion", parse_boolean,
+		 &show_version},
 		{".ExpandAbbrevs", ".expandAbbrevs", parse_boolean,
 		 &f_setup.expand_abbreviations},
 		{".ScriptColumns", ".scriptColumns", parse_int,
@@ -239,8 +244,42 @@ void os_process_arguments(int argc, char *argv[])
 			    options, XtNumber(options), &argc, argv);
 	if (dpy == NULL)
 		os_fatal("Could not open display.");
-	if (argc != 2)
-		os_fatal("Usage: xfrotz [options] storyfile");
+
+	XtGetApplicationNameAndClass(dpy, &x_name, &x_class);
+
+	class_buf = malloc(strlen(x_class) + 20);
+	strcpy(class_buf, x_class);
+	class_append = strchr(class_buf, 0);
+	name_buf = malloc(strlen(x_name) + 20);
+	strcpy(name_buf, x_name);
+	name_append = strchr(name_buf, 0);
+
+	for (i = 0; i < XtNumber(vars); i++) {
+		strcpy(class_append, vars[i].class);
+		strcpy(name_append, vars[i].name);
+		if (XrmGetResource(XtDatabase(dpy), name_buf, class_buf,
+				   &str_type_return, &value))
+			vars[i].parser((char *)value.addr, vars[i].ptr);
+	}
+
+	if (show_version) {
+		printf("FROTZ V%s - X11 interface.\n", VERSION);
+		printf("Commit date:\t%s\n", GIT_DATE);
+		printf("Git commit:\t%s\n", GIT_HASH);
+		printf("  Frotz was originally written by Stefan Jokisch.\n");
+		printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+		printf("  The X11 interface code was done by Daniel Schepler,\n");
+		printf("  The core and X11 port are maintained by David Griffith.\n");
+		printf("  Frotz's homepage is https://661.org/proj/if/frotz.\n\n");
+		os_quit(EXIT_SUCCESS);
+	}
+
+	if (argc != 2) {
+		printf("FROTZ V%s - X11 interface.\n", VERSION);
+		puts(INFORMATION);
+		puts(INFO2);
+		os_quit(EXIT_SUCCESS);
+	}
 
 	f_setup.story_file = strdup(argv[1]);
 	f_setup.story_name = strdup(basename(argv[1]));
@@ -292,22 +331,6 @@ void os_process_arguments(int argc, char *argv[])
 	       (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
 	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
 
-	XtGetApplicationNameAndClass(dpy, &x_name, &x_class);
-
-	class_buf = malloc(strlen(x_class) + 20);
-	strcpy(class_buf, x_class);
-	class_append = strchr(class_buf, 0);
-	name_buf = malloc(strlen(x_name) + 20);
-	strcpy(name_buf, x_name);
-	name_append = strchr(name_buf, 0);
-
-	for (i = 0; i < XtNumber(vars); i++) {
-		strcpy(class_append, vars[i].class);
-		strcpy(name_append, vars[i].name);
-		if (XrmGetResource(XtDatabase(dpy), name_buf, class_buf,
-				   &str_type_return, &value))
-			vars[i].parser((char *)value.addr, vars[i].ptr);
-	}
 } /* os_process_arguments */
 
 
