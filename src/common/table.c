@@ -34,11 +34,29 @@
  */
 void z_copy_table(void)
 {
+#ifdef TOPS20
+	short ssz;
+#endif
 	zword addr;
 	zword size = zargs[2];
 	zbyte value;
 	int i;
 
+#ifdef TOPS20
+	/* TODO : this looks like it could use some masking.  AT */
+	ssz=s16(size);
+	if (zargs[1] == 0)	/* zero table */
+		for (i = 0; i < (size & 0xffff); i++)
+			storeb ((zword) ((zargs[0] + i) & 0xffff), 0);
+	else if (ssz < 0 || (zargs[0] & 0xffff) > (zargs[1] & 0xffff)) {
+		/*copy forwards */
+		for (i = 0; i < ((ssz < 0) ? - ssz : ssz); i++) {
+			addr = ((zargs[0] + i) & 0xffff);
+			LOW_BYTE (addr, value)
+			storeb((zword) ((zargs[1] + i) & 0xfff), value);
+		}
+	}
+#else
 	if (zargs[1] == 0)	/* zero table */
 		for (i = 0; i < size; i++)
 			storeb((zword) (zargs[0] + i), 0);
@@ -49,7 +67,9 @@ void z_copy_table(void)
 			LOW_BYTE(addr, value)
 			    storeb((zword) (zargs[1] + i), value);
 		}
-	} else {	/* copy backwards */
+	}
+#endif
+	else {	/* copy backwards */
 		for (i = size - 1; i >= 0; i--) {
 			addr = zargs[0] + i;
 			LOW_BYTE(addr, value)
@@ -86,7 +106,11 @@ void z_loadb(void)
  */
 void z_loadw(void)
 {
+#ifdef TOPS20
+	zword addr = (zargs[0] + 2 * zargs[1]) & 0xffff;
+#else
 	zword addr = zargs[0] + 2 * zargs[1];
+#endif
 	zword value;
 
 	LOW_WORD(addr, value)

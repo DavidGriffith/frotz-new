@@ -67,6 +67,16 @@ Zwindow *curwinrec()
  */
 static zword winarg0(void)
 {
+#ifdef TOPS20
+	short sz0;
+
+	sz0 = s16(zargs[0]);
+	if (z_header.version = V6 && sz0 == -3)
+		return cwin;
+	if (sz0 >= ((z_header.version == V6) ? 8 : 2))
+		runtime_error(ERR_ILL_WIN);
+	return (zargs[0] & 0xffff);
+#else
 	if (z_header.version == V6 && (short)zargs[0] == -3)
 		return cwin;
 
@@ -74,6 +84,7 @@ static zword winarg0(void)
 		runtime_error(ERR_ILL_WIN);
 
 	return zargs[0];
+#endif
 } /* winarg0 */
 
 
@@ -87,6 +98,18 @@ static zword winarg0(void)
  */
 static zword winarg2(void)
 {
+#ifdef TOPS20
+	short sz2;
+
+	sz2=s16(zargs[2]);
+	if (zargc < 3 || sz2 == -3)
+		return cwin;
+
+	if (sz2 >= 8)
+		runtime_error(ERR_ILL_WIN);
+
+	return (zargs[2] & 0xffff);
+#else
 	if (zargc < 3 || (short)zargs[2] == -3)
 		return cwin;
 
@@ -94,6 +117,7 @@ static zword winarg2(void)
 		runtime_error(ERR_ILL_WIN);
 
 	return zargs[2];
+#endif
 } /* winarg2 */
 
 
@@ -212,6 +236,9 @@ static void countdown(void)
  */
 void screen_new_line(void)
 {
+#ifdef TOPS20
+	short slc, llc;
+#endif
 	if (discarding)
 		return;
 
@@ -247,11 +274,23 @@ void screen_new_line(void)
 
 	/* See if we need to print a more prompt (unless the game has set
 	   the line counter to -999 in order to suppress more prompts). */
+#ifdef TOPS20
+	slc = s16(cwp->line_count);
+	if (enable_scrolling && slc != -999) {
+#else
 	if (enable_scrolling && (short)cwp->line_count != -999) {
+#endif
 		zword above = (cwp->y_cursor - 1) / font_height;
 		zword below = (cwp->y_size - cwp->y_cursor + 1) / font_height;
-		cwp->line_count++;
+
+		cwp->line_count++;	/* Assume it won't overflor on PDP10 */
+#ifdef TOPS20
+		slc = s16(cwp->line_count);
+		llc = s16(above + below -1);
+		if (slc >= llc) {
+#else
 		if ((short)cwp->line_count >= (short)above + below - 1) {
+#endif
 			if (more_prompts)
 				os_more_prompt();
 			cwp->line_count = f_setup.context_lines;
@@ -581,6 +620,9 @@ void erase_window(zword win)
  */
 void split_window(zword height)
 {
+#ifdef TOPS20
+	short syc, sys;
+#endif
 	zword stat_height = 0;
 
 	flush_buffer();
@@ -598,7 +640,13 @@ void split_window(zword height)
 	wp[1].y_pos = 1 + stat_height;
 	wp[1].y_size = height;
 
+#ifdef TOPS20
+	syc=s16(wp[1].y_cursor);
+	sys=s16(wp[1].y_size);
+	if (syc > sys)
+#else
 	if ((short)wp[1].y_cursor > (short)wp[1].y_size)
+#endif
 		reset_cursor(1);
 
 	/* Cursor of lower window mustn't be swallowed by the upper window */
@@ -607,7 +655,12 @@ void split_window(zword height)
 	wp[0].y_pos = 1 + stat_height + height;
 	wp[0].y_size = z_header.screen_height - stat_height - height;
 
+#ifdef TOPS20
+	syc=s16(wp[0].y_cursor);
+	if (syc < 1)
+#else
 	if ((short)wp[0].y_cursor < 1)
+#endif
 		reset_cursor(0);
 
 	/* Erase the upper window in V3 only */
@@ -626,10 +679,18 @@ void split_window(zword height)
 static void erase_screen(zword win)
 {
 	int i;
+#ifdef TOPS20
+	short sw;
+#endif
 
 	os_erase_area(1, 1, z_header.screen_height, z_header.screen_width, -2);
 
+#ifdef TOPS20
+	sw=s16(win);
+	if (sw == -1) {
+#else
 	if ((short)win == -1) {
+#endif
 		split_window(0);
 		set_window(0);
 		reset_cursor(0);
@@ -985,12 +1046,22 @@ void z_erase_picture(void)
  */
 void z_erase_window(void)
 {
+#ifdef TOPS20
+	short sz0, sz1;
 	flush_buffer();
+	sz0=s16(zargs[0]);
+	sz1=s16(zargs[1]);
 
+	if (sz0 == -1 || sz0 == -2)
+		erase_screen((zargs[0] & 0xffff));
+	else
+		erase_window(winarg0());
+#else
 	if ((short)zargs[0] == -1 || (short)zargs[0] == -2)
 		erase_screen(zargs[0]);
 	else
 		erase_window(winarg0());
+#endif
 } /* z_erase_window */
 
 
@@ -1045,7 +1116,13 @@ void z_get_wind_prop(void)
  */
 void z_mouse_window(void)
 {
+#ifdef TOPS20
+	short sz0;
+	sz0 = s16(zargs[0]);
+	mwin = ((short) zargs[0] == -1) ? -1 : winarg0 ();
+#else
 	mwin = ((short)zargs[0] == -1) ? -1 : winarg0();
+#endif
 } /* z_mouse_window */
 
 
@@ -1209,6 +1286,10 @@ void z_put_wind_prop(void)
  */
 void z_scroll_window(void)
 {
+#ifdef TOPS20
+	short sz1;
+#endif
+
 	zword win = winarg0();
 	zword y, x;
 
@@ -1221,11 +1302,18 @@ void z_scroll_window(void)
 	y = wp[win].y_pos;
 	x = wp[win].x_pos;
 
+#ifdef TOPS20
+	sz1 = s16(zargs[1]);
+	os_scroll_area (y,
+		       x,
+		       y + wp[win].y_size - 1,
+		       x + wp[win].x_size - 1, sz1);
+#else
 	os_scroll_area(y,
 		       x,
 		       y + wp[win].y_size - 1,
 		       x + wp[win].x_size - 1, (short)zargs[1]);
-
+#endif
 	if (win != cwin && z_header.interpreter_number != INTERP_AMIGA)
 		os_set_colour(lo(cwp->colour), hi(cwp->colour));
 } /* z_scroll_window */
@@ -1241,13 +1329,21 @@ void z_scroll_window(void)
  */
 void z_set_colour(void)
 {
+#ifdef TOPS20
+	short sfg, sbg;
+#endif
+
 	zword win = (z_header.version == V6) ? winarg2() : 0;
 
 	zword fg = zargs[0];
 	zword bg = zargs[1];
 
 	flush_buffer();
-
+#ifdef TOPS20
+	flush_buffer();
+	sfg=s16(fg);
+	sbg=s16(bg);
+#endif
 	if ((short)fg == -1)	/* colour -1 is the colour at the cursor */
 		fg = os_peek_colour();
 	if ((short)bg == -1)
@@ -1332,18 +1428,41 @@ void z_set_font(void)
  */
 void z_set_cursor(void)
 {
+#ifdef TOPS20
+	short sy;
+#endif
 	zword win = (z_header.version == V6) ? winarg2() : 1;
 
 	zword y = zargs[0];
 	zword x = zargs[1];
 
+#ifdef TOPS20
+	sy=s16(y);
+#endif
+
 	flush_buffer();
 
 	/* Supply default arguments */
+#ifdef TOPS20
+	if (zargc < 3) {
+		zargs[2] = -3;
+		zargs[2] &= 0xffff;
+	}
+#else
 	if (zargc < 3)
 		zargs[2] = -3;
+#endif
 
 	/* Handle cursor on/off */
+#ifdef TOPS20
+	if (sy < 0) {
+		if (sy == -2)
+			cursor = TRUE;
+		if (sy == -1)
+			cursor = FALSE;
+		return;
+	}
+#else
 	if ((short)y < 0) {
 		if ((short)y == -2)
 			cursor = TRUE;
@@ -1351,6 +1470,7 @@ void z_set_cursor(void)
 			cursor = FALSE;
 		return;
 	}
+#endif
 
 	/* Convert grid positions to screen units if this is not V6 */
 	if (z_header.version != V6) {
