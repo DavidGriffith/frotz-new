@@ -1,0 +1,36 @@
+===========================================================================
+---------------------------------------------------------------------------
+|  READ THIS FILE ALL THE WAY THROUGH BEFORE ATTEMPTING TO INSTALL FROTZ  |
+---------------------------------------------------------------------------
+===========================================================================
+
+
+Because Frotz was originally written specifically for MS/PC DOS and then
+ported to Unix machines.  As such, nothing about it was written with
+36-bit systems in mind.  The initial job of porting to the PDP-10 mostly
+involves taking the differences between 32-bitness and 36-bitness.  This
+was sufficient for porting the dumb interface.  The ongoing job of
+adding full screen handling will involve coming up with an old version
+of curses or writing a cut-down version that supports only VT100/ANSI
+and maybe VT52.
+
+Currently the porting effort is focusing on TOPS20.
+
+The porting effort used Mark Crispin's Panda TOPS20 distribution from
+http://panda.trailing-edge.com/ and the KCC C compiler which is included.
+
+To compile, do "make tops20".  This will copy the needed source files to
+the "snavig/" directory and process them to fit TOPS20's limit of six
+alphanumeric caps-insensitive characters on extern symbols and
+filenames.  The contents of this directory then needs to be uploaded to
+a subdirectory on a PDP10.  Then while in the directory with the source,
+the following command will then compile and link the code to produce an
+executable:
+
+cc -o dfrotz.exe *.c
+
+There will be some complaints of unused parameters for some functions.
+This is to be expected because the usual means of making the compiler to
+keep quiet about these things don't work for KCC.  A considerable amount
+of disk quota is required to complete the linking, but how much is not
+entirely known.
