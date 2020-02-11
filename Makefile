@@ -58,6 +58,14 @@ COLOR ?= yes
 #CURSES ?= ncurses
 CURSES ?= ncursesw
 
+# This Makefile uses the pkg-config utility to get information on
+# installed libraries.  If your system is missing that utility and
+# cannot install it for whatever reason (usually very old ones), you
+# will need to uncomment and perhaps modify some of these lines.
+# I don't see any way around not having pkg-config for SDL.
+#CURSES_LDLAGS += -l$(CURSES) -ltinfo
+#CURSES_CFLAGS += -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600
+
 # Uncomment this to disable Blorb support for dumb and curses interfaces.
 # SDL interface always has Blorb support.
 #NO_BLORB = yes
@@ -95,11 +103,15 @@ STACK_SIZE = 1024
 # Under normal circumstances, nothing in this section should be changed.
 #########################################################################
 
-# Determine if we are compiling on MAC OS X
+# Determine what system we are on.
 ifneq ($(OS),Windows_NT)
+    RANLIB ?= $(shell which ranlib)
+    AR ?= $(shell which ar)
+    PKG_CONFIG ?= pkg-config
     # For now, assume !windows == unix.
     OS_TYPE ?= unix
     UNAME_S := $(shell uname -s)
+    # Since MacOS lacks pkg-config, pick CURSES_LDFLAGS that's known to work.
     ifeq ($(UNAME_S),Darwin)
 	MACOS = yes
 	# On MACOS, curses is actually ncurses, but to get wide char support
@@ -108,19 +120,35 @@ ifneq ($(OS),Windows_NT)
 	CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS -I/opt/local/include \
 		-D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=600
 	LDFLAGS += -L/opt/local/lib
+	CURSES_LDFLAGS += -lcurses
+    else
+    # If we have pkg-config, that good.  Otherwise maybe warn later.
+    ifneq (, $(shell which $(PKG_CONFIG)))
+	CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
+	CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
+    else
+	NO_PKG_CONFIG = yes
     endif
+    # NetBSD
     ifeq ($(UNAME_S),NetBSD)
 	NETBSD = yes
 	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include
 	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
 	SDL_LDFLAGS += -lexecinfo
+	ifeq ($(CURSES), ncursesw)
+	    CURSES_CFLAGS += -I/usr/pkg/include/ncursesw
+	else
+	    CURSES_CFLAGS += -I/usr/pkg/include/ncurses
+	endif
     endif
+    # FreeBSD
     ifeq ($(UNAME_S),FreeBSD)
 	FREEBSD = yes
 	CFLAGS += -I/usr/local/include -D__BSD_VISIBLE=1
 	LDFLAGS += -L/usr/local/lib
 	SDL_LDFLAGS += -lexecinfo
     endif
+    # OpenBSD
     ifeq ($(UNAME_S),OpenBSD)
 	OPENBSD = yes
 	NO_EXECINFO_H = yes
@@ -131,16 +159,22 @@ ifneq ($(OS),Windows_NT)
 	SDL_CFLAGS += -DSDL_DISABLE_IMMINTRIN_H
 	SDL_LDFLAGS += -lexecinfo
     endif
+    # Linux
     ifeq ($(UNAME_S),Linux)
 	LINUX = yes
 	CFLAGS += -D_POSIX_C_SOURCE=200809L
 	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
     endif
+    endif
 endif
 
-RANLIB ?= $(shell which ranlib)
-AR ?= $(shell which ar)
-PKG_CONFIG ?= pkg-config
+# Make sure the right curses include file is included.
+ifeq ($(CURSES), curses)
+  CURSES_DEFINE = USE_CURSES_H
+else ifneq ($(findstring ncurses,$(CURSES)),)
+  CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
+  CURSES_DEFINE = USE_NCURSES_H
+endif
 
 export CC
 export CFLAGS
@@ -175,24 +209,6 @@ else
 	GIT_DATE = "$Format:%ci$"
 endif
 export CFLAGS
-
-
-# Compile time options handling
-#
-CURSES_LDFLAGS += -l$(CURSES)
-ifeq ($(CURSES), curses)
-  CURSES_DEFINE = USE_CURSES_H
-else ifneq ($(findstring ncurses,$(CURSES)),)
-  CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
-  CURSES_DEFINE = USE_NCURSES_H
-ifdef NETBSD
-ifeq ($(CURSES), ncursesw)
-  CURSES_CFLAGS += -I/usr/pkg/include/ncursesw
-else
-  CURSES_CFLAGS += -I/usr/pkg/include/ncurses
-endif
-endif
-endif
 
 
 # Source locations
