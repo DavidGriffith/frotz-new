@@ -46,7 +46,7 @@ curses library, see the platform-specific info below.
 For MacOS users, Frotz with all three of its user interfaces should
 compile without any changes to the source code or Makefiles.
 
-It's always a good idea to have the GNU version of make(1) around.
+Frotz's Makefile now requires the use of GNU Make.
 
 
 =============
