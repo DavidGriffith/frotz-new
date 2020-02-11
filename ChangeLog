@@ -14,6 +14,9 @@ NEW FEATURES
 
 BUG FIXES
 
+- Cleanly account for some installations of ncurses which have the
+  library split into ncurses (high level) and tinfo (low level).
+
 - Added an idiosyncrasy fix for Cutthroats, which assumes a
   quick-and-dirty conversion of 24-hour notation to am/pm notation.
 
