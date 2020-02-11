@@ -105,7 +105,8 @@ ifneq ($(OS),Windows_NT)
 	# On MACOS, curses is actually ncurses, but to get wide char support
 	# you need to define _XOPEN_SOURCE_EXTENDED
 	CURSES = curses
-	CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS -I/opt/local/include
+	CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS -I/opt/local/include \
+		-D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=600
 	LDFLAGS += -L/opt/local/lib
     endif
     ifeq ($(UNAME_S),NetBSD)
@@ -116,7 +117,7 @@ ifneq ($(OS),Windows_NT)
     endif
     ifeq ($(UNAME_S),FreeBSD)
 	FREEBSD = yes
-	CFLAGS += -I/usr/local/include
+	CFLAGS += -I/usr/local/include -D__BSD_VISIBLE=1
 	LDFLAGS += -L/usr/local/lib
 	SDL_LDFLAGS += -lexecinfo
     endif
@@ -131,6 +132,7 @@ ifneq ($(OS),Windows_NT)
 	SDL_LDFLAGS += -lexecinfo
     endif
     ifeq ($(UNAME_S),Linux)
+	LINUX = yes
 	CFLAGS += -D_POSIX_C_SOURCE=200809L
 	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
     endif
@@ -370,13 +372,6 @@ ifdef NO_EXECINFO_H
 endif
 ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
-endif
-ifdef FREEBSD
-	@echo "#define __BSD_VISIBLE 1" >> $@
-endif
-ifdef MACOS
-	@echo "#define _DARWIN_C_SOURCE" >> $@
-	@echo "#define _XOPEN_SOURCE 600" >> $@
 endif
 ifdef DISABLE_FORMATS
 	@echo "#define DISABLE_FORMATS" >> $@
