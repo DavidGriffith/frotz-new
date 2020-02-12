@@ -1,7 +1,7 @@
-Begin4
+Begin3
 Title:		Frotz
-Version:	2.50
-Entered-date:	2019-12-24
+Version:	2.51
+Entered-date:	2020-02-12
 Description:	An interpreter for all Infocom games and other Z-machine games.
 Keywords:	infocom, frotz, text-adventure, zork, z-machine
 Author:		dave@661.org (David Griffith)

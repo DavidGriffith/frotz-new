@@ -5,6 +5,9 @@
  *
  */
 
+#ifndef DOS_BCFROTZ_H
+#define DOS_BCFROTZ_H
+
 #define MASK_LINEAR(addr)	(addr & 0x000FFFFF)
 #define RM_TO_LINEAR(addr)	(((addr & 0xFFFF0000) >> 12) + (addr & 0xFFFF))
 #define RM_OFFSET(addr)		(addr & 0xF)
@@ -103,3 +106,5 @@ extern volatile int end_of_sound_flag;
 #endif
 /* BCtext  */	void	switch_scrn_attr (bool);
 /* BCtext  */	void 	load_fonts (void);
+
+#endif

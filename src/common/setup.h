@@ -2,6 +2,10 @@
  * Various status thingies for the interpreter and interface.
  *
  */
+ 
+#ifndef COMMON_SETUP_H
+#define COMMON_SETUP_H
+
 
 typedef enum {
 	FORMAT_NORMAL,
@@ -94,3 +98,5 @@ typedef struct zcode_header_struct {
 	zword x_back_colour;
 } z_header_t;
 extern z_header_t z_header;
+
+#endif

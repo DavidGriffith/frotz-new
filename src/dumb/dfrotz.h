@@ -8,6 +8,9 @@
  * Any use permitted provided this notice stays intact.
  */
 
+#ifndef DUMB_DFROTZ_H
+#define DUMB_DFROTZ_H
+
 #include "../common/frotz.h"
 
 #ifndef NO_BASENAME
@@ -33,7 +36,7 @@
 /* from ../common/setup.h */
 extern f_setup_t f_setup;
 
-bool do_more_prompts;
+extern bool do_more_prompts;
 
 /* From input.c.  */
 bool is_terminator (zchar);
@@ -56,3 +59,5 @@ void dumb_set_picture_cell(int row, int col, zchar c);
 
 /* dumb-pic.c */
 bool dumb_init_pictures(void);
+
+#endif

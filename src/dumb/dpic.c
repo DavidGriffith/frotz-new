@@ -22,8 +22,8 @@
 #include "dfrotz.h"
 #include "dblorb.h"
 
-f_setup_t f_setup;
-z_header_t z_header;
+extern f_setup_t f_setup;
+extern z_header_t z_header;
 
 #ifndef NO_BLORB
 
@@ -37,7 +37,7 @@ static struct {
 } *pict_info;
 static int num_pictures = 0;
 
-bb_map_t *blorb_map;
+extern bb_map_t *blorb_map;
 
 static int round_div(int x, int y)
 {

@@ -20,6 +20,9 @@
 
 #include "frotz.h"
 
+f_setup_t f_setup;
+z_header_t z_header;
+
 #define MAX_OBJECT 2000
 
 #define O1_PARENT 4

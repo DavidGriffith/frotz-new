@@ -1,0 +1,6 @@
+FROTZ v2.51 - Infocom-style interactive
+fiction player. Plays all Z-machine games.
+Compiled with Turbo C++ 3.0 in 16-bit mode
+for maximum compatibility.
+Complies with standard 1.0 of Graham
+Nelson's specification.

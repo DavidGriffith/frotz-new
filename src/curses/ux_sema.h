@@ -28,6 +28,9 @@
  * at https://stackoverflow.com/questions/27736618/why-are-sem-init-sem-getvalue-sem-destroy-deprecated-on-mac-os-x-and-w 
  */
 
+#ifndef CURSES_UX_SEMA_H
+#define CURSES_UX_SEMA_H
+
 #ifndef NO_SOUND
 
 #ifdef MACOS
@@ -105,3 +108,5 @@ static inline int ux_sem_trywait(ux_sem_t *sem)
 #endif
 
 #endif /* NO_SOUND */
+
+#endif

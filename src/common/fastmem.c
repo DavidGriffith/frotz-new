@@ -75,8 +75,6 @@ zbyte far *pcp = NULL;
 
 static FILE *story_fp = NULL;
 
-z_header_t z_header;
-
 /*
  * Data for the undo mechanism.
  * This undo mechanism is based on the scheme used in Evin Robertson's

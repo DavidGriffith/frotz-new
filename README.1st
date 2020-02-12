@@ -5,10 +5,10 @@ build.bat	A batch file for building Frotz for PC/MS DOS.
 ChangeLog	Summary of changes from one version to another.
 CONTRIBUTORS	People who've helped fund Frotz development.
 COPYING		Full text of the GNU General Public License.
-DOSBUILD.txt	How to build and install Frotz for PC/MS DOS.
 DUMB		Description of the dumb-interface version of Frotz.
 HOW_TO_PLAY	How to play Interactive Fiction.
 INSTALL		How to build and install Frotz.
+INSTALL_DOS	How to build and install Frotz for PC/MS DOS.
 Makefile	The Makefile (the INSTALL file tells you about this).
 Makefile.tc	Makefile for building Frotz for DOS using Turbo C 3.00.
 README		An overview of Frotz.
