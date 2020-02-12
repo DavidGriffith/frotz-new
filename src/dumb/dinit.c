@@ -23,7 +23,7 @@
 #include "dfrotz.h"
 #include "dblorb.h"
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 extern z_header_t z_header;
 
 static void print_version(void);

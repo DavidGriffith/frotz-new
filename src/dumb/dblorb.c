@@ -33,7 +33,7 @@
 
 #ifndef NO_BLORB
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 
 FILE *blorb_fp;
 bb_result_t blorb_res;

@@ -45,7 +45,7 @@
 #include "ux_blorb.h"
 #include "ux_audio.h"
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 extern z_header_t z_header;
 
 #ifndef NO_SOUND
