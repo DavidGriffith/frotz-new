@@ -40,14 +40,14 @@ static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 int m_timerinterval = 100;
 
-bool sdl_active;
+extern bool sdl_active;
 
 static void sf_quitconf();
 
 static bool ApplyPalette(sf_picture *);
 static ulong screen_palette[16];
 
-z_header_t z_header;
+extern z_header_t z_header;
 
 /* clipping region */
 static int xmin, xmax, ymin, ymax;

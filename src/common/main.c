@@ -45,7 +45,7 @@ enum story story_id = UNKNOWN;
 long story_size = 0;
 
 /* Setup data */
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 
 /* Story file header data */
 extern z_header_t z_header;

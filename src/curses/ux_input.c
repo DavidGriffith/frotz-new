@@ -49,7 +49,7 @@
 
 #ifndef NO_SOUND
 #include "ux_sema.h"
-ux_sem_t sound_done;
+extern ux_sem_t sound_done;
 #endif
 
 static int start_of_prev_word(int, const zchar*);

@@ -20,11 +20,10 @@
  */
 
 #include <string.h>
-#include <libgen.h>
 
 #include "dfrotz.h"
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 
 static char runtime_usage[] =
 	"DUMB-FROTZ runtime help:\n"
@@ -485,8 +484,11 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 char *os_read_file_name (const char *default_name, int flag)
 {
 	char file_name[FILENAME_MAX + 1];
-	char fullpath[INPUT_BUFFER_SIZE], prompt[INPUT_BUFFER_SIZE];
+	char prompt[INPUT_BUFFER_SIZE];
+
+	char fullpath[INPUT_BUFFER_SIZE];
 	char *buf;
+
 	FILE *fp;
 	char *tempname;
 	char path_separator[2];
@@ -513,7 +515,8 @@ char *os_read_file_name (const char *default_name, int flag)
 		} else
 			sprintf(prompt, "Please enter a filename [%s]: ", default_name);
 		dumb_read_misc_line(fullpath, prompt);
-		buf = basename (fullpath);
+		buf = basename(fullpath);
+
 		if (strlen(buf) > MAX_FILE_NAME) {
 			printf("Filename too long\n");
 			return NULL;
