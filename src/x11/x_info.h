@@ -1,3 +1,13 @@
+/*
+ * x_info.h
+ *
+ * Usage info
+ *
+ */
+
+#ifndef X_INFO_H
+#define X_INFO_H
+
 #define INFORMATION "\
   -aa   watch attribute setting   \t -rm # right margin\n\
   -at   watch attribute testing   \t -rs # random number seed value\n\
@@ -14,3 +24,5 @@
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
 For more options and explanations, please read the manual page.\n"
+
+#endif
