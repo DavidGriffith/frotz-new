@@ -274,6 +274,8 @@ ifneq ($(filter output-sync,$(value .FEATURES)),)
 MAKEFLAGS += -Orecurse
 endif
 
+# Just the version number without the dot
+DOSVER = $(shell echo $(VERSION) | sed s/\\.//g )
 
 # Build recipes
 #
@@ -495,6 +497,24 @@ else
 	@echo "Not in a git repository or git command not found.  Cannot make a zip file."
 endif
 
+dosdist:
+	@echo
+	@echo "  ** Populating $(NAME)$(DOSVER) with things for the DOS Frotz precompiled zipfile."
+	@echo "  ** Just add frotz.exe compiled wherever."
+	@echo "  ** Then do \"zip -r $(NAME)$(DOSVER).zip $(NAME)$(DOSVER)\""
+	@echo
+	@mkdir $(NAME)$(DOSVER)
+	@cp ChangeLog $(NAME)$(DOSVER)/changes.txt
+	@cp frotz.lsm $(NAME)$(DOSVER)
+	@cp doc/frotz.txt $(NAME)$(DOSVER)
+	@cp doc/file_id.diz $(NAME)$(DOSVER)
+	@cp HOW_TO_PLAY $(NAME)$(DOSVER)/howto.txt
+	@cp README $(NAME)$(DOSVER)/README.txt
+	@cp AUTHORS $(NAME)$(DOSVER)/AUTHORS.txt
+	@cp COPYING $(NAME)$(DOSVER)/COPYING.txt
+	@unix2dos -q $(NAME)$(DOSVER)/*
+	@touch $(NAME)$(DOSVER)/*
+
 clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
 	rm -rf $(COMMON_DEFINES) \
@@ -504,8 +524,8 @@ clean: $(SUB_CLEAN)
 
 distclean: clean
 	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
-	rm -rf $(NAME)src
-	rm -f $(NAME)*.tar.gz $(NAME)src.zip
+	rm -rf $(NAME)src $(NAME)$(DOSVER)
+	rm -f $(NAME)*.tar.gz $(NAME)src.zip $(NAME)$(DOSVER).zip
 
 help:
 	@echo "Targets:"
@@ -531,7 +551,7 @@ help:
 .SUFFIXES:
 .SUFFIXES: .c .o .h
 
-.PHONY: all clean dist curses ncurses dumb sdl hash help \
+.PHONY: all clean dist dosdist curses ncurses dumb sdl hash help \
 	common_defines curses_defines nosound nosound_helper\
 	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
