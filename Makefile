@@ -482,7 +482,7 @@ install_sfrotz: $(SFROTZ_BIN)
 uninstall_sdl: uninstall_sfrotz
 uninstall_sfrotz:
 	rm -f $(BINDIR)/sfrotz
-	rm -f $(MAN_PREFIX)/man/man6/sfrotz.6"
+	rm -f $(MAN_PREFIX)/man/man6/sfrotz.6
 
 install_all:	install_frotz install_dfrotz install_sfrotz
 
