@@ -39,7 +39,7 @@
 #include <unistd.h>
 #endif
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 
 typedef void (*CLEANFUNC)();
 

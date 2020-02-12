@@ -53,7 +53,7 @@
 #include <locale.h>
 #endif
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 extern z_header_t z_header;
 
 volatile sig_atomic_t terminal_resized = 0;
@@ -88,8 +88,7 @@ char stripped_story_name[FILENAME_MAX+1];
 char semi_stripped_story_name[FILENAME_MAX+1];
 */
 
-f_setup_t f_setup;
-u_setup_t u_setup;
+extern u_setup_t u_setup;
 
 /* static void sigwinch_handler(int); */
 static void sigint_handler(int);
