@@ -139,7 +139,7 @@ your $PATH.
 For compiling, installing, and uninstalling Frotz using the dumb or SDL 
 interfaces, type "make dumb" or "make sdl".  You will get an executable 
 file named "dfrotz" for Dumb Frotz and "sfrotz" for SDL Frotz. To 
-install these, type "make install_dumb" or "make install_sdl".  to 
+install these, type "make install_dumb" or "make install_sdl".  To 
 uninstall these, type "make uninstall_dumb" or "make uninstall_sdl".  
 Substituting "dfrotz" for "dumb" and "sfrotz" for "sdl" will also work.
 
@@ -147,6 +147,9 @@ For compiling, installing, and uninstalling dumb frotz, use "make dumb",
 "make install_dumb", and "make uninstall_dumb".  The process is exactly 
 the same as above except you won't be depending on any external 
 libraries; not even curses.
+
+To build dfrotz, frotz, and sfrotz; you can type "make all" and then
+"make install_all" to install them all.
 
 
 ========================================
