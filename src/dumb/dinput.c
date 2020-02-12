@@ -24,7 +24,7 @@
 
 #include "dfrotz.h"
 
-f_setup_t f_setup;
+extern f_setup_t f_setup;
 
 static char runtime_usage[] =
 	"DUMB-FROTZ runtime help:\n"

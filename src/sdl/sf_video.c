@@ -40,7 +40,7 @@ static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 int m_timerinterval = 100;
 
-bool sdl_active;
+extern bool sdl_active;
 
 static void sf_quitconf();
 
