@@ -7,6 +7,9 @@
  *
  */
 
+#ifndef X_FROTZ_H
+#define X_FROTZ_H
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -41,3 +44,5 @@ extern unsigned long def_bg_pixel, def_fg_pixel;
 const XFontStruct * get_font(int font, int style);
 
 void x_init_colour(char *bg_name, char *fg_name);
+
+#endif
