@@ -105,75 +105,83 @@ STACK_SIZE = 1024
 
 # Determine what system we are on.
 ifneq ($(OS),Windows_NT)
-    RANLIB ?= $(shell which ranlib)
-    AR ?= $(shell which ar)
-    PKG_CONFIG ?= pkg-config
-    # For now, assume !windows == unix.
-    OS_TYPE ?= unix
-    UNAME_S := $(shell uname -s)
-    # Since MacOS lacks pkg-config, pick CURSES_LDFLAGS that's known to work.
-    ifeq ($(UNAME_S),Darwin)
-	MACOS = yes
-	# On MACOS, curses is actually ncurses, but to get wide char support
-	# you need to define _XOPEN_SOURCE_EXTENDED
-	CURSES = curses
-	CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS -I/opt/local/include \
-		-D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=600
-	LDFLAGS += -L/opt/local/lib
-	CURSES_LDFLAGS += -lcurses
-    else
-    # If we have pkg-config, that good.  Otherwise maybe warn later.
-    ifneq (, $(shell which $(PKG_CONFIG)))
-	CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
-	CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
-    else
-	NO_PKG_CONFIG = yes
-    endif
-    # NetBSD
-    ifeq ($(UNAME_S),NetBSD)
-	NETBSD = yes
-	CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include
-	LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
-	SDL_LDFLAGS += -lexecinfo
-	ifeq ($(CURSES), ncursesw)
-	    CURSES_CFLAGS += -I/usr/pkg/include/ncursesw
-	else
-	    CURSES_CFLAGS += -I/usr/pkg/include/ncurses
-	endif
-    endif
-    # FreeBSD
-    ifeq ($(UNAME_S),FreeBSD)
-	FREEBSD = yes
-	CFLAGS += -I/usr/local/include -D__BSD_VISIBLE=1
-	LDFLAGS += -L/usr/local/lib
-	SDL_LDFLAGS += -lexecinfo
-    endif
-    # OpenBSD
-    ifeq ($(UNAME_S),OpenBSD)
-	OPENBSD = yes
-	NO_EXECINFO_H = yes
-	NO_UCONTEXT_H = yes
-	NO_IMMINTRIN_H = yes
-	CFLAGS += -I/usr/local/include
-	LDFLAGS += -L/usr/local/lib
-	SDL_CFLAGS += -DSDL_DISABLE_IMMINTRIN_H
-	SDL_LDFLAGS += -lexecinfo
-    endif
-    # Linux
-    ifeq ($(UNAME_S),Linux)
-	LINUX = yes
-	CFLAGS += -D_POSIX_C_SOURCE=200809L
-	NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
-    endif
-    endif
+	RANLIB ?= $(shell which ranlib)
+	AR ?= $(shell which ar)
+	PKG_CONFIG ?= pkg-config
+	# For now, assume !windows == unix.
+	OS_TYPE ?= unix
+	UNAME_S := $(shell uname -s)
+else
+	$(error Compilation on Windows not supported)
 endif
+
+# Since MacOS is weird, we'll deal with well-behaved Unices first.
+ifneq ($(OS_TYPE),Darwin)
+	# If we have pkg-config, that good.  Otherwise maybe warn later.
+	ifneq (, $(shell which $(PKG_CONFIG)))
+		CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
+		CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
+	else
+		NO_PKG_CONFIG = yes
+	endif
+	# NetBSD
+	ifeq ($(UNAME_S),NetBSD)
+		NETBSD = yes
+		CFLAGS += -D_NETBSD_SOURCE -I/usr/pkg/include
+		LDFLAGS += -Wl,-R/usr/pkg/lib -L/usr/pkg/lib
+		SDL_LDFLAGS += -lexecinfo
+		ifeq ($(CURSES), ncursesw)
+			CURSES_CFLAGS += -I/usr/pkg/include/ncursesw
+		else
+			CURSES_CFLAGS += -I/usr/pkg/include/ncurses
+		endif
+	endif
+	# FreeBSD
+	ifeq ($(UNAME_S),FreeBSD)
+		FREEBSD = yes
+		CFLAGS += -I/usr/local/include -D__BSD_VISIBLE=1
+		LDFLAGS += -L/usr/local/lib
+		SDL_LDFLAGS += -lexecinfo
+	endif
+	# OpenBSD
+	ifeq ($(UNAME_S),OpenBSD)
+		OPENBSD = yes
+		NO_EXECINFO_H = yes
+		NO_UCONTEXT_H = yes
+		NO_IMMINTRIN_H = yes
+		CFLAGS += -I/usr/local/include
+		LDFLAGS += -L/usr/local/lib
+		SDL_CFLAGS += -DSDL_DISABLE_IMMINTRIN_H
+		SDL_LDFLAGS += -lexecinfo
+	endif
+	# Linux
+	ifeq ($(UNAME_S),Linux)
+		LINUX = yes
+		CFLAGS += -D_POSIX_C_SOURCE=200809L
+		NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
+	endif
+else
+	# MacOS lacks pkg-config.  So set CURSES_LDFLAGS to something
+	# known to work.
+	ifeq ($(UNAME_S),Darwin)
+		MACOS = yes
+		# On MACOS, curses is actually ncurses, but to get wide
+		# char support you need to define _XOPEN_SOURCE_EXTENDED
+		CURSES = curses
+		CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS -I/opt/local/include \
+			-D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=600
+		LDFLAGS += -L/opt/local/lib
+		CURSES_LDFLAGS += -lcurses
+	endif
+endif
+
 
 # Make sure the right curses include file is included.
 ifeq ($(CURSES), curses)
-  CURSES_DEFINE = USE_CURSES_H
+	CURSES_DEFINE = USE_CURSES_H
 else ifneq ($(findstring ncurses,$(CURSES)),)
-  CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
-  CURSES_DEFINE = USE_NCURSES_H
+	CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
+	CURSES_DEFINE = USE_NCURSES_H
 endif
 
 export CC
@@ -250,28 +258,28 @@ SFROTZ_LIBS = $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 
 
 ifdef NO_BLORB
-  SOUND_TYPE = none
-  CURSES_SOUND = disabled
-  BLORB_SUPPORT = disabled
-  FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(COMMON_LIB)
-  DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(COMMON_LIB)
+	SOUND_TYPE = none
+	CURSES_SOUND = disabled
+	BLORB_SUPPORT = disabled
+	FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(COMMON_LIB)
+	DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(COMMON_LIB)
 else
-  BLORB_SUPPORT = enabled
+	BLORB_SUPPORT = enabled
 endif
 
 ifeq ($(SOUND_TYPE), ao)
-  CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
-	-lsndfile -lvorbisfile -lmodplug -lsamplerate
-  CURSES_SOUND = enabled
+	CURSES_SOUND_LDFLAGS += -lao -lpthread -lm \
+		-lsndfile -lvorbisfile -lmodplug -lsamplerate
+	CURSES_SOUND = enabled
 else
-  CURSES_SOUND = disabled
+	CURSES_SOUND = disabled
 endif
 
 # Check to see if the -Orecurse option is available.  It's nice for
 # watching the output of a parallel build, but is otherwise not
 # necessary.
 ifneq ($(filter output-sync,$(value .FEATURES)),)
-MAKEFLAGS += -Orecurse
+	MAKEFLAGS += -Orecurse
 endif
 
 # Just the version number without the dot
