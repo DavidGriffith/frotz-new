@@ -768,25 +768,41 @@ int os_storyfile_tell(FILE * fp)
 static FILE *pathopen(const char *name, const char *path, const char *mode)
 {
 	FILE *fp;
-	char *buf;	
-	
+	char *buf;
+	char *bp;
+
 	/*
 	 * If the path variable doesn't end in a "/" a "/"
 	 * will be added, so the buffer needs to be long enough
 	 * for the path + / + name + \0
-	 */	
+	 */
 	size_t buf_sz = strlen(path) + strlen(name) + sizeof(DIRSEP) + 1;
 	buf = malloc(buf_sz);
 	
-	if (path[strlen(path)-1] != DIRSEP) {
-		snprintf(buf, buf_sz, "%s%c%s", path, DIRSEP, name);
-	} else {
-		snprintf(buf, buf_sz, "%s%s", path, name);
-	}	
-
-	fp = fopen(buf, mode);
+	/*
+	 * Split the PATH string where the PATHSEP character appears
+	 * and try to open the named file at each portion of the path
+	 */
+	while(*path) {
+		bp = buf;
+		while (*path && (*path != PATHSEP))
+			*bp++ = *path++;
+		if(*(path - 1) != DIRSEP)
+			*bp++ = DIRSEP;
+		memcpy(bp, name, strlen(name));
+		/*
+		 * Null terminate the buffer
+		 */
+		bp[strlen(name)] = 0;
+		if ((fp = fopen(buf, mode)) != NULL) {
+			free(buf);
+			return fp;
+		}
+		if (*path)
+			path++;
+	}
 	free(buf);
-	return fp;
+	return NULL;
 
 } /* pathopen */
 

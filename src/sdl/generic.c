@@ -39,6 +39,7 @@ FILE *blorb_fp;
 bb_result_t blorb_res;
 bb_map_t *blorb_map;
 
+FILE *os_path_open(const char *, const char *);
 
 /*
  * isblorb
@@ -89,7 +90,7 @@ bb_err_t gen_blorb_init(char *filename)
 
 	blorb_map = NULL;
 
-	if ((fp = fopen(filename, "rb")) == NULL)
+	if ((fp = os_path_open(filename, "rb")) == NULL)
 		return bb_err_Read;
 
 	/* Is this really a Blorb file?  If not, maybe we're loading a naked
@@ -114,12 +115,12 @@ bb_err_t gen_blorb_init(char *filename)
 		}
 
 		/* Check if foo.blb is there. */
-		if ((fp = fopen(mystring, "rb")) == NULL) {
+		if ((fp = os_path_open(mystring, "rb")) == NULL) {
 			p = strrchr(mystring, '.');
 			if (p != NULL)
 				*p = '\0';
 			strncat(mystring, EXT_BLORB3, len2 * sizeof(char));
-			if (!(fp = fopen(mystring, "rb")))
+			if (!(fp = os_path_open(mystring, "rb")))
 				return bb_err_NoBlorb;
 		}
 		if (!isblorb(fp)) {
@@ -185,7 +186,7 @@ FILE *os_load_story(void)
 		break;
 	}
 
-	fp = fopen(f_setup.story_file, "rb");
+	fp = os_path_open(f_setup.story_file, "rb");
 
 	/* Is this a Blorb file containing Zcode? */
 	if (f_setup.exec_in_blorb)

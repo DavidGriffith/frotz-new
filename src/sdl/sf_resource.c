@@ -141,9 +141,7 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 {
 	FILE *fp;
 	char *buf;
-	char *bp, lastch;
-
-	lastch = 'a';	/* makes compiler shut up */
+	char *bp;
 
 	/*
 	 * If the path variable doesn't end in a "/" a "/"
@@ -155,10 +153,11 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
 	while (*path) {
 		bp = buf;
 		while (*path && *path != OS_PATHSEP)
-			lastch = *bp++ = *path++;
-		if (lastch != OS_DIRSEP)
+			*bp++ = *path++;
+		if (*(path - 1) != OS_DIRSEP)
 			*bp++ = OS_DIRSEP;
 		memcpy(bp, name, strlen(name) * sizeof(char));
+		bp[strlen(name)] = 0;
 		if ((fp = fopen(buf, mode)) != NULL) {
 			free(buf);
 			return fp;
@@ -179,7 +178,7 @@ static FILE *pathopen(const char *name, const char *path, const char *mode)
  * defined, search INFOCOM_PATH.
  *
  */
-FILE *os_path_open(const char *name, const char *mode, long *size)
+FILE *os_path_open(const char *name, const char *mode)
 {
 	FILE *fp;
 	char *p;
