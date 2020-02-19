@@ -1,3 +1,16 @@
+Summary of changes between Frotz 2.51 and Frotz 2.52:
+=====================================================
+
+Frotz 2.52 was released on Wednesday XXX XX, 20XX.
+
+This is a minor release focusing on minor enhancements and bug fixes.
+
+BUG FIXES
+
+- Fixed broken handling of game paths set in environmental variables and
+  in config files.
+
+
 Summary of changes between Frotz 2.50 and Frotz 2.51:
 =====================================================
 
