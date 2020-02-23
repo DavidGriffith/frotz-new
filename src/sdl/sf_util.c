@@ -961,7 +961,7 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 					q = strchr(p, '\"');
 				if (!q) {
 					q = p;
-					while (*q > ' ')
+					while (*q >= ' ')
 						q++;
 					sav = *q;
 					*q = 0;
