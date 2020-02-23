@@ -957,8 +957,10 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 					break;
 			}
 			if (*p) {
-				if (quoted)
+				if (quoted) {
 					q = strchr(p, '\"');
+					*q = 0;
+				}
 				if (!q) {
 					q = p;
 					while (*q >= ' ')
