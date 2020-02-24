@@ -34,3 +34,37 @@ This is to be expected because the usual means of making the compiler to
 keep quiet about these things don't work for KCC.  A considerable amount
 of disk quota is required to complete the linking, but how much is not
 entirely known.
+
+If you get a complaint that you're out of disk space, look at the TOPS20
+manuals for how to add yourself to the WHEEL and OPERATOR groups.  Then
+you can set disk quotas yourself.  You'll want to do something like this:
+
+  enable
+  build <username>
+    permanent infinity
+    working infinity
+  disable
+
+Then for any subdirectories
+
+  enable
+  build <username.frotz>
+    permanent infinity
+    working infinity
+  disable
+  connect <username.frotz>
+
+Now you're in the directory <username.frotz>.  To get source code into
+the machine, FTP is probably your best bet.
+
+  ftp ftp.foobar.com
+    login ftp
+    set no confirmation all
+    cd <wherever the source is>
+    get *
+    quit
+  reset ftp
+
+Now compile.
+
+  cc -o dfrotz.exe *.c
