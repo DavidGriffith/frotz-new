@@ -348,10 +348,11 @@ static void parse_options(int argc, char **argv)
 		if (c == 'Z')
 			if (num >= ERR_REPORT_NEVER && num <= ERR_REPORT_FATAL)
 				f_setup.err_report_mode = num;
-		if (c == '?')
-			zoptind = argc;
+		if (c == '?') {
+			usage(USAGE_NORMAL);
+			os_quit(EXIT_FAILURE);
+		}
 	} while (c != EOF && c != '?');
-
 } /* parse_options */
 
 
