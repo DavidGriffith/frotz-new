@@ -11,7 +11,7 @@
 #elif defined (__LCLINT__)
 #	define UNUSED(x) /*@unused@*/ x
 #else
-#	define UNUSED(x)	(void)(x)
+#	define UNUSED(x)	x
 #endif
 
 #ifdef __GNUC__
