@@ -94,6 +94,7 @@ extern u_setup_t u_setup;
 static void sigint_handler(int);
 /* static void redraw(void); */
 
+static void	usage(void);
 static void	print_version(void);
 static int	getconfig(char *);
 static int	getbool(char *);
@@ -264,7 +265,7 @@ void os_process_arguments (int argc, char *argv[])
 
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "-aAb:c:def:Fh:iI:l:L:oOpPqr:R:s:S:tu:vw:W:xZ:");
+		c = zgetopt(argc, argv, "aAb:c:def:Fh:iI:l:L:oOpPqr:R:s:S:tu:vw:W:xZ:");
 		switch(c) {
 		case 'a': f_setup.attribute_assignment = 1; break;
 		case 'A': f_setup.attribute_testing = 1; break;
@@ -319,22 +320,16 @@ void os_process_arguments (int argc, char *argv[])
 			  (f_setup.err_report_mode > ERR_REPORT_FATAL))
 				f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
 			break;
+		case '?':
+			usage();
+			os_quit(EXIT_FAILURE);
+			break;
 		}
 	} while (c != EOF);
 
 	if (argv[zoptind] == NULL) {
-		printf("FROTZ V%s - Curses interface.  ", VERSION);
-
-#ifndef NO_SOUND
-		printf("Audio output enabled.");
-#else
-		printf("Audio output disabled.");
-#endif
-		putchar('\n');
-
-		puts (INFORMATION);
-		puts (INFO2);
-		os_quit (EXIT_SUCCESS);
+		usage();
+		os_quit(EXIT_SUCCESS);
 	}
 
 	/* This section is exceedingly messy and really can't be fixed
@@ -1139,6 +1134,18 @@ char *my_strrchr(const char *s, int c)
 } /* my_strrchr */
 #endif	/* NO_STRRCHR */
 
+static void usage(void)
+{
+	printf("FROTZ V%s - Curses interface.  ", VERSION);
+#ifndef NO_SOUND
+		printf("Audio output enabled.\n");
+#else
+		printf("Audio output disabled.\n");
+#endif
+	puts(INFORMATION);
+	puts(INFO2);
+	return;
+}
 
 static void print_version(void)
 {

@@ -26,6 +26,7 @@
 extern f_setup_t f_setup;
 extern z_header_t z_header;
 
+static void usage(void);
 static void print_version(void);
 
 #define INFORMATION "\
@@ -76,7 +77,7 @@ void os_process_arguments(int argc, char *argv[])
 	do_more_prompts = TRUE;
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "-aAf:h:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
+		c = zgetopt(argc, argv, "aAf:h:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
 		switch(c) {
 		case 'a':
 			f_setup.attribute_assignment = 1;
@@ -165,13 +166,15 @@ void os_process_arguments(int argc, char *argv[])
 				f_setup.err_report_mode =
 					ERR_DEFAULT_REPORT_MODE;
 			break;
+		case '?':
+			usage();
+			os_quit(EXIT_FAILURE);
+			break;
 		}
 	} while (c != EOF);
 
 	if (argv[zoptind] == NULL) {
-		printf("FROTZ V%s - Dumb interface.\n", VERSION);
-		puts(INFORMATION);
-		puts(INFO2);
+		usage();
 		os_quit(EXIT_SUCCESS);
 	}
 
@@ -394,6 +397,13 @@ void os_init_setup(void)
 	/* Nothing here */
 }
 
+static void usage(void)
+{
+	printf("FROTZ V%s - Dumb interface.\n", VERSION);
+	puts(INFORMATION);
+	puts(INFO2);
+	return;
+}
 
 static void print_version(void)
 {
