@@ -10,6 +10,13 @@ BUG FIXES
 - Fixed broken handling of game paths set in environmental variables and
   in config files.
 
+- Fixed slightly broken parsing of .sfrotzrc.
+
+- Fixed behavior of command line processing inconsistent between the
+  different user interfaces.
+
+- Assorted source code formatting fixes.
+
 
 Summary of changes between Frotz 2.50 and Frotz 2.51:
 =====================================================
