@@ -643,7 +643,7 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
 
 int os_storyfile_tell(FILE * fp)
 {
-#ifdef NO_BLORB
+#ifndef NO_BLORB
         /* Is this a Blorb file containing Zcode? */
         if (f_setup.exec_in_blorb)
                 return ftell(fp) - blorb_res.data.startpos;
