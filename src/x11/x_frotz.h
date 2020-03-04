@@ -23,6 +23,9 @@
 #define X_WIDTH  800
 #define X_HEIGHT 600
 
+#ifndef MAX
+#define MAX(x,y) ((x)>(y)) ? (x) : (y)
+#endif
 /* X connection */
 extern Display *dpy;
 

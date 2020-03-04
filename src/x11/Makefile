@@ -1,8 +1,8 @@
 # For GNU Make.
 
-SOURCES = x_init.c x_input.c x_pic.c x_sample.c x_screen.c x_text.c
+SOURCES = x_init.c x_input.c x_pic.c x_sample.c x_screen.c x_text.c x_blorb.c
 OBJECTS = $(SOURCES:.c=.o)
-HEADERS = x_frotz.h x_setup.h
+HEADERS = x_frotz.h x_setup.h x_blorb.h
 
 ZFONTSBDF = Zork_r400-10.bdf Zork_r400-11.bdf Zork_r400-13.bdf Zork_r400-16.bdf Zork_r400-20.bdf
 ZFONTSPCF = $(ZFONTSBDF:.bdf=.pcf)

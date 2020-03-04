@@ -9,6 +9,7 @@
 
 #include "x_frotz.h"
 #include "x_info.h"
+#include "x_blorb.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -572,24 +573,83 @@ void os_init_setup(void)
 }
 
 
+/*
+ * os_load_story
+ *
+ * This is different from os_path_open() because we need to see if the
+ * story file is actually a chunk inside a blorb file.  Right now we're
+ * looking only at the exact path we're given on the command line.
+ *
+ */
+
 FILE *os_load_story(void)
 {
 	FILE *fp;
 
+#ifndef NO_BLORB
+        switch (x_blorb_init(f_setup.story_file)) {
+        case bb_err_NoBlorb:
+                /* printf("No blorb file found.\n\n"); */
+                break;
+        case bb_err_Format:
+                printf("Blorb file loaded, but unable to build map.\n\n");
+                break;
+        case bb_err_NotFound:
+                printf("Blorb file loaded, but lacks ZCOD executable chunk.\n\n");
+                break;
+        case bb_err_None:
+                /* printf("No blorb errors.\n\n"); */
+                break;
+        }
+
+        fp = fopen(f_setup.story_file, "rb");
+
+        /* Is this a Blorb file containing Zcode? */
+        if (f_setup.exec_in_blorb)
+                fseek(fp, blorb_res.data.startpos, SEEK_SET);
+#else
+
 	fp = fopen(f_setup.story_file, "rb");
+#endif
 	return fp;
 }
 
 
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
-	/* No blorb in X11 for now, so just use fseek */
+#ifndef NO_BLORB
+        /* Is this a Blorb file containing Zcode? */
+        if (f_setup.exec_in_blorb) {
+                switch (whence) {
+                case SEEK_END:
+                        return fseek(fp, blorb_res.data.startpos + blorb_res.length + offset, SEEK_SET);
+                        break;
+                case SEEK_CUR:
+                        return fseek(fp, offset, SEEK_CUR);
+                        break;
+                case SEEK_SET:
+                        /* SEEK_SET falls through to default */
+                default:
+                        return fseek(fp, blorb_res.data.startpos + offset, SEEK_SET);
+                        break;
+                }
+        } else
+                return fseek(fp, offset, whence);
+#else
 	return fseek(fp, offset, whence);
+#endif
 }
 
 
 int os_storyfile_tell(FILE * fp)
 {
-	/* No blorb in X11 for now, so just use ftell */
-	return ftell(fp);
+#ifndef NO_BLORB
+        /* Is this a Blorb file containing Zcode? */
+        if (f_setup.exec_in_blorb)
+                return ftell(fp) - blorb_res.data.startpos;
+        else
+                return ftell(fp);
+#else
+        return ftell(fp);
+#endif
 }
