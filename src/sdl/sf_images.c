@@ -196,7 +196,14 @@ static int loadpng(byte * data, int length, sf_picture * graphic)
 		if (graphic->adaptive)
 			os_fatal("Non-paletted graphics cannot be adaptive");
 
-		os_fatal("TODO: Support loading of non-paletted images");
+		png_set_bgr(png_ptr);
+		png_set_filler(png_ptr,0xFF,PNG_FILLER_AFTER);
+		size = width*height*4;
+		graphic->pixels = (byte *) malloc(size);
+		rowPointers = malloc(sizeof(png_bytep) * height);
+		for (int i = 0; i < (int)height; i++)
+			rowPointers[i] = graphic->pixels + (width * i * 4);
+		png_read_image(png_ptr, rowPointers);
 	}
 
 	/* Reading done. */
