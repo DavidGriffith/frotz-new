@@ -153,7 +153,7 @@ static int loadpng(byte * data, int length, sf_picture * graphic)
 	if (png_get_gAMA(png_ptr, info_ptr, &gamma))
 		png_set_gamma(png_ptr, m_gamma, gamma);
 
-	if ((color_type == PNG_COLOR_TYPE_PALETTE) && (graphic->adaptive)) {
+	if ((color_type == PNG_COLOR_TYPE_PALETTE) && bit_depth <= 4) {
 		graphic->usespalette = TRUE;
 		png_set_packing(png_ptr);
 
@@ -210,7 +210,7 @@ static int loadpng(byte * data, int length, sf_picture * graphic)
 		if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
 			png_set_gray_to_rgb(png_ptr);
 
-		png_set_filler(png_ptr,0xFF,PNG_FILLER_AFTER);
+		png_set_filler(png_ptr,0xff,PNG_FILLER_AFTER);
 		size = width*height*4;
 		graphic->pixels = (byte *) malloc(size);
 		rowPointers = malloc(sizeof(png_bytep) * height);
