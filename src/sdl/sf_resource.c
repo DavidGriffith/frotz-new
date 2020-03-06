@@ -79,6 +79,7 @@ static char *ResSnd = "SND%d";
 
 int AcWidth = 640, AcHeight = 400;
 int option_scrollback_buffer = 0;
+bool m_adaptiveMode = FALSE;
 
 static void checkwidths()
 {
@@ -114,6 +115,7 @@ static void load_local_resources(void);
  */
 int sf_load_resources(void)
 {
+	bb_result_t result;
 	CLEANREG(sf_cleanup_resources);
 
 	if (blorb_map) {
@@ -121,6 +123,14 @@ int sf_load_resources(void)
 		bb_count_resources(blorb_map, bb_ID_Pict, &countedpics, NULL,
 				   &maxlegalpic);
 		releaseno = bb_get_release_num(blorb_map);
+		if (bb_load_chunk_by_type (blorb_map,
+					   bb_method_Memory,
+					   &result,
+					   bb_ID_APal,
+					   0) == bb_err_None) {
+			m_adaptiveMode = TRUE;
+			bb_unload_chunk(blorb_map, result.chunknum);
+		}
 	}
 
 	if ((m_reslist_file))

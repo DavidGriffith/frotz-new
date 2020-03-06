@@ -36,6 +36,7 @@
 
 static byte toLinear[256];
 static byte fromLinear[256];
+extern bool m_adaptiveMode;
 
 ulong sf_blend(int a, ulong s, ulong d)
 {
@@ -153,7 +154,7 @@ static int loadpng(byte * data, int length, sf_picture * graphic)
 	if (png_get_gAMA(png_ptr, info_ptr, &gamma))
 		png_set_gamma(png_ptr, m_gamma, gamma);
 
-	if ((color_type == PNG_COLOR_TYPE_PALETTE) && bit_depth <= 4) {
+	if (m_adaptiveMode && (color_type == PNG_COLOR_TYPE_PALETTE) && bit_depth <= 4) {
 		graphic->usespalette = TRUE;
 		png_set_packing(png_ptr);
 
