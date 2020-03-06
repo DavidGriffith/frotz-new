@@ -399,7 +399,6 @@ void init_memory(void)
 		{        TRINITY,  11, "860509" },
 		{        TRINITY,  12, "860926" },
 		{        TRINITY,  15, "870628" },
-		{     CUTTHROATS,  23, "840809" },
 		{        UNKNOWN,   0, "------" }
 	};
 	/* INDENT-ON */
