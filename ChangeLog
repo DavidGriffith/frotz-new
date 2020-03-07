@@ -1,11 +1,18 @@
 Summary of changes between Frotz 2.51 and Frotz 2.52:
 =====================================================
 
-Frotz 2.52 was released on Wednesday XXX XX, 20XX.
+Frotz 2.52 was released on WWW MMM DD, 20YY.
 
 This is a minor release focusing on minor enhancements and bug fixes.
 
 BUG FIXES
+
+- Fixed rendering of non-paletted PNG images.  Affected only non-Infocom
+  V6 games.
+
+- Rolled back idiosyncrasy fix for Cutthroats and changed over to the
+  quick-and-dirty 24-to-12 conversion used by Infocom as this is how the
+  Imps expected an interpreter to behave.
 
 - Fixed broken handling of game paths set in environmental variables and
   in config files.
