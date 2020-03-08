@@ -638,12 +638,6 @@ void dumb_set_picture_cell(int row, int col, zchar c)
 
 void dumb_init_output(void)
 {
-/* FIXME Why is this here?  sc isn't used in this function. */
-#ifdef TOPS20
-	size_t sc;
-	sc = sizeof(cell_t);
-#endif
-
 #ifndef DISABLE_FORMATS
 	if (f_setup.format == FORMAT_IRC) {
 		setvbuf(stdout, 0, _IONBF, 0);
