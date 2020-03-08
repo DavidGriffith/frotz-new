@@ -255,6 +255,7 @@ void z_load(void)
 		zword addr = z_header.globals + 2 * (z0 - 16);
 		LOW_WORD (addr, value)
 	}
+	store(value & 0xffff);
 #else
 	if (zargs[0] == 0)
 		value = *sp;
