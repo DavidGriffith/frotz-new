@@ -419,8 +419,8 @@ void init_memory(void)
 	/* Load header into memory */
 #ifdef TOPS20
 	/* One byte at a time for 36-bit sanitization */
-	for ( i = 0; i < 64 ; i++) {
-		if (fread (zmp+i, 1, 1, story_fp) != 1) {
+	for (i = 0; i < 64 ; i++) {
+		if (fread(zmp + i, 1, 1, story_fp) != 1) {
 			os_fatal ("Story file read error");
 		}
 		zmp[i] &= 0xff; /* No nine-bit craziness here! */
@@ -507,8 +507,8 @@ void init_memory(void)
 #ifdef TOPS20
 	/* Load and sanitize story file one byte at a time. */
 	for (size = 64; size < story_size; size++) {
-		if (fread (zmp + size, 1, 1, story_fp) != 1) {
-			os_fatal ("Story file read error");
+		if (fread(zmp + size, 1, 1, story_fp) != 1) {
+			os_fatal("Story file read error");
 		}
 		zmp[size] &= 0xff; /* No nine-bit craziness here! */
 	}
@@ -531,9 +531,9 @@ void init_memory(void)
 #ifdef TOPS20
 	/* Internal verification; is this where the PDP-10 is blowing up? */
 	/* Sum all bytes in story file except header bytes */
-	fseek (story_fp, 64, SEEK_SET);
+	fseek(story_fp, 64, SEEK_SET);
 	for (li = 64; li < story_size; li++)
-		checksum = (checksum + (fgetc (story_fp) & 0xff)) & 0xffff;
+		checksum = (checksum + (fgetc(story_fp) & 0xff)) & 0xffff;
 	if (checksum != z_header.checksum)
 		os_fatal("Checksum failed!");
 #endif
@@ -562,8 +562,16 @@ void init_undo(void)
 	/* Allocate z_header.dynamic_size bytes for previous dynamic
 	 * zmp state + 1.5 z_header.dynamic_size for Quetzal diff + 2.
 	 */
+
+	/* FIXME UNDO changed a lot since 2.32. May not be correct. */
+#ifdef TOPS20
+	prev_zmp = malloc(z_header.dynamic_size & 0xffff);
+	undo_diff = malloc(((unsigned long)(z_header.dynamic_size & 0xffff) * 3) / 2 + 2);
+#else
 	prev_zmp = malloc(z_header.dynamic_size);
 	undo_diff = malloc(((unsigned long)z_header.dynamic_size * 3) / 2 + 2);
+#endif
+
 	if ((undo_diff != NULL) && (prev_zmp != NULL)) {
 		memmove (prev_zmp, zmp, z_header.dynamic_size);
 	} else {
