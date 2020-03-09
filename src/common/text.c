@@ -631,7 +631,7 @@ void print_num(zword value)
 void z_print_num(void)
 {
 #ifdef TOPS20
-	print_object (zargs[0] & 0xffff);
+	print_num(zargs[0] & 0xffff);
 #else
 	print_num(zargs[0]);
 #endif
