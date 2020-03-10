@@ -93,6 +93,9 @@ CURSES ?= ncursesw
 # For missing basename()
 #NO_BASENAME = yes
 
+# If your target complains excessively about unused parameters, uncomment this
+#SILENCE_UNUSED = yes
+
 # Assorted constants
 MAX_UNDO_SLOTS = 500
 MAX_FILE_NAME = 80
@@ -120,6 +123,7 @@ UNAME_S := $(shell uname -s)
 
 ifeq ($(MAKECMDGOALS),tops20)
     EXPORT_TYPE = tops20
+    SILENCE_UNUSED = yes
 endif
 ifeq ($(MAKECMDGOALS),dos)
     EXPORT_TYPE = dos
@@ -473,6 +477,9 @@ ifdef NO_UCONTEXT_H
 endif
 ifdef NO_EXECINFO_H
 	@echo "#define NO_EXECINFO_H" >> $@
+endif
+ifdef SILENCE_UNUSED
+	@echo "#define SILENCE_UNUSED" >> $@
 endif
 
 ifneq ($(EXPORT_TYPE), tops20)
