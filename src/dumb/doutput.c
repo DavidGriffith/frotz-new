@@ -145,9 +145,10 @@ static void show_cell_irc(cell_t cel)
 
 		if (fg != DEFAULT_DUMB_COLOUR) {
 			if (bg != DEFAULT_DUMB_COLOUR)
-				printf("\003%hhu,%s%hhu", fg, (bg < 10) ? "0" : "", bg);
+				printf("\003%u,%s%u", (unsigned char) fg,
+					((unsigned char) bg < 10) ? "0" : "", (unsigned char) bg);
 			else
-				printf("\003%s%hhu", (fg < 10) ? "0" : "", fg);
+				printf("\003%s%u", ((unsigned char) fg < 10) ? "0" : "", (unsigned char) fg);
 		}
 	}
 
