@@ -283,7 +283,7 @@ void screen_new_line(void)
 		zword above = (cwp->y_cursor - 1) / font_height;
 		zword below = (cwp->y_size - cwp->y_cursor + 1) / font_height;
 
-		cwp->line_count++;	/* Assume it won't overflor on PDP10 */
+		cwp->line_count++;	/* Assume it won't overflow on PDP10 */
 #ifdef TOPS20
 		slc = s16(cwp->line_count);
 		llc = s16(above + below -1);
@@ -483,12 +483,11 @@ zchar console_read_key(zword timeout)
 
 	key = os_read_key(timeout, cursor);
 
-	if (key != ZC_TIME_OUT)
+	if (key != ZC_TIME_OUT) {
 		for (i = 0; i < 8; i++)
 			wp[i].line_count = 0;
-
+	}
 	return key;
-
 } /* console_read_key */
 
 
@@ -510,12 +509,15 @@ static void update_attributes(void)
 
 	/* Some story files forget to select wrapping for printing hints */
 
-	if (story_id == ZORK_ZERO && z_header.release == 366)
+	if (story_id == ZORK_ZERO && z_header.release == 366) {
 		if (cwin == 0)
 			enable_wrapping = TRUE;
-	if (story_id == SHOGUN && z_header.release <= 295)
+	}
+
+	if (story_id == SHOGUN && z_header.release <= 295) {
 		if (cwin == 0)
 			enable_wrapping = TRUE;
+	}
 } /* update_attributes */
 
 
@@ -533,7 +535,6 @@ void refresh_text_style(void)
 
 	if (z_header.version != V6) {
 		style = wp[0].style;
-
 		if (cwin != 0 || z_header.flags & FIXED_FONT_FLAG)
 			style |= FIXED_WIDTH_STYLE;
 	} else
@@ -542,7 +543,6 @@ void refresh_text_style(void)
 	if (!ostream_memory && ostream_screen && enable_buffering) {
 		print_char(ZC_NEW_STYLE);
 		print_char(style);
-
 	} else
 		os_set_text_style(style);
 } /* refresh_text_style */
@@ -644,10 +644,11 @@ void split_window(zword height)
 	syc=s16(wp[1].y_cursor);
 	sys=s16(wp[1].y_size);
 	if (syc > sys)
+		reset_cursor(1);
 #else
 	if ((short)wp[1].y_cursor > (short)wp[1].y_size)
-#endif
 		reset_cursor(1);
+#endif
 
 	/* Cursor of lower window mustn't be swallowed by the upper window */
 	wp[0].y_cursor += wp[0].y_pos - 1 - stat_height - height;
@@ -658,10 +659,11 @@ void split_window(zword height)
 #ifdef TOPS20
 	syc=s16(wp[0].y_cursor);
 	if (syc < 1)
+		reset_cursor(0);
 #else
 	if ((short)wp[0].y_cursor < 1)
-#endif
 		reset_cursor(0);
+#endif
 
 	/* Erase the upper window in V3 only */
 	if (z_header.version == V3 && height != 0)
@@ -1343,12 +1345,17 @@ void z_set_colour(void)
 	flush_buffer();
 	sfg=s16(fg);
 	sbg=s16(bg);
-#endif
+
+	if (sfg == -1)		/* colour -1 is the colour at the cursor */
+		fg = os_peek_colour();
+	if (bg == -1)
+		bg = os_peek_colour();
+#else
 	if ((short)fg == -1)	/* colour -1 is the colour at the cursor */
 		fg = os_peek_colour();
 	if ((short)bg == -1)
 		bg = os_peek_colour();
-
+#endif
 	if (fg == 0)		/* colour 0 means keep current colour */
 		fg = lo(wp[win].colour);
 	if (bg == 0)
@@ -1375,9 +1382,7 @@ void z_set_colour(void)
 					    (fg2 == lo(wp[0].colour)) ? fg : bg;
 
 				wp[i].colour = (bg2 << 8) | fg2;
-
 			}
-
 		}
 
 	wp[win].colour = (bg << 8) | fg;
@@ -1443,15 +1448,14 @@ void z_set_cursor(void)
 	flush_buffer();
 
 	/* Supply default arguments */
-#ifdef TOPS20
 	if (zargc < 3) {
 		zargs[2] = -3;
+#ifdef TOPS20
 		zargs[2] &= 0xffff;
-	}
 #else
-	if (zargc < 3)
 		zargs[2] = -3;
 #endif
+	}
 
 	/* Handle cursor on/off */
 #ifdef TOPS20
