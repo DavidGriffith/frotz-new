@@ -32,3 +32,5 @@ $(DFROTZ):	$(DUMB_OBJ) $(CORE_OBJ)
 clean:
 	delete *.rel
 	delete *.exe
+
+.SUFFIXES:	.exe .rel .c *.h
