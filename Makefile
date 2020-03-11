@@ -123,7 +123,6 @@ UNAME_S := $(shell uname -s)
 
 ifeq ($(MAKECMDGOALS),tops20)
     EXPORT_TYPE = tops20
-    SILENCE_UNUSED = yes
 endif
 ifeq ($(MAKECMDGOALS),dos)
     EXPORT_TYPE = dos
@@ -478,9 +477,6 @@ ifdef NO_UCONTEXT_H
 endif
 ifdef NO_EXECINFO_H
 	@echo "#define NO_EXECINFO_H" >> $@
-endif
-ifdef SILENCE_UNUSED
-	@echo "#define SILENCE_UNUSED" >> $@
 endif
 
 ifneq ($(EXPORT_TYPE), tops20)

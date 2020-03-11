@@ -502,8 +502,6 @@ void os_display_string (const zchar *s)
 void os_erase_area (int top, int left, int bottom, int right, int UNUSED (win))
 {
 	int row, col;
-
-	SILENCE(win)
 	top--; left--; bottom--; right--;
 	for (row = top; row <= bottom; row++) {
 		for (col = left; col <= right; col++)
@@ -569,18 +567,15 @@ void os_beep (int volume)
 
 
 /* To make the common code happy */
-void os_set_font (int UNUSED (x)) { SILENCE(x) }
+void os_set_font (int UNUSED (x)) {}
 void os_init_sound(void) {}
-void os_prepare_sample (int UNUSED (a)) { SILENCE(a) }
-void os_finish_with_sample (int UNUSED (a)) { SILENCE(a) }
-void os_start_sample (int UNUSED (a), int UNUSED (b), int UNUSED (c), zword UNUSED (d)) { SILENCE(a) SILENCE(b) SILENCE(c) SILENCE(d) }
-void os_stop_sample (int UNUSED (a)) { SILENCE(a) }
+void os_prepare_sample (int UNUSED (a)) {}
+void os_finish_with_sample (int UNUSED (a)) {}
+void os_start_sample (int UNUSED (a), int UNUSED (b), int UNUSED (c), zword UNUSED (d)) {}
+void os_stop_sample (int UNUSED (a)) {}
 
-int os_check_unicode(int UNUSED (font), zchar UNUSED (c))
+int os_check_unicode(int font, zchar c)
 {
-	SILENCE(font)
-	SILENCE(c)
-
 	/* Only UTF-8 output, no input yet.  */
 	return 1;
 }
@@ -623,12 +618,6 @@ bool os_repaint_window(int UNUSED(win), int UNUSED(ypos_old),
 			int UNUSED(ypos_new), int UNUSED(xpos),
 			int UNUSED(ysize), int UNUSED(xsize))
 {
-	SILENCE(win)
-	SILENCE(ypos_old)
-	SILENCE(ypos_new)
-	SILENCE(xpos)
-	SILENCE(ysize)
-	SILENCE(xsize)
 	return FALSE;
 }
 

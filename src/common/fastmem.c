@@ -537,7 +537,6 @@ void init_memory(void)
 	if (checksum != z_header.checksum)
 		os_fatal("Checksum failed!");
 #endif
-	SILENCE(n)
 } /* init_memory */
 
 

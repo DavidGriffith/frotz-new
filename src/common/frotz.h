@@ -41,12 +41,6 @@ typedef int bool;
 #define FALSE 0
 #endif
 
-#ifdef SILENCE_UNUSED
-#define SILENCE(x)	{x = NULL;}
-#else
-#define SILENCE(x)	{}
-#endif
-
 #ifndef PATH_MAX
 #  ifdef MAXPATHLEN                /* defined in <sys/param.h> some systems */
 #    define PATH_MAX      MAXPATHLEN

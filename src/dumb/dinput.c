@@ -433,9 +433,6 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 	int i, j, len;
 #endif
 
-	SILENCE(max)
-	SILENCE(width)
-
 	/* Discard any keys read for single key input.  */
 	read_key_buffer[0] = '\0';
 

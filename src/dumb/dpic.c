@@ -184,9 +184,6 @@ bool os_picture_data(int num, int *height, int *width)
 	*height = pict_info[index].height;
 	*width = pict_info[index].width;
 #endif
-	SILENCE(num)
-	SILENCE(height)
-	SILENCE(width)
 	return TRUE;
 }
 
@@ -222,10 +219,6 @@ void os_draw_picture (int num, int row, int col)
 		for (c = col + width - 2; c > col; c--, (num /= 10))
 			dumb_set_picture_cell(row + height - 2, c, num ? (num % 10 + '0') : ':');
 	}
-#else
-	SILENCE(num)
-	SILENCE(row)
-	SILENCE(col)
 #endif
 }
 

@@ -301,9 +301,7 @@ void os_quit(int status)
 }
 
 
-void os_restart_game (int UNUSED (stage)) {
-	SILENCE(stage)
-}
+void os_restart_game (int UNUSED (stage)) {}
 
 
 void os_fatal (const char *s, ...)
