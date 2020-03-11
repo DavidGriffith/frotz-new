@@ -393,6 +393,7 @@ tops20: distclean $(COMMON_DEFINES) $(HASH)
 	@echo "*************************************************************"
 	@echo Producing snavig-processed source for $(EXPORT_TYPE)
 	@$(SNAVIG) $(COMMON_DIR) $(DUMB_DIR) $(SNAVIG_DIR)
+	@cp Makefile.kcc $(SNAVIG_DIR)/Makefile
 	@echo Now, get this into a $(EXPORT_TYPE) machine for compilation.
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)

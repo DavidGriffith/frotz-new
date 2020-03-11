@@ -1,0 +1,34 @@
+# This file is used to build Frotz for TOPS20 using the KCC compiler.
+#
+
+CC = cc
+
+NAME = frotz
+
+C = .c
+O = .rel
+E = .exe
+
+CFLAGS =
+
+DFROTZ = d$(NAME)$(E)
+CFROTZ = $(NAME)$(E)
+
+CORE_OBJ = buffer$(O) err$(O) fastme$(O) files$(O) getopt$(O) hotkey$(O) \
+		input$(O) main$(O) math$(O) missin$(O) object$(O) \
+		proces$(O) quetza$(O) random$(O) redire$(O) screen$(O) \
+		sound$(O) stream$(O) table$(O) text$(O) variab$(O)
+
+DUMB_OBJ = dblorb$(O) dinit$(O) dinput$(O) doutpu$(O) dpic$(O)
+
+dumb:		$(DFROTZ)
+dfrotz:		$(DFROTZ)
+$(DFROTZ):	$(DUMB_OBJ) $(CORE_OBJ)
+	$(CC) $(CFLAGS) -o $(DFROTZ) $(DUMB_OBJ) $(CORE_OBJ)
+
+.c.rel:
+	$(CC) $(CFLAGS) -c $<
+
+clean:
+	delete *.rel
+	delete *.exe
