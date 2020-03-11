@@ -27,7 +27,7 @@ $(DFROTZ):	$(DUMB_OBJ) $(CORE_OBJ)
 	$(CC) $(CFLAGS) -o $(DFROTZ) $(DUMB_OBJ) $(CORE_OBJ)
 
 .c.rel:
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	delete *.rel
