@@ -47,7 +47,7 @@ void z_dec(void)
 		sv -= 1;
 		*sp = ((zword) (sv & 0xffff));
 	} else {
-		zword addr = z_header.globals + 2 * (zargs[0] - 16);
+		zword addr = z_header.globals + 2 * (z0 - 16);
 		LOW_WORD(addr, value)
 		sv=s16(value);
 		sv--;
