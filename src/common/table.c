@@ -88,7 +88,11 @@ void z_copy_table(void)
  */
 void z_loadb(void)
 {
+#ifdef TOPS20
+	zword addr = zargs[0] + zargs[1] & 0xffff;
+#else
 	zword addr = zargs[0] + zargs[1];
+#endif
 	zbyte value;
 
 	LOW_BYTE(addr, value)
