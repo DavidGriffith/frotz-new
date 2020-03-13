@@ -45,7 +45,7 @@ void z_dec(void)
 	else if (z0 < 16) {
 		sv = s16(*(fp - z0));
 		sv -= 1;
-		*sp = ((zword) (sv & 0xffff));
+		*(fp - z0) = ((zword) (sv & 0xffff));
 	} else {
 		zword addr = z_header.globals + 2 * (z0 - 16);
 		LOW_WORD(addr, value)
