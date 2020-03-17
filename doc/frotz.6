@@ -601,6 +601,15 @@ Getting normal xterm to behave like this all the time can vary from
 system to system.  Other terminal emulators have their own ways of being
 set to use UTF-8 character encoding.
 
+.SH NON ASCII CHARACTERS
+Non-ASCII glyphs can be displayed without the use of UTF-8 by way of the
+ISO-8859-1 or ISO-8859-15 (Latin-1 or Latin-9) character sets.
+ISO-8859-15 is more or less identical to ISO-8859-1 except that the
+OE/oe dipthongs are supported, replacing the seldom-used 1/2 and 1/4
+glyphs.  See
+.B luit(1)
+for more information.
+
 .SS LOCALE
 An important means of ensuring the system knows to use UTF-8 is to make
 sure the locale is set appropriately.  This is valid only when
