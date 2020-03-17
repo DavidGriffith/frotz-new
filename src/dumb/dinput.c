@@ -454,8 +454,8 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 
 	/* copy to the buffer and save the rest for next time.  */
 #ifndef USE_UTF8
-	strncat((char*) buf, read_line_buffer,
-		(INPUT_BUFFER_SIZE - strlen((char *)buf)) - 2);
+	strncat((char*) buf, (char *) read_line_buffer,
+		INPUT_BUFFER_SIZE - strlen(read_line_buffer) - 1);
 #else
 	for (len = 0;; len++) {
 		if (!buf[len])
