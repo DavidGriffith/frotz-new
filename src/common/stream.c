@@ -110,7 +110,11 @@ void z_output_stream(void)
 {
 	flush_buffer();
 
+#ifdef TOPS20
+	switch (s16(zargs[0])) {
+#else
 	switch ((short)zargs[0]) {
+#endif
 	case 1:
 		ostream_screen = TRUE;
 		break;
