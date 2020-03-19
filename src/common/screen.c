@@ -71,7 +71,7 @@ static zword winarg0(void)
 	short sz0;
 
 	sz0 = s16(zargs[0]);
-	if (z_header.version = V6 && sz0 == -3)
+	if (z_header.version == V6 && sz0 == -3)
 		return cwin;
 	if (sz0 >= ((z_header.version == V6) ? 8 : 2))
 		runtime_error(ERR_ILL_WIN);
