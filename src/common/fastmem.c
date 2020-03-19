@@ -777,7 +777,7 @@ void z_restore(void)
 
 				/* In V3, reset the upper window. */
 				if (z_header.version == V3)
-				split_window(0);
+					split_window(0);
 
 				LOW_BYTE (H_SCREEN_ROWS, old_screen_rows);
 				LOW_BYTE (H_SCREEN_COLS, old_screen_cols);
