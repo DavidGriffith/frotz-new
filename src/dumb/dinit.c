@@ -183,7 +183,6 @@ void os_process_arguments(int argc, char *argv[])
 		break;
 	case FORMAT_ANSI:
 		printf("Using ANSI formatting.\n");
-		f_setup.format = FORMAT_ANSI;
 		break;
 	case FORMAT_UNKNOWN:
 		printf("Unknown formatting \"%s\".\n", format_orig);
