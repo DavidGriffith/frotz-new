@@ -161,17 +161,19 @@ ifneq ($(OS_TYPE),Darwin)
 		NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
 	endif
 else
-	# MacOS lacks pkg-config.  So set CURSES_LDFLAGS to something
-	# known to work.
+	# MacOS ordinarily lacks pkg-config.  Abort if it's not installed.
 	ifeq ($(UNAME_S),Darwin)
 		MACOS = yes
 		# On MACOS, curses is actually ncurses, but to get wide
 		# char support you need to define _XOPEN_SOURCE_EXTENDED
-		CURSES = curses
-		CFLAGS += -D_XOPEN_SOURCE_EXTENDED -DMACOS -I/opt/local/include \
-			-D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=600
-		LDFLAGS += -L/opt/local/lib
-		CURSES_LDFLAGS += -lcurses
+		# Often ncursesw is not present, but has wide support anyhow.
+		CURSES ?= ncurses
+		ifneq (, $(shell which $(PKG_CONFIG))
+			CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
+			CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
+		else
+			($error pkg-config required for building on MacOS)
+		endif
 	endif
 endif
 
