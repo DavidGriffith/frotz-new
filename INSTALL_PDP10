@@ -68,3 +68,20 @@ the machine, FTP is probably your best bet.
 Now compile.
 
   cc -o dfrotz.exe *.c
+
+
+There are some irritating characteristics of TOPS20 that need to be
+addressed.  So far, the only serious one deals with the terminal width.
+TOPS20 will automatically insert a newline every N characters where N is
+the terminal width setting.  You can see these by typing INFO TERM.  To
+make TOPS20 not do this, you need to set the width to zero -- like this
+"TERM WIDTH 0".  It's best to do these terminal setup things in your
+LOGIN.CMD file, which is akin to a .profile or .bashrc file on a Unix
+machine.  Add the following lines in the following order to LOGIN.CMD:
+
+TERM VT100
+TERM WIDTH 0
+
+When setting TERM VT100, this implies a width of 80.  Therefore the
+width needs to be set AFTER the terminal type in order for the width
+setting to stick.
