@@ -50,8 +50,8 @@ static int screen_cells;
 
 typedef struct cell_struct {
 	int style;
-	unsigned int fg;
-	unsigned int bg;
+	short fg;
+	short bg;
 	zchar c;
 } cell_t;
 
@@ -183,17 +183,14 @@ static void show_cell_irc(cell_t cel)
 
 static void show_cell_ansi(cell_t cel)
 {
-	static char
+	static char lastfg   = DEFAULT_DUMB_COLOUR,
+		    lastbg   = DEFAULT_DUMB_COLOUR,
 		    lastbold = 0,
 		    lastemph = 0,
 		    lastrev  = 0;
 
-	static unsigned int lastfg   = DEFAULT_DUMB_COLOUR,
-			    lastbg   = DEFAULT_DUMB_COLOUR;
-
-	unsigned int	    fg	     = cel.fg,
-			    bg	     = cel.bg,
-			    new_bg, new_fg;
+	char	    fg	     = cel.fg,
+		    bg	     = cel.bg;
 
 	if (cel.c == '\n') {
 		printf("\033[0K\n");
@@ -206,24 +203,18 @@ static void show_cell_ansi(cell_t cel)
 		bg = frotz_to_dumb [z_header.default_background];
 
 	if (fg != lastfg) {
-		if (fg < 8) {
-			new_fg = 30 + fg;
-			printf("\033[%um", new_fg);
-		} else {
-			new_fg = 232 + fg;
-			printf("\033[38;5;%um", new_fg);
-		}
+		if (fg < 8)
+			printf("\033[%dm", 30 + fg);
+		else
+			printf("\033[38;5;%dm", 232 + fg);
 		lastfg = fg;
 	}
 
 	if (bg != lastbg) {
-		if (bg < 8) {
-			new_bg = 40 + bg;
-			printf("\033[%um", new_bg);
-		} else {
-			new_bg = 232 + bg;
-			printf("\033[48;5;%um", new_bg);
-		}
+		if (bg < 8)
+			printf("\033[%dm", 40 + bg);
+		else
+			printf("\033[48;5;%dm", 232 + bg);
 		lastbg = bg;
 	}
 
