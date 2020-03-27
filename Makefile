@@ -168,7 +168,7 @@ else
 		# char support you need to define _XOPEN_SOURCE_EXTENDED
 		# Often ncursesw is not present, but has wide support anyhow.
 		CURSES ?= ncurses
-		ifneq (, $(shell which $(PKG_CONFIG))
+		ifneq (, $(shell which $(PKG_CONFIG)))
 			CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 			CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
 		else
