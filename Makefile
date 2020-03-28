@@ -172,7 +172,7 @@ ifneq (, $(shell which $(PKG_CONFIG)))
 CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
 else
-($error pkg-config required for building on MacOS)
+$(error pkg-config required for building on MacOS)
 endif
 endif
 endif
