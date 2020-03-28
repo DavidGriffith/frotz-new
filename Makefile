@@ -117,7 +117,7 @@ OS_TYPE ?= unix
 UNAME_S := $(shell uname -s)
 
 # If we have pkg-config, that good.  Otherwise maybe warn later.
-ifneq (, $(shell which $(PKG_CONFIG)))
+ifneq ($(shell which $(PKG_CONFIG)),)
 # check for pkg-config curses info
 PKG_CONFIG_CURSES := $(shell $(PKG_CONFIG) --exists $(CURSES); echo $$?)
 ifeq ($(PKG_CONFIG_CURSES),0)
@@ -298,7 +298,7 @@ MAKEFLAGS += -Orecurse
 endif
 
 # Just the version number without the dot
-DOSVER = $(shell echo $(VERSION) | sed s/\\.//g )
+DOSVER = $(shell echo $(VERSION) | sed s/\\.//g)
 
 # Build recipes
 #
@@ -381,7 +381,7 @@ $(SUB_CLEAN):
 defs: common_defines
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
-ifeq ($(wildcard $(COMMON_DEFINES)), )
+ifeq ($(wildcard $(COMMON_DEFINES)),)
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
@@ -423,7 +423,7 @@ endif
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
-ifeq ($(wildcard $(CURSES_DEFINES)), )
+ifeq ($(wildcard $(CURSES_DEFINES)),)
 ifndef CURSES
 	@echo "** ERROR You need to pick a flavor of curses in the Makefile!"
 	exit 1
@@ -463,7 +463,7 @@ endif
 
 hash: $(HASH)
 $(HASH):
-ifeq ($(wildcard $(HASH)), )
+ifeq ($(wildcard $(HASH)),)
 	@echo "** Generating $@"
 	@echo "#define VERSION \"$(VERSION)\"" > $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
