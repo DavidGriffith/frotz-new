@@ -103,17 +103,18 @@ STACK_SIZE = 1024
 # Under normal circumstances, nothing in this section should be changed.
 #########################################################################
 
+# Windows - don't build
+ifeq ($(OS),Windows_NT)
+$(error Compilation on Windows not supported)
+endif
+
 # Determine what system we are on.
-ifneq ($(OS),Windows_NT)
 RANLIB ?= $(shell which ranlib)
 AR ?= $(shell which ar)
 PKG_CONFIG ?= pkg-config
 # For now, assume !windows == unix.
 OS_TYPE ?= unix
 UNAME_S := $(shell uname -s)
-else
-$(error Compilation on Windows not supported)
-endif
 
 # Since MacOS is weird, we'll deal with well-behaved Unices first.
 ifneq ($(UNAME_S),Darwin)
