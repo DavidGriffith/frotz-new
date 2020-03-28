@@ -116,8 +116,6 @@ PKG_CONFIG ?= pkg-config
 OS_TYPE ?= unix
 UNAME_S := $(shell uname -s)
 
-# Since MacOS is weird, we'll deal with well-behaved Unices first.
-ifneq ($(UNAME_S),Darwin)
 # If we have pkg-config, that good.  Otherwise maybe warn later.
 ifneq (, $(shell which $(PKG_CONFIG)))
 # check for pkg-config curses info
@@ -165,7 +163,7 @@ LINUX = yes
 CFLAGS += -D_POSIX_C_SOURCE=200809L
 NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
 endif
-else
+# macOS
 # MacOS ordinarily lacks pkg-config.  Abort if it's not installed.
 ifeq ($(UNAME_S),Darwin)
 MACOS = yes
@@ -178,7 +176,6 @@ CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
 else
 $(error pkg-config required for building on MacOS)
-endif
 endif
 endif
 
