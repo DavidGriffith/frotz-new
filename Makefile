@@ -171,7 +171,8 @@ MACOS = yes
 # char support you need to define _XOPEN_SOURCE_EXTENDED
 # Often ncursesw is not present, but has wide support anyhow.
 CURSES ?= ncurses
-ifneq (, $(shell which $(PKG_CONFIG)))
+# get flags from pkg-config curses if available
+ifeq ($(PKG_CONFIG_CURSES),0)
 CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
 else
