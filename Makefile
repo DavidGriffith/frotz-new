@@ -116,7 +116,7 @@ $(error Compilation on Windows not supported)
 endif
 
 # Since MacOS is weird, we'll deal with well-behaved Unices first.
-ifneq ($(OS_TYPE),Darwin)
+ifneq ($(UNAME_S),Darwin)
 # If we have pkg-config, that good.  Otherwise maybe warn later.
 ifneq (, $(shell which $(PKG_CONFIG)))
 CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
