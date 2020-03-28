@@ -120,8 +120,12 @@ UNAME_S := $(shell uname -s)
 ifneq ($(UNAME_S),Darwin)
 # If we have pkg-config, that good.  Otherwise maybe warn later.
 ifneq (, $(shell which $(PKG_CONFIG)))
+# check for pkg-config curses info
+PKG_CONFIG_CURSES := $(shell $(PKG_CONFIG) --exists $(CURSES); echo $$?)
+ifeq ($(PKG_CONFIG_CURSES),0)
 CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
+endif
 else
 NO_PKG_CONFIG = yes
 endif
