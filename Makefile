@@ -188,6 +188,7 @@ endif
 CURSES_LDFLAGS += $(shell $(CURSES_CONFIG) --libs)
 CURSES_CFLAGS += $(shell $(CURSES_CONFIG) --cflags)
 endif
+SDL_CFLAGS += -D_XOPEN_SOURCE
 endif
 
 
