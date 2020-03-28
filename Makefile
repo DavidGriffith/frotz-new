@@ -176,7 +176,17 @@ ifeq ($(PKG_CONFIG_CURSES),0)
 CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
 else
-$(error pkg-config required for building on MacOS)
+# MacOS provided ncurses, but doesn't have pkg-config .pc files installed.
+# Since ncursesx.x-config (should be) available if curses is installed,
+# use that instead of pkg-config to get --libs and --cflags.
+# Search $PATH for ncursesx.x-config, use the first one.
+CURSES_CONFIG ?= $(shell echo "$$PATH" | while read -d':' l; do \
+	stat -q -f'%N' $$l/$(CURSES)*-config; done | head -n 1)
+ifeq ($(CURSES_CONFIG),)
+$(error no $(CURSES)x.x-config found)
+endif
+CURSES_LDFLAGS += $(shell $(CURSES_CONFIG) --libs)
+CURSES_CFLAGS += $(shell $(CURSES_CONFIG) --cflags)
 endif
 endif
 
