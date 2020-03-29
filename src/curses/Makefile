@@ -15,15 +15,15 @@ ARFLAGS = rc
 SOUND_TYPE ?= ao
 
 ifeq ($(SOUND_TYPE), ao)
-    ifneq ($(UNAME_S),Haiku)
-	CFLAGS += -pthread
-    endif
+ifneq ($(UNAME_S),Haiku)
+CFLAGS += -pthread
+endif
 else ifeq ($(SOUND_TYPE), none)
 
 else ifndef SOUND_TYPE
 
 else
-  $(error Invalid sound choice $(SOUND_TYPE))
+$(error Invalid sound choice $(SOUND_TYPE))
 endif
 
 .PHONY: clean
