@@ -127,6 +127,7 @@ endif
 else
 NO_PKG_CONFIG = yes
 endif
+
 # NetBSD
 ifeq ($(UNAME_S),NetBSD)
 NETBSD = yes
@@ -139,6 +140,7 @@ else
 CURSES_CFLAGS += -I/usr/pkg/include/ncurses
 endif
 endif
+
 # FreeBSD
 ifeq ($(UNAME_S),FreeBSD)
 FREEBSD = yes
@@ -146,6 +148,7 @@ CFLAGS += -I/usr/local/include -D__BSD_VISIBLE=1
 LDFLAGS += -L/usr/local/lib
 SDL_LDFLAGS += -lexecinfo
 endif
+
 # OpenBSD
 ifeq ($(UNAME_S),OpenBSD)
 OPENBSD = yes
@@ -157,13 +160,15 @@ LDFLAGS += -L/usr/local/lib
 SDL_CFLAGS += -DSDL_DISABLE_IMMINTRIN_H
 SDL_LDFLAGS += -lexecinfo
 endif
+
 # Linux
 ifeq ($(UNAME_S),Linux)
 LINUX = yes
 CFLAGS += -D_POSIX_C_SOURCE=200809L
 NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
 endif
-# macOS
+
+# MacOS
 # MacOS ordinarily lacks pkg-config.  Abort if it's not installed.
 ifeq ($(UNAME_S),Darwin)
 MACOS = yes
