@@ -111,22 +111,29 @@ endif
 # Determine what system we are on.
 RANLIB ?= $(shell which ranlib)
 AR ?= $(shell which ar)
-PKG_CONFIG ?= pkg-config
 # For now, assume !windows == unix.
 OS_TYPE ?= unix
 UNAME_S := $(shell uname -s)
+PKG_CONFIG ?= pkg-config
 
-# If we have pkg-config, that good.  Otherwise maybe warn later.
-ifneq ($(shell which $(PKG_CONFIG)),)
-# check for pkg-config curses info
-PKG_CONFIG_CURSES := $(shell $(PKG_CONFIG) --exists $(CURSES); echo $$?)
-ifeq ($(PKG_CONFIG_CURSES),0)
+
+# If we don't have pkg-config, try something obvious for curses.
+ifeq ($(shell which $(PKG_CONFIG)),)
+NO_PKG_CONFIG = yes
+CURSES_LDFLAGS += -l$(CURSES)
+else
+# If pkg-config detects a curses library, use it.
+ifneq ($(shell $(PKG_CONFIG) --exists),)
 CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
-endif
 else
-NO_PKG_CONFIG = yes
+# Otherwise, try something obvious.
+CURSES_LDFLAGS += -l$(CURSES)
 endif
+endif
+
+
+# OS-specific configuration.
 
 # NetBSD
 ifeq ($(UNAME_S),NetBSD)
@@ -170,6 +177,7 @@ endif
 
 # MacOS
 # MacOS ordinarily lacks pkg-config.  Abort if it's not installed.
+# We can't count on the above tricks to work for MacOS.
 ifeq ($(UNAME_S),Darwin)
 MACOS = yes
 # On MACOS, curses is actually ncurses, but to get wide
