@@ -7,6 +7,8 @@ This is a minor release focusing on minor enhancements and bug fixes.
 
 BUG FIXES
 
+- Reworked Makefiles to better handle library detection.
+
 - Fixed rendering of non-paletted PNG images.  Affected only non-Infocom
   V6 games.
 
