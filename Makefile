@@ -116,25 +116,21 @@ OS_TYPE ?= unix
 UNAME_S := $(shell uname -s)
 PKG_CONFIG ?= pkg-config
 
-
 # If we don't have pkg-config, try something obvious for curses.
 ifeq ($(shell which $(PKG_CONFIG)),)
 NO_PKG_CONFIG = yes
 CURSES_LDFLAGS += -l$(CURSES)
 else
 # If pkg-config detects a curses library, use it.
-ifneq ($(shell $(PKG_CONFIG) --exists),)
+ifeq ($(shell pkg-config --exists $(CURSES) && echo 0),0)
 CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
-else
-# Otherwise, try something obvious.
+else # Otherwise, try something obvious like before.
 CURSES_LDFLAGS += -l$(CURSES)
 endif
 endif
 
-
-# OS-specific configuration.
-
+# OS-specific configurations.
 # NetBSD
 ifeq ($(UNAME_S),NetBSD)
 NETBSD = yes
@@ -176,8 +172,6 @@ NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
 endif
 
 # MacOS
-# MacOS ordinarily lacks pkg-config.  Abort if it's not installed.
-# We can't count on the above tricks to work for MacOS.
 ifeq ($(UNAME_S),Darwin)
 MACOS = yes
 # On MACOS, curses is actually ncurses, but to get wide
