@@ -42,6 +42,11 @@ static char latin1_to_ascii[] =
 
 static char frotz_to_dumb [256];
 
+static char* bbcode_colour[] = {
+	"black", "red", "green", "yellow", "blue", "magenda",
+	"cyan", "white", "lightgrey", "grey", "dimgrey"
+};
+
 /* z_header.screen_rows * z_header.screen_cols */
 static int screen_cells;
 
@@ -252,6 +257,101 @@ static void show_cell_ansi(cell_t cel)
 	else
 		zputchar(cel.c);
 }
+
+static void show_cell_bbcode(cell_t cel)
+{
+	static char lastfg   = DEFAULT_DUMB_COLOUR,
+		    lastbg   = DEFAULT_DUMB_COLOUR,
+		    lastbold = 0,
+		    lastemph = 0,
+		    lastfix  = 0;
+
+	char	    fg	     = cel.fg,
+		    bg	     = cel.bg,
+		    bold      = (cel.style & BOLDFACE_STYLE) ? 1 : 0,
+		    emph      = (cel.style & EMPHASIS_STYLE) ? 1 : 0,
+		    fix       = (cel.style & FIXED_WIDTH_STYLE) ? 1 : 0,
+		    defaultfg = frotz_to_dumb [z_header.default_foreground],
+		    defaultbg = frotz_to_dumb [z_header.default_background];
+
+	if (fg == DEFAULT_DUMB_COLOUR)
+		fg = defaultfg;
+	if (bg == DEFAULT_DUMB_COLOUR)
+		bg = defaultbg;
+	if (lastfg == DEFAULT_DUMB_COLOUR)
+		lastfg = defaultfg;
+	if (lastbg == DEFAULT_DUMB_COLOUR)
+		lastbg = defaultbg;
+
+	if (cel.style & REVERSE_STYLE) {
+		char tmp;
+		tmp = fg;
+		fg = bg;
+		bg = tmp;
+	}
+
+	if (lastemph && (fix != lastfix || emph != lastemph || bold != lastbold
+		|| bg != lastbg || fg != lastfg)) {
+		printf("[/i]");
+		lastemph = 0;
+	}
+
+	if (lastbold && (fix != lastfix || bold != lastbold || bg != lastbg
+		|| fg != lastfg)) {
+		printf("[/b]");
+		lastbold = 0;
+	}
+
+	if (lastfg != defaultfg && (fix != lastfix || bg != lastbg
+		|| fg != lastfg)) {
+		printf("[/color]");
+		lastfg = defaultfg;
+	}
+
+	if (lastbg != defaultbg && (fix != lastfix || bg != lastbg)) {
+		printf("[/bgcolor]");
+		lastbg = defaultbg;
+	}
+
+	if (lastfix && fix != lastfix) {
+		printf("[/font]");
+		lastfix = 0;
+	}
+
+	if (fix != lastfix) {
+		printf("[font=monospace]");
+		lastfix = 1;
+	}
+
+	if (bg != lastbg) {
+		printf("[bgcolor=%s]", bbcode_colour[bg]);
+		lastbg = bg;
+	}
+
+	if (fg != lastfg) {
+		printf("[color=%s]", bbcode_colour[fg]);
+		lastfg = fg;
+	}
+
+	if (bold != lastbold) {
+		printf("[b]");
+		lastbold = 1;
+	}
+
+	if (emph != lastemph) {
+		printf("[i]");
+		lastemph = 1;
+	}
+
+	if (cel.style & PICTURE_STYLE)
+		zputchar(show_pictures ? cel.c : ' ');
+	else if (strchr("[]\\`*|_#<>=-.+~&", cel.c))
+		printf("\\%c", cel.c);
+	else if (cel.c == ' ' && fix)
+		printf("&nbsp;");
+	else
+		zputchar(cel.c);
+}
 #endif /* DISABLE_FORMATS */
 
 
@@ -303,6 +403,8 @@ static void show_cell(cell_t cel)
 		show_cell_irc(cel);
 	else if (f_setup.format == FORMAT_ANSI)
 		show_cell_ansi(cel);
+	else if (f_setup.format == FORMAT_BBCODE)
+		show_cell_bbcode(cel);
 	else
 #endif
 		show_cell_normal(cel);
@@ -704,6 +806,27 @@ void dumb_init_output(void)
 
 		z_header.default_foreground = WHITE_COLOUR;
 		z_header.default_background = BLACK_COLOUR;
+	} else if (f_setup.format == FORMAT_BBCODE) {
+		setvbuf(stdout, 0, _IONBF, 0);
+		setvbuf(stderr, 0, _IONBF, 0);
+
+		z_header.config |= CONFIG_COLOUR | CONFIG_BOLDFACE | CONFIG_EMPHASIS;
+
+		memset (frotz_to_dumb, 256, DEFAULT_DUMB_COLOUR);
+		frotz_to_dumb [BLACK_COLOUR]      = 0;
+		frotz_to_dumb [RED_COLOUR]        = 1;
+		frotz_to_dumb [GREEN_COLOUR]      = 2;
+		frotz_to_dumb [YELLOW_COLOUR]     = 3;
+		frotz_to_dumb [BLUE_COLOUR]       = 4;
+		frotz_to_dumb [MAGENTA_COLOUR]    = 5;
+		frotz_to_dumb [CYAN_COLOUR]       = 6;
+		frotz_to_dumb [WHITE_COLOUR]      = 7;
+		frotz_to_dumb [LIGHTGREY_COLOUR]  = 8;
+		frotz_to_dumb [MEDIUMGREY_COLOUR] = 9;
+		frotz_to_dumb [DARKGREY_COLOUR]   = 10;
+
+		z_header.default_foreground = BLACK_COLOUR;
+		z_header.default_background = WHITE_COLOUR;
 	}
 #endif /* DISABLE_FORMATS */
 	if (z_header.version == V3) {

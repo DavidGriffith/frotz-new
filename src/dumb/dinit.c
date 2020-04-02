@@ -104,6 +104,8 @@ void os_process_arguments(int argc, char *argv[])
 				f_setup.format = FORMAT_IRC;
 			} else if (strcmp(zoptarg, "ansi") == 0) {
 				f_setup.format = FORMAT_ANSI;
+			} else if (strcmp(zoptarg, "bbcode") == 0) {
+				f_setup.format = FORMAT_BBCODE;
 			} else if ((strcmp(zoptarg, "none") == 0) ||
 				(strcmp(zoptarg, "normal") == 0)) {
 			} else
@@ -195,6 +197,10 @@ void os_process_arguments(int argc, char *argv[])
 	case FORMAT_ANSI:
 		printf("Using ANSI formatting.\n");
 		f_setup.format = FORMAT_ANSI;
+		break;
+	case FORMAT_BBCODE:
+		printf("Using Discourse BBCode formatting.\n");
+		f_setup.format = FORMAT_BBCODE;
 		break;
 	case FORMAT_UNKNOWN:
 		printf("Unknown formatting \"%s\".\n", format_orig);
