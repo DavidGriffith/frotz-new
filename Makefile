@@ -116,19 +116,19 @@ OS_TYPE ?= unix
 UNAME_S := $(shell uname -s)
 PKG_CONFIG ?= pkg-config
 
-# If we don't have pkg-config, try something obvious for curses.
-ifeq ($(shell which $(PKG_CONFIG)),)
-NO_PKG_CONFIG = yes
-CURSES_LDFLAGS += -l$(CURSES)
-else
-# If pkg-config detects a curses library, use it.
-ifeq ($(shell pkg-config --exists $(CURSES) && echo 0),0)
+# If we have pkg-config...
+ifneq ($(shell which $(PKG_CONFIG)),)
+# if pkg-config has $(CURSES)
+ifeq ($(shell $(PKG_CONFIG) --exists $(CURSES) && echo 0),0)
+# use pkg-config $(CURSES) info
+PKG_CONFIG_CURSES = yes
 CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
 CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
 else # Otherwise, try something obvious like before.
 CURSES_LDFLAGS += -l$(CURSES)
 endif
 endif
+
 
 # OS-specific configurations.
 # NetBSD
@@ -174,26 +174,26 @@ endif
 # MacOS
 ifeq ($(UNAME_S),Darwin)
 MACOS = yes
-# On MACOS, curses is actually ncurses, but to get wide
+# On MacOS, curses is actually ncurses, but to get wide
 # char support you need to define _XOPEN_SOURCE_EXTENDED
 # Often ncursesw is not present, but has wide support anyhow.
-CURSES = ncurses
+# Reset CURSES, use CURSES_MACOS on command line to override.
+CURSES_MACOS ?= ncurses
+CURSES = $(CURSES_MACOS)
 # get flags from pkg-config curses if available
-ifeq ($(PKG_CONFIG_CURSES),0)
-CURSES_LDFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --libs)
-CURSES_CFLAGS += $(shell $(PKG_CONFIG) $(CURSES) --cflags)
-else
+ifndef PKG_CONFIG_CURSES
 # MacOS provided ncurses, but doesn't have pkg-config .pc files installed.
 # Since ncursesx.x-config (should be) available if curses is installed,
 # use that instead of pkg-config to get --libs and --cflags.
 # Search $PATH for ncursesx.x-config, use the first one.
-CURSES_CONFIG ?= $(shell echo "$$PATH" | while read -d':' l; do \
-	stat -q -f'%N' $$l/$(CURSES)*-config; done | head -n 1)
+CURSES_CONFIG ?= $(shell echo $$PATH | while read -d ':' p; do \
+	stat -f'%N' $$p/$(CURSES)[0-9]*-config 2>/dev/null; done | head -n1)
+# Reset CURSES_LDFLAGS, CURSES_CFLAGS.
+CURSES_LDFLAGS = $(shell $(CURSES_CONFIG) --libs)
+CURSES_CFLAGS = $(shell $(CURSES_CONFIG) --cflags)
 ifeq ($(CURSES_CONFIG),)
 $(error no $(CURSES)x.x-config found)
 endif
-CURSES_LDFLAGS += $(shell $(CURSES_CONFIG) --libs)
-CURSES_CFLAGS += $(shell $(CURSES_CONFIG) --cflags)
 endif
 SDL_CFLAGS += -D_XOPEN_SOURCE
 endif
