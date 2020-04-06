@@ -212,6 +212,7 @@ extern const char build_timestamp[];
 #define HX_MOUSE_X 1
 #define HX_MOUSE_Y 2
 #define HX_UNICODE_TABLE 3
+#define HX_FLAGS 4
 
 /*** Various Z-machine constants ***/
 #define V1 1
@@ -279,6 +280,7 @@ extern const char build_timestamp[];
 #define LIGHTGREY_COLOUR 10 	/* INTERP_AMIGA only */
 #define MEDIUMGREY_COLOUR 11 	/* INTERP_AMIGA only */
 #define DARKGREY_COLOUR 12 	/* INTERP_AMIGA only */
+#define TRANSPARENT_COLOUR 15	/* ZSpec 1.1 */
 
 #define NORMAL_STYLE 0
 #define REVERSE_STYLE 1
@@ -642,6 +644,7 @@ void 	z_set_cursor(void);
 void 	z_set_margins(void);
 void 	z_set_window(void);
 void 	z_set_text_style(void);
+void	z_set_true_colour(void);
 void 	z_show_status(void);
 void 	z_sound_effect(void);
 void 	z_split_window(void);
@@ -795,6 +798,7 @@ void 	os_reset_screen(void);
 void 	os_restart_game(int);
 void 	os_scroll_area(int, int, int, int, int);
 void 	os_set_colour(int, int);
+int	os_from_true_colour(zword);
 void 	os_set_cursor(int, int);
 void 	os_set_font(int);
 void 	os_set_text_style(int);

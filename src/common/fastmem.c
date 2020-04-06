@@ -201,6 +201,8 @@ void init_header(void)
 {
 	memset(&z_header, 0, sizeof(z_header));
 	z_header.standard_high = 1;
+	/* Uncomment when 1.1 compliance is complete. */
+	/* z_header.standard_low = 1; */
 }
 
 

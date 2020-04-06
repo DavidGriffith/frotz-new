@@ -151,7 +151,7 @@ void (*ext_opcodes[0x1d])(void) = {
 	z_restore_undo,
 	z_print_unicode,
 	z_check_unicode,
-	__illegal__,
+	z_set_true_colour,	/* spec 1.1 */
 	__illegal__,
 	__illegal__,
 	z_move_window,

@@ -239,3 +239,16 @@ bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
 	return copywin(saved_screen, stdscr, ypos_old, xpos, ypos_new, xpos,
 		ypos_new + ysize - 1, xpos + xsize - 1, FALSE) != ERR;
 } /* os_repaint_window */
+
+
+/*
+ * os_from_true_colour
+ *
+ * Given a true colour, return an appropriate colour index.
+ *
+ */
+int os_from_true_colour(zword colour)
+{
+	/* Nothing here yet */
+	return 0;
+}

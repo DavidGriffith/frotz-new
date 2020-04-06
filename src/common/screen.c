@@ -1283,6 +1283,7 @@ void z_set_colour(void)
 
 	if (fg == 1)		/* colour 1 is the system default colour */
 		fg = z_header.default_foreground;
+
 	if (bg == 1)
 		bg = z_header.default_background;
 
@@ -1317,6 +1318,72 @@ void z_set_colour(void)
 	if (win == cwin || z_header.version != V6)
 		os_set_colour(fg, bg);
 } /* z_set_colour */
+
+
+/*
+ * z_set_true_colour, set the foreground and background colours
+ * to specific RGB colour values.
+ *
+ * zargs[0] = foreground colour
+ * zargs[1] = background colour
+ * zargs[2] = window (-3 is the current one, optional)
+ *
+ */
+void z_set_true_colour (void)
+{
+	zword win = (z_header.version == V6) ? winarg2() : 0;
+	zword true_fg = zargs[0];
+	zword true_bg = zargs[1];
+
+	zword fg = 0;
+	zword bg = 0;
+
+	flush_buffer();
+
+	switch ((short) true_fg) {
+	case -1:	/* colour -1 is the system default colour */
+		fg = z_header.default_foreground;
+		break;
+	case -2:	/* colour -2 means keep current colour */
+		fg = lo(wp[win].colour);
+		break;
+	case -3:	/* colour -3 is the colour at the cursor */
+		fg = os_peek_colour();
+		break;
+	case -4:
+		fg = lo (wp[win].colour);
+		break;
+	default:
+		fg = os_from_true_colour(true_fg);
+		break;
+	}
+
+	switch ((short) true_bg) {
+	case -1: /* colour -1 is the system default colour */
+		bg = z_header.default_background;
+		break;
+	case -2: /* colour -2 means keep current colour */
+ 		bg = hi (wp[win].colour);
+		break;
+	case -3: /* colour -3 is the colour at the cursor */
+		bg = os_peek_colour();
+		break;
+	case -4: /* colour -4 means transparent */
+		if (z_header.x_flags & TRANSPARENT_FLAG)
+			bg = TRANSPARENT_COLOUR;
+		else
+			bg = hi(wp[win].colour);
+		break;
+	default:
+		bg = os_from_true_colour(true_bg);
+		break;
+	}
+
+	wp[win].colour = (bg << 8) | fg;
+
+	if (win == cwin || z_header.version != V6)
+		os_set_colour(fg, bg);
+}/* z_set_true_colour */
 
 
 /*

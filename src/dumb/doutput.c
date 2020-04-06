@@ -628,6 +628,19 @@ void os_set_text_style(int x)
 
 
 /*
+ * os_from_true_colour
+ *
+ * Given a true colour, return an appropriate colour index.
+ *
+ */
+int os_from_true_colour(zword colour)
+{
+	/* Nothing here yet */
+	return 0;
+}
+
+
+/*
  * Public functions just for the Dumb interface.
  */
 void dumb_set_picture_cell(int row, int col, zchar c)
