@@ -132,6 +132,31 @@ static void reset_cursor(zword win)
 
 
 /*
+ * amiga_screen_model
+ *
+ * Check if the Amiga screen model should be used, required for
+ * some Infocom games.
+ *
+ */
+static bool amiga_screen_model (void)
+{
+	if (z_header.interpreter_number == INTERP_AMIGA) {
+		switch (story_id) {
+		case BEYOND_ZORK:
+		case ZORK_ZERO:
+		case SHOGUN:
+		case ARTHUR:
+		case JOURNEY:
+			return TRUE;
+		default:
+			break;
+		}
+	}
+	return FALSE;
+}/* amiga_screen_model */
+
+
+/*
  * reset_screen
  *
  * Do any interface-independent screen cleanup prior to exiting the game.
@@ -555,15 +580,13 @@ void erase_window(zword win)
 	zword y = wp[win].y_pos;
 	zword x = wp[win].x_pos;
 
-	if (z_header.version == V6 && win != cwin
-	    && z_header.interpreter_number != INTERP_AMIGA)
+	if (z_header.version == V6 && win != cwin && !amiga_screen_model())
 		os_set_colour(lo(wp[win].colour), hi(wp[win].colour));
 
 	os_erase_area(y,
 		      x, y + wp[win].y_size - 1, x + wp[win].x_size - 1, win);
 
-	if (z_header.version == V6 && win != cwin
-	    && z_header.interpreter_number != INTERP_AMIGA)
+	if (z_header.version == V6 && win != cwin && !amiga_screen_model())
 		os_set_colour(lo(cwp->colour), hi(cwp->colour));
 
 	reset_cursor(win);
@@ -1215,7 +1238,7 @@ void z_scroll_window(void)
 	flush_buffer();
 
 	/* Use the correct set of colours when scrolling the window */
-	if (win != cwin && z_header.interpreter_number != INTERP_AMIGA)
+	if (win != cwin && !amiga_screen_model())
 		os_set_colour(lo(wp[win].colour), hi(wp[win].colour));
 
 	y = wp[win].y_pos;
@@ -1226,7 +1249,7 @@ void z_scroll_window(void)
 		       y + wp[win].y_size - 1,
 		       x + wp[win].x_size - 1, (short)zargs[1]);
 
-	if (win != cwin && z_header.interpreter_number != INTERP_AMIGA)
+	if (win != cwin && !amiga_screen_model ())
 		os_set_colour(lo(cwp->colour), hi(cwp->colour));
 } /* z_scroll_window */
 
@@ -1263,7 +1286,12 @@ void z_set_colour(void)
 	if (bg == 1)
 		bg = z_header.default_background;
 
-	if (z_header.version == V6 && z_header.interpreter_number == INTERP_AMIGA)
+	if (fg == TRANSPARENT_COLOUR)
+		fg = lo (wp[win].colour);
+	if (bg == TRANSPARENT_COLOUR && !(z_header.x_flags & TRANSPARENT_FLAG))
+		bg = hi (wp[win].colour);
+
+	if (z_header.version == V6 && !amiga_screen_model())
 		/* Changing colours of window 0 affects the entire screen */
 		if (win == 0) {
 			int i;
