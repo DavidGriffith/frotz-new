@@ -5,6 +5,12 @@ Frotz 2.52 was released on WWW MMM DD, 20YY.
 
 This is a minor release focusing on minor enhancements and bug fixes.
 
+NEW FEATURES
+
+- Partial support for new @set_true_colour opcode.  Works for SDL.
+  Doesn't work all the way for curses.  Not in scope for dumb interface.
+
+
 BUG FIXES
 
 - Reworked Makefiles to better handle library detection.
