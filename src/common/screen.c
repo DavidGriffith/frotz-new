@@ -1053,10 +1053,19 @@ void z_get_wind_prop(void)
 {
 	flush_buffer();
 
-	if (zargs[1] >= 16)
+	if (zargs[1] < 16)
+		store(((zword *) (wp + winarg0()))[zargs[1]]);
+	else if (zargs[1] == 16)
+		store (os_to_true_colour(lo (wp [winarg0 ()].colour)));
+	else if (zargs[1] == 17) {
+		zword bg = hi (wp [winarg0 ()].colour);
+		if (bg == TRANSPARENT_COLOUR)
+			store ((zword) -4);
+		else
+			store (os_to_true_colour (bg));
+	} else
 		runtime_error(ERR_ILL_WIN_PROP);
 
-	store(((zword *) (wp + winarg0()))[zargs[1]]);
 } /* z_get_wind_prop */
 
 
@@ -1383,6 +1392,7 @@ void z_set_true_colour (void)
 
 	if (win == cwin || z_header.version != V6)
 		os_set_colour(fg, bg);
+
 }/* z_set_true_colour */
 
 

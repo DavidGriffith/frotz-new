@@ -63,6 +63,7 @@ typedef int bool;
 /* typedef unsigned short zbyte; */
 typedef unsigned char zbyte;
 typedef unsigned short zword;
+typedef unsigned long zlong;
 
 #ifndef USE_UTF8
 typedef unsigned char zchar;
@@ -122,7 +123,6 @@ typedef struct {
 	zword true_fore;
 	zword true_back;
 } Zwindow;
-
 
 #include "setup.h"
 #include "missing.h"
@@ -212,7 +212,6 @@ extern const char build_timestamp[];
 #define HX_MOUSE_X 1
 #define HX_MOUSE_Y 2
 #define HX_UNICODE_TABLE 3
-#define HX_FLAGS 4
 
 /*** Various Z-machine constants ***/
 #define V1 1
@@ -759,6 +758,8 @@ bool is_terminator(zchar);
 void read_string(int max, zchar *buffer);
 bool read_yes_or_no(const char *);
 
+int colour_in_use(zword);
+
 void screen_new_line(void);
 
 #ifndef MSDOS_16BIT
@@ -807,6 +808,7 @@ void 	os_stop_sample(int);
 int	os_storyfile_seek(FILE *, long, int);
 int	os_storyfile_tell(FILE *);
 int  	os_string_width(const zchar *);
+zword	os_to_true_colour (int);
 void	os_init_setup(void);
 void 	os_warn(const char *, ...);
 void	os_quit(int);

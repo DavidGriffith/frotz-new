@@ -48,8 +48,6 @@
 #define get_c fgetc
 #define put_c fputc
 
-typedef unsigned long zlong;
-
 /*
  * This is used only by save_quetzal. It probably should be allocated
  * dynamically rather than statically.

@@ -373,6 +373,13 @@ void os_process_arguments (int argc, char *argv[])
 	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char) + 1);
 	memcpy(f_setup.aux_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
 	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
+
+/*
+	for (int i = 0; i < NON_STD_COLS; i++)
+		u_setup.nonstdcolours[i] = 0xffffffff;
+	u_setup.nonstdindex = 0;
+*/
+
 } /* os_process_arguments */
 
 

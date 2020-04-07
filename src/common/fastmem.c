@@ -200,9 +200,9 @@ void restart_header(void)
 void init_header(void)
 {
 	memset(&z_header, 0, sizeof(z_header));
+	/* Claim to support Z-machine Standard 1.1. */
 	z_header.standard_high = 1;
-	/* Uncomment when 1.1 compliance is complete. */
-	/* z_header.standard_low = 1; */
+	z_header.standard_low = 1;
 }
 
 
