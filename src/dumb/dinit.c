@@ -20,6 +20,7 @@
  */
 
 #include <libgen.h>
+#include <sys/stat.h>
 #include "dfrotz.h"
 #include "dblorb.h"
 
@@ -91,7 +92,6 @@ void os_process_arguments(int argc, char *argv[])
 			break;
 		case 'B':
 			bot_mode = TRUE;
-			bot_status = BOT_NORMAL;
 			bot_command = strdup(zoptarg);
 			break;
 		case 'f':
@@ -247,16 +247,17 @@ void os_process_arguments(int argc, char *argv[])
 	memcpy(f_setup.command_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char));
 	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
-	if (!f_setup.restore_mode) {
-		f_setup.save_name = malloc((strlen(f_setup.story_name) +
-			strlen(EXT_SAVE)) * sizeof(char) + 1);
-		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
-		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-	} else { /* Set our auto load save as the name save */
+	/* Set our auto load save as the name save */
+	if (f_setup.restore_mode || bot_mode) {
 		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) +
 			strlen(EXT_SAVE)) * sizeof(char) + 1);
 		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char));
 		free(f_setup.tmp_save_name);
+	} else {
+		f_setup.save_name = malloc((strlen(f_setup.story_name) +
+			strlen(EXT_SAVE)) * sizeof(char) + 1);
+		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
+		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
 	}
 
 	f_setup.aux_name = malloc((strlen(f_setup.story_name) +
@@ -410,6 +411,7 @@ int os_storyfile_tell(FILE * fp)
 void os_init_setup(void)
 {
 	bot_mode = FALSE;
+	bot_status = BOT_NORMAL;
 }
 
 static void usage(void)

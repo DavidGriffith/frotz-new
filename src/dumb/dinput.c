@@ -21,10 +21,13 @@
 
 #include <string.h>
 #include <libgen.h>
+#include <sys/stat.h>
 
 #include "dfrotz.h"
 
 extern f_setup_t f_setup;
+extern zword save_quetzal (FILE *, FILE *);
+extern zword restore_quetzal (FILE *, FILE *);
 
 static char runtime_usage[] =
 	"DUMB-FROTZ runtime help:\n"
@@ -83,8 +86,29 @@ enum input_type {
 
 static void end_of_turn(void)
 {
-	/* Nothing here yet. */
-	fprintf(stderr, "end_of_turn()\n");
+	struct stat *statbuf;
+	FILE *save_fp;
+
+
+	if (bot_mode) {
+		statbuf = malloc(sizeof(struct stat));
+		if (stat(f_setup.save_name, statbuf) == 0)
+			bot_status = BOT_NORMAL;
+		else
+			bot_status = BOT_START;
+	}
+
+
+	fprintf(stderr, "savename: %s\n", f_setup.save_name);
+	fprintf(stderr, "command:  %s\n", bot_command);
+	fprintf(stderr, "status:   %d\n", bot_status);
+
+	save_fp = fopen(f_setup.save_name, "wb");
+	if (save_fp == NULL) {
+		fprintf(stderr, "Can't read save\n");
+	}
+
+
 }
 
 
