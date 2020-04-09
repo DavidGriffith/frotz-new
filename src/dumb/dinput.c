@@ -516,7 +516,7 @@ char *os_read_file_name (const char *default_name, int flag)
 		if (!fullpath[0])
 			buf = fullpath;
 		else
-			buf = basename (fullpath);
+			buf = basename(fullpath);
 		if (strlen(buf) > MAX_FILE_NAME) {
 			printf("Filename too long\n");
 			return NULL;
