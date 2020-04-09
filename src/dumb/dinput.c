@@ -81,6 +81,14 @@ enum input_type {
 };
 
 
+static void end_of_turn(void)
+{
+	/* Nothing here yet. */
+	fprintf(stderr, "end_of_turn()\n");
+}
+
+
+
 /* get a character.  Exit with no fuss on EOF.  */
 static int xgetchar(void)
 {
@@ -229,6 +237,12 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 	time_ahead = 0;
 
 	dumb_show_screen(show_cursor);
+
+	/* Here marks the end of output from the last turn
+	 * and where we start getting input.
+	 */
+	end_of_turn();
+
 	for (;;) {
 		char *command;
 		if (prompt)

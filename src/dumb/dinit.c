@@ -26,6 +26,10 @@
 extern f_setup_t f_setup;
 extern z_header_t z_header;
 
+char *bot_command;
+bool bot_mode;
+short bot_status;
+
 static void usage(void);
 static void print_version(void);
 
@@ -33,8 +37,9 @@ static void print_version(void);
 An interpreter for all Infocom and other Z-Machine games.\n\
 \n\
 Syntax: dfrotz [options] story-file\n\
-  -a   watch attribute setting    \t -P   alter piracy opcode\n\
-  -A   watch attribute testing    \t -R <path> restricted read/write\n\
+  -a   watch attribute setting    \t -p   plain ASCII output only\n\
+  -A   watch attribute testing    \t -P   alter piracy opcode\n\
+  -B <command> bot mode command   \t -R <path> restricted read/write\n\
   -f <type> type of format codes  \t -s # random number seed value\n\
   -h # screen height              \t -S # transcript width\n\
   -i   ignore fatal errors        \t -t   set Tandy bit\n\
@@ -42,8 +47,7 @@ Syntax: dfrotz [options] story-file\n\
   -o   watch object movement      \t -v   show version information\n\
   -O   watch object locating      \t -w # screen width\n\
   -L <file> load this save file   \t -x   expand abbreviations g/x/z\n\
-  -m   turn off MORE prompts      \t -Z # error checking (see below)\n\
-  -p   plain ASCII output only\n"
+  -m   turn off MORE prompts      \t -Z # error checking (see below)\n"
 
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
@@ -77,13 +81,18 @@ void os_process_arguments(int argc, char *argv[])
 	do_more_prompts = TRUE;
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "aAf:h:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
+		c = zgetopt(argc, argv, "aAB:f:h:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
 		switch(c) {
 		case 'a':
 			f_setup.attribute_assignment = 1;
 			break;
 		case 'A':
 			f_setup.attribute_testing = 1;
+			break;
+		case 'B':
+			bot_mode = TRUE;
+			bot_status = BOT_NORMAL;
+			bot_command = strdup(zoptarg);
 			break;
 		case 'f':
 #ifdef DISABLE_FORMATS
@@ -177,6 +186,12 @@ void os_process_arguments(int argc, char *argv[])
 		usage();
 		os_quit(EXIT_SUCCESS);
 	}
+
+	if (bot_mode && !(f_setup.restore_mode && f_setup.restricted_path))
+		os_fatal("Bot mode requires arguments to both -L and -R options.");
+
+	if (bot_mode && f_setup.restore_mode)
+		f_setup.restore_mode = FALSE;
 
 	switch (f_setup.format) {
 	case FORMAT_IRC:
@@ -394,7 +409,7 @@ int os_storyfile_tell(FILE * fp)
 
 void os_init_setup(void)
 {
-	/* Nothing here */
+	bot_mode = FALSE;
 }
 
 static void usage(void)
