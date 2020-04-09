@@ -513,7 +513,10 @@ char *os_read_file_name (const char *default_name, int flag)
 		} else
 			sprintf(prompt, "Please enter a filename [%s]: ", default_name);
 		dumb_read_misc_line(fullpath, prompt);
-		buf = basename (fullpath);
+		if (!fullpath[0])
+			buf = fullpath;
+		else
+			buf = basename (fullpath);
 		if (strlen(buf) > MAX_FILE_NAME) {
 			printf("Filename too long\n");
 			return NULL;
