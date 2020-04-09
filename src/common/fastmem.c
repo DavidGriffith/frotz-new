@@ -100,6 +100,12 @@ static zbyte *prev_zmp, *undo_diff;
 static int undo_count = 0;
 
 
+zword save_frotz(FILE *qfp)
+{
+	return save_quetzal(qfp, story_fp);
+}
+
+
 /*
  * get_header_extension
  *
@@ -999,7 +1005,7 @@ void z_save(void)
 		if ((gfp = fopen(new_name, "wb")) == NULL)
 			goto finished;
 
-		success = save_quetzal(gfp, story_fp);
+		success = save_frotz(gfp);
 
 		/* Close game file and check for errors */
 		if (fclose(gfp) == EOF || ferror(story_fp)) {

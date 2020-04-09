@@ -28,13 +28,15 @@ extern f_setup_t f_setup;
 extern bool do_more_prompts;
 
 /* Current status of bot and return value after every move. */
-#define BOT_NORMAL 0
-#define BOT_START 1
-#define BOT_LOAD 2
-#define BOT_SAVE 3
-#define BOT_QUIT 4
-#define BOT_DONE 5
-#define BOT_ERR  6
+#define BOT_NORMAL	0
+#define BOT_START	1
+#define BOT_LOAD	2
+#define BOT_SAVE	3
+#define BOT_QUIT	4
+#define BOT_DONE	5
+#define BOT_ERR_SAVE	6
+#define BOT_ERR_RESTORE	7
+#define BOT_ERR_MISC	8
 
 extern bool  bot_mode;
 extern short bot_status;

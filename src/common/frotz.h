@@ -768,6 +768,11 @@ void screen_new_line(void);
 
 int cdecl zgetopt(int, char **, const char *);
 
+
+/*** Unconditionally perform a save ***/
+zword save_frotz(FILE *);
+
+
 /*** returns the current window ***/
 Zwindow * curwinrec(void);
 

@@ -88,7 +88,7 @@ static void end_of_turn(void)
 {
 	struct stat *statbuf;
 	FILE *save_fp;
-
+	zword success = 0;
 
 	if (bot_mode) {
 		statbuf = malloc(sizeof(struct stat));
@@ -96,19 +96,18 @@ static void end_of_turn(void)
 			bot_status = BOT_NORMAL;
 		else
 			bot_status = BOT_START;
+
+
+		fprintf(stderr, "savename: %s\n", f_setup.save_name);
+		fprintf(stderr, "command:  %s\n", bot_command);
+		fprintf(stderr, "status:   %d\n", bot_status);
+
+		save_fp = fopen(f_setup.save_name, "wb");
+		if (save_fp == NULL) {
+			fprintf(stderr, "Can't read save\n");
+		}
+		success = save_frotz(save_fp);
 	}
-
-
-	fprintf(stderr, "savename: %s\n", f_setup.save_name);
-	fprintf(stderr, "command:  %s\n", bot_command);
-	fprintf(stderr, "status:   %d\n", bot_status);
-
-	save_fp = fopen(f_setup.save_name, "wb");
-	if (save_fp == NULL) {
-		fprintf(stderr, "Can't read save\n");
-	}
-
-
 }
 
 
