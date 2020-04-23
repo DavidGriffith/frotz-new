@@ -43,7 +43,7 @@ You can download ncurses from https://www.gnu.org/software/ncurses/ or
 ftp://ftp.gnu/org/gnu/ncurses/.  If you must use the vendor-supplied
 curses library, see the platform-specific info below.
 
-For macOS users, Frotz with all three of its user interfaces should
+For MacOS users, Frotz with all three of its user interfaces should
 compile without any changes to the source code or Makefiles. If you
 install Xcode from the Mac App Store, you should be able to run
 "make nosound" to build Frotz. To enable sound support, you can use
