@@ -39,10 +39,6 @@ certain features needed by Frotz.  I don't know about the other *BSD
 curses.  Of the current BSDs, only NetBSD still uses the old BSD curses 
 library.  All the others, including MacOS, now use ncurses.
 
-You can download ncurses from https://www.gnu.org/software/ncurses/ or
-ftp://ftp.gnu/org/gnu/ncurses/.  If you must use the vendor-supplied
-curses library, see the platform-specific info below.
-
 For MacOS users, Frotz with all three of its user interfaces should
 compile without any changes to the source code or Makefiles. If you
 install Xcode from the Mac App Store, you should be able to run
@@ -51,6 +47,13 @@ Homebrew https://brew.sh/ to install the sound support libraries:
 "brew install libao libmodplug libsamplerate libsndfile libvorbis"
 Once the sound libraries are installed, a simple "make" should build
 Frotz.
+
+For older systems, especially ones not Linux or [Net|Free|Open]BSD...
+You can download ncurses from https://www.gnu.org/software/ncurses/ or
+ftp://ftp.gnu/org/gnu/ncurses/ and compile it yourself.  If you must use
+the vendor-supplied curses library, see the platform-specific info
+below.  If your system provides a means to install ncurses, that's
+usually the best approach.
 
 Frotz's Makefile now requires the use of GNU Make.
 
