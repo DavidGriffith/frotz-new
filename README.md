@@ -8,7 +8,7 @@ Reference code and Unix port currently maintained by David Griffith.
 
 ## Features
 - Compiles and runs on most common flavors of Unix, both open source and not.
-  This includes MacOS.
+  This includes macOS.
 - Portable to many other operating systems and hardware.
 - Curses, Dumb, and SDL user interfaces.
 - Plays all Z-code games including V6.

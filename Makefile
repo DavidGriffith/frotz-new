@@ -171,10 +171,10 @@ CFLAGS += -D_POSIX_C_SOURCE=200809L
 NPROCS = $(shell grep -c ^processor /proc/cpuinfo)
 endif
 
-# MacOS
+# macOS
 ifeq ($(UNAME_S),Darwin)
 MACOS = yes
-# On MacOS, curses is actually ncurses, but to get wide
+# On macOS, curses is actually ncurses, but to get wide
 # char support you need to define _XOPEN_SOURCE_EXTENDED
 # Often ncursesw is not present, but has wide support anyhow.
 # Reset CURSES, use CURSES_MACOS on command line to override.
@@ -182,7 +182,7 @@ CURSES_MACOS ?= ncurses
 CURSES = $(CURSES_MACOS)
 # get flags from pkg-config curses if available
 ifndef PKG_CONFIG_CURSES
-# MacOS provided ncurses, but doesn't have pkg-config .pc files installed.
+# macOS provided ncurses, but doesn't have pkg-config .pc files installed.
 # Since ncursesx.x-config (should be) available if curses is installed,
 # use that instead of pkg-config to get --libs and --cflags.
 # Search $PATH for ncursesx.x-config, use the first one.

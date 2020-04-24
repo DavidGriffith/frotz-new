@@ -37,9 +37,9 @@ Linux uses ncurses, so you're safe there.  The version of curses that
 comes with NetBSD 1.6.x and later is good too.  Earlier versions lacked
 certain features needed by Frotz.  I don't know about the other *BSD
 curses.  Of the current BSDs, only NetBSD still uses the old BSD curses 
-library.  All the others, including MacOS, now use ncurses.
+library.  All the others, including macOS, now use ncurses.
 
-For MacOS users, Frotz with all three of its user interfaces should
+For macOS users, Frotz with all three of its user interfaces should
 compile without any changes to the source code or Makefiles. If you
 install Xcode from the Mac App Store, you should be able to run
 "make nosound" to build Frotz. To enable sound support, you can use
@@ -93,7 +93,7 @@ Prerequisite packages for sfrotz (Debian nomenclature):
   * libjpeg-dev		(1.5.x or higher)
   * zlib1g-dev		(1.2.x or higher)
 
-Prerequisite packages for sfrotz (MacOS Homebrew nomenclature):
+Prerequisite packages for sfrotz (macOS Homebrew nomenclature):
   * pkg-config (0.29 or higher)
   * sdl2    (2.0.9 or higher)
   * sdl2_mixer    (2.0.4 or higher)
@@ -272,13 +272,13 @@ versions of ncurses supplied on SGI's freeware CDs and in SGI's freeware
 archive.  You MUST compile and install at least ncurses 5.0 from source.
 Versions of ncurses older than 5.0 are also broken on Irix.
 
-MacOS X:  You must use "cc" instead of "gcc" even though it's really GCC.
+macOS X:  You must use "cc" instead of "gcc" even though it's really GCC.
 This is a quirk of the Mac OS X Developer Tools.  MAN_PREFIX in the
 Makefile should be set to "/usr/local/share".
 
-Installing ncurses on MacOS X used to be troublesome because of some
+Installing ncurses on macOS X used to be troublesome because of some
 nonstandard places for things, but it seems that thse problems have been
-solved with ncurses 5.2.  A precompiled version of ncurses for MacOS X is
+solved with ncurses 5.2.  A precompiled version of ncurses for macOS X is
 available at http://gnu-darwin.sourceforge.net/.
 
 Solaris:  Some versions of curses on Solaris have trouble with color
