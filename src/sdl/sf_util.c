@@ -358,9 +358,10 @@ static void parse_options(int argc, char **argv)
 
 static void print_version(void)
 {
-	printf("FROTZ V%s\tSDL interface.\n", VERSION);
-	printf("Commit date:\t%s\n", GIT_DATE);
-	printf("Git commit:\t%s\n", GIT_HASH);
+	printf("FROTZ V%s     SDL interface.\n", VERSION);
+	printf("Commit date:    %s\n", GIT_DATE);
+	printf("Git commit:     %s\n", GIT_HASH);
+	printf("Notes:          %s\n", RELEASE_NOTES);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");
 	printf
 	    ("  It complies with standard 1.0 of Graham Nelson's specification.\n");

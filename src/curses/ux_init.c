@@ -1156,14 +1156,15 @@ static void usage(void)
 
 static void print_version(void)
 {
-	printf("FROTZ V%s\tCurses interface.  ", VERSION);
+	printf("FROTZ V%s     Curses interface.  ", VERSION);
 #ifndef NO_SOUND
 	printf("Audio output enabled.");
 #else
 	printf("Audio output disabled.");
 #endif
-	printf("\nCommit date:\t%s\n", GIT_DATE);
-	printf("Git commit:\t%s\n", GIT_HASH);
+	printf("\nCommit date:    %s\n", GIT_DATE);
+	printf("Git commit:     %s\n", GIT_HASH);
+	printf("Notes:          %s\n", RELEASE_NOTES);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");
 	printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
 	printf("  It was ported to Unix by Galen Hazelwood.\n");

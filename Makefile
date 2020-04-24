@@ -224,7 +224,7 @@ export NO_SOUND
 
 NAME = frotz
 VERSION = 2.51
-
+RELEASE_NOTES = "Development release."
 
 # If we're working from git, we have access to proper variables. If
 # not, make it clear that we're working from a release.
@@ -474,6 +474,7 @@ $(HASH):
 ifeq ($(wildcard $(HASH)),)
 	@echo "** Generating $@"
 	@echo "#define VERSION \"$(VERSION)\"" > $@
+	@echo "#define RELEASE_NOTES \"$(RELEASE_NOTES)\"" >> $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
