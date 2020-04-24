@@ -93,7 +93,6 @@ extern bool m_localfiles;
 extern int m_no_sound;
 extern int m_vga_fonts;
 extern int SFdticks;
-extern volatile bool SFticked;
 extern char *m_fontdir;
 extern bool m_aafonts;
 extern char *m_setupfile;
