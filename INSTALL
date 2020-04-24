@@ -94,13 +94,13 @@ Prerequisite packages for sfrotz (Debian nomenclature):
   * zlib1g-dev		(1.2.x or higher)
 
 Prerequisite packages for sfrotz (macOS Homebrew nomenclature):
-  * pkg-config (0.29 or higher)
-  * sdl2    (2.0.9 or higher)
-  * sdl2_mixer    (2.0.4 or higher)
-  * freetype    (2.6.x or higher)
-  * libpng     (1.6.x or higher)
-  * jpeg    (1.5.x or higher)
-  * zlib    (1.2.x or higher)
+  * pkg-config		(0.29 or higher)
+  * sdl2		(2.0.9 or higher)
+  * sdl2_mixer		(2.0.4 or higher)
+  * freetype		(2.6.x or higher)
+  * libpng		(1.6.x or higher)
+  * jpeg		(1.5.x or higher)
+  * zlib		(1.2.x or higher)
 
 Prerequisite packages for sfrotz (NetBSD nomenclature):
   * SDL2		(2.0.9 or higher)
@@ -117,7 +117,7 @@ Prerequisite packages for sfrotz (OpenBSD nomenclature):
   * png			(1.6.x or higher)
   * jpeg		(1.5.x or higher)
   * zlib		(1.2.x or higher)
-  
+
 
 =======================
 Editing the Makefile ||
