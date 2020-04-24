@@ -454,12 +454,17 @@ bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
 
 
 int SFdticks = 200;
-volatile bool SFticked = 0;
+static SDL_atomic_t SFticked = {0};
 static SDL_TimerID timerid = 0;
+static Uint32 refreshEventType = 0;
 
-static Uint32 mytimer(Uint32 inter, void *parm)
+static Uint32 SDLCALL mytimer(Uint32 inter, void *parm)
 {
-	SFticked = true;
+	SDL_AtomicSet(&SFticked, 1);
+	SDL_Event event = {0};
+	event.type = SDL_USEREVENT;
+	event.user.type = refreshEventType;
+	SDL_PushEvent(&event);
 	return inter;
 }
 
@@ -536,7 +541,8 @@ void sf_initvideo(int W, int H, int full)
 	if (!sbuffer)
 		os_fatal("Could not create gc");
 
-	SDL_AddTimer(SFdticks, mytimer, NULL);
+	refreshEventType = SDL_RegisterEvents(1);
+	timerid = SDL_AddTimer(SFdticks, mytimer, NULL);
 
 	xmin = ymin = 0;
 	xmax = ewidth = W;
@@ -857,6 +863,11 @@ static zword goodzkey(SDL_Event * e, int allowed)
 			return res;
 		else
 			return 0;
+	case SDL_USEREVENT:
+		if (e->user.type == refreshEventType) {
+			myGrefresh();
+		}
+		return 0;
 	case SDL_WINDOWEVENT:
 		handle_window_event(e);
 	}
@@ -1336,8 +1347,7 @@ static void sf_quitconf()
 void os_tick()
 {
 	sf_checksound();
-	if (SFticked) {
-		SFticked = false;
+	if (SDL_AtomicSet(&SFticked, 0)) {
 		if (!sf_flushdisplay()) {
 			SDL_Event ev;
 			SDL_PumpEvents();
