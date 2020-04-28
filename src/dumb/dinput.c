@@ -29,6 +29,13 @@ extern f_setup_t f_setup;
 extern zword save_quetzal (FILE *, FILE *);
 extern zword restore_quetzal (FILE *, FILE *);
 
+extern bool bot_mode;
+extern char *bot_command;
+
+static int bot_char_count;
+
+static bool line_done;
+
 static char runtime_usage[] =
 	"DUMB-FROTZ runtime help:\n"
 	"  General Commands:\n"
@@ -86,27 +93,11 @@ enum input_type {
 
 static void end_of_turn(void)
 {
-	struct stat *statbuf;
-	FILE *save_fp;
-	zword success = 0;
-
 	if (bot_mode) {
-		statbuf = malloc(sizeof(struct stat));
-		if (stat(f_setup.save_name, statbuf) == 0)
-			bot_status = BOT_NORMAL;
-		else
-			bot_status = BOT_START;
-
-
-		fprintf(stderr, "savename: %s\n", f_setup.save_name);
-		fprintf(stderr, "command:  %s\n", bot_command);
-		fprintf(stderr, "status:   %d\n", bot_status);
-
-		save_fp = fopen(f_setup.save_name, "wb");
-		if (save_fp == NULL) {
-			fprintf(stderr, "Can't read save\n");
+		if (line_done) {
+			/* Inject SAVE command here */
+			os_quit(EXIT_SUCCESS);
 		}
-		success = save_frotz(save_fp);
 	}
 }
 
@@ -115,7 +106,16 @@ static void end_of_turn(void)
 /* get a character.  Exit with no fuss on EOF.  */
 static int xgetchar(void)
 {
-	int c = getchar();
+	int c;
+
+	if (bot_mode && !line_done) {
+		c = bot_command[bot_char_count++];
+		if (c == '\0')
+			c = '\n';
+		return c;
+	} else
+		c = getchar();
+
 	if (c == EOF) {
 		if (feof(stdin)) {
 			fprintf(stderr, "\nEOT\n");
@@ -134,9 +134,16 @@ static void dumb_getline(char *s)
 {
 	int c;
 	char *p = s;
+
+	if (bot_mode) {
+		bot_char_count = 0;
+		line_done = FALSE;
+	}
+
 	while (p < s + INPUT_BUFFER_SIZE - 1) {
 		if ((*p++ = xgetchar()) == '\n') {
 			*p = '\0';
+			line_done = TRUE;
 			return;
 		}
 	}
