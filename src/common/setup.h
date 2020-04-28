@@ -15,6 +15,18 @@ typedef enum {
 	FORMAT_ANSI
 } format_t;
 
+
+/* Current status of bot and return value after every move. */
+#define BOT_NORMAL	0
+#define BOT_START	1
+#define BOT_LOAD	2
+#define BOT_SAVE	3
+#define BOT_QUIT	4
+#define BOT_DONE	5
+#define BOT_ERR_SAVE	6
+#define BOT_ERR_RESTORE	7
+#define BOT_ERR_MISC	8
+
 typedef struct frotz_setup_struct {
 	int attribute_assignment;
 	int attribute_testing;
@@ -48,6 +60,8 @@ typedef struct frotz_setup_struct {
 
 	format_t format;  /* type of format codes for dumb interface */
 	bool restore_mode; /* for a save file passed from command line */
+	bool bot_mode;     /* for use with bot wrapper scripts */
+	bool bot_status;
 	bool use_blorb;
 	bool exec_in_blorb;
 } f_setup_t;

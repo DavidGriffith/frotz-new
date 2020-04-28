@@ -21,7 +21,6 @@
 
 #include <string.h>
 #include <libgen.h>
-#include <sys/stat.h>
 
 #include "dfrotz.h"
 
@@ -29,12 +28,12 @@ extern f_setup_t f_setup;
 extern zword save_quetzal (FILE *, FILE *);
 extern zword restore_quetzal (FILE *, FILE *);
 
-extern bool bot_mode;
 extern char *bot_command;
 
 static int bot_char_count;
 
 static bool line_done;
+static bool save_done;
 
 static char runtime_usage[] =
 	"DUMB-FROTZ runtime help:\n"
@@ -93,11 +92,18 @@ enum input_type {
 
 static void end_of_turn(void)
 {
-	if (bot_mode) {
-		if (line_done) {
-			/* Inject SAVE command here */
+	if (f_setup.bot_mode) {
+		if (save_done)
 			os_quit(EXIT_SUCCESS);
+
+		if (line_done) {
+			/* Inject SAVE command */
+//			free(bot_command);
+			bot_command = strdup("SAVE");
+			save_done = TRUE;
 		}
+
+		printf("command:  %s\n", bot_command);
 	}
 }
 
@@ -108,7 +114,7 @@ static int xgetchar(void)
 {
 	int c;
 
-	if (bot_mode && !line_done) {
+	if (f_setup.bot_mode && !line_done) {
 		c = bot_command[bot_char_count++];
 		if (c == '\0')
 			c = '\n';
@@ -135,7 +141,7 @@ static void dumb_getline(char *s)
 	int c;
 	char *p = s;
 
-	if (bot_mode) {
+	if (f_setup.bot_mode) {
 		bot_char_count = 0;
 		line_done = FALSE;
 	}
@@ -541,8 +547,9 @@ char *os_read_file_name (const char *default_name, int flag)
 
 	/* If we're restoring a game before the interpreter starts,
  	 * our filename is already provided.  Just go ahead silently.
+	 * If we're in bot mode, we don't prompt for file names.
 	 */
-	if (f_setup.restore_mode) {
+	if (f_setup.restore_mode || f_setup.bot_mode) {
 		return strdup(default_name);
 	} else {
 		if (f_setup.restricted_path) {

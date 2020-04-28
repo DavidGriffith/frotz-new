@@ -28,7 +28,6 @@ extern f_setup_t f_setup;
 extern z_header_t z_header;
 
 char *bot_command;
-bool bot_mode;
 short bot_status;
 
 static void usage(void);
@@ -91,7 +90,7 @@ void os_process_arguments(int argc, char *argv[])
 			f_setup.attribute_testing = 1;
 			break;
 		case 'B':
-			bot_mode = TRUE;
+			f_setup.bot_mode = TRUE;
 			bot_command = strdup(zoptarg);
 			break;
 		case 'f':
@@ -187,7 +186,7 @@ void os_process_arguments(int argc, char *argv[])
 		os_quit(EXIT_SUCCESS);
 	}
 
-	if (bot_mode && !(f_setup.restore_mode && f_setup.restricted_path))
+	if (f_setup.bot_mode && !(f_setup.restore_mode && f_setup.restricted_path))
 		os_fatal("Bot mode requires arguments to both -L and -R options.");
 
 	switch (f_setup.format) {
@@ -245,7 +244,7 @@ void os_process_arguments(int argc, char *argv[])
 	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND) + 1);
 
 	/* Set our auto load save as the name save */
-	if (f_setup.restore_mode || bot_mode) {
+	if (f_setup.restore_mode || f_setup.bot_mode) {
 		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) +
 			strlen(EXT_SAVE)) * sizeof(char) + 1);
 		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char));
@@ -407,7 +406,6 @@ int os_storyfile_tell(FILE * fp)
 
 void os_init_setup(void)
 {
-	bot_mode = FALSE;
 	bot_status = BOT_NORMAL;
 }
 

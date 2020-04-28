@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "frotz.h"
 
 #ifdef MSDOS_16BIT
@@ -735,6 +736,19 @@ void z_restore(void)
 	char *new_name;
 	char default_name[MAX_FILE_NAME + 1];
 	FILE *gfp = NULL;
+	struct stat *statbuf;
+
+
+	/* In bot mode, attempting to restore from a nonexistant file
+	 * should just be ignored.  The save will be created soon enough.
+	 */
+//	if (f_setup.bot_mode && f_setup.restore_mode) {
+//		statbuf = malloc(sizeof(struct stat));
+//		if (!stat(f_setup.tmp_save_name, statbuf) == 0)
+//			f_setup.bot_status = BOT_START;
+//			return;
+//		}
+//	}
 
 	zword success = 0;
 
@@ -812,6 +826,7 @@ void z_restore(void)
 finished:
 	if (gfp == NULL && f_setup.restore_mode)
 		os_fatal ("Error reading save file for restore mode");
+
 
 	if (z_header.version <= V3)
 		branch(success);
