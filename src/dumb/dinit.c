@@ -190,9 +190,6 @@ void os_process_arguments(int argc, char *argv[])
 	if (bot_mode && !(f_setup.restore_mode && f_setup.restricted_path))
 		os_fatal("Bot mode requires arguments to both -L and -R options.");
 
-	if (bot_mode && f_setup.restore_mode)
-		f_setup.restore_mode = FALSE;
-
 	switch (f_setup.format) {
 	case FORMAT_IRC:
 		printf("Using IRC formatting.\n");
