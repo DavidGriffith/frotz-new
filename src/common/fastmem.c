@@ -776,8 +776,6 @@ void z_restore(void)
 		if ((gfp = fopen(new_name, "rb")) == NULL)
 			goto finished;
 		success = restore_quetzal(gfp, story_fp);
-		printf("restore success == %hd\n", success);
-
 		if ((short) success >= 0) {
 			/* Close game file */
 			fclose (gfp);
