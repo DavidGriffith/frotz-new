@@ -92,6 +92,13 @@ static void end_of_turn(void)
 {
 	if (f_setup.bot_mode) {
 		printf("EOT status: %d\n", f_setup.bot_status);
+
+
+		/* Maybe not here... */
+		if (f_setup.bot_status == BOT_LOAD) {
+			f_setup.bot_status = BOT_NORMAL;
+		}
+
 		if (save_done) {
 			printf("[/frotz]\n");
 			os_quit(EXIT_SUCCESS);
@@ -281,6 +288,8 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 	 * and where we start getting input.
 	 */
 	end_of_turn();
+
+	printf("dumb_read_line status %d\n", f_setup.bot_status);
 
 	if (f_setup.bot_mode && f_setup.bot_status <= BOT_NORMAL) {
 		if (f_setup.bot_status == BOT_NORMAL)
