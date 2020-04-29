@@ -91,8 +91,10 @@ enum input_type {
 static void end_of_turn(void)
 {
 	if (f_setup.bot_mode) {
-		if (save_done)
+		if (save_done) {
+			printf("[/frotz]\n");
 			os_quit(EXIT_SUCCESS);
+		}
 
 		if (line_done) {
 			/* Inject SAVE command */
@@ -269,6 +271,9 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 	}
 	time_ahead = 0;
 
+	if (f_setup.bot_mode && f_setup.bot_status == BOT_START)
+		printf("[frotz]\n");
+
 	dumb_show_screen(show_cursor);
 
 	/* Here marks the end of output from the last turn
@@ -277,6 +282,13 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 	end_of_turn();
 
 	if (f_setup.bot_mode && f_setup.bot_status <= BOT_START) {
+		if (f_setup.bot_status == BOT_NORMAL)
+			printf("[frotz]\n");
+
+		if (f_setup.bot_status == BOT_START)
+			f_setup.bot_status = BOT_NORMAL;
+
+
 		if (prompt)
 			fputs(prompt, stdout);
 		else
@@ -284,7 +296,6 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 				(timeout ? "tTD" : ")>}")[type]);
 		printf("%s\n", f_setup.bot_command);
 	}
-
 
 	for (;;) {
 		char *command;
