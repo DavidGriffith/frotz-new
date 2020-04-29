@@ -226,7 +226,7 @@ void init_setup(void)
 	f_setup.script_name = NULL;
 	f_setup.command_name = NULL;
 	f_setup.save_name = NULL;
-	f_setup.tmp_save_name = NULL;
+	f_setup.auto_save_name = NULL;
 	f_setup.aux_name = NULL;
 	f_setup.story_path = NULL;
 	f_setup.zcode_path = NULL;
@@ -737,18 +737,20 @@ void z_restore(void)
 	char default_name[MAX_FILE_NAME + 1];
 	FILE *gfp = NULL;
 	struct stat *statbuf;
-
+	int statret;
 
 	/* In bot mode, attempting to restore from a nonexistant file
 	 * should just be ignored.  The save will be created soon enough.
 	 */
-//	if (f_setup.bot_mode && f_setup.restore_mode) {
-//		statbuf = malloc(sizeof(struct stat));
-//		if (!stat(f_setup.tmp_save_name, statbuf) == 0)
-//			f_setup.bot_status = BOT_START;
-//			return;
-//		}
-//	}
+	if (f_setup.bot_mode && f_setup.restore_mode) {
+		statbuf = malloc(sizeof(struct stat));
+		statret = stat(f_setup.auto_save_name, statbuf);
+		free(statbuf);
+		if (statret != 0) {
+			f_setup.bot_status = BOT_START;
+			return;
+		}
+	}
 
 	zword success = 0;
 
