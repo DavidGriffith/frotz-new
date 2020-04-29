@@ -28,8 +28,6 @@ extern f_setup_t f_setup;
 extern zword save_quetzal (FILE *, FILE *);
 extern zword restore_quetzal (FILE *, FILE *);
 
-extern char *bot_command;
-
 static int bot_char_count;
 
 static bool line_done;
@@ -98,12 +96,10 @@ static void end_of_turn(void)
 
 		if (line_done) {
 			/* Inject SAVE command */
-//			free(bot_command);
-			bot_command = strdup("SAVE");
+			free(f_setup.bot_command);
+			f_setup.bot_command = strdup("SAVE");
 			save_done = TRUE;
 		}
-
-		printf("command:  %s\n", bot_command);
 	}
 }
 
@@ -115,7 +111,7 @@ static int xgetchar(void)
 	int c;
 
 	if (f_setup.bot_mode && !line_done) {
-		c = bot_command[bot_char_count++];
+		c = f_setup.bot_command[bot_char_count++];
 		if (c == '\0')
 			c = '\n';
 		return c;
@@ -260,7 +256,7 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 			   int timeout, enum input_type type,
 			   zchar *continued_line_chars)
 {
-	time_t start_time;
+	time_t start_time = 0;
 
 	if (timeout) {
 		if (time_ahead >= timeout) {
@@ -279,13 +275,26 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 	 */
 	end_of_turn();
 
-	for (;;) {
-		char *command;
+	if (f_setup.bot_mode) {
 		if (prompt)
 			fputs(prompt, stdout);
 		else
 			dumb_show_prompt(show_cursor,
 				(timeout ? "tTD" : ")>}")[type]);
+		printf("%s\n", f_setup.bot_command);
+	}
+
+
+	for (;;) {
+		char *command;
+
+		if (!f_setup.bot_mode) {
+			if (prompt)
+				fputs(prompt, stdout);
+			else
+				dumb_show_prompt(show_cursor,
+					(timeout ? "tTD" : ")>}")[type]);
+		}
 
 		/* Prompt only shows up after user input if we don't flush stdout */
 		fflush(stdout);

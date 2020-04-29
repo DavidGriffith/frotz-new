@@ -27,8 +27,6 @@
 extern f_setup_t f_setup;
 extern z_header_t z_header;
 
-char *bot_command;
-short bot_status;
 
 static void usage(void);
 static void print_version(void);
@@ -91,7 +89,7 @@ void os_process_arguments(int argc, char *argv[])
 			break;
 		case 'B':
 			f_setup.bot_mode = TRUE;
-			bot_command = strdup(zoptarg);
+			f_setup.bot_command = strdup(zoptarg);
 			break;
 		case 'f':
 #ifdef DISABLE_FORMATS
@@ -405,7 +403,7 @@ int os_storyfile_tell(FILE * fp)
 
 void os_init_setup(void)
 {
-	bot_status = BOT_NORMAL;
+	f_setup.bot_status = BOT_NORMAL;
 }
 
 static void usage(void)

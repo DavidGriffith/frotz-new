@@ -61,6 +61,7 @@ typedef struct frotz_setup_struct {
 	format_t format;  /* type of format codes for dumb interface */
 	bool restore_mode; /* for a save file passed from command line */
 	bool bot_mode;     /* for use with bot wrapper scripts */
+	char *bot_command;
 	bool bot_status;
 	bool use_blorb;
 	bool exec_in_blorb;

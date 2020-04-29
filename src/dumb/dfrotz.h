@@ -27,8 +27,6 @@ extern f_setup_t f_setup;
 
 extern bool do_more_prompts;
 
-extern char *bot_command;
-
 /* From input.c.  */
 bool is_terminator (zchar);
 
