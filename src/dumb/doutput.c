@@ -780,6 +780,11 @@ void dumb_show_screen(bool show_cursor)
 
 	printf("dumb_show_screen status: %d\n", f_setup.bot_status);
 
+	if (f_setup.bot_status > BOT_NORMAL) {
+		mark_all_unchanged();
+		return;
+	}
+
 	/* Easy case */
 	if (compression_mode == COMPRESSION_NONE) {
 		for (r = hide_lines; r < z_header.screen_rows; r++)
