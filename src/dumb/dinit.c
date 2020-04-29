@@ -206,7 +206,7 @@ void os_process_arguments(int argc, char *argv[])
 	default:
 		break;
 	}
-	if (f_setup.format == FORMAT_NORMAL)
+	if (f_setup.format == FORMAT_NORMAL && !f_setup.bot_mode)
 		printf("Using normal formatting.\n");
 
 	/* Save the story file name */
@@ -216,10 +216,11 @@ void os_process_arguments(int argc, char *argv[])
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
-	printf("Loading %s.\n", f_setup.story_file);
+	if (!f_setup.bot_mode)
+		printf("Loading %s.\n", f_setup.story_file);
 
 #ifndef NO_BLORB
-	if (f_setup.blorb_file != NULL)
+	if (f_setup.blorb_file != NULL && !f_setup.bot_mode)
 		printf("Also loading %s.\n", f_setup.blorb_file);
 #endif
 

@@ -98,6 +98,7 @@ static void end_of_turn(void)
 			/* Inject SAVE command */
 			free(f_setup.bot_command);
 			f_setup.bot_command = strdup("SAVE");
+			f_setup.bot_status = BOT_SAVE;
 			save_done = TRUE;
 		}
 	}
@@ -275,7 +276,7 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 	 */
 	end_of_turn();
 
-	if (f_setup.bot_mode) {
+	if (f_setup.bot_mode && f_setup.bot_status <= BOT_START) {
 		if (prompt)
 			fputs(prompt, stdout);
 		else
