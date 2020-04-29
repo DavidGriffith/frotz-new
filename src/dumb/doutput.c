@@ -778,6 +778,8 @@ void dumb_show_screen(bool show_cursor)
 	int r, c, first, last;
 	char changed_rows[0x100];
 
+	printf("dumb_show_screen status: %d\n", f_setup.bot_status);
+
 	/* Easy case */
 	if (compression_mode == COMPRESSION_NONE) {
 		for (r = hide_lines; r < z_header.screen_rows; r++)

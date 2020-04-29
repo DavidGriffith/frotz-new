@@ -17,8 +17,8 @@ typedef enum {
 
 
 /* Current status of bot and return value after every move. */
-#define BOT_NORMAL	0
-#define BOT_START	1
+#define BOT_START	0
+#define BOT_NORMAL	1
 #define BOT_LOAD	2
 #define BOT_SAVE	3
 #define BOT_QUIT	4

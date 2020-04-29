@@ -120,6 +120,7 @@ void os_process_arguments(int argc, char *argv[])
 			break;
 		case 'L':
 			f_setup.restore_mode = 1;
+			f_setup.bot_status = BOT_LOAD;
 			f_setup.auto_save_name = strdup(zoptarg);
 			break;
 		case 'm':
@@ -404,7 +405,7 @@ int os_storyfile_tell(FILE * fp)
 
 void os_init_setup(void)
 {
-	f_setup.bot_status = BOT_NORMAL;
+	f_setup.bot_status = BOT_START;
 }
 
 static void usage(void)
