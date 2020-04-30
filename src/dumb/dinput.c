@@ -97,6 +97,8 @@ static void end_of_turn(void)
 		}
 
 		if (save_done) {
+			dumb_show_prompt(TRUE, 0);
+			putchar('\n');
 			os_quit(EXIT_SUCCESS);
 		}
 
