@@ -90,6 +90,9 @@ enum input_type {
 
 static void end_of_turn(void)
 {
+	FILE *save_fp;
+
+
 	if (f_setup.bot_mode) {
 		/* Maybe not here... */
 		if (f_setup.bot_status == BOT_LOAD) {
@@ -104,10 +107,18 @@ static void end_of_turn(void)
 
 		if (line_done || f_setup.bot_status == BOT_START) {
 			/* Inject SAVE command */
-			free(f_setup.bot_command);
-			f_setup.bot_command = strdup("SAVE");
-			f_setup.bot_status = BOT_SAVE;
+//			free(f_setup.bot_command);
+//			f_setup.bot_command = strdup("SAVE");
+//			f_setup.bot_status = BOT_SAVE;
+
+			save_fp = fopen(f_setup.save_name, "wb");
+			if (save_fp == NULL) {
+				fprintf(stderr, "Can't read save\n");
+			}
+
 			save_done = TRUE;
+			save_frotz(save_fp);
+			os_quit(EXIT_SUCCESS);
 		}
 	}
 }
