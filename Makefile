@@ -235,9 +235,9 @@ GIT_HASH = $(shell git rev-parse HEAD)
 GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 GIT_DATE = $(shell git show -s --format=%ci)
 else
-GIT_HASH = "$$Format:%H$$"
-GIT_HASH_SHORT = "$$Format:%h$$"
-GIT_DATE = "$$Format:%ci$$"
+GIT_HASH = $$Format:%H$$
+GIT_HASH_SHORT = $$Format:%h$$
+GIT_DATE = $$Format:%ci$$
 endif
 export CFLAGS
 
