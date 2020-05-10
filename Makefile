@@ -440,6 +440,9 @@ $(DOS_DEFINES):
 	@echo "** Generating $@"
 	@echo "#ifndef DOS_DEFINES_H" > $@
 	@echo "#define DOS_DEFINES_H" >> $@
+	@echo "#ifndef MSDOS_16BIT" >> $@
+	@echo "#define MSDOS_16BIT" >> $@
+	@echo "#endif /* MSDOS_16BIT */" >> $@
 	@echo "#define RELEASE_NOTES \"$(RELEASE_NOTES)\"" >> $@
 	@echo "#define MAX_UNDO_SLOTS $(MAX_UNDO_SLOTS)" >> $@
 	@echo "#define MAX_FILE_NAME $(MAX_FILE_NAME)" >> $@
