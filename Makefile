@@ -260,12 +260,13 @@ CURSES_DEFINES = $(CURSES_DIR)/ux_defines.h
 DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 
+DOS_DIR = $(SRCDIR)/dos
+DOS_DEFINES = $(DOS_DIR)/defs.h
+
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
-
-DOS_DIR = $(SRCDIR)/dos
 
 SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
@@ -336,8 +337,9 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
-dos: $(DOS_BIN)
+dos: $(DOS_DEFINES) $(DOS_BIN)
 $(DOS_BIN):
+ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	@echo
 	@echo "  ** Cannot cross-compile for DOS yet."
 	@echo "  ** Copy this zip file, $(NAME)src.zip, into a DOS machine and use Turbo C."
@@ -345,13 +347,17 @@ $(DOS_BIN):
 	@echo "  ** double-sided double-density 5.25-inch floppy disk.  Read the file"
 	@echo "  ** DOSBUILD.txt for more information."
 	@echo
-ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	@git archive --format=zip --prefix $(NAME)src/ HEAD -o $(NAME)src.zip
 	@zip -d $(NAME)src.zip $(NAME)src/src/curses/* \
 		$(NAME)src/src/dumb/* $(NAME)src/src/blorb/* \
 		$(NAME)src/src/sdl/* $(NAME)src/src/misc/* \
 		$(NAME)src/doc/*.6 $(NAME)src/doc/frotz.conf* \
 		$(NAME)src/doc/Xresources  > /dev/null
+	@mkdir -p $(NAME)src/$(DOS_DIR)
+	@cp $(DOS_DEFINES) $(NAME)src/$(DOS_DIR)
+	@zip $(NAME)src.zip $(NAME)src/$(DOS_DEFINES) > /dev/null
+	@rm -rf $(NAME)src
+
 else
 	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
 endif
@@ -427,6 +433,21 @@ ifdef DISABLE_FORMATS
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 endif
+
+
+dosdefs: $(DOS_DEFINES)
+$(DOS_DEFINES):
+	@echo "** Generating $@"
+	@echo "#ifndef DOS_DEFINES_H" > $@
+	@echo "#define DOS_DEFINES_H" >> $@
+	@echo "#define RELEASE_NOTES \"$(RELEASE_NOTES)\"" >> $@
+	@echo "#define MAX_UNDO_SLOTS $(MAX_UNDO_SLOTS)" >> $@
+	@echo "#define MAX_FILE_NAME $(MAX_FILE_NAME)" >> $@
+	@echo "#define TEXT_BUFFER_SIZE $(TEXT_BUFFER_SIZE)" >> $@
+	@echo "#define INPUT_BUFFER_SIZE $(INPUT_BUFFER_SIZE)" >> $@
+	@echo "#define STACK_SIZE $(STACK_SIZE)" >> $@
+	@echo "#define NO_BLORB" >> $@
+	@echo "#endif /* DOS_DEFINES_H */" >> $@
 
 
 curses_defines: $(CURSES_DEFINES)
@@ -554,6 +575,7 @@ clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
 	rm -rf $(COMMON_DEFINES) \
 		$(CURSES_DEFINES) \
+		$(DOS_DEFINES) \
 		$(HASH)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
 
@@ -587,7 +609,7 @@ help:
 .SUFFIXES: .c .o .h
 
 .PHONY: all clean dist dosdist curses ncurses dumb sdl hash help \
-	common_defines curses_defines nosound nosound_helper\
-	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
+	common_defines dosdefs curses_defines nosound nosound_helper\
+	$(COMMON_DEFINES) $(DOS_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz $(SUB_CLEAN)
