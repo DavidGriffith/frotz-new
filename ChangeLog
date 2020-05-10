@@ -1,7 +1,7 @@
 Summary of changes between Frotz 2.51 and Frotz 2.52:
 =====================================================
 
-Frotz 2.52 was released on WWW MMM DD, 20YY.
+Frotz 2.52 was released on Sunday May 10, 2020.
 
 This is a minor release focusing on minor enhancements and bug fixes.
 
@@ -13,7 +13,8 @@ NEW FEATURES
 
 BUG FIXES
 
-- Reworked Makefiles to better handle library detection.
+- Reworked Makefiles to better handle library detection, particularly
+  for macOS.
 
 - Fixed rendering of non-paletted PNG images.  Affected only non-Infocom
   V6 games.
