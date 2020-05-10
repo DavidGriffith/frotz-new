@@ -775,3 +775,27 @@ void os_more_prompt(void)
 
 	adjust_style();
 } /* os_more_prompt */
+
+/*
+ * os_from_true_colour
+ *
+ * Given a true colour, return an appropriate colour index.
+ *
+ */
+int os_from_true_colour(zword colour)
+{
+	/* Nothing here yet */
+	return 0;
+}
+
+/*
+ * os_to_true_colour
+ *
+ * Given a colour index, return the appropriate true colour.
+ *
+ */
+zword os_to_true_colour(int index)
+{
+	/* Nothing here yet */
+	return 0;
+}
