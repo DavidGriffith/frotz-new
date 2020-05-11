@@ -17,7 +17,7 @@ CFLAGS += -g
 
 # Define where you want Frotz installed
 PREFIX ?= /usr/local
-MANDIR ?= $(PREFIX)/share/man
+MANDIR ?= $(MAN_PREFIX)/man
 BINDIR ?= $(PREFIX)/bin
 #BINDIR ?= $(PREFIX)/games
 MAN_PREFIX ?= $(PREFIX)/share
@@ -511,37 +511,37 @@ install: install_frotz
 install_frotz: $(FROTZ_BIN)
 	install -d $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(FROTZ_BIN) $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MAN_PREFIX)/man/man6
-	install -m 644 doc/frotz.6 $(DESTDIR)$(MAN_PREFIX)/man/man6/
+	install -d $(DESTDIR)$(MANDIR)/man6
+	install -m 644 doc/frotz.6 $(DESTDIR)$(MANDIR)/man6/
 
 uninstall: uninstall_frotz
 uninstall_frotz:
 	rm -f $(DESTDIR)$(BINDIR)/frotz
-	rm -f $(DESTDIR)$(MAN_PREFIX)/man6/frotz.6
+	rm -f $(DESTDIR)$(MANDIR)/man6/frotz.6
 
 install_dumb: install_dfrotz
 install_dfrotz: $(DFROTZ_BIN)
 	install -d $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(DFROTZ_BIN) $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MAN_PREFIX)/man/man6
-	install -m 644 doc/dfrotz.6 $(DESTDIR)$(MAN_PREFIX)/man/man6/
+	install -d $(DESTDIR)$(MANDIR)/man6
+	install -m 644 doc/dfrotz.6 $(DESTDIR)$(MANDIR)/man6/
 
 uninstall_dumb: uninstall_dfrotz
 uninstall_dfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/dfrotz
-	rm -f $(DESTDIR)$(MAN_PREFIX)/man/man6/dfrotz.6
+	rm -f $(DESTDIR)$(MANDIR)/man6/dfrotz.6
 
 install_sdl: install_sfrotz
 install_sfrotz: $(SFROTZ_BIN)
 	install -d $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(SFROTZ_BIN) $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MAN_PREFIX)/man/man6
-	install -m 644 doc/sfrotz.6 $(DESTDIR)$(MAN_PREFIX)/man/man6/
+	install -d $(DESTDIR)$(MANDIR)/man6
+	install -m 644 doc/sfrotz.6 $(DESTDIR)$(MANDIR)/man6/
 
 uninstall_sdl: uninstall_sfrotz
 uninstall_sfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/sfrotz
-	rm -f $(DESTDIR)$(MAN_PREFIX)/man/man6/sfrotz.6
+	rm -f $(DESTDIR)$(MANDIR)/man6/sfrotz.6
 
 install_all:	install_frotz install_dfrotz install_sfrotz
 
