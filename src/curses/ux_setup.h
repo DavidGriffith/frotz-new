@@ -21,6 +21,7 @@ typedef struct unix_setup_struct {
 	zlong colours[11];
 	zlong nonstdcolours[NON_STD_COLS];
 	int nonstdindex;
+	char *term;			/* Terminal name, aka $TERM. */
 } u_setup_t;
 
 extern u_setup_t u_setup;

@@ -464,6 +464,9 @@ void os_init_screen (void)
 	keypad(stdscr, TRUE);		/* Enable the keypad and function keys */
 	scrollok(stdscr, FALSE);	/* No scrolling unless explicitly asked for */
 
+	/* It's nice to know what terminal we have to work with. */
+	u_setup.term = strdup(getenv("TERM"));
+
 	if (z_header.version == V3 && u_setup.tandy_bit != 0)
 		z_header.config |= CONFIG_TANDY;
 
