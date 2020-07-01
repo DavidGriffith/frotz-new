@@ -721,9 +721,6 @@ void dumb_init_output(void)
 
 	z_header.font_width = 1; z_header.font_height = 1;
 
-	if (!show_line_types)
-		show_line_types = z_header.version > 3;
-
 	screen_data = malloc(screen_cells * sizeof(cell_t));
 	screen_changes = malloc(screen_cells);
 	os_erase_area(1, 1, z_header.screen_rows, z_header.screen_cols, -2);
