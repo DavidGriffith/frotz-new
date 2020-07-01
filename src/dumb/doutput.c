@@ -26,7 +26,7 @@
 extern f_setup_t f_setup;
 
 static bool show_line_numbers = FALSE;
-static bool show_line_types = -1;
+static bool show_line_types = FALSE;
 static bool show_pictures = TRUE;
 static bool visual_bell = TRUE;
 static bool plain_ascii = FALSE;
@@ -721,7 +721,7 @@ void dumb_init_output(void)
 
 	z_header.font_width = 1; z_header.font_height = 1;
 
-	if (show_line_types == -1)
+	if (!show_line_types)
 		show_line_types = z_header.version > 3;
 
 	screen_data = malloc(screen_cells * sizeof(cell_t));
