@@ -34,16 +34,16 @@ An interpreter for all Infocom and other Z-Machine games.\n\
 \n\
 Syntax: dfrotz [options] story-file\n\
   -a   watch attribute setting    \t -P   alter piracy opcode\n\
-  -A   watch attribute testing    \t -R <path> restricted read/write\n\
-  -f <type> type of format codes  \t -s # random number seed value\n\
-  -h # screen height              \t -S # transcript width\n\
-  -i   ignore fatal errors        \t -t   set Tandy bit\n\
-  -I # interpreter number         \t -u # slots for multiple undo\n\
-  -o   watch object movement      \t -v   show version information\n\
-  -O   watch object locating      \t -w # screen width\n\
-  -L <file> load this save file   \t -x   expand abbreviations g/x/z\n\
-  -m   turn off MORE prompts      \t -Z # error checking (see below)\n\
-  -p   plain ASCII output only\n"
+  -A   watch attribute testing    \t -r <option> Set runtime options\n\
+  -f <type> type of format codes  \t -R <path> restricted read/write\n\
+  -h # screen height              \t -s # random number seed value\n\
+  -i   ignore fatal errors        \t -S # transcript width\n\
+  -I # interpreter number         \t -t   set Tandy bit\n\
+  -o   watch object movement      \t -u # slots for multiple undo\n\
+  -O   watch object locating      \t -v   show version information\n\
+  -L <file> load this save file   \t -w # screen width\n\
+  -m   turn off MORE prompts      \t -x   expand abbreviations g/x/z\n\
+  -p   plain ASCII output only    \t -Z # error checking (see below)\n"
 
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
