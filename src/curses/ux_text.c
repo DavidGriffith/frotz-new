@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "ux_defines.h"
 
@@ -134,17 +133,8 @@ static int unix_convert(int color)
  * remarks on os_peek_colour.
  *
  */
-
-#define BOLD_FACTOR 1.48
 void os_set_colour (int new_foreground, int new_background)
 {
-	short red, green, blue;
-	float redf, greenf, bluef;
-	short fg;
-	char cursor_color[23];
-	char cursor_color2[23];
-
-
 	if (new_foreground == 1) new_foreground = z_header.default_foreground;
 	if (new_background == 1) new_background = z_header.default_background;
 	if (u_setup.color_enabled) {
@@ -158,46 +148,12 @@ void os_set_colour (int new_foreground, int new_background)
 			colorspace[new_foreground][new_background] = n_colors;
 		}
 		u_setup.current_color = COLOR_PAIR(colorspace[new_foreground][new_background]);
-		fg = unix_convert(new_foreground);
-
-		if (strcmp(u_setup.term, "xterm") == 0) {
-			color_content(fg, &red, &green, &blue);
-//			sprintf(cursor_color, "\033]12;#%.2x%.2x%.2x\007", red, green, blue);
-
-
-			redf = red * BOLD_FACTOR;
-			greenf = green * BOLD_FACTOR;
-			bluef = blue * BOLD_FACTOR;
-
-			red = (short) floorf(redf);
-			green = (short) floorf(greenf);
-			blue = (short) floorf(bluef);
-
-			sprintf(cursor_color, "\e]12;#%.2x%.2x%.2x\a",
-				(unsigned char) red,
-				(unsigned char) green,
-				(unsigned char) blue);
-
-			sprintf(cursor_color2, "#%.2x%.2x%.2x\n",
-				(unsigned char) red,
-				(unsigned char) green,
-				(unsigned char) blue);
-
-			puts(cursor_color);
-			puts(cursor_color2);
-			fflush(stdout);
-		}
-
 #endif
 	} else
 		u_setup.current_color = (((new_foreground == z_header.default_background)
 			&& (new_background == z_header.default_foreground))
 			? A_REVERSE : 0);
 	os_set_text_style(u_setup.current_text_style);
-
-
-
-
 
 } /* os_set_colour */
 
