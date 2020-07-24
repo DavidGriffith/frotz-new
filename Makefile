@@ -214,8 +214,6 @@ export NPROCS
 export MAKEFLAGS
 export AR
 export RANLIB
-export PREFIX
-export MANDIR
 export SYSCONFDIR
 export SDL_CFLAGS
 export COLOR
