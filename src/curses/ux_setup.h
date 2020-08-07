@@ -8,6 +8,7 @@ typedef struct unix_setup_struct {
 	int force_color;
 	int foreground_color;
 	int background_color;
+	int emphasis_mode;
 	int screen_width;
 	int screen_height;
 	int random_seed;

@@ -86,9 +86,23 @@ Enable sound.  If you've disabled sound in a config file and want to hear
 sound effects, use this.
 
 .TP
+.B \-E <mode>
+Emphasis mode.  <mode> corresponds to one of three possible ways to
+render emphasized text.  Possible choices are as follows:
+.br
+.I italic underline none
+.br
+Infocom created an EMPHASIS_STYLE for the Z-machine, which was supposed
+to make the text be underlined or be italicized. Exactly what to do is
+left up to the interpreter.  Some platforms/terminals could support
+either, both of these, or neither.  Underlining was more common than
+italic. This option allows you to choose how EMPHASIS_STYLE is
+displayed.
+
+.TP
 .B \-f <colorname>
 Sets the default foreground color.  <colorname> corresponds to one of the
-Z-machine colors, which are as follows
+Z-machine colors, which are as follows:
 .br
 .I black red green yellow blue magenta cyan white
 .br

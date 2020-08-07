@@ -176,7 +176,23 @@ void os_set_text_style (int new_style)
 	u_setup.current_text_style = new_style;
 	if (new_style & REVERSE_STYLE) temp |= A_REVERSE;
 	if (new_style & BOLDFACE_STYLE) temp |= A_BOLD;
-	if (new_style & EMPHASIS_STYLE) temp |= A_UNDERLINE;
+	if (new_style & EMPHASIS_STYLE) {
+		switch(u_setup.emphasis_mode) {
+		case EMPHASIS_ITALIC:
+#ifdef ITALIC_SUPPORT
+			temp |= A_ITALIC;
+#else
+			temp |= A_UNDERLINE;
+#endif /* ITALICS_SUPPORT */
+			break;
+		case EMPHASIS_UNDERLINE:
+			temp |= A_UNDERLINE;
+			break;
+		case EMPHASIS_NONE: /* do nothing */
+		default:
+			break;
+		}
+	}
 	attrset(temp ^ u_setup.current_color);
 } /* os_set_text_style */
 

@@ -4,6 +4,7 @@
 -c # context lines
 -d   disable color
 -e   enable sound
+-E <style> emphasis style
 -f <colorname> foreground color
 -F   Force color mode
 -h # text height

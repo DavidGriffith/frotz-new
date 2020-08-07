@@ -69,14 +69,15 @@ Syntax: frotz [options] story-file\n\
   -c # context lines              \t -q   quiet (disable sound effects)\n\
   -d   disable color              \t -r # right margin\n\
   -e   enable sound               \t -R <path> restricted read/write\n\
-  -f <colorname> foreground color \t -s # random number seed value\n\
-  -F   Force color mode           \t -S # transcript width\n\
-  -h # text height                \t -t   set Tandy bit\n\
-  -i   ignore fatal errors        \t -u # slots for multiple undo\n\
-  -I # interpreter number         \t -v   show version information\n\
-  -l # left margin                \t -w # text width\n\
-  -L <file> load this save file   \t -x   expand abbreviations g/x/z\n\
-  -o   watch object movement      \t -Z # error checking (see below)\n"
+  -E <style> emphasis style       \t -s # random number seed value\n\
+  -f <colorname> foreground color \t -S # transcript width\n\
+  -F   Force color mode           \t -t   set Tandy bit\n\
+  -h # text height                \t -u # slots for multiple undo\n\
+  -i   ignore fatal errors        \t -v   show version information\n\
+  -I # interpreter number         \t -w # text width\n\
+  -l # left margin                \t -x   expand abbreviations g/x/z\n\
+  -L <file> load this save file   \t -Z # error checking (see below)\n\
+  -o   watch object movement\n"
 
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
@@ -98,6 +99,7 @@ static void	usage(void);
 static void	print_version(void);
 static int	getconfig(char *);
 static int	getbool(char *);
+static int	getemph(char *);
 static int	getcolor(char *);
 static int	geterrmode(char *);
 static FILE	*pathopen(const char *, const char *, const char *);
@@ -265,7 +267,7 @@ void os_process_arguments (int argc, char *argv[])
 
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "aAb:c:def:Fh:iI:l:L:oOpPqr:R:s:S:tu:vw:W:xZ:");
+		c = zgetopt(argc, argv, "aAb:c:deE:f:Fh:iI:l:L:oOpPqr:R:s:S:tu:vw:W:xZ:");
 		switch(c) {
 		case 'a': f_setup.attribute_assignment = 1; break;
 		case 'A': f_setup.attribute_testing = 1; break;
@@ -280,6 +282,8 @@ void os_process_arguments (int argc, char *argv[])
 		case 'c': f_setup.context_lines = atoi(zoptarg); break;
 		case 'd': u_setup.disable_color = 1; break;
 		case 'e': f_setup.sound = 1; break;
+		case 'E':
+			u_setup.emphasis_mode = getemph(zoptarg); break;
 		case 'f':
 			u_setup.foreground_color = getcolor(zoptarg);
 			u_setup.force_color = 1;
@@ -895,6 +899,9 @@ static int getconfig(char *configfile)
 		else if (strcmp(varname, "force_color") == 0) {
 			u_setup.force_color = getbool(value);
 		}
+		else if (strcmp(varname, "emphasis_mode") == 0) {
+			u_setup.emphasis_mode = getemph(value);
+		}
 		else if (strcmp(varname, "obj_move") == 0) {
 			f_setup.object_movement = getbool(value);
 		}
@@ -963,6 +970,36 @@ static int getconfig(char *configfile)
 	} /* while */
 	return TRUE;
 } /* getconfig */
+
+
+/* getemph
+ *
+ * Check a string for possible emphasis types:
+ * 	italic, underline, caps, or none
+ *
+ */
+static int getemph(char *value)
+{
+	int num;
+
+	/* Be case-insensitive */
+	for (num = 0; value[num] != 0; num++)
+		value[num] = tolower((int) value[num]);
+
+	if (strncmp(value, "italic", 6) == 0)
+		return EMPHASIS_ITALIC;
+
+	if (strncmp(value, "under", 5) == 0)
+		return EMPHASIS_UNDERLINE;
+
+	if (strncmp(value, "none", 2) == 0)
+		return EMPHASIS_NONE;
+
+	if (atoi(value) == 0)
+		return EMPHASIS_NONE;
+
+	return EMPHASIS_ITALIC;
+}
 
 
 /*
@@ -1105,6 +1142,7 @@ void os_init_setup(void)
 	u_setup.force_color = 0;
 	u_setup.foreground_color = -1;
 	u_setup.background_color = -1;
+	u_setup.emphasis_mode = EMPHASIS_DEFAULT;
 	u_setup.screen_width = -1;
 	u_setup.screen_height = -1;
 	u_setup.random_seed = -1;

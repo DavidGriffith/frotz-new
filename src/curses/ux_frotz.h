@@ -58,6 +58,20 @@
 #define PIC_DATA	8
 #define PIC_COLOUR	11
 
+enum emph_mode {
+	EMPHASIS_ITALIC,
+	EMPHASIS_UNDERLINE,
+	EMPHASIS_NONE
+};
+
+
+#ifndef EMPHASIS_DEFAULT
+#ifdef ITALIC_SUPPORT
+#define EMPHASIS_DEFAULT EMPHASIS_ITALIC
+#else
+#define EMPHASIS_DEFAULT EMPHASIS_UNDERLINE
+#endif
+#endif
 
 /* Paths where z-files may be found */
 #define	PATH1		"ZCODE_PATH"

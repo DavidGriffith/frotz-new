@@ -52,6 +52,9 @@ USE_UTF8 ?= yes
 # Comment this out if your machine's version of curses doesn't support color.
 COLOR ?= yes
 
+# Comment this out if your machine's version of curses doesn't support italic.
+ITALIC ?= yes
+
 # Select your chosen version of curses.  Unless something old is going
 # on, ncursesw should be used because that's how UTF8 is supported.
 #CURSES ?= curses
@@ -217,6 +220,7 @@ export RANLIB
 export SYSCONFDIR
 export SDL_CFLAGS
 export COLOR
+export ITALIC
 export SOUND_TYPE
 export NO_SOUND
 
@@ -483,6 +487,9 @@ ifndef SOUND_TYPE
 endif
 ifdef COLOR
 	@echo "#define COLOR_SUPPORT" >> $@
+endif
+ifdef ITALIC
+	@echo "#define ITALIC_SUPPORT" >> $@
 endif
 ifeq ($(USE_UTF8), yes)
 	@echo "#define USE_UTF8" >> $@
