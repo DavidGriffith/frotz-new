@@ -1,3 +1,22 @@
+Summary of changes between Frotz 2.52 and Frotz 2.53:
+=====================================================
+
+Frotz 2.53 was released on WWW MMM DD, 20YY.
+
+This is a minor release focusing on minor enhancements and bug fixes.
+
+NEW FEATURES
+
+- -E option to choose how emphasised text is rendered.
+
+
+BUG FIXES
+
+- Corrected a potential trouble with garbage in filenames for SDL
+  interface.
+
+
+
 Summary of changes between Frotz 2.51 and Frotz 2.52:
 =====================================================
 
