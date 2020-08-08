@@ -477,8 +477,11 @@ void os_init_screen (void)
 	if (z_header.version == V3)
 		z_header.config |= CONFIG_SPLITSCREEN;
 
-	if (z_header.version >= V4)
-		z_header.config |= CONFIG_BOLDFACE | CONFIG_EMPHASIS | CONFIG_FIXED | CONFIG_TIMEDINPUT;
+	if (z_header.version >= V4) {
+		z_header.config |= CONFIG_BOLDFACE | CONFIG_FIXED | CONFIG_TIMEDINPUT;
+		if (u_setup.emphasis_mode != EMPHASIS_NONE)
+			z_header.config |= CONFIG_EMPHASIS;
+	}
 
 	if (z_header.version >= V5)
 		z_header.flags &= ~(GRAPHICS_FLAG | MOUSE_FLAG | MENU_FLAG);
