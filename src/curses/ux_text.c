@@ -180,7 +180,8 @@ void os_set_text_style (int new_style)
 		switch(u_setup.emphasis_mode) {
 		case EMPHASIS_ITALIC:
 #ifdef ITALIC_SUPPORT
-			temp |= A_ITALIC;
+			if (termattrs() & A_ITALIC) temp |= A_ITALIC;
+			else temp |= A_UNDERLINE;
 #else
 			temp |= A_UNDERLINE;
 #endif /* ITALICS_SUPPORT */
