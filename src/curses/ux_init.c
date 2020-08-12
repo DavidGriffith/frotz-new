@@ -198,11 +198,6 @@ void os_process_arguments (int argc, char *argv[])
 {
 	int c;
 	char *p = NULL;
-/*
- * FIXME: Remove this after K&R treatment
- * FIXME: put this back before committing merge fixes
- *    char *blorb_ext = NULL;
- */
 	char *home;
 	char configfile[FILENAME_MAX + 1];
 
