@@ -12,6 +12,8 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <string.h>
+#include "../common/frotz.h"
+#include "../common/setup.h"
 #include "MainWindow.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
@@ -35,7 +37,7 @@ void mainwindow_set_size_according_to_terminal (MainWindow *self);
 // not supposed to know about. But the thought of implementing a half-dozen
 // new virtual methods just to set this trivial variable was more than
 // I could face
-extern int err_report_mode;
+//extern int err_report_mode;
 
 /*======================================================================
   mainwindow_request_quit
@@ -214,7 +216,7 @@ static gboolean mainwindow_prefs_event_callback (GtkMenuItem *w,
   {
     const Settings *new_settings = settingsdialog_get_new_settings (d);
 
-    err_report_mode = new_settings->error_level;
+    f_setup.err_report_mode = new_settings->error_level;
 
     if (self->settings->user_screen_width != 
             new_settings->user_screen_width
@@ -878,7 +880,7 @@ MainWindow *mainwindow_new (Settings *settings, const char *temp_dir)
   self->settings = g_object_ref (settings);
   self->temp_dir = strdup (temp_dir);
   mainwindow_setup_layout (self);
-  err_report_mode = settings->error_level;
+  f_setup.err_report_mode = settings->error_level;
   return self;
 }
 

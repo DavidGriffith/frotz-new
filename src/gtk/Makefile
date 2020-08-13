@@ -26,7 +26,7 @@ ARFLAGS = rc
 $(TARGET): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
-	@echo "** Done with curses interface."
+	@echo "** Done with GTK interface."
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)

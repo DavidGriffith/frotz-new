@@ -414,8 +414,8 @@ void os_display_char (zword c)
 void zmachine_run (Interpreter *_self)
   {
   ZMachine *self = ZMACHINE (_self);
-  story_name = self->priv->story_file;
-  g_debug ("Starting frotz interpreter, file is %s", story_name);
+  f_setup.story_name = self->priv->story_file;
+  g_debug ("Starting frotz interpreter, file is %s", f_setup.story_name);
   frotz_main ();
   g_debug ("frotz interpreter finished");
   }
@@ -1145,7 +1145,7 @@ zword os_read_mouse (void)
 /*======================================================================
 os_read_file_name
 ======================================================================*/
-char *os_read_file_name (const char *file_name, int flag)
+char *os_read_file_name (const char *default_name, int flag)
 {
   ZMachine *self = global_zmachine;
   StoryTerminal *terminal = zmachine_global_terminal();
@@ -1153,6 +1153,7 @@ char *os_read_file_name (const char *file_name, int flag)
      GTK_WINDOW(gtk_widget_get_toplevel (GTK_WIDGET (terminal))); 
   gboolean is_save = FALSE;
   char *caption = "Open file";
+  char *file_name;
 
   switch (flag)
     {
@@ -1219,6 +1220,7 @@ char *os_read_file_name (const char *file_name, int flag)
     self->priv->current_save_dir = gtk_file_chooser_get_current_folder 
       (GTK_FILE_CHOOSER (d));
 
+    file_name = malloc(MAX_FILE_NAME);
     strncpy (file_name, selected_filename, MAX_FILE_NAME - 1);
 
     gtk_widget_destroy (GTK_WIDGET(d));
@@ -1372,7 +1374,58 @@ void os_reset_screen (void)
   zmachine_init_colour_table (global_zmachine);
   }
 
+/*======================================================================
+os_init_setup
+======================================================================*/
+void os_init_setup(void)
+{
+	/* Currently does nothing */
 
+} /* os_init_setup */
 
+/*======================================================================
+os_init_sound
+======================================================================*/
+void os_init_sound(void)
+{
+	/* Currently does nothing */
 
+} /* os_init_sound */
+
+/*======================================================================
+os_repaint_window
+======================================================================*/
+bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
+		   int ysize, int xsize)
+{
+	/* Currently does nothing */
+	return FALSE;
+
+} /* os_repaint_window */
+
+/*======================================================================
+os_load_story
+======================================================================*/
+FILE *os_load_story(void)
+{
+	/* Currently does nothing */
+	return NULL;
+} /* os_load_story */
+
+/*======================================================================
+os_process_arguments
+======================================================================*/
+void os_process_arguments(int argc, char *argv[])
+{
+	/* Currently does nothing */
+} /* os_load_story */
+
+/*======================================================================
+os_quit
+======================================================================*/
+void os_quit(int status)
+{
+	os_stop_sample(0);
+	exit(status);
+} /* os_load_story */
 

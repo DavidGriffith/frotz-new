@@ -287,7 +287,7 @@ GTK_CFLAGS += -DAPPNAME=\"$(GFROTZ_BIN)\" -DVERSION=\"$(VERSION)\" -DPIXMAPDIR=\
 
 DOS_DIR = $(SRCDIR)/dos
 
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(GTK_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 FROTZ_BIN = frotz$(EXTENSION)
@@ -612,18 +612,6 @@ uninstall_sdl: uninstall_sfrotz
 uninstall_sfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/sfrotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/sfrotz.6
-
-install_x11: install_xfrotz
-install_xfrotz: $(XFROTZ_BIN)
-	install -d $(DESTDIR)$(BINDIR)
-	install -c -m 755 $(XFROTZ_BIN) $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MANDIR)/man6
-	install -m 644 doc/xfrotz.6 $(DESTDIR)$(MANDIR)/man6/
-
-uninstall_x11: uninstall_xfrotz
-uninstall_xfrotz:
-	rm -f $(DESTDIR)$(BINDIR)/xfrotz
-	rm -f $(DESTDIR)$(MANDIR)/man6/xfrotz.6
 
 install_gtk: install_gfrotz
 install_gfrotz: $(GFROTZ_BIN)
