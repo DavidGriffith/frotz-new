@@ -594,18 +594,6 @@ uninstall_sfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/sfrotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/sfrotz.6
 
-install_x11: install_xfrotz
-install_xfrotz: $(XFROTZ_BIN)
-	install -d $(DESTDIR)$(BINDIR)
-	install -c -m 755 $(XFROTZ_BIN) $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MANDIR)/man6
-	install -m 644 doc/xfrotz.6 $(DESTDIR)$(MANDIR)/man6/
-
-uninstall_x11: uninstall_xfrotz
-uninstall_xfrotz:
-	rm -f $(DESTDIR)$(BINDIR)/xfrotz
-	rm -f $(DESTDIR)$(MANDIR)/man6/xfrotz.6
-
 install_all:	install_frotz install_dfrotz install_sfrotz install_xfrotz
 
 uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz
