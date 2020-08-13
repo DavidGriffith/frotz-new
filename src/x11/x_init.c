@@ -35,7 +35,6 @@
 #include <libgen.h>
 #include <X11/Intrinsic.h>
 
-f_setup_t f_setup;
 x_setup_t x_setup;
 
 /* Variables to save from os_process_arguments for use in os_init_screen */
