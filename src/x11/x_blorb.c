@@ -105,8 +105,10 @@ bb_err_t x_blorb_init(char *filename)
 		/* with resources in a separate Blorb file. */
 		blorb_fp = fp;
 		f_setup.use_blorb = 1;
+/*
 		if (f_setup.blorb_file == NULL)
 			printf("Found Blorb file named %s.\n", mystring);
+*/
 	}
 
 	/* Create a Blorb map from this file.
@@ -124,7 +126,7 @@ bb_err_t x_blorb_init(char *filename)
 		blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
 			&blorb_res, bb_ID_ZCOD, 0);
 		f_setup.exec_in_blorb = 1;
-		printf("Found zcode chunk in Blorb file.\n");
+		/* printf("Found zcode chunk in Blorb file.\n"); */
 	}
 
 	return blorb_err;

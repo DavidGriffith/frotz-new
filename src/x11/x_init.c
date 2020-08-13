@@ -455,7 +455,7 @@ void os_init_screen(void)
 	class_hint->res_name = x_name;
 	class_hint->res_class = x_class;
 
-	printf("%s\n\n", f_setup.story_name);
+	/* printf("%s\n\n", f_setup.story_name); */
 
 	story_basename = strrchr(f_setup.story_name, '/');
 	if (story_basename == NULL)
