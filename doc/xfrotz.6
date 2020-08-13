@@ -1,18 +1,13 @@
-.\" Copyright (c) 2000  Daniel Schepler
-.\" Permission is granted to distribute, copy, and modify this source and
-.\" resulting binaries under the turns of the Artistic License.  This
-.\" should have been included in the COPYING file along with this
-.\" distribution.
-.\"
-.\" xfrotz comes with NO WARRANTY.  See the Artistic License for more
-.\" information.
-.\"
-.TH XFROTZ 6
+.TH XFROTZ 6 2.53
 .SH NAME
-xfrotz \- Graphical Z-code interpreter.
+xfrotz \- interpreter for Infocom and other Z-Machine games (X11 interface)
+
+
 .SH SYNOPSIS
 .B xfrotz
 .I "[options] file"
+
+
 .SH DESCRIPTION
 The \fIxfrotz\fP program is an Xlib-based interpreter for Z-machine
 code, the byte code used by Infocom games and, more recently, Inform.
@@ -20,20 +15,14 @@ code, the byte code used by Infocom games and, more recently, Inform.
 supports versions 1 through 8 of the format.  It uses the standard
 Quetzal format for its saved games.
 
-The author's focus in writing
-.I xfrotz
-was to support Version 6 graphical games.  It currently supports
+.I Xfrotz
+supports Version 6 graphical games.  It currently supports
 color, graphics (in the
 .B .mg1
-format only), and sound on systems with OSS installed.  For games
-which do not need graphics or sound support, one of the other freely
-available interpreters, such as
-.IR nitfol (6),
-.IR frotz (6),
-.IR jzip (6),
-or
-.IR xzip (6),
-will probably produce better results.
+format only) by way of Blorb archives or by parsing Infocom's original
+files.  Sound is supported through OSS.
+
+
 .SH OPTIONS
 In each of the following options which enables some feature, replacing
 .B \-
@@ -204,19 +193,47 @@ Undoes one turn.
 .TP
 .B Mod1\+X
 Exits the currently running game.
-.SH SEE ALSO
-.BR inform (1),
-.BR nitfol (6),
-.BR frotz (6),
-.BR jzip (6),
-.BR xzip (6).
+
+
+.SH FURTHER INFORMATION
+.PP
+The
+.B Frotz
+homepage is at https://661.org/proj/if/frotz/.
+.PP
+The bleeding edge of Frotz development may be followed there.
+.PP
+The Interactive Fiction Archive is a good place to find games to play
+with Frotz.  Various ports and builds for Frotz may also be found here.
+Here is its URL:
+.br
+http://www.ifarchive.org/
+.PP
+Most distributions of Linux and BSD include
+.B Frotz
+in their package repositories.
+
+
+.SH CAVEATS
+.PP
+This manpage is not intended to tell users HOW to play interactive
+fiction.  Refer to the file HOW_TO_PLAY included in the Unix Frotz
+documentation or visit one of the following sites:
+.br
+http://www.microheaven.com/ifguide/
+.br
+http://www.brasslantern.org/beginners/
+.br
+http://www.musicwords.net/if/how_to_play.htm
+.br
+http://ifarchive.org/
+
+
 .SH BUGS
 If run on an 8-bit display,
 .I xfrotz
 will most likely leak the entire color palette, especially if
 displaying graphics.
-
-There is no support yet for Blorb archives.
 
 The window size is fixed at 800x600, with pictures scaled to match;
 this scaling is hard coded.  Also,
@@ -230,9 +247,23 @@ especially apparent in menus.
 In order to change the fonts used, you would usually have to specify
 at least 4 fonts (for normal, bold, italic, and bold italic).  This is
 extremely cumbersome.
-.SH AUTHOR
+
+
+.SH AUTHORS
 .I frotz
 was written by Stefan Jokisch in 1995-7.
 .I xfrotz
 is an Xlib port written by Daniel Schepler, based in part on the Unix
 port by Galen Hazelwood and on WinFrotz by Rich Lawrence.
+.br
+The Unix port is currently maintained by David Griffith <dave@661.org>
+
+.SH SEE ALSO
+.BR frotz (6)
+.BR sfrotz (6)
+.BR nitfol (6)
+.BR rezrov (6)
+.BR jzip (6)
+.BR xzip (6)
+.BR inform (1)
+
