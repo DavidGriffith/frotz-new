@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 #include "ZTerminal.h"
-#include "frotz.h"
+#include "../common/frotz.h"
 #include "charutils.h"
 #include "MainWindow.h"
 

@@ -6,7 +6,8 @@
 #include "ZTerminal.h"
 #include "ZMachine.h"
 #include "StoryTerminal.h"
-#include "frotz.h"
+#include "../common/frotz.h"
+#include "../common/setup.h"
 #include "charutils.h"
 #include "StoryReader.h"
 #include "Picture.h"
@@ -17,9 +18,9 @@
 G_DEFINE_TYPE (ZMachine, zmachine, INTERPRETER_TYPE);
 
 #define ZM_MAX_COLOURS 512
-#define ZM_FIRST_CUSTOM_COLOUR 20 
+#define ZM_FIRST_CUSTOM_COLOUR 20
 
-extern void end_of_sound (zword routine);
+extern void end_of_sound (void);
 
 typedef struct _ZMachinePriv
 {
@@ -289,20 +290,20 @@ static void zmachine_terminal_size_allocate_event (GtkWidget *w,
 
   fx = storyterminal_get_char_width (terminal, '0');
 
-  if (h_font_width != fx || h_font_height != fy 
-     || h_screen_rows != (char) (cy / fy)
-     || h_screen_cols != (char) (cx / fx)
-     || h_screen_width != cx
-     || h_screen_height != cy)
+  if (z_header.font_width != fx || z_header.font_height != fy 
+     || z_header.screen_rows != (char) (cy / fy)
+     || z_header.screen_cols != (char) (cx / fx)
+     || z_header.screen_width != cx
+     || z_header.screen_height != cy)
     {
-    h_font_width = fx; 
-    h_font_height = fy;
-    h_screen_rows = (char) (cy / fy); 
-    h_screen_height = cy; 
-    h_screen_cols = (char ) (cx / fx);
-    h_screen_width = cx; 
-    if (h_version == V6)
-      h_flags |= REFRESH_FLAG;
+    z_header.font_width = fx; 
+    z_header.font_height = fy;
+    z_header.screen_rows = (char) (cy / fy); 
+    z_header.screen_height = cy; 
+    z_header.screen_cols = (char ) (cx / fx);
+    z_header.screen_width = cx; 
+    if (z_header.version == V6)
+      z_header.flags |= REFRESH_FLAG;
     resize_screen();
     restart_header();
     }
@@ -475,46 +476,46 @@ os_init_screen
 ======================================================================*/
 void os_init_screen(void)
 {
-  if (h_version == V3 && global_zmachine->priv->user_tandy_bit)
-      h_config |= CONFIG_TANDY;
+  if (z_header.version == V3 && global_zmachine->priv->user_tandy_bit)
+      z_header.config |= CONFIG_TANDY;
 
   if (global_zmachine->priv->user_interpreter_number > 0)
-    h_interpreter_number = global_zmachine->priv->user_interpreter_number;
+    z_header.interpreter_number = global_zmachine->priv->user_interpreter_number;
   else 
   {
-    h_interpreter_number = h_version == 6 ? INTERP_MSDOS : INTERP_AMIGA;
+    z_header.interpreter_number = z_header.version == 6 ? INTERP_MSDOS : INTERP_AMIGA;
   }
-  h_interpreter_version = 'F';
+  z_header.interpreter_version = 'F';
 
-  g_debug ("ZMachine using interpreter number %d", h_interpreter_number);
+  g_debug ("ZMachine using interpreter number %d", z_header.interpreter_number);
 
- if ((h_version >= V4) && (global_zmachine->priv->speed != 0))
-    h_config |= CONFIG_TIMEDINPUT;
+ if ((z_header.version >= V4) && (global_zmachine->priv->speed != 0))
+    z_header.config |= CONFIG_TIMEDINPUT;
 
-  if (h_version == V3) 
+  if (z_header.version == V3) 
   {
-    h_config |= CONFIG_SPLITSCREEN;
-    h_config |= CONFIG_PROPORTIONAL;
-    h_flags &= ~OLD_SOUND_FLAG;
+    z_header.config |= CONFIG_SPLITSCREEN;
+    z_header.config |= CONFIG_PROPORTIONAL;
+    z_header.flags &= ~OLD_SOUND_FLAG;
   }
 
-  if (h_version >= V4) 
+  if (z_header.version >= V4) 
   {
-    h_config |= CONFIG_BOLDFACE;
-    h_config |= CONFIG_EMPHASIS;
-    h_config |= CONFIG_FIXED;
-    h_config |= CONFIG_TIMEDINPUT;
+    z_header.config |= CONFIG_BOLDFACE;
+    z_header.config |= CONFIG_EMPHASIS;
+    z_header.config |= CONFIG_FIXED;
+    z_header.config |= CONFIG_TIMEDINPUT;
   }
 
-  if (h_version >= V5) 
+  if (z_header.version >= V5) 
   {
-    h_config |= CONFIG_COLOUR;
-    //h_flags &= ~SOUND_FLAG;
+    z_header.config |= CONFIG_COLOUR;
+    //z_header.flags &= ~SOUND_FLAG;
   }
 
-  h_screen_height = h_screen_rows;
-  h_screen_width = h_screen_cols;
-  //int screen_cells = h_screen_rows * h_screen_cols;
+  z_header.screen_height = z_header.screen_rows;
+  z_header.screen_width = z_header.screen_cols;
+  //int screen_cells = z_header.screen_rows * z_header.screen_cols;
 
   int fx, fy, cx, cy;
   StoryTerminal *terminal = zmachine_global_terminal (); 
@@ -523,50 +524,50 @@ void os_init_screen(void)
 
   fx = storyterminal_get_char_width (terminal, '0');
 
-  h_font_width = fx; 
-  h_font_height = fy;
-  h_screen_rows = (char) (cy / fy); 
-  h_screen_height = cy; 
-  h_screen_cols = (char ) (cx / fx);
-  h_screen_width = cx; 
+  z_header.font_width = fx; 
+  z_header.font_height = fy;
+  z_header.screen_rows = (char) (cy / fy); 
+  z_header.screen_height = cy; 
+  z_header.screen_cols = (char ) (cx / fx);
+  z_header.screen_width = cx; 
 
-g_debug ("h_screen_width=%d", h_screen_width);
-g_debug ("h_screen_height=%d", h_screen_height);
-g_debug ("h_screen_rows=%d", h_screen_rows);
-g_debug ("h_screen_cols=%d", h_screen_cols);
-g_debug ("h_font_width=%d", h_font_width);
-g_debug ("h_font_height=%d", h_font_height);
+g_debug ("z_header.screen_width=%d", z_header.screen_width);
+g_debug ("z_header.screen_height=%d", z_header.screen_height);
+g_debug ("z_header.screen_rows=%d", z_header.screen_rows);
+g_debug ("z_header.screen_cols=%d", z_header.screen_cols);
+g_debug ("z_header.font_width=%d", z_header.font_width);
+g_debug ("z_header.font_height=%d", z_header.font_height);
 
-  h_default_foreground = 1;
-  h_default_background = 1;
+  z_header.default_foreground = 1;
+  z_header.default_background = 1;
 
   zmachine_init_colour_table (global_zmachine);
 
-  if (h_version >= V5)
+  if (z_header.version >= V5)
     {
     zword mask = 0;
-    if (h_version == V6)
+    if (z_header.version == V6)
       mask |= TRANSPARENT_FLAG;
 
-    hx_flags &= mask;
+    z_header.x_flags &= mask;
 
     StoryTerminal *terminal = zmachine_global_terminal();
     RGB8COLOUR fg = storyterminal_get_default_fg_colour (terminal);
     RGB8COLOUR bg = storyterminal_get_default_bg_colour (terminal);
 
-    hx_fore_colour = zmachine_rgb8_to_rgb5 (fg); 
-    hx_back_colour = zmachine_rgb8_to_rgb5 (bg); 
+    z_header.x_fore_colour = zmachine_rgb8_to_rgb5 (fg); 
+    z_header.x_back_colour = zmachine_rgb8_to_rgb5 (bg); 
    
-    if (h_version == V6)
+    if (z_header.version == V6)
       {
       int index_fg = zmachine_lookup_colour (global_zmachine, fg);
       int index_bg = zmachine_lookup_colour (global_zmachine, bg);
-      h_default_foreground = index_fg;
-      h_default_background = index_bg;
+      z_header.default_foreground = index_fg;
+      z_header.default_background = index_bg;
       }
     }
 
-  h_config |= CONFIG_SOUND;
+  z_header.config |= CONFIG_SOUND;
 
   // Start off in fixed width mode. With luck, modern games
   //  with do a set_font to select style 1, which can be
@@ -979,7 +980,7 @@ os_fatal
 Bad, bad, bad in a GUI app. Need to remove all calls to this
 if possible
 ======================================================================*/
-void os_fatal (const char *s)
+void os_fatal (const char *s, ...)
 {
   StoryTerminal *terminal = zmachine_global_terminal();
   GtkWindow *w = GTK_WINDOW(gtk_widget_get_toplevel (GTK_WIDGET (terminal))); 
@@ -1144,7 +1145,7 @@ zword os_read_mouse (void)
 /*======================================================================
 os_read_file_name
 ======================================================================*/
-int os_read_file_name (char *file_name, const char *default_name, int flag)
+char *os_read_file_name (const char *file_name, int flag)
 {
   ZMachine *self = global_zmachine;
   StoryTerminal *terminal = zmachine_global_terminal();
@@ -1268,23 +1269,22 @@ void os_prepare_sample (int n)
 /*======================================================================
 os_finish_with_sample
 ======================================================================*/
-void os_finish_with_sample (int n) 
+void os_finish_with_sample (int n)
   {
   g_debug ("os_finish_with_sample %d\n", n);
   }
 
 
 /*======================================================================
-zmachine_media_finished 
+zmachine_media_finished
 ======================================================================*/
-void zmachine_media_notification (MediaPlayerNotificationType type, 
+void zmachine_media_notification (MediaPlayerNotificationType type,
     void *user_data1, int user_data2)
   {
   if (type == MEDIAPLAYER_NOTIFICATION_FINISHED)
     {
     g_debug ("MediaPlayer notified EOS");
-    int eos = (int) user_data1;
-    end_of_sound ((zword) eos);
+    end_of_sound ();
     }
   }
 
@@ -1292,7 +1292,7 @@ void zmachine_media_notification (MediaPlayerNotificationType type,
 /*======================================================================
 os_start_sample
 ======================================================================*/
-void os_start_sample (int n, int volume, int repeats, zword eos) 
+void os_start_sample (int n, int volume, int repeats, zword eos)
   {
   g_debug ("os_start_sample %d, vol=%d, repeats=%d, eos=%d", n,
     volume, repeats, (int)eos);
