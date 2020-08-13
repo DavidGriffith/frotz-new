@@ -1338,7 +1338,7 @@ void os_start_sample (int n, int volume, int repeats, zword eos)
         zmachine_media_notification, (void *)global_zmachine, eos, &error);
       if (error)
         {
-        g_message (error->message);
+        g_message ("%s", error->message);
         g_error_free (error);
         }
 

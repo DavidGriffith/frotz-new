@@ -95,7 +95,7 @@ GdkPixbuf *picture_make_pixbuf (const Picture *self, int max_width,
   g_object_unref (s);
   if (error)
     {
-    g_debug (error->message);
+    g_debug ("%s", error->message);
     g_error_free (error);
     return NULL;
     }

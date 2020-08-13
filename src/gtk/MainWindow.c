@@ -370,7 +370,7 @@ void mainwindow_about_event_callback (GtkMenuItem *mi,
 {
   MainWindow *w = (MainWindow *)data;
   GtkDialog *ed = GTK_DIALOG (gtk_message_dialog_new (GTK_WINDOW (w), 
-        GTK_DIALOG_MODAL, GTK_MESSAGE_OTHER, GTK_BUTTONS_OK, 
+        GTK_DIALOG_MODAL, GTK_MESSAGE_OTHER, GTK_BUTTONS_OK, "%s",
         mainwindow_about_message));
   gtk_window_set_title (GTK_WINDOW (ed), APPNAME); 
   gtk_dialog_run (ed);

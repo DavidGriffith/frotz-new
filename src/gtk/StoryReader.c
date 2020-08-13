@@ -147,7 +147,7 @@ void storyreader_read_resources_from_blorb (StoryReader *self,
   self->priv->picture_list = blorbreader_get_pictures (filename, &error);
   if (error)
   {
-    g_message (error->message);
+    g_message ("%s", error->message);
     g_error_free (error);
   }
   error = NULL;
@@ -157,7 +157,7 @@ void storyreader_read_resources_from_blorb (StoryReader *self,
   self->priv->sound_list = blorbreader_get_sounds (filename, &error);
   if (error)
   {
-    g_message (error->message);
+    g_message ("%s", error->message);
     g_error_free (error);
   }
   error = NULL;
@@ -167,7 +167,7 @@ void storyreader_read_resources_from_blorb (StoryReader *self,
   self->priv->metadata = metadata_new_from_file (filename, &error);
   if (error)
   {
-    g_message (error->message);
+    g_message ("%s", error->message);
     g_error_free (error);
   }
 
