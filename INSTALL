@@ -107,11 +107,14 @@ characters in Beyond Zork through .pcf fonts.  This interface is not yet
 ready.  On startup, the screen has a tendency to be black.  Saves and
 restores also don't work -- doing so causes a segfault.
 
+
+================
+Prerequisites ||
+================
+
 Prerequisite packages for xfrotz:
   * libx11		(1.6.7 or higher)
   * libxt		(1.1.5 or higher)  
-Earlier versions of these libraries might work, but are untested.
-
 
 Prerequisite packages for sfrotz (macOS Homebrew nomenclature):
   * pkg-config		(0.29 or higher)
@@ -137,6 +140,8 @@ Prerequisite packages for sfrotz (OpenBSD nomenclature):
   * png			(1.6.x or higher)
   * jpeg		(1.5.x or higher)
   * zlib		(1.2.x or higher)
+
+Earlier versions of these libraries might work, but are untested.
 
 
 =======================
