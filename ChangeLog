@@ -9,6 +9,7 @@ NEW FEATURES
 
 - -E option to choose how emphasised text is rendered.
 
+- X11 interface has been added as a compile target.
 
 BUG FIXES
 
