@@ -221,6 +221,7 @@ export AR
 export RANLIB
 export SYSCONFDIR
 export SDL_CFLAGS
+export GTK_CFLAGS
 export COLOR
 export ITALIC
 export SOUND_TYPE
@@ -278,6 +279,12 @@ SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
 
+GTK_DIR = $(SRCDIR)/gtk
+GTK_LIB = $(GTK_DIR)/frotz_gtk.a
+export GTK_PKGS = gtk+-2.0
+GTK_LDFLAGS += $(shell $(PKG_CONFIG) $(GTK_PKGS) --libs) -lm
+GTK_CFLAGS += -DAPPNAME=\"$(GFROTZ_BIN)\" -DVERSION=\"$(VERSION)\" -DPIXMAPDIR=\"$(DESTDIR)$(PREFIX)/share/pixmaps\"
+
 DOS_DIR = $(SRCDIR)/dos
 
 SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
@@ -287,13 +294,14 @@ FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
 XFROTZ_BIN = xfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
+GFROTZ_BIN = gfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
 
 FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
 XFROTZ_LIBS = $(COMMON_LIB) $(X11_LIB) $(BLORB_LIB) $(COMMON_LIB)
 SFROTZ_LIBS = $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
-
+GFROTZ_LIBS = $(COMMON_LIB) $(GTK_LIB) $(BLORB_LIB) $(COMMON_LIB)
 
 ifdef NO_BLORB
 SOUND_TYPE = none
@@ -356,6 +364,13 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
+gtk: $(GFROTZ_BIN)
+$(GFROTZ_BIN): $(GFROTZ_LIBS)
+	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(GTK_LDFLAGS)
+	@echo "** Done building Frotz with GTK interface."
+
+
+
 dos: $(DOS_DEFINES) $(DOS_BIN)
 $(DOS_BIN):
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
@@ -387,6 +402,7 @@ common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
 x11_lib:	$(X11_LIB)
 sdl_lib:	$(SDL_LIB)
+gtk_lib:	$(GTK_LIB)
 dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
@@ -402,6 +418,9 @@ $(X11_LIB): $(COMMON_DEFINES) $(HASH)
 
 $(SDL_LIB): $(COMMON_DEFINES) $(HASH) $(SDL_DIR)
 	$(MAKE) -C $(SDL_DIR)
+
+$(GTK_LIB): $(COMMON_DEFINES) $(HASH) $(GTK_DIR)
+	$(MAKE) -C $(GTK_DIR)
 
 $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(DUMB_DIR)
@@ -606,9 +625,21 @@ uninstall_xfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/xfrotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/xfrotz.6
 
-install_all:	install_frotz install_dfrotz install_sfrotz install_xfrotz
+install_gtk: install_gfrotz
+install_gfrotz: $(GFROTZ_BIN)
+	install -d $(DESTDIR)$(BINDIR)
+	install -c -m 755 $(GFROTZ_BIN) $(DESTDIR)$(BINDIR)
+	install -d $(DESTDIR)$(MANDIR)/man6
+	install -m 644 doc/gfrotz.6 $(DESTDIR)$(MANDIR)/man6/
 
-uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz
+uninstall_g11: uninstall_gfrotz
+uninstall_gfrotz:
+	rm -f $(DESTDIR)$(BINDIR)/gfrotz
+	rm -f $(DESTDIR)$(MANDIR)/man6/gfrotz.6
+
+install_all:	install_frotz install_dfrotz install_sfrotz install_xfrotz install_gfrotz
+
+uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz uninstall_gfrotz
 
 
 dist: $(NAME)-$(VERSION).tar.gz
@@ -680,7 +711,7 @@ help:
 
 .PHONY: all clean dist dosdist curses ncurses dumb sdl hash help \
 	common_defines dosdefs curses_defines nosound nosound_helper\
-	$(COMMON_DEFINES) $(DOS_DEFINES) $(CURSES_DEFINES) $(HASH) \
+	$(COMMON_DEFINES) $(DOS_DEFINES) $(CURSES_DEFINES) $(HASH) $(SUB_CLEAN) \
 	blorb_lib common_lib curses_lib dumb_lib \
-	install install_dfrotz install_sfrotz install_xfrotz $(SUB_CLEAN)
-	uninstall uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz
+	install install_dfrotz install_sfrotz install_xfrotz install_gfrotz \
+	uninstall uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz uninstall_gfrotz
