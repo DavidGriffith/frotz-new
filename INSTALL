@@ -92,6 +92,26 @@ Prerequisite packages for sfrotz (Debian nomenclature):
   * libpng-dev		(1.6.x or higher)
   * libjpeg-dev		(1.5.x or higher)
   * zlib1g-dev		(1.2.x or higher)
+Earlier versions of these libraries might work, but are untested.
+
+
+============
+X11 Frotz ||
+============
+
+X11 Frotz (aka xfrotz) was created by Daniel Schepler from around 1998 to
+2000 based in Frotz 2.32.  Like SDK Frotz, it languished for several years.
+It does have rudimentary audio support for playback of Infocom's original
+.snd audio file format and no Blorb support.  It also supports rune
+characters in Beyond Zork through .pcf fonts.  This interface is not yet
+ready.  On startup, the screen has a tendency to be black.  Saves and
+restores also don't work -- doing so causes a segfault.
+
+Prerequisite packages for xfrotz:
+  * libx11		(1.6.7 or higher)
+  * libxt		(1.1.5 or higher)  
+Earlier versions of these libraries might work, but are untested.
+
 
 Prerequisite packages for sfrotz (macOS Homebrew nomenclature):
   * pkg-config		(0.29 or higher)

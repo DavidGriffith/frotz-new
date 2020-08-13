@@ -210,6 +210,8 @@ CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
 CURSES_DEFINE = USE_NCURSES_H
 endif
 
+MKFONTDIR ?= $(shell which mkfontdir)
+
 export CC
 export CFLAGS
 export CURSES_CFLAGS
@@ -265,21 +267,31 @@ DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 DOS_DIR = $(SRCDIR)/dos
 DOS_DEFINES = $(DOS_DIR)/defs.h
 
+X11_DIR = $(SRCDIR)/x11
+X11_LIB = $(X11_DIR)/frotz_x11.a
+export X11_PKGS = x11 xt
+X11_FONTDIR = $(DESTDIR)$(PREFIX)/share/fonts/X11/zork
+X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lm
+
 SDL_DIR = $(SRCDIR)/sdl
 SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
 
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
+DOS_DIR = $(SRCDIR)/dos
+
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 FROTZ_BIN = frotz$(EXTENSION)
 DFROTZ_BIN = dfrotz$(EXTENSION)
+XFROTZ_BIN = xfrotz$(EXTENSION)
 SFROTZ_BIN = sfrotz$(EXTENSION)
 DOS_BIN = frotz.exe
 
 FROTZ_LIBS  = $(COMMON_LIB) $(CURSES_LIB) $(BLORB_LIB) $(COMMON_LIB)
 DFROTZ_LIBS = $(COMMON_LIB) $(DUMB_LIB) $(BLORB_LIB) $(COMMON_LIB)
+XFROTZ_LIBS = $(COMMON_LIB) $(X11_LIB) $(BLORB_LIB) $(COMMON_LIB)
 SFROTZ_LIBS = $(COMMON_LIB) $(SDL_LIB) $(BLORB_LIB) $(COMMON_LIB)
 
 
@@ -334,6 +346,11 @@ $(DFROTZ_BIN): $(DFROTZ_LIBS)
 	@echo "** Done building Frotz with dumb interface."
 	@echo "** Blorb support $(BLORB_SUPPORT)"
 
+x11: $(XFROTZ_BIN)
+$(XFROTZ_BIN): $(XFROTZ_LIBS)
+	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(X11_LDFLAGS)
+	@echo "** Done building Frotz with X11 interface."
+
 sdl: $(SFROTZ_BIN)
 $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
@@ -364,10 +381,11 @@ else
 	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
 endif
 
-all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN)
+all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN) $(XFROTZ_BIN)
 
 common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
+x11_lib:	$(X11_LIB)
 sdl_lib:	$(SDL_LIB)
 dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
@@ -379,8 +397,14 @@ $(COMMON_LIB): $(COMMON_DEFINES) $(HASH)
 $(CURSES_LIB): $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
 	$(MAKE) -C $(CURSES_DIR)
 
-$(SDL_LIB): $(COMMON_DEFINES) $(HASH)
-	$(MAKE) -C $(SDL_DIR)
+$(X11_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(X11_DIR)
+
+$(SDL_LIB): $(COMMON_DEFINES) $(HASH) $(SDL_DIR)
+	$(MAKE) -C $(SDL_LIB)
+
+$(X11_LIB): $(COMMON_DEFINES) $(HASH)
+	$(MAKE) -C $(X11_DIR)
 
 $(DUMB_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(DUMB_DIR)
@@ -536,6 +560,31 @@ uninstall_dfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/dfrotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/dfrotz.6
 
+install_x11: install_xfrotz
+install_xfrotz: $(XFROTZ_BIN)
+	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
+	install "$(XFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
+	install -m 644 doc/xfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
+	install -d "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-10.pcf" "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-11.pcf" "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-13.pcf" "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-16.pcf" "$(X11_FONTDIR)"
+	install -m 644 "$(X11_DIR)/Zork_r400-20.pcf" "$(X11_FONTDIR)"
+	$(MKFONTDIR) $(X11_FONTDIR)
+
+uninstall_x11: uninstall_xfrotz
+uninstall_xfrotz:
+	rm -f "$(DESTDIR)$(PREFIX)/bin/xfrotz"
+	rm -f "$(DESTDIR)$(MANDIR)/man6/xfrotz.6"
+	rm -f "$(X11_FONTDIR)/Zork_r400-10.pcf"
+	rm -f "$(X11_FONTDIR)/Zork_r400-11.pcf"
+	rm -f "$(X11_FONTDIR)/Zork_r400-13.pcf"
+	rm -f "$(X11_FONTDIR)/Zork_r400-16.pcf"
+	rm -f "$(X11_FONTDIR)/Zork_r400-20.pcf"
+	rm -f "$(X11_FONTDIR)/fonts.dir"
+	find $(X11_FONTDIR) -type d -depth -empty -exec rmdir "{}" \;
+
 install_sdl: install_sfrotz
 install_sfrotz: $(SFROTZ_BIN)
 	install -d $(DESTDIR)$(BINDIR)
@@ -548,9 +597,9 @@ uninstall_sfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/sfrotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/sfrotz.6
 
-install_all:	install_frotz install_dfrotz install_sfrotz
+install_all:	install_frotz install_dfrotz install_sfrotz install_xfrotz
 
-uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz
+uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz
 
 
 dist: $(NAME)-$(VERSION).tar.gz
@@ -588,7 +637,8 @@ clean: $(SUB_CLEAN)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
 
 distclean: clean
-	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) a.out
+	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) xfrotz$(EXTENTION)
+	rm -f a.out
 	rm -rf $(NAME)src $(NAME)$(DOSVER)
 	rm -f $(NAME)*.tar.gz $(NAME)src.zip $(NAME)$(DOSVER).zip
 
@@ -598,12 +648,15 @@ help:
 	@echo "    nosound: the standard curses edition without sound support"
 	@echo "    dumb: for dumb terminals and wrapper scripts"
 	@echo "    sdl: for SDL graphics and sound"
-	@echo "    all: build curses, dumb, and SDL versions"
+#	@echo "    x11: for X11 graphics"
+	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    dos: Make a zip file containing DOS Frotz source code"
 	@echo "    install"
 	@echo "    uninstall"
 	@echo "    install_dumb"
 	@echo "    uninstall_dumb"
+	@echo "    install_x11"
+	@echo "    uninstall_x11"
 	@echo "    install_sdl"
 	@echo "    uninstall_sdl"
 	@echo "    install_all"
@@ -620,4 +673,4 @@ help:
 	common_defines dosdefs curses_defines nosound nosound_helper\
 	$(COMMON_DEFINES) $(DOS_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
-	install install_dfrotz install_sfrotz $(SUB_CLEAN)
+	install install_dfrotz install_sfrotz install_xfrotz $(SUB_CLEAN)
