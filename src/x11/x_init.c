@@ -564,6 +564,14 @@ void os_quit(int status)
  */
 void os_restart_game(int stage)
 {
+	/* Show Beyond Zork's title screen */
+	if ((stage == RESTART_END) && (story_id == BEYOND_ZORK)) {
+		int w, h;
+		if (os_picture_data(1, &h, &w)) {
+			os_draw_picture(1, 1, 1);
+			os_read_key(0, 0);
+		}
+	}
 }
 
 
