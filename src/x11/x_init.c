@@ -35,7 +35,6 @@
 #include <libgen.h>
 #include <X11/Intrinsic.h>
 
-f_setup_t f_setup;
 x_setup_t x_setup;
 
 /* Variables to save from os_process_arguments for use in os_init_screen */
@@ -521,6 +520,7 @@ void os_init_screen(void)
 	}
 	bgpm = XCreatePixmap(dpy, main_window, X_WIDTH, X_HEIGHT, DefaultDepth(dpy,DefaultScreen(dpy)));
 	XSetWindowBackgroundPixmap(dpy, main_window, bgpm);
+	x_init_pictures();
 
 } /* os_init_screen */
 

@@ -48,4 +48,5 @@ const XFontStruct * get_font(int font, int style);
 
 void x_init_colour(char *bg_name, char *fg_name);
 
+bool x_init_pictures(void);
 #endif

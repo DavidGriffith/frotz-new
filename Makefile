@@ -269,7 +269,7 @@ DOS_DEFINES = $(DOS_DIR)/defs.h
 
 X11_DIR = $(SRCDIR)/x11
 X11_LIB = $(X11_DIR)/frotz_x11.a
-export X11_PKGS = x11 xt
+export X11_PKGS = x11 xt libpng libjpeg zlib
 X11_FONTDIR = $(DESTDIR)$(PREFIX)/share/fonts/X11/zork
 X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lm
 
