@@ -10,12 +10,16 @@
 
 
 /* For now we assume DOS Frotz is always 16-bit */
-#ifdef __TURBOC__
+#if defined __TURBOC__ || defined __WATCOMC__
 #define MSDOS_16BIT
 #endif
 
 #ifdef MSDOS_16BIT
-#include "..\dos\defs.h"
+#ifdef __TURBOC__
+#include "../dos/defs.h"
+#else
+#include "../owdos/defs.h"
+#endif
 #ifdef USE_UTF8
 #error UTF-8 is not supported in DOS Frotz
 #endif

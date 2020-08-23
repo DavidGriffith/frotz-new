@@ -1,0 +1,73 @@
+# This file is used to build Frotz for DOS using Open Watcom C 2.0 beta.
+# Written with Open Watcom MAKE Version 2.0 beta in mind.
+# The resulting executable runs as a 16-bit program.
+#
+
+CC = owcc
+CFLAGS = -bdos -mcmodel=l -O3 -Wall
+WLIB = wlib
+# Use a wmake internal command to delete individual files.  This works on
+# both MS-DOS and Linux build systems.
+RM = %erase
+
+BINNAME = frotz.exe
+COMMON_LIB = common.lib
+
+# Now defined in src/common/git_hash.h.
+VER =
+
+OW_DOS_DIR = src/owdos
+DOS_OBJECTS =   $(OW_DOS_DIR)/owinit.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/owinput.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/owmouse.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/owpic.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/owsample.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/owscreen.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/owtext.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/owblorb.o
+
+CORE_DIR = src/common
+CORE_OBJECTS =  $(CORE_DIR)/buffer.o
+CORE_OBJECTS +=	$(CORE_DIR)/fastmem.o
+CORE_OBJECTS +=	$(CORE_DIR)/files.o
+CORE_OBJECTS +=	$(CORE_DIR)/getopt.o
+CORE_OBJECTS +=	$(CORE_DIR)/hotkey.o
+CORE_OBJECTS +=	$(CORE_DIR)/input.o
+CORE_OBJECTS +=	$(CORE_DIR)/main.o
+CORE_OBJECTS +=	$(CORE_DIR)/math.o
+CORE_OBJECTS +=	$(CORE_DIR)/object.o
+CORE_OBJECTS +=	$(CORE_DIR)/process.o
+CORE_OBJECTS +=	$(CORE_DIR)/random.o
+CORE_OBJECTS +=	$(CORE_DIR)/redirect.o
+CORE_OBJECTS +=	$(CORE_DIR)/screen.o
+CORE_OBJECTS +=	$(CORE_DIR)/sound.o
+CORE_OBJECTS +=	$(CORE_DIR)/stream.o
+CORE_OBJECTS +=	$(CORE_DIR)/table.o
+CORE_OBJECTS +=	$(CORE_DIR)/text.o
+CORE_OBJECTS +=	$(CORE_DIR)/variable.o
+CORE_OBJECTS +=	$(CORE_DIR)/quetzal.o
+CORE_OBJECTS +=	$(CORE_DIR)/err.o
+
+all:	frotz
+
+.ERASE
+
+.c:	$(OW_DOS_DIR);$(CORE_DIR)
+
+.c.o:
+	$(CC) $(CFLAGS) $(VER) -I$(OW_DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
+
+# Note: the `for' command is specially intercepted by wmake, and works like
+# its namesake in MS-DOS command.com --- even when cross-building in Unix (!).
+clean:	.SYMBOLIC
+	for %i in ($(CORE_DIR)/*.o $(OW_DOS_DIR)/*.o) do -$(RM) %i
+	for %i in (*.obj *.lib *.exe *.bak *.map *.lnk) do -$(RM) %i
+
+frotz:	$(BINNAME) .SYMBOLIC
+
+$(BINNAME): $(DOS_OBJECTS) $(COMMON_LIB)
+	$(CC) $(CFLAGS) -o$(BINNAME) $(DOS_OBJECTS) $(COMMON_LIB)
+
+$(COMMON_LIB): $(CORE_OBJECTS)
+	-$(RM) $@
+	for %i in ($(CORE_OBJECTS)) do $(WLIB) $(COMMON_LIB) +-%i
