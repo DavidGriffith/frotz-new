@@ -11,15 +11,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef MSDOS_16BIT
-#define cdecl
-#endif
-
 int zoptind = 1;
 int zoptopt = 0;
 char *zoptarg = NULL;
 
-int cdecl zgetopt (int argc, char *argv[], const char *options)
+int zgetopt (int argc, char *argv[], const char *options)
 {
 	static int pos = 1;
 	const char *p;

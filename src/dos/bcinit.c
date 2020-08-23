@@ -66,8 +66,6 @@ extern unsigned cdecl _stklen = 0x800;
 
 extern int zoptind;
 
-int cdecl zgetopt(int, char *[], const char *);
-
 static const char *progname = NULL;
 
 extern char script_name[];
