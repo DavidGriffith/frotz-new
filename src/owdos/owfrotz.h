@@ -156,7 +156,9 @@ word bios_video_ax_esdx_bh(word ax, void _far *esdx, byte bh);
 				    value [ax] modify [bx cx dx];
 long bios_time_ah(byte ah);
 #pragma aux bios_time_ah = "int 0x1a" parm [ah] value [cx dx] modify [ax bx];
-void dos_mouse_ax(word ax);
-#pragma aux dos_mouse_ax = "int 0x33" parm [ax] modify [ax bx cx dx];
+word dos_mouse_ax(word ax);
+#pragma aux dos_mouse_ax = "int 0x33" parm [ax] value [ax] modify [bx cx dx];
+__int64 dos_mouse_ax_bx(word ax, word bx);
+#pragma aux dos_mouse_ax_bx = "int 0x33" parm [ax] [bx] value [ax bx cx dx];
 
 #endif
