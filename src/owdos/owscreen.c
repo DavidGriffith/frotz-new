@@ -235,7 +235,7 @@ void os_scroll_area(int top, int left, int bottom, int right, int units)
 
 	if (display <= _TEXT_) {
 		word ax;
-		if (units < 0)
+		if (units > 0)
 			ax = 0x0600 | (byte)units;
 		else
 			ax = 0x0700 | (byte)-units;
