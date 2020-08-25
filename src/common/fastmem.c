@@ -26,15 +26,7 @@
 #include <string.h>
 #include "frotz.h"
 
-#ifdef MSDOS_16BIT
-
-#include <alloc.h>
-
-#define malloc(size)	farmalloc (size)
-#define realloc(size,p)	farrealloc (size,p)
-#define free(size)	farfree (size)
-
-#else
+#ifndef MSDOS_16BIT
 
 #include <stdlib.h>
 
@@ -43,8 +35,6 @@
 #define SEEK_CUR 1
 #define SEEK_END 2
 #endif
-
-#define far
 
 #endif
 
@@ -70,8 +60,8 @@ extern void (*var_opcodes[]) (void);
 /* char save_name[MAX_FILE_NAME + 1] = DEFAULT_SAVE_NAME; */
 char auxilary_name[MAX_FILE_NAME + 1] = DEFAULT_AUXILARY_NAME;
 
-zbyte far *zmp = NULL;
-zbyte far *pcp = NULL;
+zbyte huge *zmp = NULL;
+zbyte huge *pcp = NULL;
 
 static FILE *story_fp = NULL;
 
@@ -94,10 +84,24 @@ struct undo_struct {
 	/* undo diff and stack data follow */
 };
 
-static undo_t *first_undo = NULL, *last_undo = NULL, *curr_undo = NULL;
-static zbyte *prev_zmp, *undo_diff;
+static undo_t huge *first_undo = NULL, huge *last_undo = NULL,
+	      huge *curr_undo = NULL;
+static zbyte huge *prev_zmp, *undo_diff;
 
 static int undo_count = 0;
+
+
+#ifdef __WATCOMC__
+void huge *zrealloc(void huge *p, long size, size_t old_size)
+{
+	void huge *q = zmalloc(size);
+	if (q == NULL)
+		return NULL;
+	_fmemcpy(q, p, size < old_size ? size : old_size);
+	zfree(p);
+	return q;
+}
+#endif /* __WATCOMC__ */
 
 
 /*
@@ -410,7 +414,7 @@ void init_memory(void)
 		os_fatal("Cannot open story file");
 
 	/* Allocate memory for story header */
-	if ((zmp = (zbyte far *) malloc(64)) == NULL)
+	if ((zmp = (zbyte huge *) zmalloc(64)) == NULL)
 		os_fatal("Out of memory");
 
 	/* Load header into memory */
@@ -488,7 +492,7 @@ void init_memory(void)
 	}
 
 	/* Allocate memory for story data */
-	if ((zmp = (zbyte far *) realloc(zmp, story_size)) == NULL)
+	if ((zmp = (zbyte huge *) zrealloc(zmp, story_size, 64)) == NULL)
 		os_fatal("Out of memory");
 
 	/* Load story file in chunks of 32KB */
@@ -517,30 +521,30 @@ void init_memory(void)
  */
 void init_undo(void)
 {
-	void far *reserved;
+	void huge *reserved;
 
 	reserved = NULL;	/* makes compilers shut up */
 
 	if (reserve_mem != 0) {
-		if ((reserved = malloc(reserve_mem)) == NULL)
+		if ((reserved = zmalloc(reserve_mem)) == NULL)
 			return;
 	}
 
 	/* Allocate z_header.dynamic_size bytes for previous dynamic
 	 * zmp state + 1.5 z_header.dynamic_size for Quetzal diff + 2.
 	 */
-	prev_zmp = malloc(z_header.dynamic_size);
-	undo_diff = malloc(((unsigned long)z_header.dynamic_size * 3) / 2 + 2);
+	prev_zmp = zmalloc(z_header.dynamic_size);
+	undo_diff = zmalloc(((unsigned long)z_header.dynamic_size * 3) / 2 + 2);
 	if ((undo_diff != NULL) && (prev_zmp != NULL)) {
 		memmove (prev_zmp, zmp, z_header.dynamic_size);
 	} else {
 		f_setup.undo_slots = 0;
-		if (prev_zmp != NULL) free(prev_zmp);
-		if (undo_diff != NULL) free(undo_diff);
+		if (prev_zmp != NULL) zfree(prev_zmp);
+		if (undo_diff != NULL) zfree(undo_diff);
 	}
 
 	if (reserve_mem != 0)
-		free(reserved);
+		zfree(reserved);
 } /* init_undo */
 
 
@@ -561,7 +565,7 @@ static void free_undo(int count)
 		if (curr_undo == first_undo)
 			curr_undo = curr_undo->next;
 		first_undo = first_undo->next;
-		free (p);
+		zfree (p);
 		undo_count--;
 	}
 	if (first_undo)
@@ -585,8 +589,8 @@ void reset_memory(void)
 
 	if (undo_diff) {
 		free_undo(undo_count);
-		free(undo_diff);
-		free(prev_zmp);
+		zfree(undo_diff);
+		zfree(prev_zmp);
 	}
 
 	undo_diff = NULL;
@@ -594,7 +598,7 @@ void reset_memory(void)
 	prev_zmp = NULL;
 
 	if (zmp)
-		free(zmp);
+		zfree(zmp);
 	zmp = NULL;
 } /* reset_memory */
 
@@ -763,7 +767,7 @@ void z_restore(void)
 		new_name = os_read_file_name(f_setup.save_name, FILE_RESTORE);
 		if (new_name == NULL)
 			goto finished;
-		free(f_setup.save_name);
+		zfree(f_setup.save_name);
 		f_setup.save_name = strdup(new_name);
 
 		/* Open game file */
@@ -1030,7 +1034,7 @@ int save_undo(void)
 {
 	long diff_size;
 	zword stack_size;
-	undo_t *p;
+	undo_t huge *p;
 	long pc;
 
 	/* undo feature unavailable */
@@ -1055,7 +1059,7 @@ int save_undo(void)
 	diff_size = mem_diff(zmp, prev_zmp, z_header.dynamic_size, undo_diff);
 	stack_size = stack + STACK_SIZE - sp;
 	do {
-		p = malloc(sizeof (undo_t) + diff_size + stack_size * sizeof (*sp));
+		p = zmalloc(sizeof (undo_t) + diff_size + stack_size * sizeof (*sp));
 		if (p == NULL)
 			free_undo(1);
 	} while (!p && undo_count);

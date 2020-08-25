@@ -15,19 +15,40 @@
 #endif
 
 #ifdef MSDOS_16BIT
+
 #ifdef __TURBOC__
 #include "../dos/defs.h"
 #else
 #include "../owdos/defs.h"
 #endif
+
 #ifdef USE_UTF8
 #error UTF-8 is not supported in DOS Frotz
 #endif
+
+#include <malloc.h>
+
+#define zmalloc(size)	halloc((size), 1)
+#define zfree(p)	hfree(p)
+#ifdef __WATCOMC__
+/*
+ * Open Watcom C's runtime library does not have a function to reallocate
+ * "huge" memory blocks --- unlike Borland Turbo C --- so we need to
+ * implement our own function to do that.  (Luckily zrealloc is used only in
+ * one place in fastmem.c, which simplifies things somewhat.)
+ */
+#define huge		_huge
+void huge *zrealloc(void huge *p, long size, size_t old_size);
+#else
+#define zrealloc(p, size, old_size) farrealloc((p), (size))
 #endif
+
+#endif /* MSDOS_16BIT */
 
 #ifndef MSDOS_16BIT
 #include "defs.h"
 #include "git_hash.h"
+#define huge
 #endif
 
 #ifndef __UNIX_PORT_FILE
@@ -403,16 +424,32 @@ extern zbyte *zmp;
 #endif
 
 #if defined (MSDOS_16BIT)
-extern zbyte *pcp;
-extern zbyte *zmp;
 
 #define lo(v)   ((zbyte *)&v)[0]
 #define hi(v)   ((zbyte *)&v)[1]
 
 #ifdef __WATCOMC__
+
+extern zbyte _huge *pcp;
+extern zbyte _huge *zmp;
+
 zword bswap16(zword x);
 #pragma aux bswap16 = "xchg ah, al" parm [ax] value [ax];
-#endif
+
+/*
+ * TODO: make these more efficient (and still correct).
+ */
+#define SET_WORD(addr, v)	{ *(zword _huge *)(zmp+(addr))=bswap16(v); }
+#define LOW_WORD(addr, v)	{ (v)=bswap16(*(zword _huge *)(zmp+(addr))); }
+#define HIGH_WORD(addr, v)	{ (v)=bswap16(*(zword _huge *)(zmp+(addr))); }
+#define CODE_WORD(v)		{ (v)=bswap16(*(zword _huge *)pcp); pcp+=2; }
+#define GET_PC(v)		{ (v) = pcp - zmp; }
+#define SET_PC(v)		{ pcp = zmp + (v); }
+
+#else /* !__WATCOMC__ */
+
+extern zbyte *pcp;
+extern zbyte *zmp;
 
 /*
  * Turbo C has a strange limitation with passing members of structs to
@@ -490,6 +527,8 @@ zword bswap16(zword x);
 	add ax,word ptr zmp+2;\
 	mov word ptr pcp,bx;\
 	mov word ptr pcp+2,ax }
+
+#endif /* !__WATCOMC__ */
 
 #endif /* MSDOS_16BIT */
 
