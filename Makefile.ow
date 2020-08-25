@@ -5,6 +5,7 @@
 
 CC = owcc
 CFLAGS = -bdos -mcmodel=l -O3 -Wall
+ASFLAGS = -bdos -mcmodel=l
 LDFLAGS = -fm=$(BINNAME:.exe=.map)
 WLIB = wlib
 # Use a wmake internal command to delete individual files.  This works on
@@ -26,6 +27,7 @@ DOS_OBJECTS +=	$(OW_DOS_DIR)/owsample.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/owscreen.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/owtext.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/owblorb.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/owfix.o
 
 CORE_DIR = src/common
 CORE_OBJECTS =  $(CORE_DIR)/buffer.o
@@ -54,9 +56,13 @@ all:	frotz
 .ERASE
 
 .c:	$(OW_DOS_DIR);$(CORE_DIR)
+.asm:	$(OW_DOS_DIR)
 
 .c.o:
 	$(CC) $(CFLAGS) $(VER) -I$(OW_DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
+
+.asm.o:
+	$(CC) $(ASFLAGS) $(VER) -I$(OW_DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
 
 # Note: the `for' command is specially intercepted by wmake, and works like
 # its namesake in MS-DOS command.com --- even when cross-building in Unix (!).
