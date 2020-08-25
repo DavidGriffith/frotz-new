@@ -5,6 +5,7 @@
 
 CC = owcc
 CFLAGS = -bdos -mcmodel=l -O3 -Wall
+LDFLAGS = -fm=$(BINNAME:.exe=.map)
 WLIB = wlib
 # Use a wmake internal command to delete individual files.  This works on
 # both MS-DOS and Linux build systems.
@@ -66,7 +67,7 @@ clean:	.SYMBOLIC
 frotz:	$(BINNAME) .SYMBOLIC
 
 $(BINNAME): $(DOS_OBJECTS) $(COMMON_LIB)
-	$(CC) $(CFLAGS) -o$(BINNAME) $(DOS_OBJECTS) $(COMMON_LIB)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o$(BINNAME) $(DOS_OBJECTS) $(COMMON_LIB)
 
 $(COMMON_LIB): $(CORE_OBJECTS)
 	-$(RM) $@
