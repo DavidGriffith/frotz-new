@@ -409,6 +409,11 @@ extern zbyte *zmp;
 #define lo(v)   ((zbyte *)&v)[0]
 #define hi(v)   ((zbyte *)&v)[1]
 
+#ifdef __WATCOMC__
+zword bswap16(zword x);
+#pragma aux bswap16 = "xchg ah, al" parm [ax] value [ax];
+#endif
+
 /*
  * Turbo C has a strange limitation with passing members of structs to
  * assembly code within a macro.  If more than one struct have members
