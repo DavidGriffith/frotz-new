@@ -46,10 +46,16 @@ void huge *zrealloc(void huge *p, long size, size_t old_size);
 #endif /* MSDOS_16BIT */
 
 #ifndef MSDOS_16BIT
+
 #include "defs.h"
 #include "git_hash.h"
+
 #define huge
-#endif
+#define zmalloc(size)	malloc(size)
+#define zfree(p)	free(p)
+#define zrealloc(p, size, old_size) realloc((p), (size))
+
+#endif /* !MSDOS_16BIT */
 
 #ifndef __UNIX_PORT_FILE
 #include <signal.h>
