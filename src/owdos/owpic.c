@@ -103,7 +103,7 @@ static bool open_graphics_file(int number)
 		goto failure2;
 	images = gheader.images;
 	entry_size = gheader.entry_size;
-	if ((info = halloc(images, entry_size)) == NULL)
+	if ((info = halloc((long)images * entry_size, 1)) == NULL)
 		goto failure2;
 	p = info;
 	while (images != 0) {
@@ -378,6 +378,7 @@ static void draw_picture(int y, int x)
 	   be black.) */
 	current_x = x + pic_width;
 	current_y = y - 1;
+	screen = get_scrnptr(current_y);
 
 	/* The compressed picture is a stream of bits. We read the file
 	   byte-wise, storing the current byte in the variable "bits".
@@ -574,7 +575,7 @@ reverse_buffer:
 	if (bufpos == 0)
 		goto next_code;
 
-	byte0(code) = buf[--bufpos];
+	code = buf[--bufpos];
 
 	goto reverse_buffer;
 } /* draw_picture */

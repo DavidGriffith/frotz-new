@@ -755,10 +755,34 @@ void os_more_prompt(void)
  *
  * Given a true colour, return an appropriate colour index.
  *
+ * This currently follows xfrotz's "pretty brain-dead" (but very much working)
+ * implementation.
+ *
  */
 int os_from_true_colour(zword colour)
 {
-	/* Nothing here yet */
+	if (colour == 0xfffe)
+		return 0;
+	else if (colour == 0xffff)
+		return 1;
+	else {
+		int r = colour & 0x001F;
+		int g = colour & 0x03E0;
+		int b = colour & 0x7C00;
+		int index = (r ? 4 : 0) | (g ? 2 : 0) | (b ? 1 : 0);
+
+		switch (index) {
+		case 0: return 2;
+		case 1: return 6;
+		case 2: return 4;
+		case 3: return 8;
+		case 4: return 3;
+		case 5: return 7;
+		case 6: return 5;
+		case 7: return 9;
+		default: return 1; /* Can't happen */
+		}
+	}
 	return 0;
 }
 
@@ -767,9 +791,25 @@ int os_from_true_colour(zword colour)
  *
  * Given a colour index, return the appropriate true colour.
  *
+ * This currently follows xfrotz's implementation.
+ *
  */
 zword os_to_true_colour(int index)
 {
-	/* Nothing here yet */
-	return 0;
+	switch (index) {
+	case 0: return -2;
+	case 1: return -1;
+	case 2: return 0x0000;
+	case 3: return 0x001D;
+	case 4: return 0x0340;
+	case 5: return 0x03BD;
+	case 6: return 0x59A0;
+	case 7: return 0x7C1F;
+	case 8: return 0x77A0;
+	case 9: return 0x7FFF;
+	case 10: return 0x5AD6;
+	case 11: return 0x4631;
+	case 12: return 0x2D6B;
+	default: return 0x0000;
+	}
 }
