@@ -31,7 +31,7 @@
 #include "owblorb.h"
 #endif
 
-#include "git_hash.h"
+#include "owhash.h"
 
 extern f_setup_t f_setup;
 extern z_header_t z_header;

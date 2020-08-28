@@ -18,13 +18,14 @@ levels from Hercules to MCGA are supported.
 To compile DOS Frotz, you need the following:
 	* Borland Turbo C++ 3.00.  This is the latest version I'm aware 
 	  of capable of building 16-bit DOS applications.
+	  Alternatively, use Open Watcom C 2.0 beta, May 17 2020, or higher.
 	* PC-DOS, MS-DOS, or DR-DOS version 5.0 or higher.
 	  FreeDOS 1.2 works well too.
 
 
-==============
-Compilation ||
-==============
+=============================
+Compilation with Turbo C++ ||
+=============================
 
 Turbo C++ is typically installed to C:\tc.  Make sure your path contains 
 C:\tc\bin.  When this is done, type "make".  Did Borland's make program 
@@ -52,6 +53,36 @@ not result in an optimized executable.  I'm not sure how to get that
 file in agreement with what's in Makefile.tc.
 
 To clean up after a build, type "build clean".
+
+
+===============================================
+Compilation with Open Watcom C hosted on DOS ||
+===============================================
+
+Open Watcom is typically installed to C:\watcom.  Make sure the environment
+variable WATCOM points to the installation path, e.g.
+
+	set WATCOM=C:\watcom
+
+When this is done, type "%WATCOM%\binw\make".  Did Watcom's make program
+run?  If this command works, then you should be ready to compile.
+
+To compile, you need to first get the source code into a DOS machine,
+whether it's real or emulated.  Do "make dos" to produce a zip file,
+frotzsrc.zip, which can then be copied to your real or virtual DOS
+machine.
+
+To compile, open up this zip file and go into the frotzsrc directory and
+type "owbuild".  That will invoke "owbuild.bat", a batch file that sets some
+environment variables and then executes "wmake -f makefile.ow".  After about
+a minute, you should have FROTZ.EXE.  This file is all you need to run
+Frotz.  Put it somewhere in your path and go to wherever you keep your
+Infocom games.  Type "frotz zork1.dat" or whatever and there you go.
+
+Compile-time options are set in src/owdos/defs.h.  There should be no need
+to edit Makefile.ow.
+
+To clean up after a build, type "owbuild clean".
 
 
 ========================

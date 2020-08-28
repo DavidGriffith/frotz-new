@@ -3,20 +3,36 @@
 # The resulting executable runs as a 16-bit program.
 #
 
-CC = owcc
-CFLAGS = -bdos -mcmodel=l -O3 -Wall
-ASFLAGS = -bdos -mcmodel=l
-LDFLAGS = -fm=$(BINNAME:.exe=.map)
+# It would be more convenient to use the POSIX-ish owcc wrapper to do
+# compilation, but the DOS/4GW version of owcc (27 Aug 2020) likes to crash
+# when trying to invoke wcc.  (The Linux version has no problem.)
+CC = wcc
+CFLAGS = -bt=dos -ml -onatxl+ -0 -zq
+AS = wasm
+ASFLAGS = -bt=dos -ml -zq
+LD = wlink
+LDFLAGS = system dos option quiet,map=$(BINNAME:.exe=.map)
 WLIB = wlib
 # Use a wmake internal command to delete individual files.  This works on
 # both MS-DOS and Linux build systems.
 RM = %erase
 
 BINNAME = frotz.exe
-COMMON_LIB = common.lib
 
-# Now defined in src/common/git_hash.h.
-VER =
+VERSION = "2.53"
+
+# MS-DOS command.com and Unix sh have different shell quoting rules.  Try to
+# detect which one we are running under.
+!ifdef %COMSPEC
+!ifndef %SHELL
+VER = -DVERSION=$(VERSION)
+!endif
+!endif
+!ifdef %SHELL
+!ifndef %COMSPEC
+VER = -DVERSION='$(VERSION)'
+!endif
+!endif
 
 OW_DOS_DIR = src/owdos
 DOS_OBJECTS =   $(OW_DOS_DIR)/owinit.o
@@ -59,22 +75,26 @@ all:	frotz
 .asm:	$(OW_DOS_DIR)
 
 .c.o:
-	$(CC) $(CFLAGS) $(VER) -I$(OW_DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
+	echo $(CFLAGS) -fo=$@ $< >$*.rsp
+	$(CC) $(VER) -i="$(OW_DOS_DIR)" -i="$(CORE_DIR)" @$*.rsp
+	$(RM) $*.rsp
 
 .asm.o:
-	$(CC) $(ASFLAGS) $(VER) -I$(OW_DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
+	echo $(ASFLAGS) -fo=$@ $< >$*.rsp
+	$(AS) $(VER) -i="$(OW_DOS_DIR)" -i="$(CORE_DIR)" @$*.rsp
+	$(RM) $*.rsp
 
 # Note: the `for' command is specially intercepted by wmake, and works like
 # its namesake in MS-DOS command.com --- even when cross-building in Unix (!).
 clean:	.SYMBOLIC
 	for %i in ($(CORE_DIR)/*.o $(OW_DOS_DIR)/*.o) do -$(RM) %i
-	for %i in (*.obj *.lib *.exe *.bak *.map *.lnk) do -$(RM) %i
+	for %i in ($(CORE_DIR)/*.rsp $(OW_DOS_DIR)/*.rsp) do -$(RM) %i
+	for %i in (*.obj *.lib *.rsp *.exe *.bak *.map *.lnk) do -$(RM) %i
 
 frotz:	$(BINNAME) .SYMBOLIC
 
-$(BINNAME): $(DOS_OBJECTS) $(COMMON_LIB)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o$(BINNAME) $(DOS_OBJECTS) $(COMMON_LIB)
-
-$(COMMON_LIB): $(CORE_OBJECTS)
-	-$(RM) $@
-	for %i in ($(CORE_OBJECTS)) do $(WLIB) $(COMMON_LIB) +-%i
+$(BINNAME): $(DOS_OBJECTS) $(CORE_OBJECTS)
+	echo $(LDFLAGS) name $(BINNAME) >$*.rsp
+	for %i in ($(DOS_OBJECTS) $(CORE_OBJECTS)) do echo file %i >>$*.rsp
+	$(LD) @$*.rsp
+	$(RM) $*.rsp

@@ -267,6 +267,9 @@ DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 DOS_DIR = $(SRCDIR)/dos
 DOS_DEFINES = $(DOS_DIR)/defs.h
 
+OW_DOS_DIR = $(SRCDIR)/owdos
+OW_DOS_DEFINES = $(OW_DOS_DIR)/defs.h
+
 X11_DIR = $(SRCDIR)/x11
 X11_LIB = $(X11_DIR)/frotz_x11.a
 export X11_PKGS = x11 xt
@@ -278,9 +281,7 @@ SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
 
-DOS_DIR = $(SRCDIR)/dos
-
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR) $(OW_DOS_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 FROTZ_BIN = frotz$(EXTENSION)
@@ -356,15 +357,15 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
-dos: $(DOS_DEFINES) $(DOS_BIN)
-$(DOS_BIN):
+dos: $(DOS_BIN)
+$(DOS_BIN): $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	@echo
 	@echo "  ** Cannot cross-compile for DOS yet."
 	@echo "  ** Copy this zip file, $(NAME)src.zip, into a DOS machine and use Turbo C."
-	@echo "  ** A virtualized DOS machine will do.  This zip file will fit on a single"
-	@echo "  ** double-sided double-density 5.25-inch floppy disk.  Read the file"
-	@echo "  ** DOSBUILD.txt for more information."
+	@echo "  ** or Open Watcom C.  A virtualized DOS machine will do.  This zip file"
+	@echo "  ** will fit on a single double-sided double-density 5.25-inch floppy disk."
+	@echo "  ** Read the file INSTALL_DOS for more information."
 	@echo
 	@git archive --format=zip --prefix $(NAME)src/ HEAD -o $(NAME)src.zip
 	@zip -d $(NAME)src.zip $(NAME)src/src/curses/* \
@@ -372,9 +373,10 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 		$(NAME)src/src/sdl/* $(NAME)src/src/misc/* \
 		$(NAME)src/doc/*.6 $(NAME)src/doc/frotz.conf* \
 		$(NAME)src/doc/Xresources  > /dev/null
-	@mkdir -p $(NAME)src/$(DOS_DIR)
+	@mkdir -p $(NAME)src/$(DOS_DIR) $(NAME)src/$(OW_DOS_DIR)
 	@cp $(DOS_DEFINES) $(NAME)src/$(DOS_DIR)
-	@zip $(NAME)src.zip $(NAME)src/$(DOS_DEFINES) > /dev/null
+	@cp $(OW_DOS_DEFINES) $(NAME)src/$(OW_DOS_DIR)
+	@zip $(NAME)src.zip $(NAME)src/$(DOS_DEFINES) $(NAME)src/$(OW_DOS_DEFINES) > /dev/null
 	@rm -rf $(NAME)src
 
 else
@@ -458,8 +460,8 @@ endif
 endif
 
 
-dosdefs: $(DOS_DEFINES)
-$(DOS_DEFINES):
+dosdefs: $(DOS_DEFINES) $(OW_DOS_DEFINES)
+$(DOS_DEFINES) $(OW_DOS_DEFINES):
 	@echo "** Generating $@"
 	@echo "#ifndef DOS_DEFINES_H" > $@
 	@echo "#define DOS_DEFINES_H" >> $@
@@ -630,6 +632,7 @@ clean: $(SUB_CLEAN)
 	rm -rf $(COMMON_DEFINES) \
 		$(CURSES_DEFINES) \
 		$(DOS_DEFINES) \
+		$(OW_DOS_DEFINES) \
 		$(HASH)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
 
@@ -668,7 +671,8 @@ help:
 
 .PHONY: all clean dist dosdist curses ncurses dumb sdl hash help \
 	common_defines dosdefs curses_defines nosound nosound_helper\
-	$(COMMON_DEFINES) $(DOS_DEFINES) $(CURSES_DEFINES) $(HASH) \
+	$(COMMON_DEFINES) $(DOS_DEFINES) $(OW_DOS_DEFINES) $(CURSES_DEFINES) \
+	$(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz install_xfrotz $(SUB_CLEAN)
 	uninstall uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz
