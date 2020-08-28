@@ -59,6 +59,10 @@ To clean up after a build, type "build clean".
 Compilation with Open Watcom C hosted on DOS ||
 ===============================================
 
+You should be able to find an installer program for the DOS version of Open
+Watcom at https://github.com/open-watcom/open-watcom-v2/releases ; it will
+likely be under the name open-watcom-2_0-c-dos.exe.
+
 Open Watcom is typically installed to C:\watcom.  Make sure the environment
 variable WATCOM points to the installation path, e.g.
 
