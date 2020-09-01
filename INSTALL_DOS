@@ -68,7 +68,7 @@ variable WATCOM points to the installation path, e.g.
 
 	set WATCOM=C:\watcom
 
-When this is done, type "%WATCOM%\binw\make".  Did Watcom's make program
+When this is done, type "%WATCOM%\binw\dos4gw".  Did the DOS/4GW program
 run?  If this command works, then you should be ready to compile.
 
 To compile, you need to first get the source code into a DOS machine,
