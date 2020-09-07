@@ -259,7 +259,13 @@ static SFONT *loadftype(char *fname, int size, SFONT * like, int *err)
 
 	if (like) {
 		SF_glyph *zero = like->getglyph(like, '0', TRUE);
-		*err = FT_Set_Pixel_Sizes(face, zero->dx, like->height(like));
+		*err = FT_Set_Pixel_Sizes(face, 0, like->height(like));
+
+		FT_Matrix tmat;
+		tmat.xy = tmat.yx = 0;
+		tmat.yy = 1<<16;
+		tmat.xx = (zero->dx << 16)/(face->size->metrics.max_advance >>6);
+		FT_Set_Transform(face, &tmat, NULL);
 	} else
 		*err = FT_Set_Pixel_Sizes(face, size, size);
 	if (*err) {
