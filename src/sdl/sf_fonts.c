@@ -959,7 +959,13 @@ void sf_initfonts()
 		ttfontsdone();
 	/* now set the graphics font */
 	if (!myfonts[8]) {
-		if (myfonts[4]->height(myfonts[4]) < 16)
+		if (!m_vga_fonts) {
+			int err;
+			SFONT *b = ttfontloader("<builtin_font3>",
+				myfonts[FIXED_WIDTH_FONT], &err);
+			setfontk(8, b);
+			b->refcount = 1;
+		} else if (myfonts[4]->height(myfonts[4]) < 16)
 			myfonts[8] = SF_font3;
 		else
 			myfonts[8] = SF_font3double;

@@ -30,6 +30,8 @@
 #include FT_FREETYPE_H
 #include <freetype2/freetype/freetype.h>
 
+#include "sf_font3ttf.h"
+
 /***************************************************************/
 
 typedef struct {
@@ -250,7 +252,12 @@ static SFONT *loadftype(char *fname, int size, SFONT * like, int *err)
 		return NULL;
 	}
 
-	*err = FT_New_Face(library, fname, 0, &face);	/* create face object */
+	/* create face object */
+	if (strcmp(fname, "<builtin_font3>"))
+		*err = FT_New_Face(library, fname, 0, &face);
+	else
+		*err = FT_New_Memory_Face(library, SF_font3_ttf,
+			sizeof(SF_font3_ttf), 0, &face);
 	if (*err) {
 		res->sfont.destroy(&res->sfont);
 		return NULL;
@@ -301,6 +308,9 @@ SFONT *sf_loadftype(char *fspec, SFONT * like, int *err)
 {
 	char buf[FILENAME_MAX], *fn, *at, *fenv;
 	int size = DEFSIZE, fnlen = -1;
+
+	if (!strcmp(fspec, "<builtin_font3>"))
+		return loadftype(fspec, size, like, err);
 
 	at = strchr(fspec, '@');
 	if (at) {
