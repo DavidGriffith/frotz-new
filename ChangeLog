@@ -19,6 +19,7 @@ BUG FIXES
 - Corrected a potential trouble with garbage in filenames for SDL
   interface.
 
+- Corrected a problem wherein @print_table would sometimes print garbage.
 
 
 Summary of changes between Frotz 2.51 and Frotz 2.52:
