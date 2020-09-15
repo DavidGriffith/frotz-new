@@ -11,6 +11,9 @@ NEW FEATURES
 
 - X11 interface has been added as a compile target.
 
+- Added new default TrueType font for sfrotz.
+
+
 BUG FIXES
 
 - Corrected a potential trouble with garbage in filenames for SDL
