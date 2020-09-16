@@ -778,7 +778,7 @@ void dumb_show_screen(bool show_cursor)
 	int r, c, first, last;
 	char changed_rows[0x100];
 
-	if (f_setup.bot_status > BOT_NORMAL) {
+	if (f_setup.bot_mode && (f_setup.bot_status > BOT_NORMAL)) {
 		mark_all_unchanged();
 		return;
 	}
