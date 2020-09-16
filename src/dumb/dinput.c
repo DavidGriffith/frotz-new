@@ -25,6 +25,13 @@
 #include "dfrotz.h"
 
 extern f_setup_t f_setup;
+extern zword save_quetzal (FILE *, FILE *);
+extern zword restore_quetzal (FILE *, FILE *);
+
+static int bot_char_count;
+
+static bool line_done;
+static bool save_done;
 
 static char runtime_usage[] =
 	"DUMB-FROTZ runtime help:\n"
@@ -81,10 +88,56 @@ enum input_type {
 };
 
 
+static void end_of_turn(void)
+{
+	FILE *save_fp;
+
+
+	if (f_setup.bot_mode) {
+		/* Maybe not here... */
+		if (f_setup.bot_status == BOT_LOAD) {
+			f_setup.bot_status = BOT_NORMAL;
+		}
+
+		if (save_done) {
+			dumb_show_prompt(TRUE, 0);
+			putchar('\n');
+			os_quit(EXIT_SUCCESS);
+		}
+
+		if (line_done || f_setup.bot_status == BOT_START) {
+			/* Inject SAVE command */
+//			free(f_setup.bot_command);
+//			f_setup.bot_command = strdup("SAVE");
+//			f_setup.bot_status = BOT_SAVE;
+
+			save_fp = fopen(f_setup.save_name, "wb");
+			if (save_fp == NULL) {
+				fprintf(stderr, "Can't read save\n");
+			}
+
+			save_done = TRUE;
+			save_frotz(save_fp);
+			os_quit(EXIT_SUCCESS);
+		}
+	}
+}
+
+
+
 /* get a character.  Exit with no fuss on EOF.  */
 static int xgetchar(void)
 {
-	int c = getchar();
+	int c;
+
+	if (f_setup.bot_mode && !line_done) {
+		c = f_setup.bot_command[bot_char_count++];
+		if (c == '\0')
+			c = '\n';
+		return c;
+	} else
+		c = getchar();
+
 	if (c == EOF) {
 		if (feof(stdin)) {
 			fprintf(stderr, "\nEOT\n");
@@ -103,9 +156,16 @@ static void dumb_getline(char *s)
 {
 	int c;
 	char *p = s;
+
+	if (f_setup.bot_mode) {
+		bot_char_count = 0;
+		line_done = FALSE;
+	}
+
 	while (p < s + INPUT_BUFFER_SIZE - 1) {
 		if ((*p++ = xgetchar()) == '\n') {
 			*p = '\0';
+			line_done = TRUE;
 			return;
 		}
 	}
@@ -216,7 +276,7 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 			   int timeout, enum input_type type,
 			   zchar *continued_line_chars)
 {
-	time_t start_time;
+	time_t start_time = 0;
 
 	if (timeout) {
 		if (time_ahead >= timeout) {
@@ -229,13 +289,34 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 	time_ahead = 0;
 
 	dumb_show_screen(show_cursor);
-	for (;;) {
-		char *command;
+
+	/* Here marks the end of output from the last turn
+	 * and where we start getting input.
+	 */
+	end_of_turn();
+
+	if (f_setup.bot_mode && f_setup.bot_status <= BOT_NORMAL) {
+		if (f_setup.bot_status == BOT_START)
+			f_setup.bot_status = BOT_NORMAL;
+
 		if (prompt)
 			fputs(prompt, stdout);
 		else
 			dumb_show_prompt(show_cursor,
 				(timeout ? "tTD" : ")>}")[type]);
+		printf("%s\n", f_setup.bot_command);
+	}
+
+	for (;;) {
+		char *command;
+
+		if (!f_setup.bot_mode) {
+			if (prompt)
+				fputs(prompt, stdout);
+			else
+				dumb_show_prompt(show_cursor,
+					(timeout ? "tTD" : ")>}")[type]);
+		}
 
 		/* Prompt only shows up after user input if we don't flush stdout */
 		fflush(stdout);
@@ -497,8 +578,9 @@ char *os_read_file_name (const char *default_name, int flag)
 
 	/* If we're restoring a game before the interpreter starts,
  	 * our filename is already provided.  Just go ahead silently.
+	 * If we're in bot mode, we don't prompt for file names.
 	 */
-	if (f_setup.restore_mode) {
+	if (f_setup.restore_mode || f_setup.bot_mode) {
 		return strdup(default_name);
 	} else {
 		if (f_setup.restricted_path) {

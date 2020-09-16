@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "frotz.h"
 
 #ifndef MSDOS_16BIT
@@ -102,6 +103,12 @@ void huge *zrealloc(void huge *p, long size, size_t old_size)
 	return q;
 }
 #endif /* __WATCOMC__ */
+
+
+zword save_frotz(FILE *qfp)
+{
+	return save_quetzal(qfp, story_fp);
+}
 
 
 /*
@@ -223,7 +230,7 @@ void init_setup(void)
 	f_setup.script_name = NULL;
 	f_setup.command_name = NULL;
 	f_setup.save_name = NULL;
-	f_setup.tmp_save_name = NULL;
+	f_setup.auto_save_name = NULL;
 	f_setup.aux_name = NULL;
 	f_setup.story_path = NULL;
 	f_setup.zcode_path = NULL;
@@ -733,6 +740,21 @@ void z_restore(void)
 	char *new_name;
 	char default_name[MAX_FILE_NAME + 1];
 	FILE *gfp = NULL;
+	struct stat *statbuf;
+	int statret;
+
+	/* In bot mode, attempting to restore from a nonexistant file
+	 * should just be ignored.  The save will be created soon enough.
+	 */
+	if (f_setup.bot_mode && f_setup.restore_mode) {
+		statbuf = malloc(sizeof(struct stat));
+		statret = stat(f_setup.auto_save_name, statbuf);
+		free(statbuf);
+		if (statret != 0) {
+			f_setup.bot_status = BOT_START;
+			return;
+		}
+	}
 
 	zword success = 0;
 
@@ -809,7 +831,8 @@ void z_restore(void)
 
 finished:
 	if (gfp == NULL && f_setup.restore_mode)
-		os_fatal ("Error reading save file");
+		os_fatal ("Error reading save file for restore mode");
+
 
 	if (z_header.version <= V3)
 		branch(success);
@@ -1003,7 +1026,7 @@ void z_save(void)
 		if ((gfp = fopen(new_name, "wb")) == NULL)
 			goto finished;
 
-		success = save_quetzal(gfp, story_fp);
+		success = save_frotz(gfp);
 
 		/* Close game file and check for errors */
 		if (fclose(gfp) == EOF || ferror(story_fp)) {

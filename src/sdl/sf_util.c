@@ -311,7 +311,7 @@ static void parse_options(int argc, char **argv)
 			f_setup.left_margin = num;
 		if (c == 'L') {
 			f_setup.restore_mode = TRUE;
-			f_setup.tmp_save_name = strdup(zoptarg);
+			f_setup.auto_save_name = strdup(zoptarg);
 		}
 		if (c == 'q')
 			m_no_sound = 1;
@@ -460,9 +460,8 @@ void os_process_arguments(int argc, char *argv[])
 		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
 		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
 	} else {	/* Set our auto load save as the name_save */
-		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
-		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
-		free(f_setup.tmp_save_name);
+		f_setup.save_name = malloc((strlen(f_setup.auto_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
+		memcpy(f_setup.save_name, f_setup.auto_save_name, strlen(f_setup.auto_save_name) * sizeof(char));
 	}
 
 	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX) + 1) * sizeof(char));

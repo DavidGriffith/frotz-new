@@ -20,6 +20,7 @@
  */
 
 #include <libgen.h>
+#include <sys/stat.h>
 #include "dfrotz.h"
 #include "dblorb.h"
 
@@ -35,15 +36,16 @@ An interpreter for all Infocom and other Z-Machine games.\n\
 Syntax: dfrotz [options] story-file\n\
   -a   watch attribute setting    \t -P   alter piracy opcode\n\
   -A   watch attribute testing    \t -r <option> Set runtime options\n\
-  -f <type> type of format codes  \t -R <path> restricted read/write\n\
-  -h # screen height              \t -s # random number seed value\n\
-  -i   ignore fatal errors        \t -S # transcript width\n\
-  -I # interpreter number         \t -t   set Tandy bit\n\
-  -o   watch object movement      \t -u # slots for multiple undo\n\
-  -O   watch object locating      \t -v   show version information\n\
-  -L <file> load this save file   \t -w # screen width\n\
-  -m   turn off MORE prompts      \t -x   expand abbreviations g/x/z\n\
-  -p   plain ASCII output only    \t -Z # error checking (see below)\n"
+  -B <command> bot mode command   \t -R <path> restricted read/write\n\
+  -f <type> type of format codes  \t -s # random number seed value\n\
+  -h # screen height              \t -S # transcript width\n\
+  -i   ignore fatal errors        \t -t   set Tandy bit\n\
+  -I # interpreter number         \t -u # slots for multiple undo\n\
+  -o   watch object movement      \t -v   show version information\n\
+  -O   watch object locating      \t -w # screen width\n\
+  -L <file> load this save file   \t -x   expand abbreviations g/x/z\n\
+  -m   turn off MORE prompts      \t -Z # error checking (see below)\n\
+  -p   plain ASCII output only\n"
 
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
@@ -77,13 +79,17 @@ void os_process_arguments(int argc, char *argv[])
 	do_more_prompts = TRUE;
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "aAf:h:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
+		c = zgetopt(argc, argv, "aAB:f:h:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
 		switch(c) {
 		case 'a':
 			f_setup.attribute_assignment = 1;
 			break;
 		case 'A':
 			f_setup.attribute_testing = 1;
+			break;
+		case 'B':
+			f_setup.bot_mode = TRUE;
+			f_setup.bot_command = strdup(zoptarg);
 			break;
 		case 'f':
 #ifdef DISABLE_FORMATS
@@ -114,7 +120,8 @@ void os_process_arguments(int argc, char *argv[])
 			break;
 		case 'L':
 			f_setup.restore_mode = 1;
-			f_setup.tmp_save_name = strdup(zoptarg);
+			f_setup.bot_status = BOT_LOAD;
+			f_setup.auto_save_name = strdup(zoptarg);
 			break;
 		case 'm':
 			do_more_prompts = FALSE;
@@ -178,6 +185,9 @@ void os_process_arguments(int argc, char *argv[])
 		os_quit(EXIT_SUCCESS);
 	}
 
+	if (f_setup.bot_mode && !(f_setup.restore_mode && f_setup.restricted_path))
+		os_fatal("Bot mode requires arguments to both -L and -R options.");
+
 	switch (f_setup.format) {
 	case FORMAT_IRC:
 		printf("Using IRC formatting.\n");
@@ -197,7 +207,7 @@ void os_process_arguments(int argc, char *argv[])
 	default:
 		break;
 	}
-	if (f_setup.format == FORMAT_NORMAL)
+	if (f_setup.format == FORMAT_NORMAL && !f_setup.bot_mode)
 		printf("Using normal formatting.\n");
 
 	/* Save the story file name */
@@ -207,10 +217,11 @@ void os_process_arguments(int argc, char *argv[])
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
-	printf("Loading %s.\n", f_setup.story_file);
+	if (!f_setup.bot_mode)
+		printf("Loading %s.\n", f_setup.story_file);
 
 #ifndef NO_BLORB
-	if (f_setup.blorb_file != NULL)
+	if (f_setup.blorb_file != NULL && !f_setup.bot_mode)
 		printf("Also loading %s.\n", f_setup.blorb_file);
 #endif
 
@@ -228,14 +239,16 @@ void os_process_arguments(int argc, char *argv[])
 	memcpy(f_setup.command_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char));
 	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND)+1);
 
-	if (!f_setup.restore_mode) {
+	/* Set our auto load save as the name save */
+	if (f_setup.restore_mode || f_setup.bot_mode) {
+		f_setup.save_name = malloc((strlen(f_setup.auto_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
+		memcpy(f_setup.save_name, f_setup.auto_save_name, (strlen(f_setup.auto_save_name) + strlen(EXT_SAVE)) * sizeof(char));
+		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
+		free(f_setup.auto_save_name);
+	} else {
 		f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
 		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
 		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-	} else { /* Set our auto load save as the name save */
-		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
-                memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
-                free(f_setup.tmp_save_name);
 	}
 
 	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX) + 1) * sizeof(char));
@@ -387,7 +400,7 @@ int os_storyfile_tell(FILE * fp)
 
 void os_init_setup(void)
 {
-	/* Nothing here */
+	f_setup.bot_status = BOT_START;
 }
 
 static void usage(void)

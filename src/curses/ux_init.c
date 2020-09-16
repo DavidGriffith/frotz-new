@@ -297,7 +297,7 @@ void os_process_arguments (int argc, char *argv[])
 		case 'l': f_setup.left_margin = atoi(zoptarg); break;
 		case 'L':
 			f_setup.restore_mode = 1;
-			f_setup.tmp_save_name = strdup(zoptarg);
+			f_setup.auto_save_name = strdup(zoptarg);
 			break;
 		case 'o': f_setup.object_movement = 1; break;
 		case 'O': f_setup.object_locating = 1; break;
@@ -364,9 +364,9 @@ void os_process_arguments (int argc, char *argv[])
 		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
 		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
 	} else {  /*Set our auto load save as the name_save*/
-		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
-		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
-		free(f_setup.tmp_save_name);
+		f_setup.save_name = malloc((strlen(f_setup.auto_save_name) + strlen(EXT_SAVE)) * sizeof(char) + 1);
+		memcpy(f_setup.save_name, f_setup.auto_save_name, (strlen(f_setup.auto_save_name) + strlen(EXT_SAVE)) * sizeof(char));
+		free(f_setup.auto_save_name);
 	}
 
 	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX) + 1) * sizeof(char));
