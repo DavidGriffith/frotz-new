@@ -751,8 +751,9 @@ void z_restore(void)
 		statret = stat(f_setup.auto_save_name, statbuf);
 		free(statbuf);
 		if (statret != 0) {
-			f_setup.bot_status = BOT_START;
-			return;
+			printf("Where is %s?\n", f_setup.auto_save_name);
+//			f_setup.bot_status = BOT_START;
+//			return;
 		}
 	}
 

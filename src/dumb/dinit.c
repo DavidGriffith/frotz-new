@@ -124,6 +124,7 @@ void os_process_arguments(int argc, char *argv[])
 			f_setup.restore_mode = 1;
 			f_setup.bot_status = BOT_LOAD;
 			f_setup.auto_save_name = strdup(zoptarg);
+			printf("LOAD_BOT mode set: %s\n", f_setup.auto_save_name);
 			break;
 		case 'm':
 			do_more_prompts = FALSE;
@@ -250,7 +251,6 @@ void os_process_arguments(int argc, char *argv[])
 		f_setup.save_name = malloc((strlen(f_setup.auto_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
 		memcpy(f_setup.save_name, f_setup.auto_save_name, (strlen(f_setup.auto_save_name) + strlen(EXT_SAVE)) * sizeof(char));
 		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-		free(f_setup.auto_save_name);
 	} else {
 		f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
 		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
