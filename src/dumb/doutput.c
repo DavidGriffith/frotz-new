@@ -265,7 +265,6 @@ static void show_cell_bbcode(cell_t cel)
 		    lastbold = 0,
 		    lastemph = 0,
 		    lastfix  = 0;
-
 	char	    fg	     = cel.fg,
 		    bg	     = cel.bg,
 		    bold      = (cel.style & BOLDFACE_STYLE) ? 1 : 0,
@@ -324,12 +323,12 @@ static void show_cell_bbcode(cell_t cel)
 	}
 
 	if (bg != lastbg) {
-		printf("[bgcolor=%s]", bbcode_colour[bg]);
+		printf("[bgcolor=%s]", bbcode_colour[(short)bg]);
 		lastbg = bg;
 	}
 
 	if (fg != lastfg) {
-		printf("[color=%s]", bbcode_colour[fg]);
+		printf("[color=%s]", bbcode_colour[(short)fg]);
 		lastfg = fg;
 	}
 
