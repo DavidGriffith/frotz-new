@@ -18,15 +18,18 @@ typedef enum {
 
 
 /* Current status of bot and return value after every move. */
-#define BOT_START	0
-#define BOT_NORMAL	1
-#define BOT_LOAD	2
-#define BOT_SAVE	3
-#define BOT_QUIT	4
-#define BOT_DONE	5
-#define BOT_ERR_SAVE	6
-#define BOT_ERR_RESTORE	7
-#define BOT_ERR_MISC	8
+typedef enum {
+	BOT_START,
+	BOT_NORMAL,
+	BOT_LOAD,
+	BOT_SAVE,
+	BOT_QUIT,
+	BOT_DONE,
+	BOT_ERR_SAVE,
+	BOT_ERR_LOAD,
+	BOT_ERR_MISC
+} bot_status_t;
+
 
 typedef struct frotz_setup_struct {
 	int attribute_assignment;
