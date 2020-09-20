@@ -240,7 +240,7 @@ void os_process_arguments(int argc, char *argv[])
 		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
 	} else { /* Set our auto load save as the name save */
 		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
-                memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
+                memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE)) * sizeof(char));
                 free(f_setup.tmp_save_name);
 	}
 
