@@ -250,7 +250,6 @@ void os_process_arguments(int argc, char *argv[])
 	if (f_setup.restore_mode || f_setup.bot_mode) {
 		f_setup.save_name = malloc((strlen(f_setup.auto_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
 		memcpy(f_setup.save_name, f_setup.auto_save_name, (strlen(f_setup.auto_save_name) + strlen(EXT_SAVE)) * sizeof(char));
-		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
 	} else {
 		f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
 		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
