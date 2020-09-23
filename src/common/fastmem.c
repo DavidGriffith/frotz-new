@@ -107,6 +107,12 @@ void huge *zrealloc(void huge *p, long size, size_t old_size)
 
 zword save_frotz(FILE *qfp)
 {
+	zbyte pc;
+
+	GET_PC(pc);
+	printf("pc: %hu, sp: %hu\n", (unsigned short) pc, (unsigned short) *sp);
+	printf("zargs[0]: %hu, zargs[1]: %hu, zargs[2]: %hu\n", zargs[0], zargs[1], zargs[2]);
+
 	return save_quetzal(qfp, story_fp);
 }
 
@@ -1014,7 +1020,6 @@ void z_save(void)
 //	zword nsp, nfp;
 //	int skip;
 //	int i;
-
 		/* Get the file name */
 		new_name = os_read_file_name(f_setup.save_name, FILE_SAVE);
 		if (new_name == NULL)
