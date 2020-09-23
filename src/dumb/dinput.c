@@ -137,6 +137,12 @@ static void end_of_turn(void)
 
 			save_done = TRUE;
 			save_frotz(save_fp);
+
+//			retval = save_quetzal(save_fp, story_fp);
+//			if (fclose(gfp) == EOF || ferror(story_fp)) {
+//				print_string("Error writing save file\n");
+//			}
+//			fclose(story_fp);
 			os_quit(EXIT_SUCCESS);
 		}
 	}

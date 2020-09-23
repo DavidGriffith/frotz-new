@@ -108,12 +108,18 @@ void huge *zrealloc(void huge *p, long size, size_t old_size)
 zword save_frotz(FILE *qfp)
 {
 	zbyte pc;
+	zword retval;
 
 	GET_PC(pc);
 	printf("pc: %hu, sp: %hu\n", (unsigned short) pc, (unsigned short) *sp);
 	printf("zargs[0]: %hu, zargs[1]: %hu, zargs[2]: %hu\n", zargs[0], zargs[1], zargs[2]);
 
-	return save_quetzal(qfp, story_fp);
+	retval = save_quetzal(qfp, story_fp);
+	if (fclose(qfp) == EOF || ferror(story_fp)) {
+		print_string("Bot Save Error writing save file\n");
+	}
+	fclose(story_fp);
+	return retval;
 }
 
 
@@ -1032,7 +1038,7 @@ void z_save(void)
 		if ((gfp = fopen(new_name, "wb")) == NULL)
 			goto finished;
 
-		success = save_frotz(gfp);
+		success = save_quetzal(gfp, story_fp);
 
 		/* Close game file and check for errors */
 		if (fclose(gfp) == EOF || ferror(story_fp)) {
