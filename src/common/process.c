@@ -18,11 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <stdlib.h>
 #include "frotz.h"
 
 #ifdef DJGPP
 #include "djfrotz.h"
 #endif
+
+extern FILE *story_fp;
+extern zword restore_quetzal (FILE *, FILE *);
 
 zword zargs[8];
 int zargc;
@@ -246,7 +250,11 @@ void interpret(void)
 {
 	/* If we got a save file on the command line, use it now. */
 	if (f_setup.restore_mode == 1) {
-		z_restore();
+		FILE *gfp = fopen(f_setup.save_name, "rb");
+		if (gfp) {
+			restore_quetzal(gfp, story_fp);
+			fclose(gfp);
+		}
 		f_setup.restore_mode = 0;
 	}
 
