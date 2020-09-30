@@ -63,6 +63,17 @@ Watch attribute testing.  Every time the Z-machine tests an attribute
 value, the test and the result will be reported.
 
 .TP
+.B \-B
+Bot mode command.  In bot mode, Dumb Frotz will load a Quetzal save file
+if present, process the command supplied, save, and quit.  If no Quetzal
+file is present, the game will be started, saved, and the command
+ignored.  This requires the
+.B \-L
+and
+.B \-R
+flags to also be set.  See BOT MODE below for more information.
+
+.TP
 .B \-f [irc | ansi | normal]
 Select type of format codes.  Dumb Frotz can optionally mark up its
 output with codes for color, bold, underline, and so on.  Currently,
@@ -101,7 +112,7 @@ See INTERPRETER NUMBER below.
 
 .TP
 .B \-L <filename>
-When the game starts, load this saved game file.
+When the game starts, load this saved game file.  Required for bot mode.
 
 .TP
 .B \-m
@@ -153,6 +164,8 @@ restricted environment, by a front end, or by a chatbot.  This option will
 cause Frotz to write or read only to the provided path and nowhere else.
 Then the controlling process can then watch that directory for changes
 and need not worry about someone scribbling or snooping who-knows-where.
+
+Required for bot mode.
 
 .TP
 .B \-s N
@@ -455,6 +468,24 @@ If you are using some sort of wrapper around
 .B dfrotz,
 and want to make use of Unicode, it is the responsibility of the wrapper
 to make sense of characters passed back and forth.
+
+.SH BOT MODE
+Bot mode provides a means for a wrapper script to provide gameplay to an
+indefinite number of players while consuming no resources between moves
+but drive space for the saves.  This is activated with the
+.B \-B
+flag.  This is done by restoring the game, playing one move, printing
+the results, saving the game, and then exiting.  If no save is present,
+then the game will be started and the command (if any) provided by the
+.B \-B
+flag is ignored.  Along with this, the
+.B \-L
+and
+.B \-R
+flags are required for this mode to indicate the correct save file to
+use and to keep Frotz files confined.  It is the responsibility of the
+bot's author to keep save files properly associated with each individual
+player.
 
 .SH NON ASCII CHARACTERS
 Non-ASCII glyphs can be displayed without the use of UTF-8 by way of the
