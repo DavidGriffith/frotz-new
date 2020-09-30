@@ -93,6 +93,8 @@ CURSES ?= ncursesw
 # Uncomment to disable format codes for dumb interface
 #DISABLE_FORMATS = yes
 
+SAVE_UNCOMPRESSED = yes
+
 # Assorted constants
 MAX_UNDO_SLOTS = 500
 MAX_FILE_NAME = 80
@@ -456,8 +458,12 @@ endif
 ifdef DISABLE_FORMATS
 	@echo "#define DISABLE_FORMATS" >> $@
 endif
+ifdef SAVE_UNCOMPRESSED
+	@echo "#define SAVE_UNCOMPRESSED" >> $@
+endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 endif
+
 
 
 dosdefs: $(DOS_DEFINES) $(OW_DOS_DEFINES)
