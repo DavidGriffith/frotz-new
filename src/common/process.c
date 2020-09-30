@@ -254,6 +254,8 @@ void interpret(void)
 		if (gfp) {
 			restore_quetzal(gfp, story_fp);
 			fclose(gfp);
+		} else {
+			f_setup.bot_status = BOT_START;
 		}
 		f_setup.restore_mode = 0;
 	}
