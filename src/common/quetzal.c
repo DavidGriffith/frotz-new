@@ -473,29 +473,22 @@ zword save_quetzal(FILE * svf, FILE * stf)
 #ifdef SAVE_UNCOMPRESSED
 	if (!write_chnk(svf, ID_UMem, 0))
 		return 0;
-
+#else
+	if (!write_chnk(svf, ID_CMem, 0))
+		return 0;
+#endif
 	(void)os_storyfile_seek(stf, 0, SEEK_SET);
 	/* j holds current run length. */
 	for (i = 0, j = 0, memlen = 0; i < z_header.dynamic_size; ++i) {
 		if ((c = get_c(stf)) == EOF)
 			return 0;
+#ifdef SAVE_UNCOMPRESSED
 		c = (int)zmp[i];
 		if (!write_byte(svf, (zbyte) c))
 			return 0;
 		++memlen;
 	}
-	if (memlen & 1)		/* Chunk length must be even. */
-		if (!write_byte(svf, 0))
-			return 0;
 #else
-	if (!write_chnk(svf, ID_CMem, 0))
-		return 0;
-	(void)os_storyfile_seek(stf, 0, SEEK_SET);
-	/* j holds current run length. */
-	for (i = 0, j = 0, memlen = 0; i < z_header.dynamic_size; ++i) {
-		if ((c = get_c(stf)) == EOF)
-			return 0;
-		c ^= (int)zmp[i];
 		if (c == 0)
 			++j;	/* It's a run of equal bytes. */
 		else {
@@ -517,6 +510,8 @@ zword save_quetzal(FILE * svf, FILE * stf)
 			++memlen;
 		}
 	}
+#endif
+
 	/*
 	 * Reached end of dynamic memory. We ignore any unwritten run there may be
 	 * at this point.
@@ -525,7 +520,6 @@ zword save_quetzal(FILE * svf, FILE * stf)
 		if (!write_byte(svf, 0))
 			return 0;
 
-#endif
 	/* Write `Stks' chunk. You are not expected to understand this. ;) */
 	if ((stkspos = ftell(svf)) < 0)
 		return 0;
