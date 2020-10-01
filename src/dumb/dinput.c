@@ -598,6 +598,11 @@ char *os_read_file_name (const char *default_name, int flag)
 	char path_separator[2];
 	int i;
 
+	if (flag != FILE_SAVE && flag != FILE_RESTORE && f_setup.bot_mode) {
+		printf("That function is disabled.\n");
+		os_quit(EXIT_SUCCESS);
+	}
+
 	path_separator[0] = PATH_SEPARATOR;
 	path_separator[1] = 0;
 
