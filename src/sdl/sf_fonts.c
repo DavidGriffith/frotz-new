@@ -959,7 +959,7 @@ void sf_initfonts()
 		ttfontsdone();
 	/* now set the graphics font */
 	if (!myfonts[8]) {
-		if (!m_vga_fonts) {
+		if (!m_vga_fonts && m_fontfiles[FIXED_WIDTH_FONT]) {
 			int err;
 			SFONT *b = ttfontloader("<builtin_font3>",
 				myfonts[FIXED_WIDTH_FONT], &err);
