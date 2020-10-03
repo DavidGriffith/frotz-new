@@ -28,6 +28,8 @@
 extern FILE *story_fp;
 extern zword restore_quetzal (FILE *, FILE *);
 
+zbyte *old_pcp;
+
 zword zargs[8];
 int zargc;
 
@@ -263,6 +265,8 @@ void interpret(void)
 	do {
 		zbyte opcode;
 
+		old_pcp = pcp;
+
 		CODE_BYTE(opcode)
 		zargc = 0;
 
@@ -294,7 +298,6 @@ void interpret(void)
 		if (end_of_sound_flag)
 			end_of_sound();
 #endif
-
 		os_tick();
 	} while (finished == 0);
 

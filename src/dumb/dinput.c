@@ -27,6 +27,7 @@
 extern f_setup_t f_setup;
 extern zword save_quetzal (FILE *, FILE *);
 extern zword restore_quetzal (FILE *, FILE *);
+extern zbyte * old_pcp;
 
 static int bot_char_count;
 
@@ -135,6 +136,7 @@ static void end_of_turn(void)
 				fprintf(stderr, "Can't read save\n");
 			}
 
+			pcp = old_pcp;
 			save_done = TRUE;
 			save_frotz(save_fp);
 

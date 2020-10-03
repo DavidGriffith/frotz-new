@@ -454,6 +454,8 @@ zword save_quetzal(FILE * svf, FILE * stf)
 	/* Write `IFhd' chunk. */
 	GET_PC(pc);
 
+	printf("PC: %lx\n", pc);
+
 	if (!write_chnk(svf, ID_IFhd, 13))
 		return 0;
 	if (!write_word(svf, z_header.release))
