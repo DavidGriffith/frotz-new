@@ -31,6 +31,7 @@
 #undef XK_MISCELLANY
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 extern bool is_terminator(zchar key);
 extern void x_del_char(zchar c);
@@ -228,9 +229,11 @@ extern void read_string(int, zchar *);
 
 char *os_read_file_name(const char *default_name, int flag)
 {
+	FILE *fp;
 	int saved_replay = istream_replay;
 	int saved_record = ostream_record;
 	char file_name[FILENAME_MAX + 1];
+	zchar answer[4];
 
 	/* Turn off playback and recording temporarily */
 	istream_replay = 0;
@@ -245,6 +248,17 @@ char *os_read_file_name(const char *default_name, int flag)
 	/* Use the default name if nothing was typed */
 	if (file_name[0] == 0)
 		strcpy(file_name, default_name);
+
+	/* Warn if overwriting a file. */
+	if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX ||
+	    flag == FILE_RECORD || flag == FILE_SCRIPT)
+	    && ((fp = fopen(file_name, "rb")) != NULL)) {
+		fclose (fp);
+		print_string("Overwrite existing file? ");
+		read_string(4, answer);
+		if (tolower(answer[0] != 'y'))
+		return NULL;
+	}
 
 	/* Restore state of playback and recording */
 	istream_replay = saved_replay;
