@@ -231,6 +231,7 @@ static void translate_special_chars(char *s)
 			case 'X': *dest++ = ZC_HKEY_QUIT; break;
 			case 'D': *dest++ = ZC_HKEY_DEBUG; break;
 			case 'H': *dest++ = ZC_HKEY_HELP; break;
+			case 'M': *dest++ = ZC_HKEY_MEMDUMP; break;
 			case '1': *dest++ = ZC_FKEY_F1; break;
 			case '2': *dest++ = ZC_FKEY_F2; break;
 			case '3': *dest++ = ZC_FKEY_F3; break;
@@ -600,7 +601,8 @@ char *os_read_file_name (const char *default_name, int flag)
 	char path_separator[2];
 	int i;
 
-	if (flag != FILE_SAVE && flag != FILE_RESTORE && f_setup.bot_mode) {
+	if (flag != FILE_SAVE && flag != FILE_RESTORE &&
+	    flag != FILE_SAVE_MEM && f_setup.bot_mode) {
 		printf("That function is disabled.\n");
 		os_quit(EXIT_SUCCESS);
 	}
@@ -661,7 +663,8 @@ char *os_read_file_name (const char *default_name, int flag)
 	}
 
 	/* Warn if overwriting a file.  */
-	if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX || flag == FILE_RECORD)
+	if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX ||
+	     flag == FILE_RECORD || flag == FILE_SAVE_MEM)
 		&& ((fp = fopen(file_name, "rb")) != NULL)) {
 		fclose (fp);
 		dumb_read_misc_line(fullpath, "Overwrite existing file? ");

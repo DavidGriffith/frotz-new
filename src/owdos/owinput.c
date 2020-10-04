@@ -684,6 +684,7 @@ no_further:
  *     ZC_HKEY_RECORD (Alt-R)
  *     ZC_HKEY_SEED (Alt-S)
  *     ZC_HKEY_UNDO (Alt-U)
+ *     ZC_HKEY_MEMDUMP (Alt-M, "memory dump")
  *     ZC_HKEY_RESTART (Alt-N, "new game")
  *     ZC_HKEY_QUIT (Alt-X, "exit game")
  *     ZC_HKEY_DEBUGGING (Alt-D)

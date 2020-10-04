@@ -244,6 +244,7 @@ void init_setup(void)
 	f_setup.save_name = NULL;
 	f_setup.auto_save_name = NULL;
 	f_setup.aux_name = NULL;
+	f_setup.mem_name = NULL;
 	f_setup.story_path = NULL;
 	f_setup.zcode_path = NULL;
 	f_setup.restricted_path = NULL;
@@ -1155,3 +1156,60 @@ void z_verify (void)
 	/* Branch if the checksums are equal */
 	branch(checksum == z_header.checksum);
 } /* z_verify */
+
+
+/*
+ * memdump, dump memory to a file.
+ *
+ * This function writes to a file an uncompressed dump of the
+ * Z-machine's memory.
+ *
+ */
+#define write_byte(fp,b) (fputc (b, fp) != EOF)
+bool memdump(void)
+{
+	int c;
+	zlong i;
+	zlong memlen = 0;
+	long filesize;
+
+	char *memname;
+	FILE *memfp;
+
+	memname = os_read_file_name(f_setup.mem_name, FILE_SAVE_MEM);
+	if (memname == NULL) {
+		print_string("Not overwriting existing dump file.\n");
+		return FALSE;
+	}
+
+	fseek(story_fp, 0L, SEEK_END);
+	filesize = ftell(story_fp);
+
+	/* Open .mem file */
+	if ((memfp = fopen(memname, "wb")) == NULL) {
+		print_string("Unable to write dump file.\n");
+		return FALSE;
+	}
+
+	(void)os_storyfile_seek(story_fp, 0, SEEK_SET);
+	for (i = 0, memlen = 0; i < filesize; ++i) {
+		if ((c = fgetc(story_fp)) == EOF) {
+			print_string("Story file truncated.\n");
+			fclose(story_fp);
+			return FALSE;
+		}
+		c = (int)zmp[i];
+
+		if (!write_byte(memfp, (zbyte) c)) {
+			print_string("Dumped some of memory, but not all.\n");
+			fclose(story_fp);
+			return FALSE;
+		}
+		++memlen;
+	}
+	fclose(memfp);
+	print_string("Memory dump complete.\n");
+	return FALSE;
+} /* memdump */
+
+

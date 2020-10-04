@@ -63,6 +63,7 @@ static bool hot_key_help(void)
 		"\n"
 		"Alt-D  debugging options\n"
 		"Alt-H  help\n"
+		"Alt-M  dump memory\n"
 		"Alt-N  new game\n"
 		"Alt-P  playback on\n"
 		"Alt-R  recording on/off\n"
@@ -71,6 +72,7 @@ static bool hot_key_help(void)
 		"Alt-X  exit game\n");
 	return FALSE;
 } /* hot_key_help */
+
 
 
 /*
@@ -185,6 +187,21 @@ static bool hot_key_quit(void)
 } /* hot_key_quit */
 
 
+
+/*
+ * hot_key_memdump
+ *
+ * ...allows user to dump the entire memory.
+ *
+ */
+static bool hot_key_memdump(void)
+{
+	print_string("Dump memory\n");
+
+	return memdump();
+} /* hot_key_memdump */
+
+
 /*
  * handle_hot_key
  *
@@ -209,6 +226,7 @@ bool handle_hot_key(zchar key)
 		case ZC_HKEY_QUIT: aborting = hot_key_quit(); break;
 		case ZC_HKEY_DEBUG: aborting = hot_key_debugging(); break;
 		case ZC_HKEY_HELP: aborting = hot_key_help(); break;
+		case ZC_HKEY_MEMDUMP: aborting = hot_key_memdump(); break;
 		}
 
 		if (aborting)
