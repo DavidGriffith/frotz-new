@@ -437,12 +437,12 @@ zword restore_quetzal(FILE * svf, FILE * stf)
  */
 zword save_quetzal(FILE * svf, FILE * stf)
 {
-	zlong ifzslen = 0, cmemlen = 0, stkslen = 0;
+	zlong ifzslen = 0, memlen = 0, stkslen = 0;
 	zlong pc;
 	zword i, j, n;
 	zword nvars, nargs, nstk, *p;
 	zbyte var;
-	long cmempos, stkspos;
+	long mempos, stkspos;
 	int c;
 
 	/* Write `IFZS' header. */
@@ -465,16 +465,31 @@ zword save_quetzal(FILE * svf, FILE * stf)
 	if (!write_long(svf, pc << 8))	/* Includes pad. */
 		return 0;
 
-	/* Write `CMem' chunk. */
-	if ((cmempos = ftell(svf)) < 0)
+	if ((mempos = ftell(svf)) < 0)
 		return 0;
+
+#ifdef SAVE_UNCOMPRESSED
+	/* Write `UMem' chunk. */
+	if (!write_chnk(svf, ID_UMem, 0))
+		return 0;
+#else
+	/* Write `CMem' chunk. */
 	if (!write_chnk(svf, ID_CMem, 0))
 		return 0;
+#endif
+
 	(void)os_storyfile_seek(stf, 0, SEEK_SET);
 	/* j holds current run length. */
-	for (i = 0, j = 0, cmemlen = 0; i < z_header.dynamic_size; ++i) {
+	for (i = 0, j = 0, memlen = 0; i < z_header.dynamic_size; ++i) {
 		if ((c = get_c(stf)) == EOF)
 			return 0;
+#ifdef SAVE_UNCOMPRESSED
+		c = (int)zmp[i];
+		if (!write_byte(svf, (zbyte) c))
+			return 0;
+		++memlen;
+	}
+#else
 		c ^= (int)zmp[i];
 		if (c == 0)
 			++j;	/* It's a run of equal bytes. */
@@ -484,25 +499,25 @@ zword save_quetzal(FILE * svf, FILE * stf)
 				for (; j > 0x100; j -= 0x100) {
 					if (!write_run(svf, 0xFF))
 						return 0;
-					cmemlen += 2;
+					memlen += 2;
 				}
 				if (!write_run(svf, j - 1))
 					return 0;
-				cmemlen += 2;
+				memlen += 2;
 				j = 0;
 			}
 			/* Any runs are now written. Write this (nonzero) byte. */
 			if (!write_byte(svf, (zbyte) c))
 				return 0;
-			++cmemlen;
+			++memlen;
 		}
 	}
-
+#endif
 	/*
 	 * Reached end of dynamic memory. We ignore any unwritten run there may be
 	 * at this point.
 	 */
-	if (cmemlen & 1)	/* Chunk length must be even. */
+	if (memlen & 1)		/* Chunk length must be even. */
 		if (!write_byte(svf, 0))
 			return 0;
 
@@ -580,15 +595,16 @@ zword save_quetzal(FILE * svf, FILE * stf)
 		/* Calculate length written thus far. */
 		stkslen += 8 + 2 * (nvars + nstk);
 	}
+
 	/* Fill in variable chunk lengths. */
-	ifzslen = 3 * 8 + 4 + 14 + cmemlen + stkslen;
-	if (cmemlen & 1)
+	ifzslen = 3 * 8 + 4 + 14 + memlen + stkslen;
+	if (memlen & 1)
 		++ifzslen;
 	(void)fseek(svf, 4, SEEK_SET);
 	if (!write_long(svf, ifzslen))
 		return 0;
-	(void)fseek(svf, cmempos + 4, SEEK_SET);
-	if (!write_long(svf, cmemlen))
+	(void)fseek(svf, mempos + 4, SEEK_SET);
+	if (!write_long(svf, memlen))
 		return 0;
 	(void)fseek(svf, stkspos + 4, SEEK_SET);
 	if (!write_long(svf, stkslen))

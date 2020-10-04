@@ -93,6 +93,9 @@ CURSES ?= ncursesw
 # Uncomment to disable format codes for dumb interface
 #DISABLE_FORMATS = yes
 
+# Uncomment to disable compression within Quetzal files
+SAVE_UNCOMPRESSED = yes
+
 # Assorted constants
 MAX_UNDO_SLOTS = 500
 MAX_FILE_NAME = 80
@@ -455,6 +458,9 @@ ifeq ($(USE_UTF8), yes)
 endif
 ifdef DISABLE_FORMATS
 	@echo "#define DISABLE_FORMATS" >> $@
+endif
+ifdef SAVE_UNCOMPRESSED
+	 @echo "#define SAVE_UNCOMPRESSED" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 endif
