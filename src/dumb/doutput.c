@@ -398,15 +398,23 @@ static void show_cell_normal(cell_t cel)
 static void show_cell(cell_t cel)
 {
 #ifndef DISABLE_FORMATS
-	if (f_setup.format == FORMAT_IRC)
-		show_cell_irc(cel);
-	else if (f_setup.format == FORMAT_ANSI)
-		show_cell_ansi(cel);
-	else if (f_setup.format == FORMAT_BBCODE)
-		show_cell_bbcode(cel);
-	else
+	switch(f_setup.format) {
+	case FORMAT_IRC:	show_cell_irc(cel);
+				return;
+				break;
+	case FORMAT_ANSI:	show_cell_ansi(cel);
+				return;
+				break;
+	case FORMAT_BBCODE:	show_cell_bbcode(cel);
+				return;
+				break;
+	default:		break;
+	}
 #endif
-		show_cell_normal(cel);
+	/* For handling "[Hit any key to continue.]" and the like. */
+	if (ispunct(cel.c))
+		lastchar = cel.c;
+	show_cell_normal(cel);
 }
 
 

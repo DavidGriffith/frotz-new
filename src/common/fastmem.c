@@ -751,7 +751,7 @@ void z_restore(void)
 		statret = stat(f_setup.auto_save_name, statbuf);
 		free(statbuf);
 		if (statret != 0) {
-			printf("Where is %s?\n", f_setup.auto_save_name);
+			printf("Game starting\n");
 			f_setup.bot_status = BOT_START;
 			return;
 		}

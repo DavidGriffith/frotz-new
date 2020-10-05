@@ -27,6 +27,8 @@ extern f_setup_t f_setup;
 
 extern bool do_more_prompts;
 
+zchar lastchar;		/* The last character printed before prompt */
+
 /* From input.c.  */
 bool is_terminator (zchar);
 
