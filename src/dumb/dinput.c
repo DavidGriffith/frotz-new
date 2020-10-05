@@ -88,31 +88,11 @@ enum input_type {
 };
 
 
-static void print_bot_status(void)
-{
-	printf("Bot mode: ");
-	switch (f_setup.bot_status) {
-	case BOT_START:	   printf("BOT_START    game starting\n"); break;
-	case BOT_NORMAL:   printf("BOT_NORMAL   game progressing\n"); break;
-	case BOT_LOAD:     printf("BOT_LOAD     loading\n"); break;
-	case BOT_SAVE:     printf("BOT_SAVE     saving\n"); break;
-	case BOT_QUIT:     printf("BOT_QUIT     quitting game\n"); break;
-	case BOT_ERR_SAVE: printf("BOT_ERR_SAVE error while saving\n"); break;
-	case BOT_ERR_LOAD: printf("BOT_ERR_LOAD error while loading\n"); break;
-	case BOT_ERR_MISC: printf("BOT_ERR_MISC miscellaneous error\n"); break;
-	default:	printf("unanticipated error.\n"); break;
-	}
-	return;
-}
-
 static void end_of_turn(void)
 {
 //	FILE *save_fp;
 
-
 	if (f_setup.bot_mode) {
-		print_bot_status();
-
 		/* Maybe not here... */
 		if (f_setup.bot_status == BOT_LOAD) {
 			f_setup.bot_status = BOT_NORMAL;

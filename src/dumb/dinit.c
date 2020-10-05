@@ -124,7 +124,6 @@ void os_process_arguments(int argc, char *argv[])
 			f_setup.restore_mode = 1;
 			f_setup.bot_status = BOT_LOAD;
 			f_setup.auto_save_name = strdup(zoptarg);
-			printf("LOAD_BOT mode set: %s\n", f_setup.auto_save_name);
 			break;
 		case 'm':
 			do_more_prompts = FALSE;
