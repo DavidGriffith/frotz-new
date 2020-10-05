@@ -187,6 +187,7 @@ extern const char build_timestamp[];
 #define EXT_BLORB4	".zblorb"
 #define EXT_COMMAND	".rec"
 #define EXT_AUX		".aux"
+#define EXT_MEM		".mem"
 
 #ifndef DEFAULT_SAVE_NAME
 #define DEFAULT_SAVE_NAME "story.sav"
@@ -199,6 +200,9 @@ extern const char build_timestamp[];
 #endif
 #ifndef DEFAULT_AUXILARY_NAME
 #define DEFAULT_AUXILARY_NAME "story.aux"
+#endif
+#ifndef DEFAULT_MEMORY_NAME
+#define DEFAULT_MEMORY_NAME "story.mem"
 #endif
 #ifndef DEFAULT_SAVE_DIR	/* DG */
 #define DEFAULT_SAVE_DIR ".frotz-saves"
@@ -349,7 +353,8 @@ extern const char build_timestamp[];
 #define ZC_HKEY_QUIT 0x13
 #define ZC_HKEY_DEBUG 0x14
 #define ZC_HKEY_HELP 0x15
-#define ZC_HKEY_MAX 0x15
+#define ZC_HKEY_MEMDUMP 0x16
+#define ZC_HKEY_MAX 0x16
 #define ZC_ESCAPE 0x1b
 #define ZC_DEL_WORD 0x1c
 #define ZC_WORD_RIGHT 0x1d
@@ -405,6 +410,8 @@ extern const char build_timestamp[];
 #define FILE_RECORD 4
 #define FILE_LOAD_AUX 5
 #define FILE_SAVE_AUX 6
+#define FILE_SAVE_MEM 7
+#define FILE_LOAD_MEM 8
 
 /*** Data access macros ***/
 
@@ -822,6 +829,8 @@ int zgetopt(int, char **, const char *);
 /*** Unconditionally perform a save ***/
 zword save_frotz(FILE *);
 
+/*** Dump memory ***/
+bool memdump(void);
 
 /*** returns the current window ***/
 Zwindow * curwinrec(void);

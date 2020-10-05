@@ -58,6 +58,7 @@ typedef struct frotz_setup_struct {
         char *save_name;
         char *auto_save_name;
         char *aux_name;
+        char *mem_name;
         char *story_path;
         char *zcode_path;
 	char *restricted_path;

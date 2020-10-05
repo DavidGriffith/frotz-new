@@ -770,6 +770,8 @@ static zword goodzkey(SDL_Event * e, int allowed)
 					return ZC_HKEY_SEED;
 				case 'u':
 					return ZC_HKEY_UNDO;
+				case 'm':
+					return ZC_HKEY_MEMDUMP;
 				case 'n':
 					return ZC_HKEY_RESTART;
 				case 'd':
@@ -949,6 +951,7 @@ zchar os_read_key(int timeout, int cursor)
  *     ZC_HKEY_RECORD (Alt-R)
  *     ZC_HKEY_SEED (Alt-S)
  *     ZC_HKEY_UNDO (Alt-U)
+ *     ZC_HKEY_MEMDUMP (Alt-M, "memory dump")
  *     ZC_HKEY_RESTART (Alt-N, "new game")
  *     ZC_HKEY_QUIT (Alt-X, "exit game")
  *     ZC_HKEY_DEBUG (Alt-D)

@@ -468,6 +468,10 @@ void os_process_arguments(int argc, char *argv[])
 	memcpy(f_setup.aux_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
 	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
 
+	f_setup.mem_name = malloc((strlen(f_setup.story_name) + strlen(EXT_MEM) + 1) * sizeof(char));
+	memcpy(f_setup.mem_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_MEM)) * sizeof(char));
+	strncat(f_setup.mem_name, EXT_MEM, strlen(EXT_MEM) + 1);
+
 	/* Save the executable file name */
 	progname = argv[0];
 

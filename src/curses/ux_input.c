@@ -305,6 +305,7 @@ static int unix_read_char(int extkeys)
 			case 'r': return ZC_HKEY_RECORD;
 			case 's': return ZC_HKEY_SEED;
 			case 'u': return ZC_HKEY_UNDO;
+			case 'm': return ZC_HKEY_MEMDUMP;
 			case 'n': return ZC_HKEY_RESTART;
 			case 'x': return ZC_HKEY_QUIT;
 			case 'd': return ZC_HKEY_DEBUG;
@@ -348,6 +349,7 @@ static int unix_read_char(int extkeys)
 		case MOD_META | 'r': return ZC_HKEY_RECORD;
 		case MOD_META | 's': return ZC_HKEY_SEED;
 		case MOD_META | 'u': return ZC_HKEY_UNDO;
+		case MOD_META | 'm': return ZC_HKEY_MEMDUMP;
 		case MOD_META | 'n': return ZC_HKEY_RESTART;
 		case MOD_META | 'x': return ZC_HKEY_QUIT;
 		case MOD_META | 'd': return ZC_HKEY_DEBUG;
@@ -1089,7 +1091,8 @@ char *os_read_file_name (const char *default_name, int flag)
 
 	/* Warn if overwriting a file. */
 	if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX ||
-	    flag == FILE_RECORD || flag == FILE_SCRIPT)
+	    flag == FILE_RECORD || flag == FILE_SCRIPT ||
+	    flag == FILE_SAVE_MEM)
 	    && ((fp = fopen(file_name, "rb")) != NULL)) {
 		fclose (fp);
 		print_string("Overwrite existing file? ");
