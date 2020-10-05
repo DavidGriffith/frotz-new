@@ -102,7 +102,7 @@ static void end_of_turn(void)
 			os_quit(EXIT_SUCCESS);
 		}
 
-		if (lastchar == ']') {
+		if (lastchar == ']' && f_setup.bot_status == BOT_START) {
 			free(f_setup.bot_command);
 			f_setup.bot_command = strdup(" ");
 			f_setup.bot_status = BOT_NORMAL;
@@ -310,7 +310,6 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 				dumb_show_prompt(show_cursor,
 					(timeout ? "tTD" : ")>}")[type]);
 		}
-
 		/* Prompt only shows up after user input if we don't flush stdout */
 		fflush(stdout);
 		dumb_getline(s);
