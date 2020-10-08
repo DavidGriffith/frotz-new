@@ -126,9 +126,11 @@ static int xgetchar(void)
 		c = f_setup.bot_command[bot_char_count++];
 		if (c == '\0')
 			c = '\n';
+//printf("->0x%02x ", c);
 		return c;
 	} else
 		c = getchar();
+
 
 	if (c == EOF) {
 		if (feof(stdin)) {
@@ -155,14 +157,17 @@ static void dumb_getline(char *s)
 	}
 
 	while (p < s + INPUT_BUFFER_SIZE - 1) {
+//printf("A ");
 		if ((*p++ = xgetchar()) == '\n') {
 			*p = '\0';
 			line_done = TRUE;
+//printf("B ");
 			return;
 		}
 	}
 	p[-1] = '\n';
 	p[0] = '\0';
+
 	while ((c = xgetchar()) != '\n')
 		;
 	printf("Line too long, truncated to %s\n", s - INPUT_BUFFER_SIZE);
@@ -297,6 +302,7 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 		else
 			dumb_show_prompt(show_cursor,
 				(timeout ? "tTD" : ")>}")[type]);
+
 		printf("%s\n", f_setup.bot_command);
 	}
 
@@ -310,8 +316,10 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 				dumb_show_prompt(show_cursor,
 					(timeout ? "tTD" : ")>}")[type]);
 		}
+
 		/* Prompt only shows up after user input if we don't flush stdout */
 		fflush(stdout);
+//printf("C ");
 		dumb_getline(s);
 		if ((s[0] != '\\') || ((s[1] != '\0') && !islower(s[1]))) {
 			/* Is not a command line.  */
@@ -376,7 +384,9 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 						break;
 					printf("HELP: Type <return> for more, or q <return> to stop: ");
 					fflush(stdout);
+//printf("E ");
 					dumb_getline(s);
+//printf("F ");
 					if (!strcmp(s, "q\n"))
 						break;
 				}
@@ -395,7 +405,9 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
  * filename requests).  */
 static void dumb_read_misc_line(char *s, char *prompt)
 {
+//printf("G ");
 	dumb_read_line(s, prompt, 0, 0, 0, 0);
+//printf("H ");
 	/* Remove terminating newline */
 	s[strlen(s) - 1] = '\0';
 }
@@ -454,8 +466,10 @@ zchar os_read_key (int timeout, bool show_cursor)
 	read_line_buffer[0] = '\0';
 
 	if (read_key_buffer[0] == '\0') {
+//printf("I ");
 		timed_out = dumb_read_line(read_key_buffer, NULL,
 			show_cursor, timeout, INPUT_CHAR, NULL);
+//printf("J ");
 		/* An empty input line is reported as a single CR.
 		 * If there's anything else in the line, we report
 		 * only the line's contents and not the terminating CR.  */
@@ -499,12 +513,18 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 	if (timed_out_last_time && !continued)
 		read_line_buffer[0] = '\0';
 
+//printf("AA");
+
 	if (read_line_buffer[0] == '\0') {
+//printf("K ");
 		timed_out = dumb_read_line(read_line_buffer, NULL, TRUE,
 			timeout, buf[0] ? INPUT_LINE_CONTINUED : INPUT_LINE,
 			buf);
-	} else
+//printf("L ");
+	} else {
 		timed_out = check_timeout(timeout);
+	}
+//printf("M ");
 
 	if (timed_out) {
 		timed_out_last_time = TRUE;

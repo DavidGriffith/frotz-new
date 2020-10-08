@@ -360,7 +360,11 @@ static void show_cell_normal(cell_t cel)
 	switch (cel.style) {
 	case NORMAL_STYLE:
 	case FIXED_WIDTH_STYLE:	/* NORMAL_STYLE falls through to here */
+
+//FIXME extra crap gets here
+//printf("1");
 		zputchar(cel.c);
+//printf("2");
 		break;
 	case PICTURE_STYLE:
 		zputchar(show_pictures ? cel.c : ' ');
@@ -412,8 +416,9 @@ static void show_cell(cell_t cel)
 	}
 #endif
 	/* For handling "[Hit any key to continue.]" and the like. */
-	if (ispunct(cel.c))
+	if (ispunct(cel.c)) {
 		lastchar = cel.c;
+	}
 	show_cell_normal(cel);
 }
 
@@ -491,8 +496,10 @@ static void show_row(int r)
 				break;
 		}
 
-		for (c = 0; c <= last; c++)
+		// FIXME this is emitting garbage in V5+ in bot mode
+		for (c = 0; c <= last; c++) {
 			show_cell(dumb_row(r)[c]);
+		}
 	}
 	show_cell(make_cell (0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, '\n'));
 }
@@ -527,6 +534,10 @@ static void dumb_set_cell(int row, int col, cell_t c)
 /* put a character in the cell at the cursor and advance the cursor.  */
 static void dumb_display_char(zchar c)
 {
+//	printf("[%c]", c);
+	if (c == 'R')
+		printf("*");
+
 	dumb_set_cell(cursor_row, cursor_col, make_cell(current_style, current_fg, current_bg, c));
 	if (++cursor_col == z_header.screen_cols) {
 		if (cursor_row == z_header.screen_rows - 1)
@@ -956,16 +967,19 @@ void dumb_show_screen(bool show_cursor)
 	} else {
 		/* COMPRESSION_SPANS */
 		for (r = first; r <= last; r++) {
-			if (changed_rows[r] || changed_rows[r + 1])
+			if (changed_rows[r] || changed_rows[r + 1]) {
+//printf("O ");
 				show_row(r);
-			else {
+//printf("P ");
+			} else {
 				while (!changed_rows[r + 1])
 					r++;
 				show_row(-1);
 			}
 		}
-		if (show_cursor && (cursor_row > last + 1))
+		if (show_cursor && (cursor_row > last + 1)) {
 			show_row((cursor_row == last + 2) ? (last + 1) : -1);
+		}
 	}
 	mark_all_unchanged();
 }
