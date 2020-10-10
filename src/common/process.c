@@ -18,7 +18,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <stdlib.h>
 #include "frotz.h"
+
+extern FILE *story_fp;
+extern zword restore_quetzal (FILE *, FILE *);
 
 #ifdef DJGPP
 #include "djfrotz.h"
@@ -245,8 +249,15 @@ static void load_all_operands(zbyte specifier)
 void interpret(void)
 {
 	/* If we got a save file on the command line, use it now. */
-	if (f_setup.restore_mode == 1) {
-		z_restore();
+	/* FIXME This is not yet expected to work without bot mode. */
+	if (f_setup.restore_mode == 1 && f_setup.bot_mode) {
+		FILE *gfp = fopen(f_setup.save_name, "rb");
+		if (gfp) {
+			restore_quetzal(gfp, story_fp);
+			fclose(gfp);
+		} else {
+			f_setup.bot_status = BOT_START;
+		}
 		f_setup.restore_mode = 0;
 	}
 

@@ -535,8 +535,8 @@ static void dumb_set_cell(int row, int col, cell_t c)
 static void dumb_display_char(zchar c)
 {
 //	printf("[%c]", c);
-	if (c == 'R')
-		printf("*");
+//	if (c == 'R')
+//		printf("*");
 
 	dumb_set_cell(cursor_row, cursor_col, make_cell(current_style, current_fg, current_bg, c));
 	if (++cursor_col == z_header.screen_cols) {

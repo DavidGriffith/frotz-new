@@ -102,16 +102,38 @@ static void end_of_turn(void)
 			os_quit(EXIT_SUCCESS);
 		}
 
+		/* This deals with "[Press any key]" that happens in
+		 * the exposition.  I haven't checked many games for
+		 * doing this after the game is underway.
+		 */
 		if (lastchar == ']' && f_setup.bot_status == BOT_START) {
 			free(f_setup.bot_command);
 			f_setup.bot_command = strdup(" ");
 			f_setup.bot_status = BOT_NORMAL;
+		/* After the first move is made, do a save. */
 		} else if (line_done || f_setup.bot_status == BOT_START) {
+#ifdef BOTSAVE_INJECT
 			/* Inject SAVE command */
+			printf("Injecting SAVE\n");
 			free(f_setup.bot_command);
 			f_setup.bot_command = strdup("SAVE");
 			f_setup.bot_status = BOT_SAVE;
 			save_done = TRUE;
+#else
+			/* Call save_quetzal() */
+			zword save_ret;
+			FILE *save_fp;
+
+			printf("Calling save_frotz()\n");
+			save_fp = fopen(f_setup.save_name, "wb");
+			if (save_fp == NULL) {
+				fprintf(stderr, "Can't read save\n");
+			}
+			save_done = TRUE;
+			save_ret = save_frotz(save_fp);
+			printf("Return value: 0x%02x\n", save_ret);
+			os_quit(EXIT_SUCCESS);
+#endif
 		}
 	}
 }
@@ -585,6 +607,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	char path_separator[2];
 	int i;
 
+	/* FIXME:  This doesn't handle when player types SAVE. */
 	if (flag != FILE_SAVE && flag != FILE_RESTORE &&
 	    flag != FILE_SAVE_MEM && f_setup.bot_mode) {
 		printf("That function is disabled.\n");

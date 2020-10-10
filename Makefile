@@ -96,6 +96,12 @@ CURSES ?= ncursesw
 # Uncomment to disable compression within Quetzal files
 SAVE_UNCOMPRESSED = yes
 
+# Uncomment to do bot save by injecting SAVE into input stream.
+# Comment out to do bot save by calling save_quetzal() in end_of_turn()
+# in dinput.c
+#BOTSAVE_INJECT = yes
+
+
 # Assorted constants
 MAX_UNDO_SLOTS = 500
 MAX_FILE_NAME = 80
@@ -461,6 +467,9 @@ ifdef DISABLE_FORMATS
 endif
 ifdef SAVE_UNCOMPRESSED
 	 @echo "#define SAVE_UNCOMPRESSED" >> $@
+endif
+ifdef BOTSAVE_INJECT
+	@echo "#define BOTSAVE_INJECT" >> $@
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 endif

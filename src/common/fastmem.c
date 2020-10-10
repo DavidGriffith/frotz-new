@@ -64,7 +64,7 @@ char auxilary_name[MAX_FILE_NAME + 1] = DEFAULT_AUXILARY_NAME;
 zbyte huge *zmp = NULL;
 zbyte huge *pcp = NULL;
 
-static FILE *story_fp = NULL;
+FILE *story_fp = NULL;
 
 /*
  * Data for the undo mechanism.
