@@ -51,7 +51,7 @@ For more options and explanations, please read the manual page.\n\n\
 While running, enter \"\\help\" to list the runtime escape sequences.\n"
 
 
-static int user_text_width = 75;
+static int user_text_width = 80;
 static int user_text_height = 24;
 static int user_random_seed = -1;
 static int user_tandy_bit = 0;

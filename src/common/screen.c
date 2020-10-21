@@ -425,10 +425,15 @@ void screen_erase_input(const zchar * buf)
 zchar console_read_input(int max, zchar * buf, zword timeout, bool continued)
 {
 	zchar key;
-	int i;
+	int i, min_prompt_space;
+
+	if (story_id == LGOP)
+		min_prompt_space = 8;
+	else
+		min_prompt_space = 10;
 
 	/* Make sure there is some space for input */
-	if (cwin == 0 && units_left() + os_string_width(buf) < 10 * font_width)
+	if (cwin == 0 && units_left() + os_string_width(buf) < min_prompt_space * font_width)
 		screen_new_line();
 
 	/* Make sure the input line is visible */
