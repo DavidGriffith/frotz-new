@@ -322,6 +322,7 @@ void init_memory(void)
 		{	SORCERER,  87, "860904" },
 		{   SPELLBREAKER,  63, "850916" },
 		{   SPELLBREAKER,  87, "860904" },
+		{     PLANETFALL,   1, "830517" },
 		{     PLANETFALL,  20, "830708" },
 		{     PLANETFALL,  26, "831014" },
 		{     PLANETFALL,  29, "840118" },
