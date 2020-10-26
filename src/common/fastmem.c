@@ -158,18 +158,48 @@ void restart_header(void)
 
 	int i;
 
+	set_v6_terp = FALSE;
+
 	SET_BYTE(H_CONFIG, z_header.config);
 	SET_WORD(H_FLAGS, z_header.flags);
 
-	if (story_id == JOURNEY && f_setup.interpreter_number == 0) {
-		switch (z_header.release) {
-		case 26: f_setup.interpreter_number = INTERP_MACINTOSH; break;
-		case 30: f_setup.interpreter_number = INTERP_AMIGA; break;
-		case 77: f_setup.interpreter_number = INTERP_APPLE_IIE; break;
-		case 83: f_setup.interpreter_number = INTERP_MSDOS; break;
-		default: f_setup.interpreter_number = INTERP_AMIGA; break;
+	if (z_header.version == V6 && f_setup.interpreter_number == 0) {
+		if (story_id == JOURNEY) {
+			switch (z_header.release) {
+			case 26: f_setup.interpreter_number = INTERP_MACINTOSH; break;
+			case 30: f_setup.interpreter_number = INTERP_AMIGA; break;
+			case 77: f_setup.interpreter_number = INTERP_APPLE_IIE; break;
+			case 83: f_setup.interpreter_number = INTERP_MSDOS; break;
+			default: f_setup.interpreter_number = INTERP_AMIGA; break;
+			}
+			z_header.interpreter_number = f_setup.interpreter_number;
+		} else if (story_id == SHOGUN) {
+			switch (z_header.release) {
+			case 292: f_setup.interpreter_number = INTERP_MACINTOSH; break;
+			case 295: f_setup.interpreter_number = INTERP_AMIGA; break;
+			case 311: f_setup.interpreter_number = INTERP_APPLE_IIE; break;
+			case 322: f_setup.interpreter_number = INTERP_MSDOS; break;
+			default: f_setup.interpreter_number = INTERP_AMIGA; break;
+			}
+			z_header.interpreter_number = f_setup.interpreter_number;
+		} else if (story_id == ZORK_ZERO) {
+			switch (z_header.release) {
+			case 296: f_setup.interpreter_number = INTERP_MACINTOSH; break;
+			case 366: f_setup.interpreter_number = INTERP_AMIGA; break;
+			case 383: f_setup.interpreter_number = INTERP_APPLE_IIE; break;
+			case 393: f_setup.interpreter_number = INTERP_MSDOS; break;
+			default: f_setup.interpreter_number = INTERP_AMIGA; break;
+			}
+			z_header.interpreter_number = f_setup.interpreter_number;
+		} else if (story_id == ARTHUR) {
+			switch (z_header.release) {
+			case 54: f_setup.interpreter_number = INTERP_AMIGA; break;
+			case 64: f_setup.interpreter_number = INTERP_APPLE_IIE; break;
+			case 74: f_setup.interpreter_number = INTERP_MSDOS; break;
+			default: f_setup.interpreter_number = INTERP_AMIGA; break;
+			}
+			z_header.interpreter_number = f_setup.interpreter_number;
 		}
-		z_header.interpreter_number = f_setup.interpreter_number;
         }
 
 	if (z_header.version >= V4) {
