@@ -161,6 +161,17 @@ void restart_header(void)
 	SET_BYTE(H_CONFIG, z_header.config);
 	SET_WORD(H_FLAGS, z_header.flags);
 
+	if (story_id == JOURNEY && f_setup.interpreter_number == 0) {
+		switch (z_header.release) {
+		case 26: f_setup.interpreter_number = INTERP_MACINTOSH; break;
+		case 30: f_setup.interpreter_number = INTERP_AMIGA; break;
+		case 77: f_setup.interpreter_number = INTERP_APPLE_IIE; break;
+		case 83: f_setup.interpreter_number = INTERP_MSDOS; break;
+		default: f_setup.interpreter_number = INTERP_AMIGA; break;
+		}
+		z_header.interpreter_number = f_setup.interpreter_number;
+        }
+
 	if (z_header.version >= V4) {
 		SET_BYTE(H_INTERPRETER_NUMBER, z_header.interpreter_number);
 		SET_BYTE(H_INTERPRETER_VERSION, z_header.interpreter_version);
