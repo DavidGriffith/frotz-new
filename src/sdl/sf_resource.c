@@ -412,11 +412,7 @@ void sf_readsettings(void)
 	ResPict = sf_GetProfileString("Resources", "Pict", ResPict);
 	ResSnd = sf_GetProfileString("Resources", "Snd", ResSnd);
 
-	if (f_setup.interpreter_number == 0) {
-		z_header.interpreter_number =
-		    sf_GetProfileInt("Interpreter", "Number", INTERP_AMIGA);
-	} else
-		z_header.interpreter_number = f_setup.interpreter_number;
+	z_header.interpreter_number = sf_GetProfileInt("Interpreter", "Number", INTERP_AMIGA);
 
 	f_setup.err_report_mode =
 	    sf_GetProfileInt("Interpreter", "Error Reporting", ERR_REPORT_ONCE);

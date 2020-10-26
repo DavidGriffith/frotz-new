@@ -305,8 +305,10 @@ static void parse_options(int argc, char **argv)
 			user_screen_height = num;
 		if (c == 'i')
 			f_setup.ignore_errors = 1;
-		if (c == 'I')
+		if (c == 'I') {
 			f_setup.interpreter_number = num;
+			z_header.interpreter_number = num;
+		}
 		if (c == 'l')
 			f_setup.left_margin = num;
 		if (c == 'L') {
