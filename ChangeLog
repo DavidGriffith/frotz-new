@@ -18,7 +18,7 @@ NEW FEATURES
 
 BUG FIXES
 
-- Corrected a potential trouble with garbage in filenames for SDL
+- Corrected potential trouble with garbage in filenames for SDL
   interface.
 
 - Corrected a problem wherein @print_table would sometimes print garbage.
