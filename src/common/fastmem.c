@@ -158,8 +158,6 @@ void restart_header(void)
 
 	int i;
 
-	set_v6_terp = FALSE;
-
 	SET_BYTE(H_CONFIG, z_header.config);
 	SET_WORD(H_FLAGS, z_header.flags);
 
