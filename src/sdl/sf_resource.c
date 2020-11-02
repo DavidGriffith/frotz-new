@@ -435,8 +435,9 @@ void sf_readsettings(void)
 	m_v6scale = sf_GetProfileInt("Display", "Infocom V6 Scaling", 2);
 	m_gfxScale_w = 1.0;
 	m_gfxScale_h = 1.0;
-	m_defaultFore = (sf_GetProfileInt("Display", "Foreground", 0xffffff));
-	m_defaultBack = (sf_GetProfileInt("Display", "Background", 0x800000));
+	sf_initcolours();
+	m_defaultFore = (sf_GetProfileInt("Display", "Foreground", m_colours[7]));
+	m_defaultBack = (sf_GetProfileInt("Display", "Background", m_colours[10]));
 	m_morePrompts =
 	    sf_GetProfileInt("Display", "Show More Prompts", 1) ? true : false;
 	m_gamma = sf_GetProfileDouble("Display", "Gamma", DEFAULT_GAMMA);
