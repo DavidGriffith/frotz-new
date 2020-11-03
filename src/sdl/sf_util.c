@@ -139,6 +139,7 @@ extern char m_names_format;
 static char user_names_format = 0;
 extern char *m_reslist_file;
 extern int option_scrollback_buffer;
+extern bool option_disable_color;
 
 static char *info_header =
     "FROTZ V%s - SDL graphics and audio interface.\n"
@@ -253,7 +254,7 @@ extern int optind;
 
 extern int m_timerinterval;
 
-static char *options = "@:%aAb:B:c:f:FH:iI:l:L:m:N:oOPqr:s:S:tTu:vVW:xXZ:";
+static char *options = "@:%aAb:B:c:df:FH:iI:l:L:m:N:oOPqr:s:S:tTu:vVW:xXZ:";
 
 static int limit(int v, int m, int M)
 {
@@ -291,6 +292,8 @@ static void parse_options(int argc, char **argv)
 			option_scrollback_buffer = num;
 		if (c == 'c')
 			f_setup.context_lines = num;
+		if (c == 'd')
+			option_disable_color = 1;
 		if (c == 'm')
 			m_timerinterval = limit(num, 10, 1000000);
 		if (c == 'N')

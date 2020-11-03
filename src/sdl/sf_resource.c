@@ -79,6 +79,7 @@ static char *ResSnd = "SND%d";
 
 int AcWidth = 640, AcHeight = 400;
 int option_scrollback_buffer = 0;
+bool option_disable_color = 0;
 bool m_adaptiveMode = FALSE;
 
 static void checkwidths()
@@ -709,6 +710,12 @@ void os_init_screen(void)
 		if (((blorb_map == NULL) && (m_localfiles == 0))
 		    || (!sf_initsound()))
 			z_header.flags &= ~SOUND_FLAG;
+	}
+
+	if (option_disable_color) {
+		z_header.default_foreground = WHITE_COLOUR;
+		z_header.default_background = BLACK_COLOUR;
+		if (z_header.flags & COLOUR_FLAG) z_header.flags &= ~COLOUR_FLAG;
 	}
 
 	if (z_header.version >= V5) {
