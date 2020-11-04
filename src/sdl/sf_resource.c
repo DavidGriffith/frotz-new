@@ -77,6 +77,7 @@ static char *ResDir = "./";
 static char *ResPict = "PIC%d";
 static char *ResSnd = "SND%d";
 
+int option_res_mul = 1;
 int AcWidth = 640, AcHeight = 400;
 int option_scrollback_buffer = 0;
 bool option_disable_color = 0;
@@ -636,6 +637,11 @@ zword os_to_true_colour(int index)
  */
 void os_init_screen(void)
 {
+	if (option_res_mul > 1) {
+		AcWidth *= option_res_mul;
+		AcHeight *= option_res_mul;
+		m_v6scale = option_res_mul;
+	}
 
 	sf_initvideo(AcWidth, AcHeight, (m_fullscreen != -1));
 	sf_load_resources();
