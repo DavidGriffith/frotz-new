@@ -151,6 +151,7 @@ static char *info[] = {
 	"-A   watch attribute testing",
 	"-b <colourname> background colour",
 	"-c # context lines",
+	"-d   disable color",
 	"-f <colorname> foreground colour",
 	"-F   fullscreen mode",
 	"-H # screen height",
