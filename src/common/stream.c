@@ -323,6 +323,8 @@ continue_input:
 		if (timeout != 0) {
 			if (direct_call(routine) == 0)
 				goto continue_input;
+			else
+				buf[0] = 0;
 		} else {
 			goto continue_input;
 		}
