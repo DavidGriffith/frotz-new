@@ -660,8 +660,9 @@ static void utf8_mvaddstr(int y, int x, zchar * buf)
 zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
                     int continued)
 {
-	int ch, y, x, len = zcharstrlen(buf);
+	int ch, y, x;
 	int res;
+	size_t len = zcharstrlen(buf);
 	const int margin = MAX(z_header.screen_width - width, 0);
 
 	/* These are static to allow input continuation to work smoothly. */
