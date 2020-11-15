@@ -443,6 +443,10 @@ zchar console_read_input(int max, zchar * buf, zword timeout, bool continued)
 	input_window = cwin;
 	input_redraw = FALSE;
 
+	/* Check for buffer contents not shown on the screen (game error). */
+	if (cwp->x_cursor < os_string_width(buf))
+		os_fatal("Game uses inconsistent input buffer");
+
 	/* Get input line from IO interface */
 	cwp->x_cursor -= os_string_width(buf);
 	key = os_read_line(max, buf, timeout, units_left(), continued);
