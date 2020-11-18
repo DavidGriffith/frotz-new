@@ -371,6 +371,7 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	@zip -d $(NAME)src.zip $(NAME)src/src/curses/* \
 		$(NAME)src/src/dumb/* $(NAME)src/src/blorb/* \
 		$(NAME)src/src/sdl/* $(NAME)src/src/misc/* \
+		$(NAME)src/src/x11/* \
 		$(NAME)src/doc/*.6 $(NAME)src/doc/frotz.conf* \
 		$(NAME)src/doc/Xresources  > /dev/null
 	@mkdir -p $(NAME)src/$(DOS_DIR) $(NAME)src/$(OW_DOS_DIR)
