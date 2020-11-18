@@ -35,7 +35,14 @@
 #define SEEK_CUR 1
 #define SEEK_END 2
 #endif
+#endif /* !MSDOS_16BIT */
 
+#ifdef __WATCOMC__
+zbyte huge *zmp = NULL;
+zbyte huge *pcp = NULL;
+#else
+zbyte *zmp = NULL;
+zbyte *pcp = NULL;
 #endif
 
 extern void seed_random (int);
@@ -60,9 +67,6 @@ extern void (*var_opcodes[]) (void);
 /* char save_name[MAX_FILE_NAME + 1] = DEFAULT_SAVE_NAME; */
 char auxilary_name[MAX_FILE_NAME + 1] = DEFAULT_AUXILARY_NAME;
 
-zbyte huge *zmp = NULL;
-zbyte huge *pcp = NULL;
-
 static FILE *story_fp = NULL;
 
 /*
@@ -71,7 +75,6 @@ static FILE *story_fp = NULL;
  * Nitfol interpreter.
  * Undo blocks are stored as differences between states.
  */
-
 typedef struct undo_struct undo_t;
 struct undo_struct {
 	undo_t *next;
