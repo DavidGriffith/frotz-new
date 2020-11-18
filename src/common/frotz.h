@@ -9,13 +9,15 @@
 #define FROTZ_H_
 
 
+/******************************************************************************/
+/* MSDOS settings */
+/******************************************************************************/
 /* For now we assume DOS Frotz is always 16-bit */
 #if defined __TURBOC__ || defined __WATCOMC__
-#define MSDOS_16BIT
+  #define MSDOS_16BIT
 #endif
 
 #ifdef MSDOS_16BIT
-
 #ifdef __TURBOC__
 #include "../dos/defs.h"
 #else
@@ -30,6 +32,7 @@
 
 #define zmalloc(size)	halloc((size), 1)
 #define zfree(p)	hfree(p)
+
 #ifdef __WATCOMC__
 /*
  * Open Watcom C's runtime library does not have a function to reallocate
@@ -44,7 +47,18 @@ void huge *zrealloc(void huge *p, long size, size_t old_size);
 #endif
 
 #endif /* MSDOS_16BIT */
+/******************************************************************************/
+/******************************************************************************/
 
+#ifndef __UNIX_PORT_FILE
+#include <signal.h>
+typedef int bool;
+#endif /* __UNIX_PORT_FILE */
+
+
+/******************************************************************************/
+/* For Amiga and Unix */
+/******************************************************************************/
 #ifndef MSDOS_16BIT
 
 #include "defs.h"
@@ -56,12 +70,12 @@ void huge *zrealloc(void huge *p, long size, size_t old_size);
 #define zrealloc(p, size, old_size) realloc((p), (size))
 
 #endif /* !MSDOS_16BIT */
+/******************************************************************************/
+/******************************************************************************/
 
-#ifndef __UNIX_PORT_FILE
-#include <signal.h>
-typedef int bool;
-#endif /* __UNIX_PORT_FILE */
-
+/******************************************************************************/
+/* For everything */
+/******************************************************************************/
 #include <stdio.h>
 
 #ifndef TRUE
@@ -85,7 +99,8 @@ typedef int bool;
 #endif /* !PATH_MAX */
 
 
-#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) || defined (__CYGWIN__)
+/* MSDOS and derived systems use a backslash for path separator */
+#if defined(MSDOS_16BIT) || defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) || defined (__CYGWIN__)
 #define PATH_SEPARATOR '\\'
 #else
 #define PATH_SEPARATOR '/'
@@ -397,7 +412,6 @@ extern const char build_timestamp[];
 #define ZC_LATIN1_MAX 0xff
 
 /*** File types ***/
-
 #define FILE_RESTORE 0
 #define FILE_SAVE 1
 #define FILE_SCRIPT 2
@@ -407,11 +421,14 @@ extern const char build_timestamp[];
 #define FILE_SAVE_AUX 6
 
 /*** Data access macros ***/
-
 #define SET_BYTE(addr,v)  { zmp[addr] = v; }
 #define LOW_BYTE(addr,v)  { v = zmp[addr]; }
 #define CODE_BYTE(v)	  { v = *pcp++;    }
 
+
+/******************************************************************************/
+/* Amiga macros */
+/******************************************************************************/
 #if defined (AMIGA)
 
 extern zbyte *pcp;
@@ -427,8 +444,14 @@ extern zbyte *zmp;
 #define GET_PC(v)         { v = pcp - zmp; }
 #define SET_PC(v)         { pcp = zmp + v; }
 
-#endif
+#endif /* AMIGA */
+/******************************************************************************/
+/******************************************************************************/
 
+
+/******************************************************************************/
+/* MSDOS macros */
+/******************************************************************************/
 #if defined (MSDOS_16BIT)
 
 #define lo(v)   ((zbyte *)&v)[0]
@@ -469,7 +492,6 @@ extern zbyte *zmp;
  * struct members.
  *
  */
-
 #define SET_WORD(addr, v) do {\
 	asm les bx,zmp;\
 	asm add bx,addr;\
@@ -537,8 +559,13 @@ extern zbyte *zmp;
 #endif /* !__WATCOMC__ */
 
 #endif /* MSDOS_16BIT */
+/******************************************************************************/
+/******************************************************************************/
 
 
+/******************************************************************************/
+/* Macros for neither Amiga nor MSDOS... that is Unix et al. */
+/******************************************************************************/
 #if !defined (AMIGA) && !defined (MSDOS_16BIT)
 
 extern zbyte *pcp;
@@ -555,6 +582,8 @@ extern zbyte *zmp;
 #define SET_PC(v)         { pcp = zmp + v; }
 
 #endif
+/******************************************************************************/
+/******************************************************************************/
 
 
 /*** Various data ***/
