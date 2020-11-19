@@ -23,6 +23,8 @@ BUG FIXES
 
 - Corrected a problem wherein @print_table would sometimes print garbage.
 
+- Fixed a segfault problem when input buffers are abused.
+
 
 Summary of changes between Frotz 2.51 and Frotz 2.52:
 =====================================================
