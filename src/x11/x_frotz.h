@@ -19,6 +19,8 @@
 
 #include <X11/Xlib.h>
 
+#define DCLICKTIME 400
+
 /* Xfrotz currently only supports a fixed sized window */
 #define X_WIDTH  800
 #define X_HEIGHT 600

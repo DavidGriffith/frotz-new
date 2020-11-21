@@ -25,6 +25,8 @@ BUG FIXES
 
 - Fixed a segfault problem when input buffers are abused.
 
+- Double-clicks are now recognized in sfrotz and xfrotz.
+
 
 Summary of changes between Frotz 2.51 and Frotz 2.52:
 =====================================================

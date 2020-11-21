@@ -128,6 +128,7 @@ zchar os_read_key(int timeout, int cursor)
 	int size;
 	KeySym symbol;
 	int text_height;
+	static Time lastclicktime=0;
 
 	text_height = current_font_info->ascent + current_font_info->descent;
 	if (cursor)
@@ -198,6 +199,11 @@ zchar os_read_key(int timeout, int cursor)
 					       curr_x, curr_y, 2, text_height);
 			mouse_x = button_ev->x + 1;
 			mouse_y = button_ev->y + 1;
+
+			if (button_ev->time - lastclicktime < DCLICKTIME)
+				return ZC_DOUBLE_CLICK;
+
+			lastclicktime = button_ev->time;
 			return ZC_SINGLE_CLICK;
 		}
 	}
