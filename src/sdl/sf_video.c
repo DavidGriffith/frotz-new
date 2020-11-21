@@ -738,7 +738,7 @@ static zword goodzkey(SDL_Event * e, int allowed)
 		if (true) {
 			mouse_button = e->button.button;
 			set_mouse_xy(e->button.x, e->button.y);
-			return ZC_SINGLE_CLICK;
+			return (e->button.clicks == 1 ? ZC_SINGLE_CLICK : ZC_DOUBLE_CLICK);
 		} else
 			return 0;
 	case SDL_KEYDOWN:
