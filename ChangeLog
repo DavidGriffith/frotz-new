@@ -15,6 +15,7 @@ NEW FEATURES
 
 - Automatically select the appropriate interpreter number for V6 games.
 
+- Limited mouse support for curses interface.
 
 BUG FIXES
 

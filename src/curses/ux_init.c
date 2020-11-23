@@ -63,21 +63,21 @@ static void sigwinch_handler(int);
 An interpreter for all Infocom and other Z-Machine games.\n\
 \n\
 Syntax: frotz [options] story-file\n\
-  -a   watch attribute setting    \t -O   watch object locating\n\
-  -A   watch attribute testing    \t -p   plain ASCII output only\n\
-  -b <colorname> background color \t -P   alter piracy opcode\n\
-  -c # context lines              \t -q   quiet (disable sound effects)\n\
-  -d   disable color              \t -r # right margin\n\
-  -e   enable sound               \t -R <path> restricted read/write\n\
-  -E <style> emphasis style       \t -s # random number seed value\n\
-  -f <colorname> foreground color \t -S # transcript width\n\
-  -F   Force color mode           \t -t   set Tandy bit\n\
-  -h # text height                \t -u # slots for multiple undo\n\
-  -i   ignore fatal errors        \t -v   show version information\n\
-  -I # interpreter number         \t -w # text width\n\
-  -l # left margin                \t -x   expand abbreviations g/x/z\n\
-  -L <file> load this save file   \t -Z # error checking (see below)\n\
-  -o   watch object movement\n"
+  -a   watch attribute setting    \t -o   watch object movement\n\
+  -A   watch attribute testing    \t -O   watch object locating\n\
+  -b <colorname> background color \t -p   plain ASCII output only\n\
+  -c # context lines              \t -P   alter piracy opcode\n\
+  -d   disable color              \t -q   quiet (disable sound effects)\n\
+  -e   enable sound               \t -r # right margin\n\
+  -E <style> emphasis style       \t -R <path> restricted read/write\n\
+  -f <colorname> foreground color \t -s # random number seed value\n\
+  -F   Force color mode           \t -S # transcript width\n\
+  -h # text height                \t -t   set Tandy bit\n\
+  -i   ignore fatal errors        \t -u # slots for multiple undo\n\
+  -I # interpreter number         \t -v   show version information\n\
+  -l # left margin                \t -w # text width\n\
+  -L <file> load this save file   \t -x   expand abbreviations g/x/z\n\
+  -m   enable mouse support       \t -Z # error checking (see below)\n"
 
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
@@ -262,7 +262,7 @@ void os_process_arguments (int argc, char *argv[])
 
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "aAb:c:deE:f:Fh:iI:l:L:oOpPqr:R:s:S:tu:vw:W:xZ:");
+		c = zgetopt(argc, argv, "aAb:c:deE:f:Fh:iI:l:L:moOpPqr:R:s:S:tu:vw:W:xZ:");
 		switch(c) {
 		case 'a': f_setup.attribute_assignment = 1; break;
 		case 'A': f_setup.attribute_testing = 1; break;
@@ -299,6 +299,7 @@ void os_process_arguments (int argc, char *argv[])
 			f_setup.restore_mode = 1;
 			f_setup.tmp_save_name = strdup(zoptarg);
 			break;
+		case 'm': u_setup.mouse_enabled = TRUE; break;
 		case 'o': f_setup.object_movement = 1; break;
 		case 'O': f_setup.object_locating = 1; break;
 		case 'p': u_setup.plain_ascii = 1; break;
@@ -479,7 +480,17 @@ void os_init_screen (void)
 	}
 
 	if (z_header.version >= V5)
-		z_header.flags &= ~(GRAPHICS_FLAG | MOUSE_FLAG | MENU_FLAG);
+		z_header.flags &= ~(GRAPHICS_FLAG | MENU_FLAG);
+
+#ifdef NCURSES_MOUSE_VERSION
+	/* Limited mouse support */
+	if (u_setup.mouse_enabled && z_header.version >= V5)
+		mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED, NULL);
+	else
+#endif
+	if (z_header.version >= V5) {
+		z_header.flags &= ~MOUSE_FLAG;
+	}
 
 #ifdef NO_SOUND
 	if (z_header.version >= V5)
@@ -1157,6 +1168,7 @@ void os_init_setup(void)
 	/* u_setup.interpreter = INTERP_DEFAULT; */
 	u_setup.current_color = 0;
 	u_setup.color_enabled = FALSE;
+	u_setup.mouse_enabled = FALSE;
 } /* os_init_setup */
 
 

@@ -18,6 +18,7 @@ typedef struct unix_setup_struct {
 	int plain_ascii;
 	int current_color;		/* ux_text.c ux_screen.c */
 	bool color_enabled;		/* ux_init.c ux_pic.c ux_text.c */
+	bool mouse_enabled;
 	int interpreter;		/* see frotz.h */
 	zlong colours[11];
 	zlong nonstdcolours[NON_STD_COLS];

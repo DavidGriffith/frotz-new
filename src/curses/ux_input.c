@@ -166,6 +166,10 @@ void os_tick()
  */
 static int unix_read_char(int extkeys)
 {
+#ifdef NCURSES_MOUSE_VERSION
+	MEVENT mouse_event;
+#endif
+
 #ifdef USE_UTF8
 	wint_t c;
 #else
@@ -262,10 +266,20 @@ static int unix_read_char(int extkeys)
 		 * SIGWINCH ourselves.
 		 */
 #ifdef KEY_RESIZE
-	case KEY_RESIZE:
+		case KEY_RESIZE:
 #endif
-		continue;
+			continue;
 
+#ifdef NCURSES_MOUSE_VERSION
+		case KEY_MOUSE:
+			if (getmouse(&mouse_event) == OK) {
+				if (mouse_event.bstate & BUTTON1_RELEASED) continue;
+				mouse_x = mouse_event.x + 1;
+				mouse_y = mouse_event.y + 1;
+				return (mouse_event.bstate & BUTTON1_DOUBLE_CLICKED ? ZC_DOUBLE_CLICK : ZC_SINGLE_CLICK);
+			}
+			continue;
+#endif
 		/* Screen decluttering. */
 		case MOD_CTRL ^ 'L':
 		case MOD_CTRL ^ 'R':
