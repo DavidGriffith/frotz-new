@@ -28,6 +28,7 @@ BUG FIXES
 
 - Double-clicks are now recognized in sfrotz and xfrotz.
 
+- Fixed problem with spurious newline when a space triggers a word wrap.
 
 Summary of changes between Frotz 2.51 and Frotz 2.52:
 =====================================================

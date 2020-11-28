@@ -331,6 +331,8 @@ void screen_word(const zchar * s)
 {
 	int width;
 
+	bool last_char_space = FALSE;
+
 	if (discarding)
 		return;
 
@@ -338,6 +340,9 @@ void screen_word(const zchar * s)
 		screen_char(*s++);
 
 	if (units_left() < (width = os_string_width(s))) {
+		if (s[os_string_width(s)-1] == ' ')
+			last_char_space = TRUE;
+
 		if (!enable_wrapping) {
 			zchar c;
 			while ((c = *s++) != 0) {
@@ -359,8 +364,8 @@ void screen_word(const zchar * s)
 		if (cwin == 0)
 			Justifiable();
 #endif
-
-		screen_new_line();
+		if (!last_char_space)
+			screen_new_line();
 	}
 	os_display_string(s);
 	cwp->x_cursor += width;
