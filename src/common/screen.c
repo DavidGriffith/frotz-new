@@ -342,7 +342,6 @@ void screen_word(const zchar * s)
 
 	if (units_left() < (width = os_string_width(s))) {
 		if (s[os_string_width(s)-1] == ' ')
-		if (strrchr((const char *) s, ' ') != NULL)
 			last_char_space = TRUE;
 
 		if (!enable_wrapping) {
