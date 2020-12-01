@@ -58,6 +58,24 @@ usually the best approach.
 Frotz's Makefile now requires the use of GNU Make.
 
 
+=======================
+Installing a package ||
+=======================
+
+You have many choices available to you if you don't want to install
+Frotz by compiling it yourself.  All of the commonly-encountered
+distributions of Linux include Frotz in their packaging systems.  The
+BSDs do so including FreeBSD, NetBSD, and OpenBSD.
+
+For Macintosh, I recommend using Brew.  With a single script, this
+packaging system can be installed into a macOS system whereupon it can
+be used to install Frotz.  See https://brew.sh/ for more information.
+
+Frotz can also be installed as a container using Docker.  See
+https://github.com/newtmitch/frotz-docker and
+https://hub.docker.com/r/newtmitch/frotz
+
+
 =============
 Dumb Frotz ||
 =============
