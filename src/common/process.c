@@ -20,6 +20,7 @@
 
 #include "frotz.h"
 
+#include <time.h>
 #ifdef DJGPP
 #include "djfrotz.h"
 #endif
@@ -283,6 +284,14 @@ void interpret(void)
 #if defined(DJGPP) && defined(SOUND_SUPPORT)
 		if (end_of_sound_flag)
 			end_of_sound();
+#endif
+
+#if 1
+struct timespec wtreq;
+struct timespec wtrem;
+wtreq.tv_sec = 0;
+wtreq.tv_nsec = 100;
+nanosleep(&wtreq, &wtrem);
 #endif
 
 		os_tick();

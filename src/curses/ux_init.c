@@ -464,6 +464,7 @@ void os_init_screen (void)
 	keypad(stdscr, TRUE);		/* Enable the keypad and function keys */
 	scrollok(stdscr, FALSE);	/* No scrolling unless explicitly asked for */
 
+	immedok(stdscr, TRUE);
 	/* It's nice to know what terminal we have to work with. */
 	u_setup.term = strdup(getenv("TERM"));
 
