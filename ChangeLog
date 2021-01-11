@@ -30,6 +30,9 @@ BUG FIXES
 
 - Fixed problem with spurious newline when a space triggers a word wrap.
 
+- Fixed a problem with UTF-8 characters getting corrupted during line editing.
+
+
 Summary of changes between Frotz 2.51 and Frotz 2.52:
 =====================================================
 
