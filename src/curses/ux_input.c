@@ -549,13 +549,25 @@ static void scrnmove(int dest, int src, int n)
 	getyx(stdscr, y, x);
 	if (src > dest) {
 		for (col = src; col < src + n; col++) {
+#ifdef USE_UTF8
+			cchar_t ch;
+			mvin_wch(y, col, &ch);
+			mvadd_wch(y, col - src + dest, &ch);
+#else
 			chtype ch = mvinch(y, col);
 			mvaddch(y, col - src + dest, ch);
+#endif
 		}
 	} else if (src < dest) {
 		for (col = src + n - 1; col >= src; col--) {
+#ifdef USE_UTF8
+			cchar_t ch;
+			mvin_wch(y, col, &ch);
+			mvadd_wch(y, col - src + dest, &ch);
+#else
 			chtype ch = mvinch(y, col);
 			mvaddch(y, col - src + dest, ch);
+#endif
 		}
 	}
 	move(y, x);
@@ -574,7 +586,11 @@ static void scrnset(int start, int c, int n)
 	int y, x;
 	getyx(stdscr, y, x);
 	while (n--)
+#ifdef USE_UTF8
+		mvadd_wch(y, start + n, (const cchar_t *)&c);
+#else
 		mvaddch(y, start + n, c);
+#endif
 	move(y, x);
 	return;
 } /* scrnset */
