@@ -486,7 +486,7 @@ ifndef CURSES
 	@echo "** ERROR You need to pick a flavor of curses in the Makefile!"
 	exit 1
 endif
-ifdef USE_UTF8
+ifeq ($(USE_UTF8), yes)
 ifneq ($(CURSES),ncursesw)
 ifndef MACOS
 	@echo "** ERROR UTF-8 support only works with ncursesw!"
