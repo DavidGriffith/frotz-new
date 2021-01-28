@@ -576,24 +576,22 @@ static void scrnmove(int dest, int src, int n)
 
 
 /*
- * scrnset
+ * spaceset
  *
- * In the row of the cursor, set n characters starting at start to c.
+ * In the row of the cursor, set n characters starting at start to space.
+ *
  *
  */
-static void scrnset(int start, int c, int n)
+static void spaceset(int start, int n)
 {
 	int y, x;
+
 	getyx(stdscr, y, x);
 	while (n--)
-#ifdef USE_UTF8
-		mvadd_wch(y, start + n, (const cchar_t *)&c);
-#else
-		mvaddch(y, start + n, c);
-#endif
+		mvaddch(y, start + n, ' ');
 	move(y, x);
 	return;
-} /* scrnset */
+} /* spaceset */
 
 
 #ifdef USE_UTF8
@@ -794,11 +792,11 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 			continue; /* Don't feed is_terminator bad zchars. */
 
 		case KEY_EOL:	/* Delete from cursor to end of line.  */
-			scrnset(x + scrpos, ' ', len - scrpos);
+			spaceset(x + scrpos, len - scrpos);
 			len = scrpos;
 			continue;
 		case ZC_ESCAPE:		/* Delete whole line */
-			scrnset(x, ' ', len);
+			spaceset(x, len);
 			len = scrpos = 0;
 			searchpos = -1;
 			history_view = history_next;
@@ -840,7 +838,7 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 				res = unix_history_forward(buf, searchpos, max);
 
 			if (res) {
-				scrnset(x, ' ', len);
+				spaceset(x, len);
 #ifdef USE_UTF8
 				utf8_mvaddstr(y, x, buf);
 #else
