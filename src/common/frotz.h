@@ -822,6 +822,7 @@ void	print_char(zchar);
 void	print_num(zword);
 void	print_object(zword);
 void 	print_string(const char *);
+void	reset_window(void);
 
 void 	stream_mssg_on(void);
 void 	stream_mssg_off(void);

@@ -1810,3 +1810,19 @@ zword get_current_window(void)
 {
 	return cwp - wp;
 } /* get_current_window */
+
+
+/*
+ * reset_window
+ *
+ * This should be used to stop error messages from repeatedly scribbling
+ * over the status line.
+ *
+ */
+void reset_window(void)
+{
+	set_window(0);
+	wp[0].y_cursor = 0;
+	wp[0].x_cursor = 1;
+	update_cursor();
+}

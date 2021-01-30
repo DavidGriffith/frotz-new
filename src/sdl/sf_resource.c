@@ -732,6 +732,15 @@ void os_init_screen(void)
 }
 
 
+static void print_c_string (const char *s)
+{
+	zchar c;
+
+	while ((c = *s++) != 0)
+		os_display_char (c);
+} /* print_c_string */
+
+
 /*
  * os_fatal
  *
@@ -750,16 +759,14 @@ void os_fatal(const char *s, ...)
 
 	if (sdl_active) {
 		os_set_text_style(0);
-		os_display_string((zchar *) "\n\n");
+		print_c_string("\n\n");
 		os_beep(BEEP_HIGH);
 		os_set_text_style(BOLDFACE_STYLE);
-
-		os_display_string((zchar *) "Fatal error: ");
+		print_c_string("Fatal error: ");
 		os_set_text_style(0);
-		os_display_string((zchar *) s);
-		os_display_string((zchar *) "\n\n");
+		print_c_string(s);
+		print_c_string("\n");
 		new_line();
-		flush_buffer();
 	}
 
 	if (f_setup.ignore_errors) {
@@ -777,7 +784,7 @@ void os_fatal(const char *s, ...)
 		SDL_Quit();
 	}
 	sf_cleanup_all();
-	exit(EXIT_FAILURE);
+	os_quit(EXIT_FAILURE);
 }
 
 
