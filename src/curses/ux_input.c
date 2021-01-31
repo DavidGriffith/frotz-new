@@ -774,7 +774,8 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 				scrnmove(x, x + scrpos, len);
 				memmove(buf, buf + scrpos,
 					len*sizeof(zchar));
-				for (int i = len; i <= len + scrpos; i++)
+				int i;
+				for (i = len; i <= len + scrpos; i++)
 					mvaddch(y, x + i, ' ');
 				scrpos = 0;
 			}
