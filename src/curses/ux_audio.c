@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <assert.h>
 #include <unistd.h> //pread
 
@@ -52,6 +51,7 @@ extern z_header_t z_header;
 
 ux_sem_t sound_done;	/* 1 if the sound is done */
 
+#include <pthread.h>
 #include <ao/ao.h>
 #include <sndfile.h>
 #include <samplerate.h>
