@@ -1822,7 +1822,5 @@ zword get_current_window(void)
 void reset_window(void)
 {
 	set_window(0);
-	wp[0].y_cursor = 0;
-	wp[0].x_cursor = 1;
-	update_cursor();
+	new_line();
 }

@@ -765,8 +765,6 @@ void os_fatal(const char *s, ...)
 		print_c_string("Fatal error: ");
 		os_set_text_style(0);
 		print_c_string(s);
-		print_c_string("\n");
-		new_line();
 	}
 
 	if (f_setup.ignore_errors) {

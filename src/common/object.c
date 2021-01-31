@@ -48,11 +48,10 @@ static zword object_address(zword obj)
 {
 	/* Check object number */
 	if (obj > ((z_header.version <= V3) ? 255 : MAX_OBJECT)) {
-		reset_window();
 		print_string("@Attempt to address illegal object ");
 		print_num(obj);
 		print_string(".  This is normally fatal.");
-		new_line();
+		reset_window();
 		runtime_error (ERR_ILL_OBJ);
 	}
 
