@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <unistd.h> //pread
+#include <unistd.h> /* pread */
 
 #include "ux_defines.h"
 
@@ -162,7 +162,7 @@ typedef struct {
 	union {
 		sound_stream_t *e;
 		int            i;
-	};
+	} data;
 } sound_event_t;
 
 #define NUM_VOICES 8
@@ -644,9 +644,9 @@ process_engine(sound_engine_t *e)
 	/* Handle event */
 	if (ux_sem_trywait(&e->ev_pending) == 0) {
 		if (e->event.type == EVENT_START_STREAM)
-			sound_enqueue_real(e,e->event.e);
+			sound_enqueue_real(e,e->event.data.e);
 		else if (e->event.type == EVENT_STOP_STREAM)
-			sound_stop_id_real(e,e->event.i);
+			sound_stop_id_real(e,e->event.data.i);
 		ux_sem_post(&e->ev_free);
 	}
 
@@ -768,8 +768,8 @@ static void
 sound_stop_id(int id)
 {
 	ux_sem_wait(&frotz_audio.ev_free);
-	frotz_audio.event.type = EVENT_STOP_STREAM;
-	frotz_audio.event.i    = id;
+	frotz_audio.event.type   = EVENT_STOP_STREAM;
+	frotz_audio.event.data.i = id;
 	ux_sem_post(&frotz_audio.ev_pending);
 }
 
@@ -794,8 +794,8 @@ static void
 sound_enqueue(sound_stream_t *s)
 {
 	ux_sem_wait(&frotz_audio.ev_free);
-	frotz_audio.event.type = EVENT_START_STREAM;
-	frotz_audio.event.e    = s;
+	frotz_audio.event.type   = EVENT_START_STREAM;
+	frotz_audio.event.data.e = s;
 	ux_sem_post(&frotz_audio.ev_pending);
 }
 
