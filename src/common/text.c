@@ -235,9 +235,10 @@ static void load_string(zword addr, zword length)
  */
 static void encode_text(int padding)
 {
-	static zchar again[] = { 'a', 'g', 'a', 'i', 'n', 0 };
-	static zchar examine[] = { 'e', 'x', 'a', 'm', 'i', 'n', 'e', 0 };
-	static zchar wait[] = { 'w', 'a', 'i', 't', 0 };
+	/* Pad expansions to same size as decoded[] (10) */
+	static zchar again[] = { 'a', 'g', 'a', 'i', 'n', 0, 0, 0, 0, 0 };
+	static zchar examine[] = { 'e', 'x', 'a', 'm', 'i', 'n', 'e', 0, 0, 0 };
+	static zchar wait[] = { 'w', 'a', 'i', 't', 0, 0, 0, 0, 0, 0 };
 
 	zbyte zchars[12];
 	const zchar *ptr = decoded;
