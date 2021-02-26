@@ -88,7 +88,7 @@ static int x_bg_fg_color(unsigned long *pixel, int index, char *color_name,
 	if (sscanf(color_name, "z:%d%c", &z_num, &extra) == 1) {
 		if (z_num < BLACK_COLOUR || z_num > GREY_COLOUR) {
 			fprintf(stderr, "Invalid Z-machine color %d\n", z_num);
-			exit(1);
+			os_quit(EXIT_FAILURE);
 		}
 		*pixel = pixel_values[index] = pixel_values[z_num];
 		return z_num;
