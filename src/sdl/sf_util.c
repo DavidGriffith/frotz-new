@@ -144,7 +144,7 @@ extern bool option_disable_color;
 static char *info_header =
     "FROTZ V%s - SDL graphics and audio interface.\n"
     "An interpreter for all Infocom and other Z-Machine games.\n\n"
-    "Syntax: sfrotz [options] story-file\n";
+    "Syntax: sfrotz [options] story-file [blorb file]\n";
 
 static char *info[] = {
 	"-a   watch attribute setting",

@@ -32,7 +32,7 @@ static void print_version(void);
 #define INFORMATION "\
 An interpreter for all Infocom and other Z-Machine games.\n\
 \n\
-Syntax: dfrotz [options] story-file\n\
+Syntax: dfrotz [options] story-file [blorb file]\n\
   -a   watch attribute setting    \t -P   alter piracy opcode\n\
   -A   watch attribute testing    \t -r <option> Set runtime options\n\
   -f <type> type of format codes  \t -R <path> restricted read/write\n\

@@ -62,7 +62,7 @@ static void sigwinch_handler(int);
 #define INFORMATION "\
 An interpreter for all Infocom and other Z-Machine games.\n\
 \n\
-Syntax: frotz [options] story-file\n\
+Syntax: frotz [options] story-file [blorb file]\n\
   -a   watch attribute setting    \t -o   watch object movement\n\
   -A   watch attribute testing    \t -O   watch object locating\n\
   -b <colorname> background color \t -p   plain ASCII output only\n\
