@@ -16,6 +16,16 @@ README.md	An overview of Frotz formatted in Markdown.
 README.1st	This file.
 TODO		Stuff to do in no particular order.
 
-doc/		Manpages and sample config files.
+doc/		Manpages, DOS documentation, and sample config files.
 public/		The Frotz webpage.
 src/		Source code to Frotz.
+src/blorb	Blorb library.
+src/common	The Frotz core code.
+src/curses	Curses user interface code.
+src/dos		MSDOS user interface code.
+src/dumb	Dumb user interface code.
+src/misc	Scripts and fonts.
+src/owdos	MSDOS (Open Watcom C) interface code (experimental).
+src/sdl		SDL user interface code.
+src/test	Zcode test programs.
+src/x11		X11 user interface code.
