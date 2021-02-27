@@ -369,11 +369,12 @@ static void print_version(void)
 	printf("Git commit:     %s\n", GIT_HASH);
 	printf("Notes:          %s\n", RELEASE_NOTES);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");
-	printf
-	    ("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+	printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
 	printf("  It was ported to Unix by Galen Hazelwood.\n");
-	printf
-	    ("  The core and SDL port are maintained by David Griffith.\n");
+	printf("  It is distributed under the GNU General Public License version 2 or\n");
+	printf("    (at your option) any later version.\n");
+	printf("  This software is offered as-is with no warranty or liability.\n");
+	printf("  The core and SDL port are maintained by David Griffith.\n");
 	printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
 	os_quit(EXIT_SUCCESS);
 }

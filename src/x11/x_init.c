@@ -308,11 +308,15 @@ void os_process_arguments(int argc, char *argv[])
 
 	if (show_version) {
 		printf("FROTZ V%s - X11 interface.\n", VERSION);
-		printf("Commit date:\t%s\n", GIT_DATE);
-		printf("Git commit:\t%s\n", GIT_HASH);
+		printf("Commit date:    %s\n", GIT_DATE);
+		printf("Git commit:     %s\n", GIT_HASH);
+		printf("Notes:          %s\n", RELEASE_NOTES);
 		printf("  Frotz was originally written by Stefan Jokisch.\n");
 		printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
 		printf("  The X11 interface code was done by Daniel Schepler,\n");
+		printf("  It is distributed under the GNU General Public License version 2 or\n");
+		printf("    (at your option) any later version.\n");
+		printf("  This software is offered as-is with no warranty or liability.\n");
 		printf("  The core and X11 port are maintained by David Griffith.\n");
 		printf("  Frotz's homepage is https://661.org/proj/if/frotz.\n\n");
 		os_quit(EXIT_SUCCESS);
