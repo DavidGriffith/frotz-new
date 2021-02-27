@@ -1,7 +1,7 @@
 Summary of changes between Frotz 2.52 and Frotz 2.53:
 =====================================================
 
-Frotz 2.53 was released on WWW MMM DD, 20YY.
+Frotz 2.53 was released on Saturday February 27, 2021.
 
 This is a minor release focusing on minor enhancements and bug fixes.
 
@@ -30,17 +30,18 @@ BUG FIXES
 
 - Fixed problem with spurious newline when a space triggers a word wrap.
 
-- Fixed a problem with UTF-8 characters getting corrupted during line editing.
+- Fixed a problem with UTF-8 characters getting corrupted during line
+  editing.
 
-- Fixed some problems with V3 games scribbling on the status line in certain
-  circumstances.
+- Fixed some problems with V3 games scribbling on the status line in
+  certain circumstances.
 
 - Removed pre-C99 idioms and C++ comments in curses and core to benefit
-  older compilers.  X11 is still pre-C99 clean.  SDL is not due to SDL2
-  requiring newer standards.
+  older compilers.  X11 is still pre-C99 clean.  SDL interface is not
+  pre-C99-clean due to libSDL2 not being pre-C99-clean.
 
-- Fixed a problem with the -x flag not properly expanding commands for some
-  Infocom games.
+- Fixed a problem with the -x flag not properly expanding commands for
+  some Infocom games.
 
 
 Summary of changes between Frotz 2.51 and Frotz 2.52:
