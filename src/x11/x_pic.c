@@ -67,12 +67,16 @@ static int open_graphics_file(void)
 	base_end = strrchr(base_start, '.');
 	if (!base_end)
 		base_end = strchr(base_start, 0);
-	graphics_name = malloc(base_end - f_setup.story_name + 5);
-	sprintf(graphics_name, "%.*s.mg1", (int)(base_end - f_setup.story_name),
-		f_setup.story_name);
+
+	if (f_setup.blorb_file == NULL) {
+		graphics_name = malloc(base_end - f_setup.story_name + 5);
+		sprintf(graphics_name, "%.*s.mg1", (int)(base_end - f_setup.story_name),
+			f_setup.story_name);
+	} else
+		graphics_name = f_setup.blorb_file;
 
 	if ((graphics_fp = fopen(graphics_name, "r")) == NULL)
-		return 0;
+		os_fatal("Unable to open graphics file: %s", graphics_name);
 
 	gheader.fileno = fgetc(graphics_fp);
 	gheader.flags = fgetc(graphics_fp);

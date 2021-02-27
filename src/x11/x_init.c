@@ -28,6 +28,7 @@
 #include "x_info.h"
 #include "x_blorb.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -46,6 +47,16 @@ static int user_random_seed = -1;
 char *x_class;
 char *x_name;
 
+
+static void print_c_string(const char *s)
+{
+	zchar c;
+
+	while ((c = *s++) != 0)
+		os_display_char(c);
+} /* print_c_string */
+
+
 /*
  * os_fatal
  *
@@ -54,8 +65,24 @@ char *x_name;
  */
 void os_fatal(const char *s, ...)
 {
-	fprintf(stderr, "%s\n", s);
-	exit(1);
+	va_list m;
+
+	fprintf(stderr, "\nFatal Error: ");
+	va_start(m, s);
+	vfprintf(stderr, s, m);
+	print_c_string(s);
+	va_end(m);
+	fprintf(stderr, "\n");
+
+	if (f_setup.ignore_errors) {
+		os_display_string((zchar *) "Continuing anyway...");
+		new_line();
+		new_line();
+	}
+
+	
+
+	os_quit(EXIT_FAILURE);
 } /* os_fatal */
 
 
@@ -291,7 +318,7 @@ void os_process_arguments(int argc, char *argv[])
 		os_quit(EXIT_SUCCESS);
 	}
 
-	if (argc != 2) {
+	if (argc < 2) {
 		printf("FROTZ V%s - X11 interface.\n", VERSION);
 		puts(INFORMATION);
 		puts(INFO2);
@@ -300,6 +327,9 @@ void os_process_arguments(int argc, char *argv[])
 
 	f_setup.story_file = strdup(argv[1]);
 	f_setup.story_name = strdup(basename(argv[1]));
+
+	if (argc > 2)
+		f_setup.blorb_file = strdup(argv[2]);
 
 	/* Now strip off the extension */
 	p = strrchr(f_setup.story_name, '.');
