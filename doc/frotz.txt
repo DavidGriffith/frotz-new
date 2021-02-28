@@ -18,7 +18,6 @@ found at the Interactive Fiction Archive at http://ifarchive.org/
 
 Frotz is distributed under the GNU General Public License version 2 or (at
 your option) and later version.
-
 https://www.gnu.org/licenses/gpl-2.0.en.html
 
 This software is offered as-is with no warranty or liability.  If you
