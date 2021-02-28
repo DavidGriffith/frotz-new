@@ -36,7 +36,7 @@ BUG FIXES
 - Fixed some problems with V3 games scribbling on the status line in
   certain circumstances.
 
-- Removed pre-C99 idioms and C++ comments in curses and core to benefit
+- Removed C99 idioms and C++ comments in curses and core to benefit
   older compilers.  X11 is still pre-C99 clean.  SDL interface is not
   pre-C99-clean due to libSDL2 not being pre-C99-clean.
 
