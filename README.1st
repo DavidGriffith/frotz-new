@@ -11,6 +11,7 @@ INSTALL		How to build and install Frotz.
 INSTALL_DOS	How to build and install Frotz for PC/MS DOS.
 Makefile	The Makefile (the INSTALL file tells you about this).
 Makefile.tc	Makefile for building Frotz for DOS using Turbo C 3.00.
+Makefile.ow	Makefile for building Frotz for DOS using Open Watcom C.
 README		An overview of Frotz.
 README.md	An overview of Frotz formatted in Markdown.
 README.1st	This file.
