@@ -28,7 +28,7 @@ BUG FIXES
 
 - Double-clicks are now recognized in sfrotz and xfrotz.
 
-- Fixed problem with spurious newline when a space triggers a word wrap.
+- Fixed problem with spurious newlines when a space triggers a word wrap.
 
 - Fixed a problem with UTF-8 characters getting corrupted during line
   editing.
