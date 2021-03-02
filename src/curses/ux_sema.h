@@ -20,6 +20,7 @@
  *
  * This file and only this file is dual licensed under the MIT license.
  *
+ * Copyright (c) 2019 Mark McCurry
  */
 
 /*
