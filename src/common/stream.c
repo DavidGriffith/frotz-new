@@ -243,22 +243,13 @@ continue_input:
 		record_write_key(key);
 
 	/* Handle timeouts */
-	/*
-	 * Make sure that this is a real timeout, by checking
-	 * that the requested timeout is not zero.  For the case
-	 * of a recorded stream, it is possible that a timeout
-	 * keystroke might be replayed.
-	 */
-	if (key == ZC_TIME_OUT) {
-		if (timeout != 0) {
-			if (direct_call(routine) == 0)
-				goto continue_input;
-		} else {
+
+	if (key == ZC_TIME_OUT)
+		if (direct_call (routine) == 0)
 			goto continue_input;
-		}
-	}
 
 	/* Handle hot keys */
+
 	if (hot_keys && key >= ZC_HKEY_MIN && key <= ZC_HKEY_MAX) {
 		if (z_header.version == V4 && key == ZC_HKEY_UNDO)
 			goto continue_input;
@@ -313,22 +304,10 @@ continue_input:
 		record_write_input(buf, key);
 
 	/* Handle timeouts */
-	/*
-	 * Make sure that this is a real timeout, by checking
-	 * that the requested timeout is not zero.  For the case
-	 * of a recorded stream, it is possible that a timeout
-	 * keystroke might be replayed.
-	 */
-	if (key == ZC_TIME_OUT) {
-		if (timeout != 0) {
-			if (direct_call(routine) == 0)
-				goto continue_input;
-			else
-				buf[0] = 0;
-		} else {
+
+	if (key == ZC_TIME_OUT)
+		if (direct_call (routine) == 0)
 			goto continue_input;
-		}
-	}
 
 	/* Handle hot keys */
 	if (hot_keys && key >= ZC_HKEY_MIN && key <= ZC_HKEY_MAX) {
