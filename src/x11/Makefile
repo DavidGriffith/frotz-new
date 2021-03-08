@@ -14,6 +14,7 @@ ARFLAGS = rc
 SOUND ?= ao
 
 CFLAGS += -DNO_SOUND
+CFLAGS += `pkg-config $(X11_PKGS) --cflags`
 
 .PHONY: clean
 .SUFFIXES: .bdf .c .o .pcf
