@@ -245,7 +245,7 @@ continue_input:
 	/* Handle timeouts */
 
 	if (key == ZC_TIME_OUT)
-		if ((routine == 0) || (direct_call (routine) == 0))
+		if (direct_call (routine) == 0)
 			goto continue_input;
 
 	/* Handle hot keys */
@@ -306,7 +306,7 @@ continue_input:
 	/* Handle timeouts */
 
 	if (key == ZC_TIME_OUT)
-		if ((routine == 0) || (direct_call (routine) == 0))
+		if (direct_call (routine) == 0)
 			goto continue_input;
 
 	/* Handle hot keys */
