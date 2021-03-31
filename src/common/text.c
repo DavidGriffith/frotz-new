@@ -312,8 +312,11 @@ letter_found:
  */
 void z_check_unicode(void)
 {
+#ifdef TOPS20
+	zword c = zargs[0] & 0xffff;
+#else
 	zword c = zargs[0];
-
+#endif
 	if (c >= 0x20 && c <= 0x7e)
 		store(3);
 	else if (c == 0xa0)
@@ -351,7 +354,12 @@ void z_encode_text(void)
 {
 	int i;
 
+#ifdef TOPS20
+	load_string((zword) ( (zargs[0] + zargs[2]) & 0xffff), \
+		 zargs[1] & 0xffff);
+#else
 	load_string((zword) (zargs[0] + zargs[2]), zargs[1]);
+#endif
 	encode_text(0x05);
 	for (i = 0; i < 3; i++)
 		storew((zword) (zargs[3] + 2 * i), encoded[i]);
@@ -587,13 +595,24 @@ void z_print_form(void)
  */
 void print_num(zword value)
 {
+#ifdef TOPS20
+	short sv;
+#endif
 	int i;
 
 	/* Print sign */
+#ifdef TOPS20
+	sv = s16(value);
+	if (sv < 0) {
+		print_char ('-');
+		value = -sv & 0xffff;
+	}
+#else
 	if ((short)value < 0) {
 		print_char('-');
 		value = -(short)value;
 	}
+#endif
 
 	/* Print absolute value */ {
 	for (i = 10000; i != 0; i /= 10)
@@ -612,8 +631,11 @@ void print_num(zword value)
  */
 void z_print_num(void)
 {
+#ifdef TOPS20
+	print_num(zargs[0] & 0xffff);
+#else
 	print_num(zargs[0]);
-
+#endif
 } /* z_print_num */
 
 
@@ -651,7 +673,11 @@ void print_object(zword object)
  */
 void z_print_obj(void)
 {
+#ifdef TOPS20
+	print_object (zargs[0] & 0xffff);
+#else
 	print_object(zargs[0]);
+#endif
 } /* z_print_obj */
 
 
@@ -663,7 +689,11 @@ void z_print_obj(void)
  */
 void z_print_paddr(void)
 {
+#ifdef TOPS20
+	decode_text (HIGH_STRING, zargs[0] & 0xffff);
+#else
 	decode_text(HIGH_STRING, zargs[0]);
+#endif
 } /* z_print_paddr */
 
 
@@ -741,6 +771,9 @@ static zword lookup_text(int padding, zword dct)
 	int lower, upper;
 	int i;
 	bool sorted;
+#ifdef TOPS20
+	short sec;
+#endif
 
 	encode_text(padding);
 
@@ -751,8 +784,14 @@ static zword lookup_text(int padding, zword dct)
 	LOW_WORD(dct, entry_count)	/* get number of entries */
 	dct += 2;
 
+#ifdef TOPS20
+	sec = s16(entry_count);
+	if (sec < 0) {			/* bad luck, entries aren't sorted */
+		entry_count = (zword) ((-sec) & 0xffff);
+#else
 	if ((short)entry_count < 0) {	/* bad luck, entries aren't sorted */
 		entry_count = -(short)entry_count;
+#endif
 		sorted = FALSE;
 	} else
 		sorted = TRUE;	/* entries are sorted */

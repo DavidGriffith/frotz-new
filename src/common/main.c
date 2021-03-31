@@ -79,10 +79,13 @@ bool enable_buffering = FALSE;
 int option_sound = 1;
 char *option_zcode_path;
 
-
 /* Size of memory to reserve (in bytes) */
 long reserve_mem = 0;
 
+#ifdef TOPS20
+/* Strange little TOPS-20 accomodation */
+bool spurious_getchar = FALSE;
+#endif
 
 /*
  * z_piracy, branch if the story file is a legal copy.
@@ -102,7 +105,11 @@ void z_piracy(void)
  * Prepare and run the game.
  *
  */
+#ifdef TOPS20
+int main (int argc, char *argv[])
+#else
 int cdecl main(int argc, char *argv[])
+#endif
 {
 	init_header();
 	init_setup();

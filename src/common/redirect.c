@@ -42,6 +42,23 @@ static struct {
  */
 void memory_open(zword table, zword xsize, bool buffering)
 {
+#ifdef TOPS20
+	short sxs;
+
+	if (++depth < MAX_NESTING) {
+		if (!buffering)
+			xsize = 0xffff;
+		sxs = s16(xsize);
+		if (buffering && sxs <= 0)
+			xsize = get_max_width (((zword) (-sxs)) & 0xffff);
+
+		storew(table, 0);
+		redirect[depth].table = table;
+		redirect[depth].width = 0;
+		redirect[depth].total = 0;
+		redirect[depth].xsize = xsize;
+		ostream_memory = TRUE;
+#else
 	if (++depth < MAX_NESTING) {
 		if (!buffering)
 			xsize = 0xffff;
@@ -57,6 +74,7 @@ void memory_open(zword table, zword xsize, bool buffering)
 		redirect[depth].total = 0;
 		redirect[depth].xsize = xsize;
 		ostream_memory = TRUE;
+#endif
 	} else
 		runtime_error(ERR_STR3_NESTING);
 } /* memory_open */

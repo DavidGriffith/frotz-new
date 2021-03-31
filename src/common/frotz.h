@@ -62,7 +62,7 @@ typedef int bool;
 #ifndef MSDOS_16BIT
 
 #include "defs.h"
-#include "git_hash.h"
+#include "hash.h"
 
 #define huge
 #define zmalloc(size)	malloc(size)
@@ -421,8 +421,13 @@ extern const char build_timestamp[];
 #define FILE_SAVE_AUX 6
 
 /*** Data access macros ***/
+#ifdef TOPS20
+#define SET_BYTE(addr,v)  { zmp[addr] = v & 0xff; }
+#define LOW_BYTE(addr,v)  { v = zmp[addr] & 0xff; }
+#else
 #define SET_BYTE(addr,v)  { zmp[addr] = v; }
 #define LOW_BYTE(addr,v)  { v = zmp[addr]; }
+#endif
 #define CODE_BYTE(v)	  { v = *pcp++;    }
 
 
@@ -572,19 +577,33 @@ extern zbyte *pcp;
 extern zbyte *zmp;
 
 #define lo(v)	(v & 0xff)
-#define hi(v)	(v >> 8)
 
-#define SET_WORD(addr,v)  { zmp[addr] = hi(v); zmp[addr+1] = lo(v); }
+#ifdef TOPS20
+#define hi(v)  ((v & 0xff00) >> 8)
+#define LOW_WORD(addr,v)  { v = ((zword) ( zmp[addr] & 0xff) << 8) | \
+	(zmp[addr+1] & 0xff); }
+#define HIGH_WORD(addr,v) { v = ((zword) ( zmp[addr] & 0xff) << 8) | \
+	(zmp[addr+1] & 0xff); }
+#else
+#define hi(v)	(v >> 8)
 #define LOW_WORD(addr,v)  { v = ((zword) zmp[addr] << 8) | zmp[addr+1]; }
 #define HIGH_WORD(addr,v) { v = ((zword) zmp[addr] << 8) | zmp[addr+1]; }
+#endif
+
+#define SET_WORD(addr,v)  { zmp[addr] = hi(v); zmp[addr+1] = lo(v); }
 #define CODE_WORD(v)      { v = ((zword) pcp[0] << 8) | pcp[1]; pcp += 2; }
 #define GET_PC(v)         { v = pcp - zmp; }
 #define SET_PC(v)         { pcp = zmp + v; }
 
-#endif
+#endif /* !defined (AMIGA) && !defined (MSDOS_16BIT) */
+
 /******************************************************************************/
 /******************************************************************************/
 
+#ifdef TOPS20
+/*** Convenience zword-to-correctly-signed-sixteen-bit-short ***/
+extern short s16(zword);
+#endif
 
 /*** Various data ***/
 
@@ -628,6 +647,11 @@ extern long reserve_mem;
 extern int zoptind;
 extern int zoptopt;
 extern char *zoptarg;
+
+#ifdef TOPS20
+/* A weird little TOPS-20 accomodation */
+extern bool spurious_getchar;
+#endif
 
 /*** Z-machine opcodes ***/
 void 	z_add(void);

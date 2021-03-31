@@ -253,7 +253,14 @@ void interpret(void)
 	do {
 		zbyte opcode;
 
+/* FIXME may be able to do this without demacroing */
+#ifdef TOPS20
+		long pc;
+		pc = (long) (  ( (long) pcp - (long) zmp) & 0x7ffff );
 		CODE_BYTE(opcode)
+#else
+		CODE_BYTE(opcode)
+#endif
 		zargc = 0;
 
 		if (opcode < 0x80) {	/* 2OP opcodes */
@@ -416,6 +423,10 @@ void branch(bool flag)
 	zbyte off1;
 	zbyte off2;
 
+#ifdef TOPS20
+	short soffset;
+#endif
+
 	CODE_BYTE(specifier)
 	off1 = specifier & 0x3f;
 
@@ -433,9 +444,19 @@ void branch(bool flag)
 
 	if (specifier & 0x80) {
 		if (offset > 1) {	/* normal branch */
+/* FIXME Does this need to be demacroed? */
+#ifdef TOPS20
+			GET_PC(pc)
+			soffset = s16(offset);
+			pc += soffset - 2;
+			SET_PC(pc)
+#else
 			GET_PC(pc)
 			pc += (short)offset - 2;
 			SET_PC(pc)
+#endif
+
+
 		} else
 			ret(offset);	/* special case, return 0 or 1 */
 	}
@@ -452,7 +473,11 @@ void store(zword value)
 {
 	zbyte variable;
 
+#ifdef TOPS20
+	value &= 0xffff;
+#endif
 	CODE_BYTE(variable)
+
 	if (variable == 0)
 		*--sp = value;
 	else if (variable < 16)
@@ -481,6 +506,9 @@ int direct_call(zword addr)
 	zword saved_zargs[8];
 	int saved_zargc;
 	int i;
+#ifdef TOPS20
+	short sv;
+#endif
 
 	/* Calls to address 0 return false */
 	if (addr == 0)
@@ -500,7 +528,13 @@ int direct_call(zword addr)
 	zargc = saved_zargc;
 
 	/* Resulting value lies on top of the stack */
+#ifdef TOPS20
+	sv = s16(*sp);
+	sp += 1;
+	return (((zword) sv) & 0xffff);
+#else
 	return (short)*sp++;
+#endif
 } /* direct_call */
 
 
@@ -545,7 +579,11 @@ static void __illegal__(void)
  */
 void z_catch(void)
 {
+#ifdef TOPS20
+	store(frame_count & 0xffff);
+#else
 	store(frame_count);
+#endif
 }  /* z_catch */
 
 
@@ -558,14 +596,22 @@ void z_catch(void)
  */
 void z_throw(void)
 {
+#ifdef TOPS20
+	if (((zargs[1]) & 0xffff) > STACK_SIZE)
+#else
 	if (zargs[1] > frame_count)
+#endif
 		runtime_error(ERR_BAD_FRAME);
 
 	/* Unwind the stack a frame at a time. */
 	for (; frame_count > zargs[1]; --frame_count)
 		fp = stack + 1 + fp[1];
 
+#ifdef TOPS20
+	ret ((zargs[0]) & 0xffff);
+#else
 	ret(zargs[0]);
+#endif
 } /* z_throw */
 
 
@@ -580,8 +626,13 @@ void z_throw(void)
  */
 void z_call_n(void)
 {
+#ifdef TOPS20
+	if (((zargs[0]) & 0xffff) != 0)
+		call (((zargs[0]) & 0xffff), zargc - 1, zargs + 1, 1);
+#else
 	if (zargs[0] != 0)
 		call(zargs[0], zargc - 1, zargs + 1, 1);
+#endif
 } /* z_call_n */
 
 
@@ -596,8 +647,13 @@ void z_call_n(void)
  */
 void z_call_s(void)
 {
+#ifdef TOPS20
+	if (((zargs[0]) & 0xffff) != 0)
+		call (((zargs[0]) & 0xffff), zargc - 1, zargs + 1, 0);
+#else
 	if (zargs[0] != 0)
 		call(zargs[0], zargc - 1, zargs + 1, 0);
+#endif
 	else
 		store(0);
 } /* z_call_s */
@@ -611,11 +667,17 @@ void z_call_s(void)
  */
 void z_check_arg_count(void)
 {
+#ifdef TOPS20
+	if (fp == stack + STACK_SIZE)
+		branch (((zargs[0]) & 0xffff) == 0);
+	else
+		branch (((zargs[0]) & 0xffff) <= (*fp & 0xff));
+#else
 	if (fp == stack + STACK_SIZE)
 		branch(zargs[0] == 0);
 	else
 		branch(zargs[0] <= (*fp & 0xff));
-
+#endif
 } /* z_check_arg_count */
 
 
@@ -628,10 +690,17 @@ void z_check_arg_count(void)
 void z_jump(void)
 {
 	long pc;
+#ifdef TOPS20
+	short soffset;
+#endif
 
 	GET_PC(pc)
+#ifdef TOPS20
+	soffset = s16(zargs[0]);
+	pc = pc + soffset - 2;
+#else
 	pc += (short)zargs[0] - 2;
-
+#endif
 	if (pc >= story_size)
 		runtime_error(ERR_ILL_JUMP_ADDR);
 
@@ -671,7 +740,11 @@ void z_quit(void)
  */
 void z_ret(void)
 {
+#ifdef TOPS20
+	ret ((zargs[0]) & 0xffff);
+#else
 	ret(zargs[0]);
+#endif
 } /* z_ret */
 
 

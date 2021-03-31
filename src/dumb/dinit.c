@@ -19,7 +19,6 @@
  * Or visit http://www.fsf.org/
  */
 
-#include <libgen.h>
 #include "dfrotz.h"
 #include "dblorb.h"
 
@@ -186,7 +185,6 @@ void os_process_arguments(int argc, char *argv[])
 		break;
 	case FORMAT_ANSI:
 		printf("Using ANSI formatting.\n");
-		f_setup.format = FORMAT_ANSI;
 		break;
 	case FORMAT_BBCODE:
 		printf("Using Discourse BBCode formatting.\n");
@@ -208,8 +206,12 @@ void os_process_arguments(int argc, char *argv[])
 
 	/* Save the story file name */
 	f_setup.story_file = strdup(argv[zoptind]);
-	f_setup.story_name = strdup(basename(argv[zoptind]));
 
+#ifdef NO_BASENAME
+	f_setup.story_name = strdup(f_setup.story_file);
+#else
+	f_setup.story_name = strdup(basename(argv[zoptind]));
+#endif
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
 

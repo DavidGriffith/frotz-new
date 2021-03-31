@@ -30,7 +30,32 @@
 void z_dec(void)
 {
 	zword value;
+#ifdef TOPS20
+	zword z0;
+	short sv;
 
+	z0 = zargs[0];
+	z0 &= 0xffff;
+
+	if (z0 == 0) {
+		sv = s16(*sp);
+		sv -= 1;
+		*sp = ((zword) (sv & 0xffff));
+	}
+	else if (z0 < 16) {
+		sv = s16(*(fp - z0));
+		sv -= 1;
+		*(fp - z0) = ((zword) (sv & 0xffff));
+	} else {
+		zword addr = z_header.globals + 2 * (z0 - 16);
+		LOW_WORD(addr, value)
+		sv=s16(value);
+		sv--;
+		value = (zword) sv;
+		value &= 0xffff;
+		SET_WORD(addr, value)
+	}
+#else
 	if (zargs[0] == 0)
 		(*sp)--;
 	else if (zargs[0] < 16)
@@ -41,6 +66,7 @@ void z_dec(void)
 		value--;
 		SET_WORD(addr, value)
 	}
+#endif
 } /* z_dec */
 
 
@@ -54,7 +80,39 @@ void z_dec(void)
 void z_dec_chk(void)
 {
 	zword value;
+#ifdef TOPS20
+	zword z0, z1;
+	short sv, sz1;
 
+	z0 = zargs[0];
+	z1 = zargs[1];
+
+	z0 &= 0xffff;
+	z1 &= 0xffff;
+
+	if (z0 == 0) {
+		sv = s16(*sp);
+		sv -= 1;
+		value = (((zword ) sv ) & 0xffff);
+		*sp = value;
+	}
+	else if (z0 < 16) {
+		sv = s16(*(fp - z0));
+		sv -= 1;
+		value = (((zword) sv ) & 0xffff);
+		*(fp - z0) = value;
+	}
+	else {
+		zword addr = z_header.globals + 2 * (z0 - 16);
+		LOW_WORD(addr, value)
+		value--;
+		value &= 0xffff;
+		SET_WORD(addr, value)
+	}
+	sv = s16(value);
+	sz1 = s16(z1);
+	branch (sv < sz1);
+#else
 	if (zargs[0] == 0)
 		value = --(*sp);
 	else if (zargs[0] < 16)
@@ -66,6 +124,7 @@ void z_dec_chk(void)
 		SET_WORD(addr, value)
 	}
 	branch((short)value < (short)zargs[1]);
+#endif
 } /* z_dec_chk */
 
 
@@ -78,6 +137,31 @@ void z_dec_chk(void)
 void z_inc(void)
 {
 	zword value;
+#ifdef TOPS20
+	zword z0;
+	short sv;
+
+	z0 = zargs[0];
+	z0 &= 0xffff;
+
+	if (z0 == 0) {
+		sv = s16(*sp);
+		sv += 1;
+		value = (((zword) sv) & 0xffff);
+		*sp = value;
+	} else if (z0 < 16) {
+		sv = s16(*(fp -z0));
+		sv +=1;
+		value = (((zword) sv) & 0xffff);
+		*(fp - z0) = value;
+	} else {
+		zword addr = z_header.globals + 2 * (z0 - 16);
+		LOW_WORD(addr, value)
+		value++;
+		value &= 0xffff;
+		SET_WORD(addr, value)
+	}
+#else
 
 	if (zargs[0] == 0)
 		(*sp)++;
@@ -89,7 +173,7 @@ void z_inc(void)
 		    value++;
 		SET_WORD(addr, value)
 	}
-
+#endif
 } /* z_inc */
 
 
@@ -103,7 +187,34 @@ void z_inc(void)
 void z_inc_chk(void)
 {
 	zword value;
+#ifdef TOPS20
+	zword z0, z1;
+	short sv, sz1;
 
+	z0 = zargs[0];
+	z1 = zargs[1];
+	sz1 = s16(z1);
+
+	if (z0 == 0) {
+		sv = s16(*sp);
+		sv += 1;
+		value = (((zword) sv ) & 0xffff);
+		*sp = value;
+	} else if (z0 < 16) {
+		sv = s16(*(fp - z0));
+		sv +=1;
+		value = (((zword) sv) & 0xffff);
+		*(fp - z0) = value;
+	} else {
+		zword addr = z_header.globals + 2 * (z0 - 16);
+		LOW_WORD(addr, value)
+		value++;
+		value &= 0xffff;
+		SET_WORD (addr, value)
+	}
+	sv=s16(value);
+	branch (sv > sz1);
+#else
 	if (zargs[0] == 0)
 		value = ++(*sp);
 	else if (zargs[0] < 16)
@@ -115,6 +226,7 @@ void z_inc_chk(void)
 		SET_WORD(addr, value)
 	}
 	branch((short)value > (short)zargs[1]);
+#endif
 } /* z_inc_chk */
 
 
@@ -127,7 +239,24 @@ void z_inc_chk(void)
 void z_load(void)
 {
 	zword value;
+#ifdef TOPS20
+	zword z0;
+	z0 = zargs[0];
+	z0 &= 0xffff;
+#endif
 
+
+#ifdef TOPS20
+	if (z0 == 0)
+		value = *sp;
+	else if (z0 < 16)
+		value = *(fp - z0);
+	else {
+		zword addr = z_header.globals + 2 * (z0 - 16);
+		LOW_WORD (addr, value)
+	}
+	store(value & 0xffff);
+#else
 	if (zargs[0] == 0)
 		value = *sp;
 	else if (zargs[0] < 16)
@@ -137,6 +266,7 @@ void z_load(void)
 		LOW_WORD(addr, value)
 	}
 	store(value);
+#endif
 } /* z_load */
 
 

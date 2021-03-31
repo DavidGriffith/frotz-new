@@ -20,7 +20,6 @@
  */
 
 #include <string.h>
-#include <libgen.h>
 
 #include "dfrotz.h"
 
@@ -90,7 +89,19 @@ static int xgetchar(void)
 			fprintf(stderr, "\nEOT\n");
 			os_quit(EXIT_SUCCESS);
 		}
+#ifdef TOPS20
+		/* On TOPS-20 only, the very first getchar() may return EOF,
+		 * even thought feof(stdin) is false.  No idea why, but...
+		 */
+		if (!spurious_getchar) {
+			spurious_getchar = TRUE;
+			return xgetchar();
+		} else {
+			os_fatal(strerror(errno));
+		}
+#else
 		os_fatal(strerror(errno));
+#endif
 	}
 	return c;
 }
@@ -153,7 +164,11 @@ static void translate_special_chars(char *s)
 			case '7': *dest++ = ZC_FKEY_F7; break;
 			case '8': *dest++ = ZC_FKEY_F8; break;
 			case '9': *dest++ = ZC_FKEY_F9; break;
+#ifdef TOPS20
+			case '0': *dest++ = (char) (ZC_FKEY_F10 & 0xff); break;
+#else
 			case '0': *dest++ = ZC_FKEY_F10; break;
+#endif
 			default:
 				fprintf(stderr, "DUMB-FROTZ: unknown escape char: %c\n", src[-1]);
 				fprintf(stderr, "Enter \\help to see the list\n");
@@ -485,8 +500,11 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 char *os_read_file_name (const char *default_name, int flag)
 {
 	char file_name[FILENAME_MAX + 1];
-	char fullpath[INPUT_BUFFER_SIZE], prompt[INPUT_BUFFER_SIZE];
+	char prompt[INPUT_BUFFER_SIZE];
+
+	char fullpath[INPUT_BUFFER_SIZE];
 	char *buf;
+
 	FILE *fp;
 	char *tempname;
 	char path_separator[2];

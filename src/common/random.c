@@ -55,10 +55,17 @@ void seed_random(int value)
  */
 void z_random()
 {
+#ifdef TOPS20
+	short sz;
+	sz = s16(zargs[0]);
+	if (sz <= 0) {		/* set random seed */
+		seed_random(-sz);
+		store(0);
+#else
 	if ((short)zargs[0] <= 0) {	/* set random seed */
 		seed_random(-(short)zargs[0]);
 		store(0);
-
+#endif
 	} else {		/* generate random number */
 		zword result;
 
@@ -70,6 +77,11 @@ void z_random()
 			A = 0x015a4e35L * A + 1;
 			result = (A >> 16) & 0x7fff;
 		}
+
+#ifdef TOPS20
+		store((zword) ((result % zargs[0] + 1) & 0xffff));
+#else
 		store((zword) (result % zargs[0] + 1));
+#endif
 	}
 } /* z_random */

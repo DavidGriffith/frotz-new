@@ -289,6 +289,11 @@ void init_memory(void)
 	unsigned n;
 	int i, j;
 
+#ifdef TOPS20
+	zword checksum = 0;
+	long li;
+#endif
+
 	/* INDENT-OFF */
 	static struct {
 		enum story story_id;
@@ -461,8 +466,18 @@ void init_memory(void)
 		os_fatal("Out of memory");
 
 	/* Load header into memory */
+#ifdef TOPS20
+	/* One byte at a time for 36-bit sanitization */
+	for (i = 0; i < 64 ; i++) {
+		if (fread(zmp + i, 1, 1, story_fp) != 1) {
+			os_fatal ("Story file read error");
+		}
+		zmp[i] &= 0xff; /* No nine-bit craziness here! */
+	}
+#else
 	if (fread(zmp, 1, 64, story_fp) != 64)
 		os_fatal("Story file read error");
+#endif
 
 	/* Copy header fields to global variables */
 	LOW_BYTE(H_VERSION, z_header.version);
@@ -538,6 +553,15 @@ void init_memory(void)
 	if ((zmp = (zbyte huge *) zrealloc(zmp, story_size, 64)) == NULL)
 		os_fatal("Out of memory");
 
+#ifdef TOPS20
+	/* Load and sanitize story file one byte at a time. */
+	for (size = 64; size < story_size; size++) {
+		if (fread(zmp + size, 1, 1, story_fp) != 1) {
+			os_fatal("Story file read error");
+		}
+		zmp[size] &= 0xff; /* No nine-bit craziness here! */
+	}
+#else
 	/* Load story file in chunks of 32KB */
 	n = 0x8000;
 	for (size = 64; size < story_size; size += n) {
@@ -547,10 +571,21 @@ void init_memory(void)
 		if (fread(pcp, 1, n, story_fp) != n)
 			os_fatal("Story file read error");
 	}
+#endif
 
 	/* Read header extension table */
 	z_header.x_table_size = get_header_extension(HX_TABLE_SIZE);
 	z_header.x_unicode_table = get_header_extension(HX_UNICODE_TABLE);
+
+#ifdef TOPS20
+	/* Internal verification; is this where the PDP-10 is blowing up? */
+	/* Sum all bytes in story file except header bytes */
+	fseek(story_fp, 64, SEEK_SET);
+	for (li = 64; li < story_size; li++)
+		checksum = (checksum + (fgetc(story_fp) & 0xff)) & 0xffff;
+	if (checksum != z_header.checksum)
+		os_fatal("Checksum failed!");
+#endif
 } /* init_memory */
 
 
@@ -576,8 +611,15 @@ void init_undo(void)
 	/* Allocate z_header.dynamic_size bytes for previous dynamic
 	 * zmp state + 1.5 z_header.dynamic_size for Quetzal diff + 2.
 	 */
-	prev_zmp = zmalloc(z_header.dynamic_size);
-	undo_diff = zmalloc(((unsigned long)z_header.dynamic_size * 3) / 2 + 2);
+	/* FIXME UNDO changed a lot since 2.32. May not be correct. */
+#ifdef TOPS20
+	prev_zmp = malloc(z_header.dynamic_size & 0xffff);
+	undo_diff = malloc(((unsigned long)(z_header.dynamic_size & 0xffff) * 3) / 2 + 2);
+#else
+	prev_zmp = malloc(z_header.dynamic_size);
+	undo_diff = malloc(((unsigned long)z_header.dynamic_size * 3) / 2 + 2);
+#endif
+
 	if ((undo_diff != NULL) && (prev_zmp != NULL)) {
 		memmove (prev_zmp, zmp, z_header.dynamic_size);
 	} else {
@@ -654,6 +696,10 @@ void reset_memory(void)
  */
 void storeb(zword addr, zbyte value)
 {
+#ifdef TOPS20
+	addr &= 0xffff;
+	value &= 0xff;
+#endif
 	if (addr >= z_header.dynamic_size)
 		runtime_error(ERR_STORE_RANGE);
 
@@ -682,6 +728,10 @@ void storeb(zword addr, zbyte value)
  */
 void storew(zword addr, zword value)
 {
+#ifdef TOPS20
+	addr &= 0xffff;
+	value &= 0xffff;
+#endif
 	storeb((zword) (addr + 0), hi (value));
 	storeb((zword) (addr + 1), lo (value));
 } /* storew */
@@ -1161,5 +1211,8 @@ void z_verify (void)
 		checksum += fgetc(story_fp);
 
 	/* Branch if the checksums are equal */
+#ifdef TOPS20
+	checksum &= 0xffff;
+#endif
 	branch(checksum == z_header.checksum);
 } /* z_verify */
