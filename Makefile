@@ -601,9 +601,9 @@ endif
 #
 install: install_frotz
 install_frotz: $(FROTZ_BIN)
-	install -d $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(BINDIR) && test -w $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(FROTZ_BIN) $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MANDIR)/man6
+	mkdir -p $(DESTDIR)$(MANDIR)/man6 && test -w $(DESTDIR)$(MANDIR)/man6
 	install -m 644 doc/frotz.6 $(DESTDIR)$(MANDIR)/man6/
 
 uninstall: uninstall_frotz
@@ -613,9 +613,9 @@ uninstall_frotz:
 
 install_dumb: install_dfrotz
 install_dfrotz: $(DFROTZ_BIN)
-	install -d $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(BINDIR) && test -w $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(DFROTZ_BIN) $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MANDIR)/man6
+	mkdir -p $(DESTDIR)$(MANDIR)/man6 && test -w $(DESTDIR)$(MANDIR)/man6
 	install -m 644 doc/dfrotz.6 $(DESTDIR)$(MANDIR)/man6/
 
 uninstall_dumb: uninstall_dfrotz
@@ -625,10 +625,11 @@ uninstall_dfrotz:
 
 install_x11: install_xfrotz
 install_xfrotz: $(XFROTZ_BIN)
-	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(MANDIR)/man6"
+	mkdir -p "$(DESTDIR)$(PREFIX)/bin" && test -w $(DESTDIR)$(BINDIR)
+	mkdir -p "$(DESTDIR)$(MANDIR)/man6" && test -w $(DESTDIR)$(MANDIR)/man6
 	install "$(XFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/xfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
-	install -d "$(X11_FONTDIR)"
+	mkdir -p "$(X11_FONTDIR)"
 	install -m 644 "$(X11_DIR)/Zork_r400-10.pcf" "$(X11_FONTDIR)"
 	install -m 644 "$(X11_DIR)/Zork_r400-11.pcf" "$(X11_FONTDIR)"
 	install -m 644 "$(X11_DIR)/Zork_r400-13.pcf" "$(X11_FONTDIR)"
@@ -650,9 +651,9 @@ uninstall_xfrotz:
 
 install_sdl: install_sfrotz
 install_sfrotz: $(SFROTZ_BIN)
-	install -d $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(BINDIR) && test -w $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(SFROTZ_BIN) $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MANDIR)/man6
+	mkdir -p $(DESTDIR)$(MANDIR)/man6 && test -w $(DESTDIR)$(MANDIR)/man6
 	install -m 644 doc/sfrotz.6 $(DESTDIR)$(MANDIR)/man6/
 
 uninstall_sdl: uninstall_sfrotz
