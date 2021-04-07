@@ -1,7 +1,9 @@
 # Makefile for Unix Frotz
 # GNU make is required.
 
-SOURCES = buffer.c err.c fastmem.c files.c getopt.c hotkey.c input.c \
+#SOURCES = buffer.c err.c fastmem.c files.c getopt.c hotkey.c input.c \
+
+SOURCES = buffer.c err.c diskmem.c fastmem.c files.c getopt.c hotkey.c input.c \
 	main.c math.c missing.c object.c process.c quetzal.c random.c \
 	redirect.c screen.c sound.c stream.c table.c text.c variable.c
 

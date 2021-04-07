@@ -1,5 +1,5 @@
-/* fastmem.c - Memory related functions (fast version without virtual memory)
- *	Copyright (c) 1995-1997 Stefan Jokisch
+/* diskmem.c - Memory related functions (virtual memory version)
+ *      Copyright (c) 2021 David Griffith
  *
  * This file is part of Frotz.
  *
@@ -26,7 +26,7 @@
 #include <string.h>
 #include "frotz.h"
 
-#if !defined (DISKMEM)
+#if defined (DISKMEM)
 
 #ifndef MSDOS_16BIT
 
@@ -551,24 +551,27 @@ void init_memory(void)
 		op1_opcodes[0x0f] = z_call_n;
 	}
 
-	/* Allocate memory for story data */
-	if ((zmp = (zbyte huge *) zrealloc(zmp, story_size, 64)) == NULL)
+/* FIXME started work on disk paging here. */
+
+	/* Allocate memory for dynamic memory */
+	if ((zmp = (zbyte huge *) zrealloc(zmp, story_size - z_header.dynamic_size, 64)) == NULL)
 		os_fatal("Out of memory");
 
 #ifdef TOPS20
-	/* Load and sanitize story file one byte at a time. */
-	for (size = 64; size < story_size; size++) {
-		if (fread(zmp + size, 1, 1, story_fp) != 1) {
+	/* Load dynamic memory one byte at a time, sanitized for 36-bitness. */
+	for (size = 64; size < z_header.dynamic_size; size++) {
+		if (fread(zmp + size, 1, 1, story_fp) != 1)
 			os_fatal("Story file read error");
-		}
 		zmp[size] &= 0xff; /* No nine-bit craziness here! */
 	}
+
+
 #else
-	/* Load story file in chunks of 32KB */
+	/* Load dynamic memory in chunks of 32KB */
 	n = 0x8000;
-	for (size = 64; size < story_size; size += n) {
-		if (story_size - size < 0x8000)
-			n = (unsigned) (story_size - size);
+	for (size = 64; size < z_header.dynamic_size; size += n) {
+		if (z_header.dynamic_size - size < 0x8000)
+			n = (unsigned) (z_header.dynamic_size - size);
 		SET_PC(size);
 		if (fread(pcp, 1, n, story_fp) != n)
 			os_fatal("Story file read error");
@@ -1219,4 +1222,4 @@ void z_verify (void)
 	branch(checksum == z_header.checksum);
 } /* z_verify */
 
-#endif  /* !DISKMEM */
+#endif	/* DISKMEM */

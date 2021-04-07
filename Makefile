@@ -73,6 +73,11 @@ CURSES ?= ncursesw
 # SDL interface always has Blorb support.
 #NO_BLORB = yes
 
+# Uncomment this to enable swapping in Zcode from disk rather than
+# reading it all into main memory.  This can be helpful for machines
+# with very limited RAM.
+DISKMEM = yes
+
 # These are for enabling local version of certain functions which may be
 # missing or behave differently from what's expected in modern system.
 # If you're running on a system made in the past 20 years, you should be
@@ -508,6 +513,9 @@ ifdef NO_UCONTEXT_H
 endif
 ifdef NO_EXECINFO_H
 	@echo "#define NO_EXECINFO_H" >> $@
+endif
+ifdef DISKMEM
+	@echo "#define DISKMEM" >> $@
 endif
 
 ifneq ($(EXPORT_TYPE), tops20)
