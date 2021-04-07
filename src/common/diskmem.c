@@ -55,7 +55,6 @@ extern void split_window (zword);
 extern void script_open (void);
 extern void script_close (void);
 
-
 extern zword save_quetzal (FILE *, FILE *);
 extern zword restore_quetzal (FILE *, FILE *);
 
@@ -94,6 +93,30 @@ static undo_t huge *first_undo = NULL, huge *last_undo = NULL,
 static zbyte huge *prev_zmp, *undo_diff;
 
 static int undo_count = 0;
+
+
+/* Disk caching stuff */
+
+/* A cache entry */
+typedef struct cache_entry {
+	struct cache_entry *flink;
+	int page_number;
+	zbyte data[PAGE_SIZE];
+} cache_entry_t;
+static zbyte *cache_data;		/* For pages themselves */
+static cache_entry_t *cache_memory;	/* For cache entries */
+static cache_entry_t *cache = NULL	/* Cache chain anchor */
+
+/* Pseudo translation buffer, one entry each for code and data pages */
+static unsigned int current_code_page = 0;
+static cache_entry_t *current_code_cachep = NULL;
+static unsigned int current_data_page = 0;
+static cache_entry_t *current_data_cachep = NULL;
+static zbyte_t *current_code_cached;
+static zbyte_t *current_data_cached
+
+static unsigned int calc_data_pages (void);
+static cache_entry_t *update_cache (int);
 
 
 #ifdef __WATCOMC__

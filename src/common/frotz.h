@@ -190,6 +190,16 @@ typedef struct {
 #ifndef STACK_SIZE
 #define STACK_SIZE 1024
 #endif
+#ifndef PAGE_SIZE
+#define PAGE_SIZE 512
+#endif
+#ifndef PAGE_MASK
+#define 511
+#endif
+#ifndef PAGE_SHIFT
+#define PAGE_SHIFT 9
+#endif
+
 
 extern const char build_timestamp[];
 
