@@ -32,6 +32,8 @@
 #ifndef CURSES_UX_SEMA_H
 #define CURSES_UX_SEMA_H
 
+#include "../common/defs.h"
+
 #ifndef NO_SOUND
 
 #ifdef MACOS

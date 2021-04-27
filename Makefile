@@ -480,6 +480,10 @@ ifeq ($(EXPORT_TYPE), tops20)
 	@echo "#define NO_BLORB" >> $@
 else
 
+ifdef MACOS
+	@echo "#define MACOS" >> $@
+endif
+
 ifeq ($(OS_TYPE), unix)
 	@echo "#define UNIX" >> $@
 endif
