@@ -1,4 +1,5 @@
-Port Frotz to the PDP-10 line of mainframe computers.
+Finish porting Frotz to the PDP-10 line of mainframe computers.  Dumb
+works.  Full-screen support needed.
 
 Rework the screen buffer to allow the rows and columns to be changed on
 the fly.
