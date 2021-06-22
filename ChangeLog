@@ -1,14 +1,18 @@
-Summary of changes between Frotz 2.53 and Frotz x.xx:
+Summary of changes between Frotz 2.53 and Frotz 2.54:
 =====================================================
 
-Frotz x.xx was released on xxx xxx xx, 202x.
+Frotz 2.54 was released on xxx xxx xx, 202x.
 
-This is a xxx release focusing on xxx.
+This release's main attraction is official support for TOPS20.
 
 NEW FEATURES
 
 - Added changes to allow for compilation on a DEC PDP-10 mainframe
   running TOPS20.  See INSTALL_PDP10.
+
+BUG FIXES
+
+- Fixed another problem with compilation under macOS.
 
 
 Summary of changes between Frotz 2.52 and Frotz 2.53:
