@@ -19,7 +19,7 @@ RM = %erase
 
 BINNAME = frotz.exe
 
-VERSION = "2.53"
+VERSION = "2.54"
 
 # MS-DOS command.com and Unix sh have different shell quoting rules.  Try to
 # detect which one we are running under.

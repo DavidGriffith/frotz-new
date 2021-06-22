@@ -1,4 +1,4 @@
-FROTZ V2.53 - An interpreter for all Infocom and other Z-machine games.
+FROTZ V2.54 - An interpreter for all Infocom and other Z-machine games.
 Complies with standard 1.0 of Graham Nelson's specification.
 
 Originally written by Stefan Jokisch in 1995-1997.
@@ -7,6 +7,8 @@ Reference code and Unix port currently maintained by David Griffith.
 
 - Compiles and runs on most common flavors of Unix, both open source and not.
   This includes macOS.
+- Compiles and runs on MSDOS/PCDOS/FreeDOS.
+- Compiles and runs on PDP-10 mainframes running the TOPS20 operating system.
 - Portable to many other operating systems and hardware.
 - Curses, Dumb, and SDL user interfaces.
 - Plays all Z-code games including V6.
@@ -47,9 +49,7 @@ choices depending on where you live.
 
 	USA: http://ifarchive.jmac.org
 	USA: http://ifmirror.russotto.net
-	USA: http://ifarchive.smallwhitehouse.org
 	USA: http://ifarchive.info
 	USA: http://ifarchive.ifreviews.org
-	USA: ftp://ifarchive.ifreviews.org
 	USA: http://mirrors.ibiblio.org/interactive-fiction/
 	USA: gopher://gopher.661.org/1/if-archive

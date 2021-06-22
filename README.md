@@ -1,4 +1,4 @@
-# FROTZ V2.52
+# FROTZ V2.54
 An interpreter for all Infocom and other Z-machine games.
 Complies with standard 1.0 of Graham Nelson's specification.
 
@@ -9,6 +9,8 @@ Reference code and Unix port currently maintained by David Griffith.
 ## Features
 - Compiles and runs on most common flavors of Unix, both open source and not.
   This includes macOS.
+- Compiles and runs on MSDOS/PCDOS/FreeDOS.
+- Compiles and runs on PDP-10 mainframes running the TOPS20 operating system.
 - Portable to many other operating systems and hardware.
 - Curses, Dumb, and SDL user interfaces.
 - Plays all Z-code games including V6.
