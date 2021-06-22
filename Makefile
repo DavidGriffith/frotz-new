@@ -399,9 +399,10 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	@cp $(OW_DOS_DEFINES) $(NAME)src/$(OW_DOS_DIR)
 	@zip $(NAME)src.zip $(NAME)src/$(DOS_DEFINES) $(NAME)src/$(OW_DOS_DEFINES) > /dev/null
 	@rm -rf $(NAME)src
+	@echo "$(NAME)src.zip created."
 
 else
-	@echo "Not in a git repository or git command not found.  Cannot make a tarball."
+	$(error Not in a git repository or git command not found.  Cannot make a tarball)
 endif
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN) $(XFROTZ_BIN)
@@ -674,6 +675,7 @@ dist: $(NAME)-$(VERSION).tar.gz
 frotz-$(VERSION).tar.gz:
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	git archive --format=tgz --prefix $(NAME)-$(VERSION)/ HEAD -o $(NAME)-$(VERSION).tar.gz
+	@echo frotz-$(VERSION).tar.gz created.
 else
 	@echo "Not in a git repository or git command not found.  Cannot make a zip file."
 endif
