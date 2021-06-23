@@ -15,7 +15,7 @@ BINNAME = frotz.exe
 LIBRARY = frotz.lib
 
 VERSION = "2.54"
-RELEASE_NOTES = "Official release."
+RELEASE_NOTES = "Development release."
 
 VER = -DVERSION=$(VERSION)
 
