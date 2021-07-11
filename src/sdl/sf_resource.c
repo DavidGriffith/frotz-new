@@ -64,7 +64,6 @@ char *m_fontdir = NULL;
 bool m_aafonts = 0;
 char m_names_format = 0;
 char *m_reslist_file = NULL;
-char *m_setupfile = ".sfrotzrc";
 extern int m_frequency;
 
 bool sdl_active;
@@ -394,7 +393,7 @@ void sf_readsettings(void)
 {
 	char *p;
 
-	sf_InitProfile(m_setupfile);
+	sf_InitProfile(f_setup.config_file);
 
 	m_aafonts = sf_GetProfileInt("Fonts", "antialias", 0);
 	m_fontdir = sf_GetProfileString("Fonts", "fontdir", NULL);
@@ -1110,6 +1109,7 @@ static FILE *findfromlist(int ispic, int num, int *size)
 
 void os_init_setup(void)
 {
+	f_setup.config_file = strdup(CONFIG_FILE);
 	sf_setdialog();
 	sf_initloader();
 	sdl_active = FALSE;
