@@ -59,6 +59,8 @@ extern z_header_t z_header;
 volatile sig_atomic_t terminal_resized = 0;
 
 static void sigwinch_handler(int);
+static void parse_options(int argc, char **argv);
+
 #define INFORMATION "\
 An interpreter for all Infocom and other Z-Machine games.\n\
 \n\
@@ -196,7 +198,6 @@ void os_fatal (const char *s, ...)
  */
 void os_process_arguments (int argc, char *argv[])
 {
-	int c;
 	char *p = NULL;
 	char *home;
 	char configfile[FILENAME_MAX + 1];
@@ -260,7 +261,68 @@ void os_process_arguments (int argc, char *argv[])
 		getconfig(configfile);  /* we're not concerned if this fails */
 	}
 
-	/* Parse the options */
+	parse_options(argc, argv);
+
+	/* This section is exceedingly messy and really can't be fixed
+	 * without major changes all over the place.
+	 */
+
+	/* Save the story file name */
+
+	f_setup.story_file = strdup(argv[zoptind]);
+	f_setup.story_name = strdup(basename(argv[zoptind]));
+
+#ifndef NO_BLORB
+	if (argv[zoptind+1] != NULL)
+		f_setup.blorb_file = strdup(argv[zoptind+1]);
+#endif
+
+	/* Now strip off the extension */
+	p = strrchr(f_setup.story_name, '.');
+	if ( p != NULL )
+		*p = '\0';  /* extension removed */
+
+	/* Create nice default file names */
+	f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT) + 1) * sizeof(char));
+	memcpy(f_setup.script_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char));
+	strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT)+1);
+
+	f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND) + 1) * sizeof(char));
+	memcpy(f_setup.command_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char));
+	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND)+1);
+
+	if (!f_setup.restore_mode) {
+		f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
+		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
+		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
+	} else {  /*Set our auto load save as the name_save*/
+		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
+		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
+		free(f_setup.tmp_save_name);
+	}
+
+	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX) + 1) * sizeof(char));
+	memcpy(f_setup.aux_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
+	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
+
+/*
+	for (int i = 0; i < NON_STD_COLS; i++)
+		u_setup.nonstdcolours[i] = 0xffffffff;
+	u_setup.nonstdindex = 0;
+*/
+
+} /* os_process_arguments */
+
+
+/*
+ * parse_options
+ *
+ * Parse command line options and that's it.
+ *
+ */
+static void parse_options(int argc, char **argv)
+{
+	int c;
 	do {
 		c = zgetopt(argc, argv, "aAb:c:deE:f:Fh:iI:l:L:moOpPqr:R:s:S:tu:vw:W:xZ:");
 		switch(c) {
@@ -331,56 +393,7 @@ void os_process_arguments (int argc, char *argv[])
 		usage();
 		os_quit(EXIT_SUCCESS);
 	}
-
-	/* This section is exceedingly messy and really can't be fixed
-	 * without major changes all over the place.
-	 */
-
-	/* Save the story file name */
-
-	f_setup.story_file = strdup(argv[zoptind]);
-	f_setup.story_name = strdup(basename(argv[zoptind]));
-
-#ifndef NO_BLORB
-	if (argv[zoptind+1] != NULL)
-		f_setup.blorb_file = strdup(argv[zoptind+1]);
-#endif
-
-	/* Now strip off the extension */
-	p = strrchr(f_setup.story_name, '.');
-	if ( p != NULL )
-		*p = '\0';  /* extension removed */
-
-	/* Create nice default file names */
-	f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT) + 1) * sizeof(char));
-	memcpy(f_setup.script_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SCRIPT)) * sizeof(char));
-	strncat(f_setup.script_name, EXT_SCRIPT, strlen(EXT_SCRIPT)+1);
-
-	f_setup.command_name = malloc((strlen(f_setup.story_name) + strlen(EXT_COMMAND) + 1) * sizeof(char));
-	memcpy(f_setup.command_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_COMMAND)) * sizeof(char));
-	strncat(f_setup.command_name, EXT_COMMAND, strlen(EXT_COMMAND)+1);
-
-	if (!f_setup.restore_mode) {
-		f_setup.save_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
-		memcpy(f_setup.save_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
-		strncat(f_setup.save_name, EXT_SAVE, strlen(EXT_SAVE) + 1);
-	} else {  /*Set our auto load save as the name_save*/
-		f_setup.save_name = malloc((strlen(f_setup.tmp_save_name) + strlen(EXT_SAVE) + 1) * sizeof(char));
-		memcpy(f_setup.save_name, f_setup.tmp_save_name, (strlen(f_setup.story_name) + strlen(EXT_SAVE)) * sizeof(char));
-		free(f_setup.tmp_save_name);
-	}
-
-	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX) + 1) * sizeof(char));
-	memcpy(f_setup.aux_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
-	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
-
-/*
-	for (int i = 0; i < NON_STD_COLS; i++)
-		u_setup.nonstdcolours[i] = 0xffffffff;
-	u_setup.nonstdindex = 0;
-*/
-
-} /* os_process_arguments */
+} /* parse_options */
 
 
 void unix_get_terminal_size()
