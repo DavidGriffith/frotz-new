@@ -14,6 +14,9 @@ BUG FIXES
 
 - Fixed another problem with compilation under macOS.
 
+- Fixed wrong glyphs in DOS Frotz's Amiga font mode.  1/2 and 1/4 were
+  there instead of the oe and OE ligatures.
+
 
 Summary of changes between Frotz 2.52 and Frotz 2.53:
 =====================================================

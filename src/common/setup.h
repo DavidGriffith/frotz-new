@@ -36,6 +36,7 @@ typedef struct frotz_setup_struct {
 
 	char *story_file;
 	char *blorb_file;
+	char *config_file;
         char *story_name;
         char *story_base;
         char *script_name;

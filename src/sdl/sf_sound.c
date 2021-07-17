@@ -435,14 +435,14 @@ void sf_checksound()
 {
 	if ((e_sfx) && (e_sfx->ended)) {
 		e_sfx->ended = 0;
-		if (e_sfx->eos) {
+		if (z_header.version <= V4 || e_sfx->eos) {
 			end_of_sound_flag = 1;
 			end_of_sound();
 		}
 	}
 	if ((e_mod) && (e_mod->ended)) {
 		e_mod->ended = 0;
-		if (e_mod->eos) {
+		if (z_header.version <= V4 || e_mod->eos) {
 			end_of_sound_flag = 1;
 			end_of_sound();
 		}

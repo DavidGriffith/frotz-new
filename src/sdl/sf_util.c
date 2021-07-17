@@ -134,7 +134,6 @@ int m_random_seed = -1;
 int m_fullscreen = -1;
 int m_reqW = 0, m_reqH = 0;
 int m_vga_fonts = 0;
-extern char *m_setupfile;
 extern char m_names_format;
 static char user_names_format = 0;
 extern char *m_reslist_file;
@@ -151,6 +150,7 @@ static char *info[] = {
 	"-A   watch attribute testing",
 	"-b <colourname> background colour",
 	"-c # context lines",
+	"-C <file> load this configuration file",
 	"-d   disable color",
 	"-f <colorname> foreground colour",
 	"-F   fullscreen mode",
@@ -196,7 +196,7 @@ static char *footer =
     "More options and information are in the manual page.  Type \"man sfrotz\".\n";
 
 
-#define WIDCOL 40
+#define WIDCOL 42
 static void usage(int type)
 {
 	char **p;
@@ -255,7 +255,7 @@ extern int optind;
 
 extern int m_timerinterval;
 
-static char *options = "@:%aAb:B:c:df:FH:iI:l:L:m:N:oOPqr:s:S:tTu:vVW:xXZ:";
+static char *options = "@:%aAb:B:c:C:df:FH:iI:l:L:m:N:oOPqr:s:S:tTu:vVW:xXZ:";
 
 static int limit(int v, int m, int M)
 {
@@ -293,6 +293,11 @@ static void parse_options(int argc, char **argv)
 			option_scrollback_buffer = num;
 		if (c == 'c')
 			f_setup.context_lines = num;
+		if (c == 'C') {
+			/* originally allocated in os_init_setup() */
+			free(f_setup.config_file);
+			f_setup.config_file = strdup(zoptarg);
+		}
 		if (c == 'd')
 			option_disable_color = 1;
 		if (c == 'm')
@@ -418,6 +423,13 @@ void os_process_arguments(int argc, char *argv[])
 	zoptarg = NULL;
 
 	sf_installhandlers();
+
+	/* Parse command line first because we might be told to load a
+	 * different config file.  Then read from that config file.
+	 * Finally we parse the command line again because options
+	 * specified there must override the config file.
+	 */
+	parse_options(argc, argv);
 	sf_readsettings();
 	parse_options(argc, argv);
 
