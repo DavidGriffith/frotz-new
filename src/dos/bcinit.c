@@ -646,6 +646,7 @@ static void standard_palette(void)
 	}
 
 	geninterrupt(0x10);
+	load_fonts();
 
 	/* Make various preparations */
 	if (display <= _TEXT_) {
@@ -659,8 +660,7 @@ static void standard_palette(void)
 		asm mov cx, 0xffff
 		asm int 0x10
 	} else {
-		load_fonts();
-
+	
 		if (display == _AMIGA_) {
 			scaler = 2;
 

@@ -28,6 +28,13 @@
 #include "BCfrotz.h"
 #include "fontdata.h"
 
+#define sans_offset        0x0000
+#define vga_offset         0x18C0
+#define ega_offset         0x28c0
+#define ega_graphic_offset 0x36c0
+#define mcga_offset        0x3ec0
+#define graphics_offset	   0x4220
+
 extern byte far *get_scrnptr(int);
 
 int current_bg = 0;
@@ -67,12 +74,109 @@ char latin1_to_ibm[] = {
 	0x9b, 0x97, 0xa3, 0x96, 0x81, 0xec, 0xe7, 0x98
 };
 
-static byte far *graphics_font = NULL;
+static word far *sans_font = NULL;
+static byte far *sans_width = NULL;
 static byte far *mcga_font = NULL;
 static byte far *mcga_width = NULL;
-static word far *serif_font = NULL;
-static byte far *serif_width = NULL;
+static byte far *graphics_font = NULL;
 
+static char name[] = "FONTS/FONT0.FNT";
+
+/*
+ * available_bios
+ *
+ * INT 10H 1aH: Set or Query Display Combination Code
+ * INT 10H 12H BL=10H: Get EGA Information
+ * return: 2 ega, 1 vga, 0 other
+ *
+ */
+static int available_bios(void)
+{
+	asm {
+	/* VGA BIOS available? */
+		mov ax,1a00h
+		int 10h
+		mov bl,al
+		mov ax,0001h
+		cmp bl,1ah
+		je label_ret
+
+	/* EGA BIOS available? */
+		mov ah,12h
+		mov bl,10h
+		int 10h
+		mov ax,0002h
+		cmp bl,10h
+		jne label_ret
+		xor ax,ax
+	}
+	label_ret:
+	return (_AX);
+}
+
+/*
+ * set_user_tfont
+ *
+ * INT 10H 1110H: Load and Activate User-Defined Font
+ *
+ */
+static void set_user_tfont(word offset, byte height)
+{
+	byte far *ptr_font = font_data+offset;
+
+	asm {
+		mov bh,height
+		push bp
+		les ax,ptr_font
+		mov bp,ax
+		mov ax,1110h
+		xor bl,bl
+		mov cx,100h
+		xor dx,dx
+		int 10h
+		pop bp
+	}
+}
+
+/*
+ * set_user_gfont
+ *
+ * INT 10H 1121H: Setup User-Defined Font for Graphics Mode
+ *
+ */
+static void set_user_gfont(word offset, word height)
+{
+	byte far *ptr_font = font_data+offset;
+
+	asm {
+		mov cx,height
+		push bp
+		les bx,ptr_font
+		mov bp,bx
+		mov ax,1121h
+		mov bl,02h
+		int 10h
+		pop bp
+	}
+}  
+
+/*
+ * read_font
+ *
+ * If the font file is present in the current directory or in its FONTS folder,
+ * the font is loaded.
+ *
+ */
+static void read_font(word offset, size_t nmemb)
+{
+	FILE *fp;
+
+	fp = fopen(name, "rb");
+	if (fp != NULL) {
+		fread(font_data+offset, 1, nmemb, fp);
+		fclose(fp);
+	}
+}
 
 /*
  * load_fonts
@@ -83,27 +187,42 @@ static byte far *serif_width = NULL;
  */
 void load_fonts(void)
 {
-	static chunk_offset[] = {
-		0x6660,
-		0x6300,
-		0x4A40,
-		0x3180,
-		0x18C0,
-		0x00
-	};
+	int bios_video;
+
+	bios_video = available_bios();
+
+	if (bios_video) {
+		if (display <= _TEXT_ ) {
+			if (bios_video == 1) {
+				read_font(vga_offset, 0x1000);
+				set_user_tfont(vga_offset, 16);
+			}
+			else
+				set_user_tfont(ega_offset, 14);
+			return;
+		}
+		if (display == _EGA_)
+			set_user_gfont(ega_graphic_offset, 8);
+		else if (display == _AMIGA_ && bios_video == 1) {
+			read_font(vga_offset, 0x1000);
+			set_user_gfont(vga_offset, 16);
+		}
+	} 
 
 	if (display == _MCGA_) {
-		mcga_font = font_data + chunk_offset[1];
+		mcga_font = font_data + mcga_offset;
 		mcga_width = (byte *) mcga_font + 0x300;
 	} else
-		graphics_font = font_data + chunk_offset[0];
+		graphics_font = font_data + graphics_offset;
 
 	if (display == _AMIGA_ && user_font != 0) {
-		serif_font = (word *) (font_data + chunk_offset[1 + user_font]);
-		serif_width = (byte *) serif_font + 0x1800;
+		name[10] = '0' + user_font;
+		read_font(sans_offset, 0x18C0);
+		name[10] = '0';
+		sans_font = (word *) (font_data + sans_offset);
+		sans_width = (byte *) sans_font + 0x1800;
 	}
 } /* load_fonts */
-
 
 /*
  * os_font_data
@@ -514,7 +633,7 @@ void write_pattern(byte far * screen, byte val, byte mask)
 		} else if (display == _AMIGA_ && current_font == TEXT_FONT
 			   && !(current_style & FIXED_WIDTH_STYLE)
 			   && user_font != 0) {
-			table = serif_font + 16 * (c - 32);
+			table = sans_font + 16 * (c - 32);
 			mask = 0xffff << (16 - width);
 			underline = 14;
 			boldface = 1;
@@ -679,7 +798,7 @@ int os_char_width(zchar c)
 	if (display == _MCGA_)
 		return mcga_width[c - 32];
 	if (display == _AMIGA_)
-		return serif_width[c - 32] +
+		return sans_width[c - 32] +
 		    ((current_style & BOLDFACE_STYLE) ? 1 : 0);
 
 	return 0;
