@@ -163,8 +163,8 @@ static void set_user_gfont(word offset, word height)
 /*
  * read_font
  *
- * If the font file is present in the current directory or in its FONTS folder,
- * the font is loaded.
+ * The requested font file "FONT0-4.FNT" must be located in the 
+ * subdirectory "FONTS".
  *
  */
 static void read_font(word offset, size_t nmemb)

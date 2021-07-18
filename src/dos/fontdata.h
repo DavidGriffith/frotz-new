@@ -1,12 +1,14 @@
 /*
-font_data
-  0x0000: sans-serif  192*(2*16)+192 bytes 32x16 px
-  0x18C0: vga         256*(1*16)     bytes  8x16 px
-  0x28c0: ega         256*(1*14)     bytes  8x14 px
-  0x36c0: ega graphic 256*(8*8)      bytes   8x8 px
-  0x3ec0: mcga         96*(1*8) +96  bytes   8x8 px
-  0x4220: graphics     96*(1*8)      bytes   8x8 px
-*/
+ * font_data[]
+ *
+ * 0x0000: sans-serif  192*(2*16)+192 bytes 32x16 px
+ * 0x18C0: vga         256*(1*16)     bytes  8x16 px
+ * 0x28c0: ega         256*(1*14)     bytes  8x14 px
+ * 0x36c0: ega graphic 256*(8*8)      bytes   8x8 px
+ * 0x3ec0: mcga         96*(1*8) +96  bytes   8x8 px
+ * 0x4220: graphics     96*(1*8)      bytes   8x8 px
+ *
+ */
 
 static unsigned char font_data[] = {
   /* sans-serif */
