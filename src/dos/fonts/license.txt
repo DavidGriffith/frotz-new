@@ -2,7 +2,7 @@ The bitmap fonts stored in the FONT1-4.FNT files were extracted from
 the file frotzsrc/src/dos/fontdata.h  
 The character table is composed of 192 characters of 2x16 bytes each, followed  
 by 192 bytes containing the size of each character:  
-192x(2x16)+192 bytes; 32x16 pixels.
+192x(2x16)+192 bytes; 16x16 pixels.
 
 The Bizcat monospace bitmap font stored in the FONT0.FNT file was created  
 by Robey Pointer.  

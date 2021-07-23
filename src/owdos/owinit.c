@@ -622,6 +622,8 @@ static void standard_palette(void)
 		bios_video_ax_bx(0x4f02, subinfo[subdisplay].vesamode);
 	}
 
+	load_fonts();
+
 	/* Make various preparations */
 	if (display <= _TEXT_) {
 		/* Enable bright background colours */
@@ -629,7 +631,6 @@ static void standard_palette(void)
 		/* Turn off hardware cursor */
 		bios_video_ah_cx(1, 0xffff);
 	} else {
-		load_fonts();
 
 		if (display == _AMIGA_) {
 			scaler = 2;
