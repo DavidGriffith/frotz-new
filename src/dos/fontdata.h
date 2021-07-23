@@ -1,7 +1,7 @@
 /*
  * font_data[]
  *
- * 0x0000: sans-serif  192*(2*16)+192 bytes 32x16 px
+ * 0x0000: sans-serif  192*(2*16)+192 bytes 16x16 px
  * 0x18C0: vga         256*(1*16)     bytes  8x16 px
  * 0x28c0: ega         256*(1*14)     bytes  8x14 px
  * 0x36c0: ega graphic 256*(8*8)      bytes   8x8 px
