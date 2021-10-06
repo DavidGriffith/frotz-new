@@ -78,7 +78,7 @@ void os_process_arguments(int argc, char *argv[])
 	do_more_prompts = TRUE;
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "aAf:h:iI:L:moOpPs:r:qR:S:tu:vw:xZ:");
+		c = zgetopt(argc, argv, "aAf:h:iI:L:moOpPqr:R:s:S:tu:vw:xZ:");
 		switch(c) {
 		case 'a':
 			f_setup.attribute_assignment = 1;
