@@ -32,19 +32,20 @@ static void print_version(void);
 An interpreter for all Infocom and other Z-Machine games.\n\
 \n\
 Syntax: dfrotz [options] story-file [blorb file]\n\
-  -a   watch attribute setting    \t -P   alter piracy opcode\n\
-  -A   watch attribute testing    \t -q   quiet mode (no startup messages)\n\
-  -f <type> type of format codes  \t -r <option> Set runtime options\n\
-  -h # screen height              \t -R <path> restricted read/write\n\
-  -i   ignore fatal errors        \t -s # random number seed value\n\
-  -I # interpreter number         \t -S # transcript width\n\
-  -o   watch object movement      \t -t   set Tandy bit\n\
-  -O   watch object locating      \t -u # slots for multiple undo\n\
-  -L <file> load this save file   \t -v   show version information\n\
-  -m   turn off MORE prompts      \t -w # screen width\n\
-  -p   plain ASCII output only    \t -x   expand abbreviations g/x/z\n\
-  -Z # error checking (see below)\n"
+  -a   watch attribute setting    \t -q   quiet mode (no startup messages)\n\
+  -A   watch attribute testing    \t -r <option> Set runtime options\n\
+  -f <type> type of format codes  \t -R <path> restricted read/write\n\
+  -h # screen height              \t -s # random number seed value\n\
+  -i   ignore fatal errors        \t -S # transcript width\n\
+  -I # interpreter number         \t -t   set Tandy bit\n\
+  -o   watch object movement      \t -u # slots for multiple undo\n\
+  -O   watch object locating      \t -v   show version information\n\
+  -L <file> load this save file   \t -w # screen width\n\
+  -m   turn off MORE prompts      \t -x   expand abbreviations g/x/z\n\
+  -p   plain ASCII output only    \t -Z # error checking (see below)\n\
+  -P   alter piracy opcode\n"
 
+  
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
 For more options and explanations, please read the manual page.\n\n\
