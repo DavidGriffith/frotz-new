@@ -220,7 +220,7 @@ void os_process_arguments(int argc, char *argv[])
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
-  if (!quiet_mode)
+	if (!quiet_mode)
 	  printf("Loading %s.\n", f_setup.story_file);
 
 #ifndef NO_BLORB
