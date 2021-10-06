@@ -33,16 +33,17 @@ An interpreter for all Infocom and other Z-Machine games.\n\
 \n\
 Syntax: dfrotz [options] story-file [blorb file]\n\
   -a   watch attribute setting    \t -P   alter piracy opcode\n\
-  -A   watch attribute testing    \t -r <option> Set runtime options\n\
-  -f <type> type of format codes  \t -R <path> restricted read/write\n\
-  -h # screen height              \t -s # random number seed value\n\
-  -i   ignore fatal errors        \t -S # transcript width\n\
-  -I # interpreter number         \t -t   set Tandy bit\n\
-  -o   watch object movement      \t -u # slots for multiple undo\n\
-  -O   watch object locating      \t -v   show version information\n\
-  -L <file> load this save file   \t -w # screen width\n\
-  -m   turn off MORE prompts      \t -x   expand abbreviations g/x/z\n\
-  -p   plain ASCII output only    \t -Z # error checking (see below)\n"
+  -A   watch attribute testing    \t -q   quiet mode (no startup messages)\n\
+  -f <type> type of format codes  \t -r <option> Set runtime options\n\
+  -h # screen height              \t -R <path> restricted read/write\n\
+  -i   ignore fatal errors        \t -s # random number seed value\n\
+  -I # interpreter number         \t -S # transcript width\n\
+  -o   watch object movement      \t -t   set Tandy bit\n\
+  -O   watch object locating      \t -u # slots for multiple undo\n\
+  -L <file> load this save file   \t -v   show version information\n\
+  -m   turn off MORE prompts      \t -w # screen width\n\
+  -p   plain ASCII output only    \t -x   expand abbreviations g/x/z\n\
+  -Z # error checking (see below)\n"
 
 #define INFO2 "\
 Error checking: 0 none, 1 first only (default), 2 all, 3 exit after any error.\n\
@@ -55,6 +56,7 @@ static int user_text_height = 24;
 static int user_random_seed = -1;
 static int user_tandy_bit = 0;
 static bool plain_ascii = FALSE;
+static bool quiet_mode = FALSE;
 
 bool do_more_prompts;
 
@@ -76,7 +78,7 @@ void os_process_arguments(int argc, char *argv[])
 	do_more_prompts = TRUE;
 	/* Parse the options */
 	do {
-		c = zgetopt(argc, argv, "aAf:h:iI:L:moOpPs:r:R:S:tu:vw:xZ:");
+		c = zgetopt(argc, argv, "aAf:h:iI:L:moOpPs:r:qR:S:tu:vw:xZ:");
 		switch(c) {
 		case 'a':
 			f_setup.attribute_assignment = 1;
@@ -131,6 +133,9 @@ void os_process_arguments(int argc, char *argv[])
 			break;
 		case 'p':
 			plain_ascii = 1;
+			break;
+		case 'q':
+			quiet_mode = 1;
 			break;
 		case 'r':
 			dumb_handle_setting(zoptarg, FALSE, TRUE);
@@ -201,7 +206,7 @@ void os_process_arguments(int argc, char *argv[])
 	default:
 		break;
 	}
-	if (f_setup.format == FORMAT_NORMAL)
+	if (f_setup.format == FORMAT_NORMAL && !quiet_mode)
 		printf("Using normal formatting.\n");
 
 	/* Save the story file name */
@@ -215,7 +220,8 @@ void os_process_arguments(int argc, char *argv[])
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
-	printf("Loading %s.\n", f_setup.story_file);
+  if (!quiet_mode)
+	  printf("Loading %s.\n", f_setup.story_file);
 
 #ifndef NO_BLORB
 	if (f_setup.blorb_file != NULL)
