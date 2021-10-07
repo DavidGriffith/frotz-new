@@ -10,6 +10,8 @@ NEW FEATURES
 - Added changes to allow for compilation on a DEC PDP-10 mainframe
   running TOPS20.  See INSTALL_PDP10.
 
+- Added a quiet mode to dumb interface to quell startup messages.
+
 BUG FIXES
 
 - Fixed another problem with compilation under macOS.
