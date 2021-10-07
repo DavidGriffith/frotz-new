@@ -37,6 +37,7 @@
 extern f_setup_t f_setup;
 
 extern bool do_more_prompts;
+extern bool quiet_mode;
 
 /* From input.c.  */
 bool is_terminator (zchar);

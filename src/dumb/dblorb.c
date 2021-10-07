@@ -38,6 +38,8 @@ FILE *blorb_fp;
 bb_result_t blorb_res;
 bb_map_t *blorb_map;
 
+extern bool quiet_mode;
+
 static int isblorb(FILE *);
 
 #define UnsignedToFloat(u) (((double)((long)(u - 2147483647L - 1))) + 2147483648.0)
@@ -104,7 +106,7 @@ bb_err_t dumb_blorb_init(char *filename)
 		/* with resources in a separate Blorb file. */
 		blorb_fp = fp;
 		f_setup.use_blorb = 1;
-		if (f_setup.blorb_file == NULL)
+		if (f_setup.blorb_file == NULL && !quiet_mode)
 			printf("Found Blorb file named %s.\n", mystring);
 	}
 
@@ -123,7 +125,8 @@ bb_err_t dumb_blorb_init(char *filename)
 		blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
 			&blorb_res, bb_ID_ZCOD, 0);
 		f_setup.exec_in_blorb = 1;
-		printf("Found zcode chunk in Blorb file.\n");
+		if (!quiet_mode)
+			printf("Found zcode chunk in Blorb file.\n");
 	}
 
 	return blorb_err;

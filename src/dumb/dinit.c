@@ -57,8 +57,8 @@ static int user_text_height = 24;
 static int user_random_seed = -1;
 static int user_tandy_bit = 0;
 static bool plain_ascii = FALSE;
-static bool quiet_mode = FALSE;
 
+bool quiet_mode;
 bool do_more_prompts;
 
 /*
@@ -77,6 +77,7 @@ void os_process_arguments(int argc, char *argv[])
 	zoptarg = NULL;
 
 	do_more_prompts = TRUE;
+	quiet_mode = FALSE;
 	/* Parse the options */
 	do {
 		c = zgetopt(argc, argv, "aAf:h:iI:L:moOpPqr:R:s:S:tu:vw:xZ:");
@@ -185,30 +186,35 @@ void os_process_arguments(int argc, char *argv[])
 		os_quit(EXIT_SUCCESS);
 	}
 
-	switch (f_setup.format) {
-	case FORMAT_IRC:
-		printf("Using IRC formatting.\n");
-		break;
-	case FORMAT_ANSI:
-		printf("Using ANSI formatting.\n");
-		break;
-	case FORMAT_BBCODE:
-		printf("Using Discourse BBCode formatting.\n");
-		f_setup.format = FORMAT_BBCODE;
-		break;
-	case FORMAT_UNKNOWN:
-		printf("Unknown formatting \"%s\".\n", format_orig);
-		f_setup.format = FORMAT_NORMAL;
-		break;
-	case FORMAT_DISABLED:
-		printf("Format selection disabled at compile time.\n");
-		f_setup.format = FORMAT_NORMAL;
-		break;
-	default:
-		break;
+	if (!quiet_mode) {
+		switch (f_setup.format) {
+		case FORMAT_NORMAL:
+			printf("Using normal formatting.\n");
+			break;
+		case FORMAT_IRC:
+			printf("Using IRC formatting.\n");
+			break;
+		case FORMAT_ANSI:
+			printf("Using ANSI formatting.\n");
+			break;
+		case FORMAT_BBCODE:
+			printf("Using Discourse BBCode formatting.\n");
+			f_setup.format = FORMAT_BBCODE;
+			break;
+		case FORMAT_UNKNOWN:
+			printf("Unknown formatting \"%s\".  Using normal formatting instead.\n", format_orig);
+			break;
+		case FORMAT_DISABLED:
+			printf("Format selection disabled at compile time.\n");
+			break;
+		default:
+			printf("Something else happened with format selection.\n");
+			printf("This should not happen.\n");
+			break;
+		}
 	}
-	if (f_setup.format == FORMAT_NORMAL && !quiet_mode)
-		printf("Using normal formatting.\n");
+	if (f_setup.format == FORMAT_UNKNOWN || FORMAT_DISABLED)
+		f_setup.format = FORMAT_NORMAL;
 
 	/* Save the story file name */
 	f_setup.story_file = strdup(argv[zoptind]);
@@ -221,13 +227,14 @@ void os_process_arguments(int argc, char *argv[])
 	if (argv[zoptind+1] != NULL)
 		f_setup.blorb_file = strdup(argv[zoptind+1]);
 
-	if (!quiet_mode)
-	  printf("Loading %s.\n", f_setup.story_file);
+	if (!quiet_mode) {
+		printf("Loading %s.\n", f_setup.story_file);
 
 #ifndef NO_BLORB
 	if (f_setup.blorb_file != NULL)
 		printf("Also loading %s.\n", f_setup.blorb_file);
 #endif
+	}
 
 	/* Now strip off the extension */
 	p = strrchr(f_setup.story_name, '.');
