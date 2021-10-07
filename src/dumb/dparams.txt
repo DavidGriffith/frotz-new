@@ -10,6 +10,7 @@
 -m   turn off MORE prompts
 -p   plain ASCII output only
 -P   alter piracy opcode
+-q   quiet mode (no startup messages)
 -r <option> Set runtime options
 -R <path> restricted read/write
 -s # random number seed value
