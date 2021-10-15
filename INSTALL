@@ -44,9 +44,12 @@ compile without any changes to the source code or Makefiles. If you
 install Xcode from the Mac App Store, you should be able to run
 "make nosound" to build Frotz. To enable sound support, you can use
 Homebrew https://brew.sh/ to install the sound support libraries:
-"brew install libao libmodplug libsamplerate libsndfile libvorbis"
+"brew install libao libmodplug libsamplerate libsndfile libvorbis ncurses"
 Once the sound libraries are installed, a simple "make" should build
-Frotz.
+Frotz.  The ncurses that comes with macOS should not be used as it is
+extremely old and does not support italic characters.  If you insist on
+using it, make sure you comment out the line in the Makefile that reads
+"ITALIC ?= yes".
 
 For older systems, especially ones not Linux or [Net|Free|Open]BSD...
 You can download ncurses from https://www.gnu.org/software/ncurses/ or
