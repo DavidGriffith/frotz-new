@@ -130,6 +130,9 @@ endif
 ifeq ($(MAKECMDGOALS),dos)
     EXPORT_TYPE = dos
 endif
+ifeq ($(MAKECMDGOALS),owdos)
+    EXPORT_TYPE = dos
+endif
 
 RANLIB ?= ranlib
 PKG_CONFIG ?= pkg-config
@@ -377,8 +380,7 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
-dos: $(DOS_BIN)
-$(DOS_BIN): $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
+dos: $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	@echo
 	@echo "  ** Cannot cross-compile for DOS yet."
@@ -403,6 +405,15 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 
 else
 	$(error Not in a git repository or git command not found.  Cannot make a tarball)
+endif
+
+owdos: $(DOS_BIN)
+$(DOS_BIN): $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
+ifneq ($(shell which wmake),)
+	wmake -f Makefile.ow
+
+else
+	$(error wmake command not found.  Cannot make the DOS version)
 endif
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN) $(XFROTZ_BIN)
@@ -686,7 +697,7 @@ dosdist:
 	@echo "  ** Just add frotz.exe compiled wherever."
 	@echo "  ** Then do \"zip -r $(NAME)$(DOSVER).zip $(NAME)$(DOSVER)\""
 	@echo
-	@mkdir $(NAME)$(DOSVER)
+	@mkdir -p $(NAME)$(DOSVER)
 	@cp ChangeLog $(NAME)$(DOSVER)/changes.txt
 	@cp frotz.lsm $(NAME)$(DOSVER)
 	@cp doc/frotz.txt $(NAME)$(DOSVER)
@@ -698,6 +709,11 @@ dosdist:
 	@unix2dos -q $(NAME)$(DOSVER)/*
 	@touch $(NAME)$(DOSVER)/*
 
+owdosdist: $(NAME)$(DOSVER).zip
+$(NAME)$(DOSVER).zip: dosdist $(DOS_BIN)
+	@cp $(DOS_BIN) $(NAME)$(DOSVER)/$(DOS_BIN)
+	@zip -r $(NAME)$(DOSVER).zip $(NAME)$(DOSVER)
+
 clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
 	rm -rf $(COMMON_DEFINES) \
@@ -706,9 +722,10 @@ clean: $(SUB_CLEAN)
 		$(OW_DOS_DEFINES) \
 		$(HASH)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
+	rm -f frotz.map *.err
 
 distclean: clean
-	rm -f frotz$(EXTENSION) dfrotz$(EXTENSION) sfrotz$(EXTENSION) xfrotz$(EXTENTION)
+	rm -f $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN) $(XFROTZ_BIN) $(DOS_BIN)
 	rm -f a.out
 	rm -rf $(NAME)src $(NAME)$(DOSVER) $(SNAVIG_DIR)
 	rm -f $(NAME)*.tar.gz $(NAME)src.zip $(NAME)$(DOSVER).zip
@@ -722,6 +739,7 @@ help:
 	@echo "    x11: for X11 graphics"
 	@echo "    all: build curses, dumb, SDL, and x11 versions"
 	@echo "    dos: Make a zip file containing DOS Frotz source code"
+	@echo "    owdos: for cross-compiling to DOS with Open Watcom"
 	@echo "    snavig: Process source files for building on TOPS20"
 	@echo "    install"
 	@echo "    uninstall"

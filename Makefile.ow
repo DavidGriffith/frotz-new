@@ -7,7 +7,7 @@
 # compilation, but the DOS/4GW version of owcc (27 Aug 2020) likes to crash
 # when trying to invoke wcc.  (The Linux version has no problem.)
 CC = wcc
-CFLAGS = -bt=dos -ml -onatxl+ -0 -zq
+CFLAGS = -bt=dos -ml -onatxl+ -0 -zq -I$(%WATCOM)/h
 AS = wasm
 ASFLAGS = -bt=dos -ml -zq
 LD = wlink
