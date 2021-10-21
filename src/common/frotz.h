@@ -21,7 +21,7 @@
 #ifdef __TURBOC__
 #include "defs.h"
 #else
-#include "../owdos/defs.h"
+#include "defs.h"
 #endif
 
 #ifdef USE_UTF8

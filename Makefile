@@ -285,10 +285,7 @@ DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 
 DOS_DIR = $(SRCDIR)/dos
-DOS_DEFINES = $(DOS_DIR)/defs.h
-
 OW_DOS_DIR = $(SRCDIR)/owdos
-OW_DOS_DEFINES = $(OW_DOS_DIR)/defs.h
 
 X11_DIR = $(SRCDIR)/x11
 X11_LIB = $(X11_DIR)/frotz_x11.a
@@ -380,41 +377,8 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	$(CC) $+ -o $@$(EXTENSION) $(LDFLAGS) $(SDL_LDFLAGS)
 	@echo "** Done building Frotz with SDL interface."
 
-dos: $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
-	@rm -rf $(SNAVIG_DIR)
-	@mkdir $(SNAVIG_DIR)
-	@$(SNAVIG) -t dos $(COMMON_DIR) $(DOS_DIR) $(SNAVIG_DIR)
-	@cp Makefile.tc $(SNAVIG_DIR)/Makefile
-
-olddos: $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
-ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
-	@echo
-	@echo "  ** Cannot cross-compile for DOS yet."
-	@echo "  ** Copy this zip file, $(NAME)src.zip, into a DOS machine and use Turbo C."
-	@echo "  ** or Open Watcom C.  A virtualized DOS machine will do.  This zip file"
-	@echo "  ** will fit on a single double-sided double-density 5.25-inch floppy disk."
-	@echo "  ** Read the file INSTALL_DOS for more information."
-	@echo
-	@git archive --format=zip --prefix $(NAME)src/ HEAD -o $(NAME)src.zip
-	@zip -d $(NAME)src.zip $(NAME)src/src/curses/* \
-		$(NAME)src/src/dumb/* $(NAME)src/src/blorb/* \
-		$(NAME)src/src/sdl/* $(NAME)src/src/misc/* \
-		$(NAME)src/src/x11/* \
-		$(NAME)src/doc/*.6 $(NAME)src/doc/frotz.conf* \
-		$(NAME)src/doc/Xresources  > /dev/null
-	@mkdir -p $(NAME)src/$(DOS_DIR) $(NAME)src/$(OW_DOS_DIR)
-	@cp $(DOS_DEFINES) $(NAME)src/$(DOS_DIR)
-	@cp $(OW_DOS_DEFINES) $(NAME)src/$(OW_DOS_DIR)
-	@zip $(NAME)src.zip $(NAME)src/$(DOS_DEFINES) $(NAME)src/$(OW_DOS_DEFINES) > /dev/null
-	@rm -rf $(NAME)src
-	@echo "$(NAME)src.zip created."
-
-else
-	$(error Not in a git repository or git command not found.  Cannot make a tarball)
-endif
-
 owdos: $(DOS_BIN)
-$(DOS_BIN): $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
+$(DOS_BIN): $(COMMON_DEFINES) $(HASH)
 ifneq ($(shell which wmake),)
 	wmake -f Makefile.ow
 else
@@ -432,15 +396,23 @@ snavig:
 	@echo "  waits  (not even started)"
 	@echo "That's all for now."
 
-#tops20: distclean $(COMMON_DEFINES) $(HASH)
+dos: $(COMMON_DEFINES) $(HASH)
+	@rm -rf $(SNAVIG_DIR)
+	@mkdir $(SNAVIG_DIR)
+	@echo "** Invoking snavig"
+	@$(SNAVIG) -t dos $(COMMON_DIR) $(DOS_DIR) $(SNAVIG_DIR)
+	@cp Makefile.tc $(SNAVIG_DIR)/Makefile
+	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for 16-bit DOS."
+	@echo "Use Borland Turbo C 3.00 and Borland MAKE 3.6".
+
 tops20: $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
 	@mkdir $(SNAVIG_DIR)
-	@echo "*************************************************************"
-#	@echo Producing snavig-processed source for $(EXPORT_TYPE)
+	@echo "** Invoking snavig"
 	@$(SNAVIG) -t tops20 $(COMMON_DIR) $(DUMB_DIR) $(SNAVIG_DIR)
 	@cp Makefile.kcc $(SNAVIG_DIR)/Makefile
-#	@echo Now, get this into a $(EXPORT_TYPE) machine for compilation.
+	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for $(EXPORT_TYPE)."
+
 
 common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
@@ -481,12 +453,15 @@ ifeq ($(wildcard $(COMMON_DEFINES)),)
 	@echo "** Generating $@"
 	@echo "#ifndef COMMON_DEFINES_H" > $@
 	@echo "#define COMMON_DEFINES_H" >> $@
+	@echo "#define RELEASE_NOTES \"$(RELEASE_NOTES)\"" >> $@
+
 ifeq ($(MAKECMDGOALS),djgpp)
 	@echo "#define SOUND_SUPPORT" >> $@
 else
 
 ifeq ($(EXPORT_TYPE), dos)
 	@echo "#define MSDOS_16BIT" >> $@
+	@echo "#define NO_BLORB" >> $@
 else
 ifeq ($(EXPORT_TYPE), tops20)
 	@echo "#ifndef TOPS20" >> $@
@@ -532,7 +507,9 @@ ifdef NO_EXECINFO_H
 	@echo "#define NO_EXECINFO_H" >> $@
 endif
 
-ifneq ($(EXPORT_TYPE), tops20)
+# When exporting source code rather than compiling it here, the target machine
+# typically can't do UTF8.
+ifeq ($(EXPORT_TYPE),)
 	$(if $(findstring yes,$(USE_UTF8)), @echo "#define USE_UTF8" >> $@)
 endif
 
@@ -544,25 +521,6 @@ ifdef DISABLE_FORMATS
 endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 endif
-
-
-dosdefs: $(DOS_DEFINES) $(OW_DOS_DEFINES)
-$(DOS_DEFINES) $(OW_DOS_DEFINES):
-	@echo "** Generating $@"
-	@echo "#ifndef DOS_DEFINES_H" > $@
-	@echo "#define DOS_DEFINES_H" >> $@
-	@echo "#ifndef MSDOS_16BIT" >> $@
-	@echo "#define MSDOS_16BIT" >> $@
-	@echo "#endif /* MSDOS_16BIT */" >> $@
-	@echo "#define RELEASE_NOTES \"$(RELEASE_NOTES)\"" >> $@
-	@echo "#define MAX_UNDO_SLOTS $(MAX_UNDO_SLOTS)" >> $@
-	@echo "#define MAX_FILE_NAME $(MAX_FILE_NAME)" >> $@
-	@echo "#define TEXT_BUFFER_SIZE $(TEXT_BUFFER_SIZE)" >> $@
-	@echo "#define INPUT_BUFFER_SIZE $(INPUT_BUFFER_SIZE)" >> $@
-	@echo "#define STACK_SIZE $(STACK_SIZE)" >> $@
-	@echo "#define NO_BLORB" >> $@
-	@echo "#endif /* DOS_DEFINES_H */" >> $@
-
 
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
@@ -722,11 +680,7 @@ $(NAME)$(DOSVER).zip: dosdist $(DOS_BIN)
 
 clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
-	rm -rf $(COMMON_DEFINES) \
-		$(CURSES_DEFINES) \
-		$(DOS_DEFINES) \
-		$(OW_DOS_DEFINES) \
-		$(HASH)
+	rm -rf $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
 	rm -f frotz.map *.err
 
@@ -766,9 +720,8 @@ help:
 .SUFFIXES: .c .o .h
 
 .PHONY: all clean dist dosdist curses ncurses dumb sdl hash help snavig \
-	common_defines dosdefs curses_defines nosound nosound_helper\
-	$(COMMON_DEFINES) $(DOS_DEFINES) $(OW_DOS_DEFINES) $(CURSES_DEFINES) \
-	$(HASH) \
+	common_defines dosdefs curses_defines nosound nosound_helper \
+	$(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH) \
 	blorb_lib common_lib curses_lib dumb_lib \
 	install install_dfrotz install_sfrotz install_xfrotz $(SUB_CLEAN)
 	uninstall uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz
