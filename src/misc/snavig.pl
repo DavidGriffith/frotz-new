@@ -38,7 +38,23 @@ use File::Copy;
 use File::Slurp qw(edit_file_lines);
 use File::Basename;
 use File::Temp qw(tempfile);
+use Getopt::Long qw(:config no_ignore_case);
 
+my %options;
+
+GetOptions('usage|?' => \$options{usage},
+	'h|help' => \$options{help},
+	'v|verbose' => \$options{verbose},
+	'q|quiet' => \$options{quiet},
+	't|type=s' => \$options{type},
+	);
+
+my $shorten_filenames;
+my $transform_symbols;
+
+my $type = $options{type};
+
+my $myname = "snavig";
 my $topdir = getcwd();
 my $target;
 my @sources;
@@ -51,9 +67,21 @@ my %symbolmap = ();
 my $counter = 0;
 
 my $argc = @ARGV;
-if ($argc < 2) {
-	print "usage: snavig <source dir> [<source dir>] ... <dest dir>\n";
-	exit;
+
+print "  Snavig -- Change an object's shape.\n";
+
+if ($argc < 2 || $options{help} || !$type) { usage(); }
+
+
+print "  Preparing files for $type.\n";
+if ($type eq "tops20") {
+	$shorten_filenames = 1;
+	$transform_symbols = 1;
+} elsif ($type eq "dos") {
+	# nothing special
+} else {
+	print "  Unknown target type $type.\n";
+	usage();
 }
 
 # All parameters but the last one is a source directory.
@@ -65,7 +93,8 @@ $target = pop @sources;
 
 $sedfile = "$topdir/$target/$sedfile";
 
-print "Copying sources from: ";
+
+print "  Copying sources from: ";
 my $source_dir_count = @sources;
 foreach my $source_dir (@sources) {
 	print "$source_dir/";
@@ -95,35 +124,42 @@ for my $inputfile (@inputfiles) {
 }
 
 # Shorten the filenames and note shortened headers for rewriting later.
-shorten_filenames($target, 6);
 
-# Scan source code and build a symbol map.
-%symbolmap = build_symbolmap($target, 6, 6);
-
-open my $mapfile, '>', $sedfile;
-for my $k (reverse(sort(keys %symbolmap))) {
-	my $symbol = $symbolmap{$k}{'original'};
-	my $newsym = $symbolmap{$k}{'new'};
-	if ($newsym =~ /A\d*/) {
-		print $mapfile "s/\\b$symbol\\b/$newsym/g\n";
-	} else {
-		print $mapfile "s/$symbol/$newsym/g\n";
-	}		
+if ($shorten_filenames) {
+	print "  Shortening filenames...\n";
+	shorten_filenames($target, 6);
 }
 
-#print $mapfile 's/^\\s*\/\///g';
-#print $mapfile "\n";
-#print $mapfile 's/((?!").*).*\/\///g';
-#print $mapfile "\n";
-#print $mapfile 's/\/\/.*(?!.*").//g';
-#print $mapfile "\n";
+if ($transform_symbols) {
+	print "  Transforming symbols...\n";
+	# Scan source code and build a symbol map.
+	%symbolmap = build_symbolmap($target, 6, 6);
 
-# Apply the symbol map to all files.
-transform_symbols($target);
+	open my $mapfile, '>', $sedfile;
+	for my $k (reverse(sort(keys %symbolmap))) {
+		my $symbol = $symbolmap{$k}{'original'};
+		my $newsym = $symbolmap{$k}{'new'};
+		if ($newsym =~ /A\d*/) {
+			print $mapfile "s/\\b$symbol\\b/$newsym/g\n";
+		} else {
+			print $mapfile "s/$symbol/$newsym/g\n";
+		}		
+	}
+	transform_symbols($target);
+}
 
+print "  Done!\n";
 exit;
 
 ############################################################################
+
+sub usage {
+	print "Usage: $myname -t <type> <source dir> [<source dir>] ... <dest dir>\n";
+	print "Types supported:\n";
+	print "  tops20\n";
+	print "  dos\n";
+	exit;
+}
 
 # Ensure that all symbols are changed.
 sub transform_symbols {

@@ -19,7 +19,7 @@
 
 #ifdef MSDOS_16BIT
 #ifdef __TURBOC__
-#include "../dos/defs.h"
+#include "defs.h"
 #else
 #include "../owdos/defs.h"
 #endif

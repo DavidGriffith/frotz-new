@@ -19,49 +19,24 @@ RELEASE_NOTES = "Development release."
 
 VER = -DVERSION=$(VERSION)
 
-DOS_DIR = src\dos
-DOS_OBJECTS =   $(DOS_DIR)\bcinit.o \
-		$(DOS_DIR)\bcinput.o \
-		$(DOS_DIR)\bcmouse.o \
-		$(DOS_DIR)\bcpic.o \
-		$(DOS_DIR)\bcsample.o \
-		$(DOS_DIR)\bcscreen.o \
-		$(DOS_DIR)\bctext.o \
-		$(DOS_DIR)\bcblorb.o
+DOS_OBJECTS =   bcinit.o bcinput.o bcmouse.o bcpic.o bcsample.o bcscreen.o \
+		bctext.o bcblorb.o
 
-CORE_DIR = src\common
-CORE_OBJECTS =  $(CORE_DIR)\buffer.o \
-		$(CORE_DIR)\fastmem.o \
-		$(CORE_DIR)\files.o \
-		$(CORE_DIR)\getopt.o \
-		$(CORE_DIR)\hotkey.o \
-		$(CORE_DIR)\input.o \
-		$(CORE_DIR)\main.o \
-		$(CORE_DIR)\math.o \
-		$(CORE_DIR)\object.o \
-		$(CORE_DIR)\process.o \
-		$(CORE_DIR)\random.o \
-		$(CORE_DIR)\redirect.o \
-		$(CORE_DIR)\screen.o \
-		$(CORE_DIR)\sound.o \
-		$(CORE_DIR)\stream.o \
-		$(CORE_DIR)\table.o \
-		$(CORE_DIR)\text.o \
-		$(CORE_DIR)\variable.o \
-		$(CORE_DIR)\quetzal.o \
-		$(CORE_DIR)\err.o
+CORE_OBJECTS =  buffer.o fastmem.o files.o getopt.o hotkey.o input.o \
+		main.o math.o object.o process.o random.o redirect.o \
+		screen.o sound.o stream.o table.o text.o variable.o \
+		quetzal.o err.o
 
 .SUFFIXES: .c .o .h
 
 all:	frotz
 
 .c.o:
-	$(CC) $(CFLAGS) $(VER) -I$(DOS_DIR) -I$(CORE_DIR) -c -o$@ $<
+	$(CC) $(CFLAGS) $(VER) -c -o$@ $<
 	$(TLIB) $(LIBRARY) +-$@
 
 clean:
-	$(RM) $(CORE_DIR)\*.o
-	$(RM) $(DOS_DIR)\*.o
+	$(RM) *.o
 	$(RM) *.obj
 	$(RM) *.lib
 	$(RM) *.exe

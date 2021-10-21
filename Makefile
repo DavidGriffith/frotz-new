@@ -381,6 +381,12 @@ $(SFROTZ_BIN): $(SFROTZ_LIBS)
 	@echo "** Done building Frotz with SDL interface."
 
 dos: $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
+	@rm -rf $(SNAVIG_DIR)
+	@mkdir $(SNAVIG_DIR)
+	@$(SNAVIG) -t dos $(COMMON_DIR) $(DOS_DIR) $(SNAVIG_DIR)
+	@cp Makefile.tc $(SNAVIG_DIR)/Makefile
+
+olddos: $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	@echo
 	@echo "  ** Cannot cross-compile for DOS yet."
@@ -411,7 +417,6 @@ owdos: $(DOS_BIN)
 $(DOS_BIN): $(DOS_DEFINES) $(OW_DOS_DEFINES) $(HASH)
 ifneq ($(shell which wmake),)
 	wmake -f Makefile.ow
-
 else
 	$(error wmake command not found.  Cannot make the DOS version)
 endif
@@ -427,14 +432,15 @@ snavig:
 	@echo "  waits  (not even started)"
 	@echo "That's all for now."
 
-tops20: distclean $(COMMON_DEFINES) $(HASH)
+#tops20: distclean $(COMMON_DEFINES) $(HASH)
+tops20: $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
 	@mkdir $(SNAVIG_DIR)
 	@echo "*************************************************************"
-	@echo Producing snavig-processed source for $(EXPORT_TYPE)
-	@$(SNAVIG) $(COMMON_DIR) $(DUMB_DIR) $(SNAVIG_DIR)
+#	@echo Producing snavig-processed source for $(EXPORT_TYPE)
+	@$(SNAVIG) -t tops20 $(COMMON_DIR) $(DUMB_DIR) $(SNAVIG_DIR)
 	@cp Makefile.kcc $(SNAVIG_DIR)/Makefile
-	@echo Now, get this into a $(EXPORT_TYPE) machine for compilation.
+#	@echo Now, get this into a $(EXPORT_TYPE) machine for compilation.
 
 common_lib:	$(COMMON_LIB)
 curses_lib:	$(CURSES_LIB)
