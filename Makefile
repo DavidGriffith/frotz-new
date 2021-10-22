@@ -285,7 +285,6 @@ DUMB_DIR = $(SRCDIR)/dumb
 DUMB_LIB = $(DUMB_DIR)/frotz_dumb.a
 
 DOS_DIR = $(SRCDIR)/dos
-OW_DOS_DIR = $(SRCDIR)/owdos
 
 X11_DIR = $(SRCDIR)/x11
 X11_LIB = $(X11_DIR)/frotz_x11.a
@@ -298,7 +297,7 @@ SDL_LIB = $(SDL_DIR)/frotz_sdl.a
 export SDL_PKGS = libpng libjpeg sdl2 SDL2_mixer freetype2 zlib
 SDL_LDFLAGS += $(shell $(PKG_CONFIG) $(SDL_PKGS) --libs) -lm
 
-SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR) $(OW_DOS_DIR)
+SUBDIRS = $(COMMON_DIR) $(CURSES_DIR) $(X11_DIR) $(SDL_DIR) $(DUMB_DIR) $(BLORB_DIR) $(DOS_DIR)
 SUB_CLEAN = $(SUBDIRS:%=%-clean)
 
 FROTZ_BIN = frotz$(EXTENSION)

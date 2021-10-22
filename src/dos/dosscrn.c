@@ -38,7 +38,7 @@
 #ifdef __WATCOMC__
 volatile byte _far *get_scrnptr(int y)
 #else
-static void clear_byte(byte far * scrn, word mask)
+byte far *get_scrnptr(int y)
 #endif
 {
 	if (display == _CGA_)
@@ -56,7 +56,11 @@ static void clear_byte(byte far * scrn, word mask)
  * Helper function for clear_line.
  *
  */
+#ifdef __WATCOMC__
 static void clear_byte(volatile byte _far * scrn, word mask)
+#else
+static void clear_byte(byte far * scrn, word mask)
+#endif
 {
 	if (display == _CGA_)
 		if (scrn_attr == 0)

@@ -1,5 +1,5 @@
 /*
- * owinit.c - DOS interface (Open Watcom version), initialization
+ * dosinit.c - DOS interface, initialization
  *
  * This file is part of Frotz.
  *
@@ -25,13 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "frotz.h"
-#include "owfrotz.h"
 
-#ifndef NO_BLORB
-#include "owblorb.h"
-#endif
-
-#include "owhash.h"
+#include "dosfrotz.h"
 
 extern f_setup_t f_setup;
 extern z_header_t z_header;
@@ -59,6 +54,10 @@ static char information[] =
     "Fonts: 0 fixed, 1 sans serif, 2 comic, 3 times, 4 serif.\n"
     "Display modes:  0 mono, 1 text, 2 CGA, 3 MCGA, 4 EGA, 5 Amiga.\n"
     "Error reporting: 0 none, 1 first only (default), 2 all, 3 exit after any error.";
+
+/* in bcinit.c only.  What is its significance? */
+extern unsigned cdecl _heaplen = 0x800 + 4 * BUFSIZ;
+extern unsigned cdecl _stklen = 0x800;
 
 extern int zoptind;
 
@@ -218,9 +217,15 @@ static void cleanup(void)
 #endif
 	reset_pictures();
 
+#ifdef __WATCOMC__
 	bios_video_ax((word)old_video_mode);
-
 	_dos_setvect(0x1b, oldvect);
+#else
+	asm mov ah, 0
+	asm mov al, old_video_mode
+	asm int 0x10
+	setvect(0x1b, oldvect);
+#endif
 } /* cleanup */
 
 
@@ -481,10 +486,23 @@ static void standard_palette(void)
 		0x00	/* last one is the overscan register */
 	};
 
+#ifdef __WATCOMC__
 	if (display == _AMIGA_) {
 		bios_video_ax_esdx_bh(0x1002, palette, 0);
 		bios_video_ax_bx(0x1013, 0x0001);
 	}
+#else
+	if (display == _AMIGA_) {
+		asm mov ax, 0x1002
+		asm lea dx, palette
+		asm push ds
+		asm pop es
+		asm int 0x10
+		asm mov ax, 0x1013
+		asm mov bx, 0x0001
+		asm int 0x10
+	}
+#endif
 } /* standard_palette */
 
 
@@ -503,10 +521,23 @@ static void standard_palette(void)
 		0x00	/* last one is the overscan register */
 	};
 
+#ifdef __WATCOMC__
 	if (display == _AMIGA_) {
 		bios_video_ax_esdx_bh(0x1002, palette, 0);
 		bios_video_ax_bx(0x1013, 0x0101);
 	}
+#else
+	if (display == _AMIGA_) {
+		asm mov ax, 0x1002
+		asm mov dx, offset palette
+		asm push ds
+		asm pop es
+		asm int 0x10
+		asm mov ax, 0x1013
+		asm mov bx, 0x0101
+		asm int 0x10
+	}
+#endif
 } /* special_palette */
 
 
@@ -589,7 +620,14 @@ static void standard_palette(void)
 	/* Get the current video mode. This video mode will be selected
 	   when the program terminates. It's also useful to auto-detect
 	   monochrome boards. */
+
+#ifdef __WATCOMC__
 	old_video_mode = (byte)bios_video_ah(0x0f);
+#else
+	asm mov ah, 15
+	asm int 0x10
+	asm mov old_video_mode, al
+#endif
 
 	/* If the display mode has not already been set by the user then see
 	   if this is a monochrome board. If so, set the display mode to 0.
@@ -611,34 +649,65 @@ static void standard_palette(void)
 	if (display >= '0' && display <= '5') {
 		subdisplay = -1;
 		display -= '0';
+#ifdef __WATCOMC__
 		bios_video_ax((word)info[display].vmode);
+#else
+		_AL = info[display].vmode;
+		_AH = 0;
+#endif
 	} else if (display == 'a') {
 		subdisplay = 0;
 		display = 1;
+#ifdef __WATCOMC__
 		bios_video_ax(0x0001);
+#else
+		_AL = 0x01;
+		_AH = 0;
+#endif
 	} else if (display >= 'b' && display <= 'e') {
 		subdisplay = display - 'a';
 		display = 1;
+#ifdef __WATCOMC__
 		bios_video_ax_bx(0x4f02, subinfo[subdisplay].vesamode);
+#else
+		_BX = subinfo[subdisplay].vesamode;
+		_AX = 0x4f02;
+#endif
 	}
 
+#ifndef __WATCOMC__
+	geninterrupt(0x10);
+#endif
 	load_fonts();
 
 	/* Make various preparations */
 	if (display <= _TEXT_) {
+
+#ifdef __WATCOMC__
 		/* Enable bright background colours */
 		bios_video_ax_bl(0x1003, 0);
 		/* Turn off hardware cursor */
 		bios_video_ah_cx(1, 0xffff);
+#else
+		/* Enable bright background colours */
+		asm mov ax, 0x1003
+		asm mov bl, 0
+		asm int 0x10
+		/* Turn off hardware cursor */
+		asm mov ah, 1
+		asm mov cx, 0xffff
+		asm int 0x10
+#endif
 	} else {
-
 		if (display == _AMIGA_) {
 			scaler = 2;
 
-			/* Use resolution 640 x 400 instead of 640 x 480. BIOS doesn't
-			   help us here since this is not a standard resolution. */
-			outp(0x03c2, 0x63);
+			/* Use resolution 640 x 400 instead of 640 x 480.
+			   BIOS doesn't help us here since this is not a
+			   standard resolution. */
 
+#ifdef __WATCOMC__
+			outp(0x03c2, 0x63);
 			outpw(0x03d4, 0x0e11);
 			outpw(0x03d4, 0xbf06);
 			outpw(0x03d4, 0x1f07);
@@ -646,7 +715,16 @@ static void standard_palette(void)
 			outpw(0x03d4, 0x8f12);
 			outpw(0x03d4, 0x9615);
 			outpw(0x03d4, 0xb916);
-
+#else
+			outportb(0x03c2, 0x63);
+			outport(0x03d4, 0x0e11);
+			outport(0x03d4, 0xbf06);
+			outport(0x03d4, 0x1f07);
+			outport(0x03d4, 0x9c10);
+			outport(0x03d4, 0x8f12);
+			outport(0x03d4, 0x9615);
+			outport(0x03d4, 0xb916);
+#endif
 		}
 
 	}
@@ -752,8 +830,13 @@ static void standard_palette(void)
 		z_header.interpreter_number = INTERP_AMIGA;
 
 	/* Install the fast_exit routine to handle the ctrl-break key */
+#ifdef __WATCOMC__
 	oldvect = _dos_getvect(0x1b);
 	_dos_setvect(0x1b, fast_exit);
+#else
+	oldvect = getvect(0x1b);
+	setvect(0x1b, fast_exit);
+#endif
 } /* os_init_screen */
 
 
@@ -795,10 +878,24 @@ void os_restart_game(int stage)
 			    && os_picture_data(1, &x, &y)) {
 
 				special_palette();
-
+#ifdef __WATCOMC__
 				bios_video_ax_bx_dh_ch_cl(0x1010, 64, 0, 0, 0);
 				bios_video_ax_bx_dh_ch_cl(0x1010, 79,
 							  0xff, 0xff, 0xff);
+#else				asm mov ax, 0x1010
+				asm mov bx, 64
+				asm mov dh, 0
+				asm mov ch, 0
+				asm mov cl, 0
+				asm int 0x10
+				asm mov ax, 0x1010
+				asm mov bx, 79
+				asm mov dh, 0xff
+				asm mov ch, 0xff
+				asm mov cl, 0xff
+				asm int 0x10
+#endif
+
 				os_draw_picture(1, 1, 1);
 				os_read_key(0, FALSE);
 
@@ -818,10 +915,16 @@ void os_restart_game(int stage)
  */
 int os_random_seed(void)
 {
-	if (user_random_seed == -1)
+	if (user_random_seed == -1) {
 		/* Use the time of day as seed value */
+#ifdef __WATCOMC__
 		return (int)bios_time_ah(0) & 0x7fff;
-	else
+#else
+		asm mov ah, 0
+		asm int 0x1a
+		return _DX & 0x7fff;
+#endif
+	} else
 		return user_random_seed;
 } /* os_random_seed */
 

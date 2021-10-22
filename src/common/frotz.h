@@ -18,11 +18,6 @@
 #endif
 
 #ifdef MSDOS_16BIT
-#ifdef __TURBOC__
-#include "defs.h"
-#else
-#include "defs.h"
-#endif
 
 #ifdef USE_UTF8
 #error UTF-8 is not supported in DOS Frotz
@@ -61,9 +56,6 @@ typedef int bool;
 /******************************************************************************/
 #ifndef MSDOS_16BIT
 
-#include "defs.h"
-#include "hash.h"
-
 #define huge
 #define zmalloc(size)	malloc(size)
 #define zfree(p)	free(p)
@@ -77,6 +69,9 @@ typedef int bool;
 /* For everything */
 /******************************************************************************/
 #include <stdio.h>
+
+#include "defs.h"
+#include "hash.h"
 
 #ifndef TRUE
 #define TRUE 1

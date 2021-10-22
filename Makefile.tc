@@ -19,8 +19,8 @@ RELEASE_NOTES = "Development release."
 
 VER = -DVERSION=$(VERSION)
 
-DOS_OBJECTS =   bcinit.o bcinput.o bcmouse.o bcpic.o bcsample.o bcscreen.o \
-		bctext.o bcblorb.o
+DOS_OBJECTS =   dosinit.o dosinput.o dosmouse.o dospic.o dossample.o dosscrn.o \
+		dostext.o dosblorb.o
 
 CORE_OBJECTS =  buffer.o fastmem.o files.o getopt.o hotkey.o input.o \
 		main.o math.o object.o process.o random.o redirect.o \

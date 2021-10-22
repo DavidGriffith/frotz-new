@@ -1,19 +1,7 @@
-# For GNU Make.
+# For GNU Make.  Just for cleaning purposes.
 
-SOURCES = bcblorb.c bcinit.c bcinput.c bcmouse.c bcpic.c bcsample.c bcscreen bctext.c
-
-HEADERS = bcfrotz.h blorb.h blorblow.h fontdata.h
-
-OBJECTS = $(SOURCES:.c=.o)
-
-.PHONY: clean
-
-$(TARGET): $(OBJECTS)
-	@echo "** Done with DOS interface."
+.PHONY:	clean
 
 clean:
-	rm -f $(TARGET) $(OBJECTS)
-	rm -f *.O
-
-%.o: %.c
-	$(WCC) $(CFLAGS) $(DOS_CFLAGS) -o $@ -c $<
+	rm -f frotz.exe FROTZ.EXE
+	rm -f *.O *.o

@@ -8,6 +8,8 @@
 #ifndef DOS_INLINE_H
 #define DOS_INLINE_H
 
+#ifdef __WATCOMC__
+
 /*
  * Inline functions for calling BIOS video and date/time services, and DOS
  * mouse services.
@@ -67,4 +69,5 @@ __int64 dos_mouse_ax_bx(word ax, word bx);
 void video_latch(volatile byte);
 #pragma aux video_latch = "" parm [al] modify [];
 
+#endif
 #endif
