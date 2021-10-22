@@ -42,7 +42,7 @@ DOS_OBJECTS +=	$(OW_DOS_DIR)/dospic.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/dossampl.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/dosscrn.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/dostext.o
-DOS_OBJECTS +=	$(OW_DOS_DIR)/owblorb.o
+DOS_OBJECTS +=	$(OW_DOS_DIR)/dosblorb.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/owfix.o
 
 CORE_DIR = src/common
