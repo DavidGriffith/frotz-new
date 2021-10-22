@@ -35,7 +35,8 @@ VER = -DVERSION='$(VERSION)'
 !endif
 
 OW_DOS_DIR = src/owdos
-DOS_OBJECTS =   $(OW_DOS_DIR)/owinit.o
+#DOS_OBJECTS =   $(OW_DOS_DIR)/owinit.o
+DOS_OBJECTS =   $(OW_DOS_DIR)/dosinit.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/owinput.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/owmouse.o
 DOS_OBJECTS +=	$(OW_DOS_DIR)/owpic.o
