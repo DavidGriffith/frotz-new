@@ -130,6 +130,9 @@ extern volatile int end_of_sound_flag;
 
 #ifdef __WATCOMC__
 #include "inline.h"
+#define outportb(x,y)	outp(x,y)
+#define outport(x,y)	outpw(x,y)
+#define inportb(x)	inp(x)
 #endif
 
 #endif

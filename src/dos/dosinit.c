@@ -706,16 +706,6 @@ static void standard_palette(void)
 			   BIOS doesn't help us here since this is not a
 			   standard resolution. */
 
-#ifdef __WATCOMC__
-			outp(0x03c2, 0x63);
-			outpw(0x03d4, 0x0e11);
-			outpw(0x03d4, 0xbf06);
-			outpw(0x03d4, 0x1f07);
-			outpw(0x03d4, 0x9c10);
-			outpw(0x03d4, 0x8f12);
-			outpw(0x03d4, 0x9615);
-			outpw(0x03d4, 0xb916);
-#else
 			outportb(0x03c2, 0x63);
 			outport(0x03d4, 0x0e11);
 			outport(0x03d4, 0xbf06);
@@ -724,7 +714,6 @@ static void standard_palette(void)
 			outport(0x03d4, 0x8f12);
 			outport(0x03d4, 0x9615);
 			outport(0x03d4, 0xb916);
-#endif
 		}
 
 	}
