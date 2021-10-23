@@ -445,13 +445,8 @@ static void pascal draw_picture(int y, int x)
 
 	/* Prepare EGA hardware for setting pixels */
 	if (display >= _EGA_) {
-#ifdef __WATCOMC__
-		outpw(0x03ce, 0x0205);
-		outpw(0x03ce, 0xff08);
-#else
 		outport(0x03ce, 0x0205);
 		outport(0x03ce, 0xff08);
-#endif
 	}
 
 	/* The uncompressed picture is a long sequence of bytes. Every
