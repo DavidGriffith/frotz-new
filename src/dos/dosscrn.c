@@ -125,11 +125,7 @@ static void clear_byte(byte far * scrn, word mask)
 
 		/* Clear middle bytes */
 		if (display >= _EGA_)
-#ifdef __WATCOMC__
-			outpw(0x03ce, 0xff08);
-#else
 			outport(0x03ce, 0xff08);
-#endif
 		while (--x > 0)
 			*scrn++ = scrn_attr;
 
@@ -193,46 +189,35 @@ static void copy_byte(byte far * scrn1, byte far * scrn2, byte mask)
 #endif
 {
 	int i;
+#ifdef __WATCOMC__
+	byte t;
+#endif
 
 	if (display == _CGA_)
 		*scrn1 = (*scrn1 & ~mask) | (*scrn2 & mask);
 	else {
-#ifdef __WATCOMC__
-		outpw(0x03ce, 0x0005);
-		outp(0x03ce, 0x08);
-		outp(0x03cf, mask);
-		outp(0x03ce, 0x04);
-		outp(0x03c4, 0x02);
-#else
 		outport(0x03ce, 0x0005);
 		outportb(0x03ce, 0x08);
 		outportb(0x03cf, mask);
 		outportb(0x03ce, 0x04);
 		outportb(0x03c4, 0x02);
-#endif
 		for (i = 0; i < 4; i++) {
+			outportb(0x03cf, i);
+			outportb(0x03c5, 1 << i);
 #ifdef __WATCOMC__
-			byte t;
-			outp(0x03cf, i);
-			outp(0x03c5, 1 << i);
 			t = *scrn2;
 			video_latch(*scrn1);
 			*scrn1 = t;
 		}
-		outp(0x03c5, 0x0f);
 #else
-			outportb(0x03cf, i);
-			outportb(0x03c5, 1 << i);
-
 			asm les bx, scrn2
 			asm mov ah, es:[bx]
 			asm les bx, scrn1
 			asm mov al, es:[bx]
 			asm mov es:[bx], ah
-
 		}
-		outportb(0x03c5, 0x0f);
 #endif
+		outportb(0x03c5, 0x0f);
 	}
 } /* copy_byte */
 
@@ -278,11 +263,7 @@ static void copy_line(int y1, int y2, int left, int right)
 
 		/* Copy middle bytes */
 		if (display >= _EGA_)
-#ifdef __WATCOMC__
-			outpw(0x03ce, 0x0105);
-#else
-			outpw(0x03ce, 0x0105);
-#endif
+			outport(0x03ce, 0x0105);
 		while (--x > 0)
 			*scrn1++ = *scrn2++;
 
