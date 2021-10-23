@@ -21,15 +21,9 @@
 
 #ifdef SOUND_SUPPORT
 
-#ifdef __WATCOMC__
 #define SWAP_BYTES(v)	{ (v) = bswap16(v); }
-#define READ_DSP(v)	{while(!inp(sound_adr+14)&0x80);(v)=inp(sound_adr+10);}
-#define WRITE_DSP(v)	{while(inp(sound_adr+12)&0x80);outp(sound_adr+12,(v));}
-#else
-#define SWAP_BYTES(v)  {_AX=v;asm xchg al,ah;v=_AX;}
-#define READ_DSP(v)    {while(!inportb(sound_adr+14)&0x80);v=inportb(sound_adr+10);}
-#define WRITE_DSP(v)   {while(inportb(sound_adr+12)&0x80);outportb(sound_adr+12,v);}
-#endif
+#define READ_DSP(v)	{while(!inp(sound_adr+14)&0x80);(v)=inportb(sound_adr+10)}
+#define WRITE_DSP(v)	{while(inp(sound_adr+12)&0x80);outportb(sound_adr+12,(v))}
 
 extern void end_of_sound(void);
 
@@ -81,17 +75,6 @@ static void start_of_dma(long address, unsigned length)
 	length--;
 
 	/* Set up DMA chip */
-#ifdef __WATCOMC__
-	outp(0x0a, 0x04 | sound_dma);
-	outp(0x0c, 0x00);
-	outp(0x0b, 0x48 | sound_dma);
-	outp(2 * sound_dma, byte0(address));
-	outp(2 * sound_dma, byte1(address));
-	outp(dma_page_port[sound_dma], byte2(address));
-	outp(2 * sound_dma + 1, byte0(length));
-	outp(2 * sound_dma + 1, byte1(length));
-	outp(0x0a, sound_dma);
-#else
 	outportb(0x0a, 0x04 | sound_dma);
 	outportb(0x0c, 0x00);
 	outportb(0x0b, 0x48 | sound_dma);
@@ -101,7 +84,6 @@ static void start_of_dma(long address, unsigned length)
 	outportb(2 * sound_dma + 1, byte0(length));
 	outportb(2 * sound_dma + 1, byte1(length));
 	outportb(0x0a, sound_dma);
-#endif
 
 	/* Play 8-bit mono sample */
 	WRITE_DSP(0x14)
@@ -134,18 +116,11 @@ static void interrupt end_of_dma(void)
 	}
 
 	/* Tell interrupt controller(s) + sound board we are done */
-#ifdef __WATCOMC__
-	outp(0x20, 0x20);
-	if (sound_irq >= 8)
-		outp(0xa0, 0x20);
-
-	inp(sound_adr + 14);
-#else
 	outportb(0x20, 0x20);
 	if (sound_irq >= 8)
 		outportb(0xa0, 0x20);
 	inportb(sound_adr + 14);
-#endif
+
 } /* end_of_dma */
 
 
@@ -170,16 +145,6 @@ bool dos_init_sound(void)
 	sound_ver = dectoi(strchr(settings, 'T') + 1);
 
 	/* Reset mixer chip and DSP */
-#ifdef __WATCOMC__
-	outp(sound_adr + 4, 0);
-	outp(sound_adr + 5, 0);
-
-	outp(sound_adr + 6, 1);
-	inp(sound_adr + 6);
-	inp(sound_adr + 6);
-	inp(sound_adr + 6);
-	outp(sound_adr + 6, 0);
-#else
 	outportb(sound_adr + 4, 0);
 	outportb(sound_adr + 5, 0);
 
@@ -188,7 +153,6 @@ bool dos_init_sound(void)
 	inportb(sound_adr + 6);
 	inportb(sound_adr + 6);
 	outportb(sound_adr + 6, 0);
-#endif
 
 	/* Turn on speakers */
 	WRITE_DSP(0xd1)
@@ -223,22 +187,13 @@ bool dos_init_sound(void)
 	word1(sample_adr2) = word1(sample_adr1) + 1;
 
 	/* Enable the end_of_dma interrupt */
-
-#ifdef __WATCOMC__
-	outp(0x20, 0x20);
-#else
 	outportb(0x20, 0x20);
-#endif
 
 	if (sound_irq >= 8)
-#ifdef __WATCOMC__
-		outp(0xa0, 0x20);
-	outp(irc_mask_port,
-		 inp(irc_mask_port) & ~(1 << (sound_irq & 7)));
-#else
-		outportb(0xa0, 0x20);
-			 inportb(irc_mask_port) & ~(1 << (sound_irq & 7)));
-#endif
+		outportb(0xa0, 0x20)
+
+	outportb(irc_mask_port, inportb(irc_mask_port) & ~(1 << (sound_irq & 7)))
+
 	/* Indicate success */
 	return TRUE;
 
@@ -288,24 +243,12 @@ void os_beep(int number)
 {
 	word T = 888 * number;
 
-#ifdef __WATCOMC__
-	outp(0x43, 0xb6);
-	outp(0x42, lo(T));
-	outp(0x42, hi(T));
-	outp(0x61, inp(0x61) | 3);
-#else
 	outportb(0x43, 0xb6);
 	outportb(0x42, lo(T));
 	outportb(0x42, hi(T));
 	outportb(0x61, inportb(0x61) | 3);
-#endif
 	delay(75);
-
-#ifdef __WATCOMC__
-	outp(0x61, inp(0x61) & ~3);
-#else
 	outportb(0x61, inportb(0x61) & ~3);
-#endif
 } /* os_beep */
 
 /*
@@ -419,31 +362,13 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 
 		if (sound_ver < 6) {	/* Set up SB pro mixer chip */
 			volume = (volume != 255) ? 7 + volume : 15;
-#ifdef __WATCOMC__
-			outp(sound_adr + 4, 0x04);
-			outp(sound_adr + 5, (volume << 4) | volume);
-			outp(sound_adr + 4, 0x22);
-			outp(sound_adr + 5, 0xff);
-#else
 			outportb(sound_adr + 4, 0x04);
 			outportb(sound_adr + 5, (volume << 4) | volume);
 			outportb(sound_adr + 4, 0x22);
 			outportb(sound_adr + 5, 0xff);
-#endif
-
 		} else {	/* Set up SB16 mixer chip */
 			/* Many thanks to Linards Ticmanis for writing this part! */
 			volume = (volume != 255) ? 127 + 16 * volume : 255;
-#ifdef __WATCOMC__
-			outp(sound_adr + 4, 0x32);
-			outp(sound_adr + 5, volume);
-			outp(sound_adr + 4, 0x33);
-			outp(sound_adr + 5, volume);
-			outp(sound_adr + 4, 0x30);
-			outp(sound_adr + 5, 0xff);
-			outp(sound_adr + 4, 0x31);
-			outp(sound_adr + 5, 0xff);
-#else
 			outportb(sound_adr + 4, 0x32);
 			outportb(sound_adr + 5, volume);
 			outportb(sound_adr + 4, 0x33);
@@ -452,7 +377,6 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 			outportb(sound_adr + 5, 0xff);
 			outportb(sound_adr + 4, 0x31);
 			outportb(sound_adr + 5, 0xff);
-#endif
 		}
 
 		play_part = 1;
