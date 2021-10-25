@@ -763,13 +763,8 @@ void write_pattern(byte far * screen, byte val, byte mask)
 			underline = -1;
 
 		if (display >= _EGA_) {
-#ifdef __WATCOMC__
-			outpw(0x03ce, 0x0205);
-			outpw(0x03ce, 0xff08);
-#else
 			outport(0x03ce, 0x0205);
 			outport(0x03ce, 0xff08);
-#endif
 		}
 
 		for (i = 0; i < z_header.font_height; i++) {
