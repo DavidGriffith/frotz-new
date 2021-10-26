@@ -165,13 +165,8 @@ bool dos_init_sound(void)
 		sound_int = 0x68 + sound_irq;
 	}
 
-#ifdef __WATCOMC__
-	vect = _dos_getvect(sound_int);
-	_dos_setvect(sound_int, end_of_dma);
-#else
 	vect = getvect(sound_int);
 	setvect(sound_int, end_of_dma);
-#endif
 
 	/* Allocate 64KB RAM for sample data */
 #ifdef __WATCOMC__

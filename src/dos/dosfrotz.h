@@ -133,6 +133,9 @@ extern volatile int end_of_sound_flag;
 #define outportb(x,y)	outp(x,y)
 #define outport(x,y)	outpw(x,y)
 #define inportb(x)	inp(x)
+
+#define getvect(x)	_dos_getvect(x)
+#define setvect(x,y)	_dos_setvect(x,y)
 #endif
 
 #endif

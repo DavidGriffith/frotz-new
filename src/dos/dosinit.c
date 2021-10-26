@@ -819,13 +819,8 @@ static void standard_palette(void)
 		z_header.interpreter_number = INTERP_AMIGA;
 
 	/* Install the fast_exit routine to handle the ctrl-break key */
-#ifdef __WATCOMC__
-	oldvect = _dos_getvect(0x1b);
-	_dos_setvect(0x1b, fast_exit);
-#else
 	oldvect = getvect(0x1b);
 	setvect(0x1b, fast_exit);
-#endif
 } /* os_init_screen */
 
 
