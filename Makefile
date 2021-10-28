@@ -388,6 +388,7 @@ all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN) $(XFROTZ_BIN)
 snavig:
 	@echo "Snavig: Change an object's shape..."
 	@echo "Possible snavig-processed targets:"
+	@echo "  dos    (done)"
 	@echo "  tops20 (working on it)"
 	@echo "  its    (not even started)"
 	@echo "  tops10 (not even started)"
