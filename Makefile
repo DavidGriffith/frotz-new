@@ -133,6 +133,9 @@ endif
 ifeq ($(MAKECMDGOALS),owdos)
     EXPORT_TYPE = dos
 endif
+ifeq ($(MAKECMDGOALS),dosdefs)
+    EXPORT_TYPE = dos
+endif
 
 RANLIB ?= ranlib
 PKG_CONFIG ?= pkg-config
@@ -446,6 +449,7 @@ $(SUB_CLEAN):
 
 # Compile-time generated defines and strings
 #
+dosdefs: hash defs
 defs: common_defines
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
