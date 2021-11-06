@@ -31,6 +31,8 @@
 
 extern int direct_call(zword);
 
+#ifdef SOUND_SUPPORT
+
 static zword routine = 0;
 
 static int next_sample = 0;
@@ -215,3 +217,13 @@ void z_sound_effect(void)
 		locked = FALSE;
 	}
 } /* z_sound_effect */
+
+#else /* SOUND_SUPPORT */
+
+/* Do-nothing stubs for when sound support is disabled. */
+
+void init_sound(void) { /* nothing here */ }
+void end_of_sound(void) { /* nothing here */ }
+void z_sound_effect(void) { /* nothing here */ }
+
+#endif

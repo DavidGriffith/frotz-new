@@ -224,8 +224,6 @@ void dos_reset_sound(void)
 
 } /* dos_reset_sound */
 
-#endif /* SOUND_SUPPORT */
-
 
 /*
  * os_beep
@@ -250,7 +248,7 @@ void os_beep(int number)
  * os_init_sound
  *
  * Dummy function to satisfy the core code.  DOS Frotz does its sound
- * initialization in bcinit.c in os_init_screen().
+ * initialization in dosinit.c in os_init_screen().
  *
  * FIXME: Move the sound initlization from os_init_screen() to here and
  *        somehow work around the ifs.
@@ -269,8 +267,6 @@ void os_init_sound(void)
  */
 void os_prepare_sample(int number)
 {
-#ifdef SOUND_SUPPORT
-
 	os_stop_sample(0);
 
 	/* Exit if the sound board isn't set up properly */
@@ -322,7 +318,6 @@ void os_prepare_sample(int number)
 		fclose(fp);
 
 	}
-#endif /* SOUND_SUPPORT */
 } /* os_prepare_sample */
 
 
@@ -337,7 +332,6 @@ void os_prepare_sample(int number)
  */
 void os_start_sample(int number, int volume, int repeats, zword eos)
 {
-#ifdef SOUND_SUPPORT
 	eos = eos;		/* not used in DOS Frotz */
 
 	os_stop_sample(0);
@@ -378,8 +372,6 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 		start_of_dma(sample_adr1, sample_len1);
 
 	}
-
-#endif /* SOUND_SUPPORT */
 } /* os_start_sample */
 
 
@@ -391,7 +383,6 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
  */
 void os_stop_sample(int UNUSED(id))
 {
-#ifdef SOUND_SUPPORT
 	play_part = 0;
 
 	/* Exit if the sound board isn't set up properly */
@@ -402,7 +393,6 @@ void os_stop_sample(int UNUSED(id))
 
 	/* Tell DSP to stop the current sample */
 	WRITE_DSP(0xd0)
-#endif /* SOUND_SUPPORT */
 } /* os_stop_sample */
 
 
@@ -414,9 +404,39 @@ void os_stop_sample(int UNUSED(id))
  */
 void os_finish_with_sample(int UNUSED(id))
 {
-#ifdef SOUND_SUPPORT
-
 	os_stop_sample(0);	/* we keep 64KB allocated all the time */
+} /* os_finish_with_sample */
+
+#else /* SOUND_SUPPORT */
+
+/* Do-nothing stubs for when sound support is disabled. */
+
+void os_finish_with_sample(int UNUSED(id)) {}
+void os_stop_sample(int UNUSED(id)) {}
+void os_start_sample(int number, int volume, int repeats, zword eos) {}
+void os_prepare_sample(int number) {}
+void os_init_sound(void) {}
+void dos_reset_sound(void) {}
+bool dos_init_sound(void) { return TRUE; }
 
 #endif /* SOUND_SUPPORT */
-} /* os_finish_with_sample */
+
+/*
+ * os_beep
+ *
+ * Play a beep sound. Ideally, the sound should be high- (number == 1)
+ * or low-pitched (number == 2).
+ * This goes through the PC speaker, not the sound card.
+ *
+ */
+void os_beep(int number)
+{
+	word T = 888 * number;
+
+	outportb(0x43, 0xb6);
+	outportb(0x42, lo(T));
+	outportb(0x42, hi(T));
+	outportb(0x61, inportb(0x61) | 3);
+	delay(75);
+	outportb(0x61, inportb(0x61) & ~3);
+} /* os_beep */
