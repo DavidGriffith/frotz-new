@@ -107,7 +107,7 @@ static bool open_graphics_file(int number)
 		goto failure2;
 	p = info;
 	while (images != 0) {
-		if (fread((void _far *)info, gheader.entry_size, 1, file) != 1)
+		if (fread((void _far *)p, gheader.entry_size, 1, file) != 1)
 			goto failure3;
 		p += entry_size;
 		--images;
@@ -524,6 +524,7 @@ reverse_buffer:
 
 		current_x += pixels;
 	} else for (i = 0; i < scaler; i++) {
+		int displ = display;
 		_asm {
 			mov ah, byte ptr code
 			cmp ah, transparent
@@ -532,7 +533,7 @@ reverse_buffer:
 			les bx, screen
 			mov dx, current_x
 			dec dx
-			mov si, display
+			mov si, displ
 			cmp si, _MCGA_
 			jz L2
 			push dx
