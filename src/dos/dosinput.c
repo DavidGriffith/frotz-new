@@ -257,7 +257,7 @@ static int get_key(bool cursor)
 #endif
 	do {
 
-#ifdef SOUND_SUPPORT
+#ifndef NO_SOUND
 		if (end_of_sound_flag)
 			end_of_sound();
 #endif

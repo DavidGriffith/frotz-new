@@ -31,7 +31,7 @@
 
 extern int direct_call(zword);
 
-#ifdef SOUND_SUPPORT
+#ifndef NO_SOUND
 
 static zword routine = 0;
 
@@ -132,7 +132,7 @@ static void start_next_sample(void)
  */
 void end_of_sound(void)
 {
-#if defined(DJGPP) && defined(SOUND_SUPPORT)
+#if defined(DJGPP) && defined(NO_SOUND)
 	end_of_sound_flag = 0;
 #endif
 
@@ -218,7 +218,7 @@ void z_sound_effect(void)
 	}
 } /* z_sound_effect */
 
-#else /* SOUND_SUPPORT */
+#else /* NO_SOUND */
 
 /* Do-nothing stubs for when sound support is disabled. */
 

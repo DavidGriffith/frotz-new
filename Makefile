@@ -27,6 +27,10 @@ SYSCONFDIR ?= /etc
 # OPTIONS: ao, none
 SOUND_TYPE ?= ao
 
+# Choose DOS options
+DOS_NO_SOUND ?= yes
+DOS_NO_BLORB ?= yes
+DOS_NO_GRAPHICS ?= yes
 
 ##########################################################################
 # The configuration options below are intended mainly for older flavors
@@ -459,13 +463,19 @@ ifeq ($(wildcard $(COMMON_DEFINES)),)
 	@echo "#define COMMON_DEFINES_H" >> $@
 	@echo "#define RELEASE_NOTES \"$(RELEASE_NOTES)\"" >> $@
 
-ifeq ($(MAKECMDGOALS),djgpp)
-	@echo "#define SOUND_SUPPORT" >> $@
-else
-
 ifeq ($(EXPORT_TYPE), dos)
 	@echo "#define MSDOS_16BIT" >> $@
+ifdef DOS_NO_BLORB
 	@echo "#define NO_BLORB" >> $@
+endif
+ifdef DOS_NO_SOUND
+	@echo "#define NO_SOUND" >> $@
+endif
+ifdef DOS_NO_GRAPHICS
+	@echo "#define NO_GRAPHICS" >> $@
+endif
+
+
 else
 ifeq ($(EXPORT_TYPE), tops20)
 	@echo "#ifndef TOPS20" >> $@
@@ -486,7 +496,7 @@ ifeq ($(OS_TYPE), unix)
 endif
 endif
 endif
-endif
+
 	@echo "#define MAX_UNDO_SLOTS $(MAX_UNDO_SLOTS)" >> $@
 	@echo "#define MAX_FILE_NAME $(MAX_FILE_NAME)" >> $@
 	@echo "#define TEXT_BUFFER_SIZE $(TEXT_BUFFER_SIZE)" >> $@

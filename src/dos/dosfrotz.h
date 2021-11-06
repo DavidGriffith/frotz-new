@@ -109,7 +109,7 @@ extern int current_font;
 
 extern int scaler;
 
-#ifdef SOUND_SUPPORT
+#ifndef NO_SOUND
 extern volatile int end_of_sound_flag;
 #endif
 
@@ -120,7 +120,7 @@ extern volatile int end_of_sound_flag;
 /* owpic   */	bool 	init_pictures (void);
 /* owpic   */	void 	reset_pictures (void);
 
-#ifdef SOUND_SUPPORT
+#ifndef NO_SOUND
 /* owsmpl  */	bool 	dos_init_sound (void);
 /* owsmpl  */	void 	dos_reset_sound (void);
 /* owinput */	void	end_of_sound(void);

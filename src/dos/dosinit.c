@@ -212,7 +212,7 @@ char *basename(const char *path)
  */
 static void cleanup(void)
 {
-#ifdef SOUND_SUPPORT
+#ifndef NO_SOUND
 	dos_reset_sound();
 #endif
 	reset_pictures();
@@ -763,12 +763,12 @@ static void standard_palette(void)
 		if (display <= _TEXT_)
 			z_header.flags &= ~GRAPHICS_FLAG;
 	if (z_header.version == V3 && (z_header.flags & OLD_SOUND_FLAG))
-#ifdef SOUND_SUPPORT
+#ifdef NO_SOUND
 		if (!dos_init_sound())
 #endif
 			z_header.flags &= ~OLD_SOUND_FLAG;
 	if (z_header.flags & SOUND_FLAG)
-#ifdef SOUND_SUPPORT
+#ifdef NO_SOUND
 		if (!dos_init_sound())
 #endif
 			z_header.flags &= ~SOUND_FLAG;

@@ -287,7 +287,7 @@ void interpret(void)
 			var_opcodes[opcode - 0xc0] ();
 		}
 
-#if defined(DJGPP) && defined(SOUND_SUPPORT)
+#if defined(DJGPP) && !defined(NO_SOUND)
 		if (end_of_sound_flag)
 			end_of_sound();
 #endif

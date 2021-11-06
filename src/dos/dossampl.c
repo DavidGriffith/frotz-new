@@ -19,7 +19,7 @@
 #include "frotz.h"
 #include "dosfrotz.h"
 
-#ifdef SOUND_SUPPORT
+#ifndef NO_SOUND
 
 #define SWAP_BYTES(v)	{ (v) = bswap16(v); }
 #define READ_DSP(v)	{while(!inp(sound_adr+14)&0x80);(v)=inportb(sound_adr+10)}
@@ -407,7 +407,7 @@ void os_finish_with_sample(int UNUSED(id))
 	os_stop_sample(0);	/* we keep 64KB allocated all the time */
 } /* os_finish_with_sample */
 
-#else /* SOUND_SUPPORT */
+#else /* NO_SOUND */
 
 /* Do-nothing stubs for when sound support is disabled. */
 
@@ -419,7 +419,7 @@ void os_init_sound(void) {}
 void dos_reset_sound(void) {}
 bool dos_init_sound(void) { return TRUE; }
 
-#endif /* SOUND_SUPPORT */
+#endif /* NO_SOUND */
 
 /*
  * os_beep
