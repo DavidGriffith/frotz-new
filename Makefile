@@ -686,6 +686,7 @@ clean: $(SUB_CLEAN)
 	rm -rf $(NAME)-$(VERSION)
 	rm -rf $(COMMON_DEFINES) $(CURSES_DEFINES) $(HASH)
 	rm -f FROTZ.BAK FROTZ.EXE FROTZ.LIB FROTZ.DSK *.OBJ
+	rm -f FROTZ.MAP *.ERR
 	rm -f frotz.map *.err
 
 distclean: clean
