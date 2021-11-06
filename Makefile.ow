@@ -7,7 +7,17 @@
 # compilation, but the DOS/4GW version of owcc (27 Aug 2020) likes to crash
 # when trying to invoke wcc.  (The Linux version has no problem.)
 CC = wcc
-CFLAGS = -bt=dos -ml -onatxl+ -0 -zq -I$(%WATCOM)/h
+
+INCLUDE_PATH = -I$(%WATCOM)/h
+
+# If we're running under DOS, use a backslash in INCLUDE_PATH
+!ifdef %COMSPEC
+!ifndef %SHELL
+INCLUDE_PATH = -I$(%WATCOM)\h
+!endif
+!endif
+
+CFLAGS = -bt=dos -ml -onatxl+ -0 -zq $(INCLUDE_PATH)
 AS = wasm
 ASFLAGS = -bt=dos -ml -zq
 LD = wlink
