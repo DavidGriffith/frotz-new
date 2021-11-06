@@ -31,6 +31,8 @@ SOUND_TYPE ?= ao
 DOS_NO_SOUND ?= yes
 DOS_NO_BLORB ?= yes
 DOS_NO_GRAPHICS ?= yes
+DOS_NO_TRUECOLOUR ?= yes
+
 
 ##########################################################################
 # The configuration options below are intended mainly for older flavors
@@ -473,6 +475,9 @@ ifdef DOS_NO_SOUND
 endif
 ifdef DOS_NO_GRAPHICS
 	@echo "#define NO_GRAPHICS" >> $@
+endif
+ifdef DOS_NO_TRUECOLOUR
+	@echo "#define NO_TRUECOLOUR" >> $@
 endif
 
 

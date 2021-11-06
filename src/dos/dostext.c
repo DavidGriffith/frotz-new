@@ -1014,7 +1014,7 @@ void os_more_prompt(void)
  */
 int os_from_true_colour(zword colour)
 {
-#ifdef __WATCOMC__
+#ifndef NO_TRUECOLOUR
 	if (colour == 0xfffe)
 		return 0;
 	else if (colour == 0xffff)
@@ -1051,7 +1051,7 @@ int os_from_true_colour(zword colour)
  */
 zword os_to_true_colour(int index)
 {
-#ifdef __WATCOMC__
+#ifndef NO_TRUECOLOUR
 	switch (index) {
 	case 0: return -2;
 	case 1: return -1;
