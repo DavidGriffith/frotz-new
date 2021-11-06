@@ -32,6 +32,9 @@
 #include "frotz.h"
 #include "dosfrotz.h"
 
+int scaler = 1;
+
+#ifndef NO_GRAPHICS
 
 #define PIC_NUMBER 0
 #define PIC_WIDTH 2
@@ -68,8 +71,6 @@ static struct {
 	word unused2;
 	word version;
 } gheader;
-
-int scaler = 1;
 
 static word pic_width = 0;
 static word pic_height = 0;
@@ -814,3 +815,13 @@ bool os_picture_data(int picture, int *height, int *width)
 
 	return avail;
 } /* os_picture_data */
+
+#else /* NO_GRAPHICS */
+
+bool init_pictures(void) {}
+void reset_pictures(void) {}
+int os_peek_colour(void) {}
+void os_draw_picture(int picture, int y, int x) {}
+bool os_picture_data(int picture, int *height, int *width) {}
+
+#endif
