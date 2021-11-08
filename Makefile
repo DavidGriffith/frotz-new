@@ -467,16 +467,16 @@ ifeq ($(wildcard $(COMMON_DEFINES)),)
 
 ifeq ($(EXPORT_TYPE), dos)
 	@echo "#define MSDOS_16BIT" >> $@
-ifdef DOS_NO_BLORB
+ifeq ($(DOS_NO_BLORB), yes)
 	@echo "#define NO_BLORB" >> $@
 endif
-ifdef DOS_NO_SOUND
+ifeq ($(DOS_NO_SOUND), yes)
 	@echo "#define NO_SOUND" >> $@
 endif
-ifdef DOS_NO_GRAPHICS
+ifeq ($(DOS_NO_GRAPHICS), yes)
 	@echo "#define NO_GRAPHICS" >> $@
 endif
-ifdef DOS_NO_TRUECOLOUR
+ifeq ($(DOS_NO_TRUECOLOUR), yes)
 	@echo "#define NO_TRUECOLOUR" >> $@
 endif
 
