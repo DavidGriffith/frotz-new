@@ -21,9 +21,13 @@
 
 #ifndef NO_SOUND
 
+#ifdef __WATCOMC__
 #define SWAP_BYTES(v)	{ (v) = bswap16(v); }
-#define READ_DSP(v)	{while(!inp(sound_adr+14)&0x80);(v)=inportb(sound_adr+10)}
-#define WRITE_DSP(v)	{while(inp(sound_adr+12)&0x80);outportb(sound_adr+12,(v))}
+#else
+#define SWAP_BYTES(v)	{_AX=v;asm xchg al,ah;v=_AX;}
+#endif
+#define READ_DSP(v)	{while(!inp(sound_adr+14)&0x80);(v)=inportb(sound_adr+10);}
+#define WRITE_DSP(v)	{while(inp(sound_adr+12)&0x80);outportb(sound_adr+12,(v));}
 
 extern void end_of_sound(void);
 
@@ -185,9 +189,9 @@ bool dos_init_sound(void)
 	outportb(0x20, 0x20);
 
 	if (sound_irq >= 8)
-		outportb(0xa0, 0x20)
+		outportb(0xa0, 0x20);
 
-	outportb(irc_mask_port, inportb(irc_mask_port) & ~(1 << (sound_irq & 7)))
+	outportb(irc_mask_port, inportb(irc_mask_port) & ~(1 << (sound_irq & 7)));
 
 	/* Indicate success */
 	return TRUE;
@@ -417,26 +421,7 @@ void os_start_sample(int number, int volume, int repeats, zword eos) {}
 void os_prepare_sample(int number) {}
 void os_init_sound(void) {}
 void dos_reset_sound(void) {}
+void os_beep(int number) { delay(75); }
 bool dos_init_sound(void) { return TRUE; }
 
 #endif /* NO_SOUND */
-
-/*
- * os_beep
- *
- * Play a beep sound. Ideally, the sound should be high- (number == 1)
- * or low-pitched (number == 2).
- * This goes through the PC speaker, not the sound card.
- *
- */
-void os_beep(int number)
-{
-	word T = 888 * number;
-
-	outportb(0x43, 0xb6);
-	outportb(0x42, lo(T));
-	outportb(0x42, hi(T));
-	outportb(0x61, inportb(0x61) | 3);
-	delay(75);
-	outportb(0x61, inportb(0x61) & ~3);
-} /* os_beep */
