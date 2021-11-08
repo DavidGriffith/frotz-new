@@ -23,7 +23,7 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)
-	rm -f *.O DEFS.H
+	rm -f *.o defs.h *.O DEFS.H
 
 %.o: %.c
 	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<
