@@ -409,7 +409,7 @@ dos: $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
 	@mkdir $(SNAVIG_DIR)
 	@echo "** Invoking snavig"
-	@$(SNAVIG) -t dos $(COMMON_DIR) $(DOS_DIR) $(SNAVIG_DIR)
+	@$(SNAVIG) -t dos $(COMMON_DIR) $(BLORB_DIR) $(DOS_DIR) $(SNAVIG_DIR)
 	@cp Makefile.tc $(SNAVIG_DIR)/Makefile
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for 16-bit DOS."
 	@echo "Use Borland Turbo C 3.00 and Borland MAKE 3.6".

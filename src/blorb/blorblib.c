@@ -8,6 +8,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "frotz.h"
+
+#ifndef NO_BLORB
+
 #include "blorb.h"
 #include "blorblow.h"
 
@@ -819,4 +823,6 @@ bb_err_t bb_load_resource_snd(bb_map_t *map, int method, bb_result_t *res,
 
     return bb_err_None;
 }
+
+#endif
 
