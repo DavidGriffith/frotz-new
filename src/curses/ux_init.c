@@ -366,7 +366,7 @@ static void parse_options(int argc, char **argv)
 		case 'O': f_setup.object_locating = 1; break;
 		case 'p': u_setup.plain_ascii = 1; break;
 		case 'P': f_setup.piracy = 1; break;
-		case 'q': f_setup.sound = 0; break;
+		case 'q': f_setup.quiet = 1; break;
 		case 'r': f_setup.right_margin = atoi(zoptarg); break;
 		case 'R': f_setup.restricted_path = strndup(zoptarg, PATH_MAX); break;
 		case 's': u_setup.random_seed = atoi(zoptarg); break;

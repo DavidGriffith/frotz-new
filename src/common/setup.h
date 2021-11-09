@@ -31,6 +31,7 @@ typedef struct frotz_setup_struct {
 	int expand_abbreviations;
 	int script_cols;
 	int sound;
+	int quiet;
 	int bleep;
 	int err_report_mode;
 

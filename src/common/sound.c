@@ -70,11 +70,15 @@ void init_sound(void)
 	}
 
 	if ((z_header.flags & SOUND_FLAG)
-	    || (z_header.version == V3 && (z_header.flags & OLD_SOUND_FLAG))) {
-		f_setup.sound = TRUE;
-		locked = FALSE;
-		playing = FALSE;
-		os_init_sound();
+	    || (z_header.version == V3 && (z_header.flags & OLD_SOUND_FLAG))
+	    || (f_setup.bleep)
+	    ) {
+		if (!f_setup.quiet) {
+			f_setup.sound = TRUE;
+			locked = FALSE;
+			playing = FALSE;
+			os_init_sound();
+		}
 	} else
 		f_setup.sound = FALSE;
 } /* init_sound */
