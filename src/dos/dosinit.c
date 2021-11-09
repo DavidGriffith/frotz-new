@@ -31,29 +31,31 @@
 extern f_setup_t f_setup;
 extern z_header_t z_header;
 
-static char information[] =
-    "An interpreter for all Infocom and other Z-Machine games.\n"
-    "Complies with standard 1.0 of Graham Nelson's specification.\n"
-    "\n"
-    "Syntax: frotz [options] story-file\n"
-    "  -a   watch attribute setting    \t -O   watch object locating\n"
-    "  -A   watch attribute testing    \t -p   alter piracy opcode\n"
-    "  -b # background colour          \t -r # right margin\n"
-    "  -B # reverse background colour  \t -R <path> restricted read/write\n"
-    "  -c # context lines              \t -s # random number seed value\n"
-    "  -d # display mode (see below)   \t -S # transcript width\n"
-    "  -e # emphasis colour [mode 1]   \t -t   set Tandy bit\n"
-    "  -f # foreground colour          \t -T   bold typing [modes 2+4+5]\n"
-    "  -F # reverse foreground colour  \t -u # slots for multiple undo\n"
-    "  -g # font [mode 5] (see below)  \t -v   show version information\n"
-    "  -h # screen height              \t -w # screen width\n"
-    "  -i   ignore runtime errors      \t -x   expand abbreviations g/x/z\n"
-    "  -l # left margin                \t -Z # error checking (see below)\n"
-    "  -o   watch object movement\n"
-    "\n"
-    "Fonts: 0 fixed, 1 sans serif, 2 comic, 3 times, 4 serif.\n"
-    "Display modes:  0 mono, 1 text, 2 CGA, 3 MCGA, 4 EGA, 5 Amiga.\n"
-    "Error reporting: 0 none, 1 first only (default), 2 all, 3 exit after any error.";
+#define INFORMATION "\
+An interpreter for all Infocom and other Z-Machine games.\n\
+Complies with standard 1.0 of Graham Nelson's specification.\n\
+\n\
+Syntax: frotz [options] story-file\n\
+  -a   watch attribute setting    \t -O   watch object locating\n\
+  -A   watch attribute testing    \t -p   alter piracy opcode\n\
+  -b # background colour          \t -q   quiet (disable sound effects)\n\
+  -B # reverse background colour  \t -r # right margin\n\
+  -c # context lines              \t -R <path> restricted read/write\n\
+  -d # display mode (see below)   \t -s # random number seed value\n\
+  -e # emphasis colour [mode 1]   \t -S # transcript width\n\
+  -f # foreground colour          \t -t   set Tandy bit\n\
+  -F # reverse foreground colour  \t -T   bold typing [modes 2+4+5]\n\
+  -g # font [mode 5] (see below)  \t -u # slots for multiple undo\n\
+  -h # screen height              \t -v   show version information\n\
+  -i   ignore runtime errors      \t -w # screen width\n\
+  -l # left margin                \t -x   expand abbreviations g/x/z\n\
+  -o   watch object movement      \t -Z # error checking (see below)\n"
+
+#define INFO2 "\
+Fonts: 0 fixed, 1 sans serif, 2 comic, 3 times, 4 serif.\n\
+Display modes:  0 mono, 1 text, 2 CGA, 3 MCGA, 4 EGA, 5 Amiga.\n\
+Error reporting: 0 none, 1 first only (default), 2 all, 3 exit after any error."
+
 
 /* in bcinit.c only.  What is its significance? */
 extern unsigned cdecl _heaplen = 0x800 + 4 * BUFSIZ;
@@ -116,6 +118,8 @@ static bool test_enhanced_keyboard(unsigned char b)
  */
 void os_init_setup(void)
 {
+	f_setup.sound = 1;
+
 	at_keybrd = (test_enhanced_keyboard(0x40) && test_enhanced_keyboard(0x80));
 	test_enhanced_keyboard(0x00);
 } /* os_init_setup */
@@ -274,7 +278,7 @@ static void parse_options(int argc, char **argv)
 		int num = 0;
 
 		c = zgetopt(argc, argv,
-			   "aAb:B:c:d:e:f:F:g:h:il:oOpr:R:s:S:tTu:vw:xZ:");
+			   "aAb:B:c:d:e:f:F:g:h:il:oOpqr:R:s:S:tTu:vw:xZ:");
 
 		if (zoptarg != NULL)
 			num = dectoi(zoptarg);
@@ -320,6 +324,8 @@ static void parse_options(int argc, char **argv)
 			f_setup.object_locating = 1;
 		if (c == 'p')
 			f_setup.piracy = 1;
+		if (c == 'q')
+			f_setup.sound = 0;
 		if (c == 'r')
 			f_setup.right_margin = num;
 		if (c == 'R')
@@ -408,7 +414,8 @@ void os_process_arguments(int argc, char *argv[])
 #else
 		printf("Audio output disabled.\n");
 #endif
-		puts(information);
+		puts(INFORMATION);
+		puts(INFO2);
 		exit(EXIT_SUCCESS);
 	}
 
