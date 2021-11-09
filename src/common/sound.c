@@ -220,10 +220,16 @@ void z_sound_effect(void)
 
 #else /* NO_SOUND */
 
-/* Do-nothing stubs for when sound support is disabled. */
-
 void init_sound(void) { /* nothing here */ }
 void end_of_sound(void) { /* nothing here */ }
-void z_sound_effect(void) { /* nothing here */ }
 
+/* Processes bleeps and nothing more. */
+void z_sound_effect(void)
+{
+	zword number = zargs[0];
+
+	if (number == 1 || number == 2)
+		os_beep(number);
+	return;
+}
 #endif
