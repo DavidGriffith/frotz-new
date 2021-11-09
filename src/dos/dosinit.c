@@ -325,7 +325,7 @@ static void parse_options(int argc, char **argv)
 		if (c == 'p')
 			f_setup.piracy = 1;
 		if (c == 'q')
-			f_setup.sound = 0;
+			f_setup.quiet = 1;
 		if (c == 'r')
 			f_setup.right_margin = num;
 		if (c == 'R')

@@ -416,6 +416,8 @@ void os_beep(int number)
 {
 	word T = 888 * number;
 
+	if (!f_setup.sound) return;
+
 	outportb(0x43, 0xb6);
 	outportb(0x42, lo(T));
 	outportb(0x42, hi(T));
