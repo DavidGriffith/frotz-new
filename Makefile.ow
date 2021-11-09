@@ -77,34 +77,37 @@ CORE_OBJECTS +=	$(CORE_DIR)/variable.o
 CORE_OBJECTS +=	$(CORE_DIR)/quetzal.o
 CORE_OBJECTS +=	$(CORE_DIR)/err.o
 
+BLORB_DIR = src/blorb
+BLORB_OBJECTS += $(BLORB_DIR)/blorblib.o
+
 all:	frotz
 
 .ERASE
 
-.c:	$(OW_DOS_DIR);$(CORE_DIR)
+.c:	$(OW_DOS_DIR);$(CORE_DIR);$(BLORB_DIR)
 .asm:	$(OW_DOS_DIR)
 
 .c.o:
 	echo $(CFLAGS) -fo=$@ $< >$*.rsp
-	$(CC) $(VER) -i="$(OW_DOS_DIR)" -i="$(CORE_DIR)" @$*.rsp
+	$(CC) $(VER) -i="$(OW_DOS_DIR)" -i="$(CORE_DIR)" -i="$(BLORB_DIR)" @$*.rsp
 	$(RM) $*.rsp
 
 .asm.o:
 	echo $(ASFLAGS) -fo=$@ $< >$*.rsp
-	$(AS) $(VER) -i="$(OW_DOS_DIR)" -i="$(CORE_DIR)" @$*.rsp
+	$(AS) $(VER) -i="$(OW_DOS_DIR)" -i="$(CORE_DIR)" -i="$(BLORB_DIR)" @$*.rsp
 	$(RM) $*.rsp
 
 # Note: the `for' command is specially intercepted by wmake, and works like
 # its namesake in MS-DOS command.com --- even when cross-building in Unix (!).
 clean:	.SYMBOLIC
-	for %i in ($(CORE_DIR)/*.o $(OW_DOS_DIR)/*.o) do -$(RM) %i
-	for %i in ($(CORE_DIR)/*.rsp $(OW_DOS_DIR)/*.rsp) do -$(RM) %i
+	for %i in ($(CORE_DIR)/*.o $(BLORB_DIR)/*.o $(OW_DOS_DIR)/*.o) do -$(RM) %i
+	for %i in ($(CORE_DIR)/*.rsp $(BLORB_DIR)/*.rsp $(OW_DOS_DIR)/*.rsp) do -$(RM) %i
 	for %i in (*.obj *.lib *.rsp *.exe *.bak *.map *.lnk) do -$(RM) %i
 
 frotz:	$(BINNAME) .SYMBOLIC
 
-$(BINNAME): $(DOS_OBJECTS) $(CORE_OBJECTS)
+$(BINNAME): $(DOS_OBJECTS) $(CORE_OBJECTS) $(BLORB_OBJECTS)
 	echo $(LDFLAGS) name $(BINNAME) >$*.rsp
-	for %i in ($(DOS_OBJECTS) $(CORE_OBJECTS)) do echo file %i >>$*.rsp
+	for %i in ($(DOS_OBJECTS) $(CORE_OBJECTS) $(BLORB_OBJECTS)) do echo file %i >>$*.rsp
 	$(LD) @$*.rsp
 	$(RM) $*.rsp

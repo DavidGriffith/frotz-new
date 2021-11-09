@@ -27,6 +27,9 @@
 #include "frotz.h"
 
 #include "dosfrotz.h"
+#ifndef NO_BLORB
+#include "dosblorb.h"
+#endif
 
 extern f_setup_t f_setup;
 extern z_header_t z_header;
@@ -83,14 +86,6 @@ int user_screen_width = -1;
 int user_tandy_bit = -1;
 int user_random_seed = -1;
 int user_font = 1;
-
-/* Blorb-related things */
-#ifndef NO_BLORB
-char *blorb_name;
-char *blorb_file;
-bool use_blorb;
-bool exec_in_blorb;
-#endif
 
 static byte old_video_mode = 0;
 
@@ -444,20 +439,6 @@ void os_process_arguments(int argc, char *argv[])
 
 	/* Save the executable file name */
 	progname = argv[0];
-
-#ifndef NO_BLORB
-	blorb_file = malloc_filename(f_setup.story_name, "blb");
-
-	switch (dos_init_blorb()) {
-	case bb_err_Format:
-		printf("Blorb file loaded, but unable to build map.\n\n");
-		break;
-	default:
-		break;
-/* No problem.  Don't say anything. */
-/*	    printf("Blorb error code %i\n\n"); */
-	}
-#endif
 } /* os_process_arguments */
 
 
@@ -957,54 +938,32 @@ FILE *os_load_story(void)
 #ifndef NO_BLORB
 	FILE *fp;
 
-	/* Did we build a valid blorb map? */
-	if (exec_in_blorb) {
-		fp = fopen(blorb_file, "rb");
-		fseek(fp, blorb_res.data.startpos, SEEK_SET);
-	} else {
-		fp = fopen(f_setup.story_file, "rb");
+	switch (dos_blorb_init(f_setup.story_file)) {
+	case bb_err_NoBlorb:
+/*		printf("No blorb file found.\n\n"); */
+		break;
+	case bb_err_Format:
+		printf("Blorb file loaded, but unable to build map.\n\n");
+		break;
+	case bb_err_NotFound:
+		printf("Blorb file loaded, but lacks executable chunk.\n\n");
+		break;
+	case bb_err_None:
+/*		printf("No blorb errors.\n\n"); */
+		break;
 	}
+
+	fp = fopen(f_setup.story_file, "rb");
+
+	/* Is this a Blorb file containing Zcode? */
+	if (f_setup.exec_in_blorb)
+		fseek(fp, blorb_res.data.startpos, SEEK_SET);
+
 	return fp;
 #else
 	return fopen(f_setup.story_file, "rb");
 #endif
 }
-
-
-#ifndef NO_BLORB
-int dos_init_blorb(void)
-{
-	FILE *blorbfile;
-
-	/* If the filename given on the command line is the same as our
-	 * computed blorb filename, then we will assume the executable
-	 * is contained in the blorb file.
-	 */
-	if (strncmp((char *)basename(f_setup.story_file),
-		    (char *)basename(blorb_file), 55) == 0) {
-		if ((blorbfile = fopen(blorb_file, "rb")) == NULL)
-			return bb_err_Read;
-		/* Under DOS, bb_create_map() returns bb_err_Format */
-		blorb_err = bb_create_map(blorbfile, &blorb_map);
-
-		if (blorb_err != bb_err_None) {
-			return blorb_err;
-		}
-
-		/* Now we need to locate the EXEC chunk within the blorb file
-		 * and present it to the rest of the program as a file stream.
-		 */
-		blorb_err = bb_load_chunk_by_type(blorb_map, bb_method_FilePos,
-						  &blorb_res, bb_ID_ZCOD, 0);
-
-		if (blorb_err == bb_err_None) {
-			exec_in_blorb = 1;
-			use_blorb = 1;
-		}
-	}
-	return 0;
-}
-#endif /* NO_BLORB */
 
 
 /*
@@ -1014,27 +973,21 @@ int dos_init_blorb(void)
 int os_storyfile_seek(FILE * fp, long offset, int whence)
 {
 #ifndef NO_BLORB
-	int retval;
 	/* Is this a Blorb file containing Zcode? */
-	if (exec_in_blorb) {
+	if (f_setup.exec_in_blorb) {
 		switch (whence) {
 		case SEEK_END:
-			retval =
-			    fseek(fp,
-				  blorb_res.data.startpos + blorb_res.length +
-				  offset, SEEK_SET);
+			return fseek(fp, blorb_res.data.startpos + blorb_res.length + offset, SEEK_SET);
 			break;
 		case SEEK_CUR:
-			retval = fseek(fp, offset, SEEK_CUR);
+			return fseek(fp, offset, SEEK_CUR);
 			break;
 		case SEEK_SET:
+			/* SEEK_SET falls through to default */
 		default:
-			retval =
-			    fseek(fp, blorb_res.data.startpos + offset,
-				  SEEK_SET);
+			return fseek(fp, blorb_res.data.startpos + offset, SEEK_SET);
 			break;
 		}
-		return retval;
 	}
 #endif
 	return fseek(fp, offset, whence);
@@ -1049,7 +1002,7 @@ int os_storyfile_tell(FILE * fp)
 {
 #ifndef NO_BLORB
 	/* Is this a Blorb file containing Zcode? */
-	if (exec_in_blorb)
+	if (f_setup.exec_in_blorb)
 		return ftell(fp) - blorb_res.data.startpos;
 #endif
 	return ftell(fp);

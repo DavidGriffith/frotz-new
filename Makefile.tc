@@ -27,6 +27,8 @@ CORE_OBJECTS =  buffer.o fastmem.o files.o getopt.o hotkey.o input.o \
 		screen.o sound.o stream.o table.o text.o variable.o \
 		quetzal.o err.o
 
+BLORB_OBJECTS = blorblib.o
+
 .SUFFIXES: .c .o .h
 
 all:	frotz
@@ -42,5 +44,5 @@ clean:
 	$(RM) *.exe
 	$(RM) *.bak
 
-frotz:	$(DOS_OBJECTS) $(CORE_OBJECTS)
+frotz:	$(DOS_OBJECTS) $(CORE_OBJECTS) $(BLORB_OBJECTS)
 	$(CC) $(CFLAGS) -e$(BINNAME) $(LIBRARY)
