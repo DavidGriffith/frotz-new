@@ -28,7 +28,7 @@ SYSCONFDIR ?= /etc
 SOUND_TYPE ?= ao
 
 # Choose DOS options
-DOS_NO_SOUND ?= yes
+#DOS_NO_SOUND ?= yes
 DOS_NO_BLORB ?= yes
 DOS_NO_GRAPHICS ?= yes
 DOS_NO_TRUECOLOUR ?= yes
@@ -410,7 +410,10 @@ dos: $(COMMON_DEFINES) $(HASH)
 	@mkdir $(SNAVIG_DIR)
 	@echo "** Invoking snavig"
 	@$(SNAVIG) -t dos $(COMMON_DIR) $(DOS_DIR) $(SNAVIG_DIR)
-	@cp Makefile.tc $(SNAVIG_DIR)/Makefile
+	@cp Makefile.tc Makefile.ow $(SNAVIG_DIR)
+	@cp owbuild.bat tcbuild.bat $(SNAVIG_DIR)
+	@sed -i "/^OW_DOS_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
+	@sed -i "/^CORE_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for 16-bit DOS."
 	@echo "Use Borland Turbo C 3.00 and Borland MAKE 3.6".
 
@@ -467,17 +470,35 @@ ifeq ($(wildcard $(COMMON_DEFINES)),)
 
 ifeq ($(EXPORT_TYPE), dos)
 	@echo "#define MSDOS_16BIT" >> $@
+
+
+	@echo "/* Uncomment this to disable Blorb support. */" >> $@
 ifeq ($(DOS_NO_BLORB), yes)
 	@echo "#define NO_BLORB" >> $@
+else
+	@echo "/* #define  NO_BLORB */" >>  $@
 endif
+
+	@echo "/* Uncomment this to disable sound support. */" >> $@
 ifeq ($(DOS_NO_SOUND), yes)
 	@echo "#define NO_SOUND" >> $@
+else
+	@echo "/* #define NO_SOUND */" >> $@
 endif
+
+
+	@echo "/* Uncomment this to disable graphics support. */" >> $@
 ifeq ($(DOS_NO_GRAPHICS), yes)
 	@echo "#define NO_GRAPHICS" >> $@
+else
+	@echo "/* #define NO_GRAPHICS */" >> $@
 endif
+
+	@echo "/* Uncomment this to disable true-colour support. */" >> $@
 ifeq ($(DOS_NO_TRUECOLOUR), yes)
 	@echo "#define NO_TRUECOLOUR" >> $@
+else
+	@echo "/* #define NO_TRUECOLOUR */" >> $@
 endif
 
 
@@ -708,7 +729,7 @@ distclean: clean
 	rm -f $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN) $(XFROTZ_BIN) $(DOS_BIN)
 	rm -f a.out
 	rm -rf $(NAME)src $(NAME)$(DOSVER) $(SNAVIG_DIR)
-	rm -f $(NAME)*.tar.gz $(NAME)src.zip $(NAME)$(DOSVER).zip
+	rm -f $(NAME)*.tar.gz $(NAME)src.zip $(NAME)$(DOSVER).zip snavig.zip
 
 help:
 	@echo "Targets:"
