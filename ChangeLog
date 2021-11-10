@@ -10,6 +10,9 @@ NEW FEATURES
 - Added changes to allow for compilation on a DEC PDP-10 mainframe
   running TOPS20.  See INSTALL_PDP10.
 
+- Added a means to cross-compile to DOS by way of Open Watcom C version
+  2 and later.  See INSTALL_DOS.
+
 - Added a quiet mode to dumb interface to quell startup messages.
 
 BUG FIXES
@@ -18,6 +21,8 @@ BUG FIXES
 
 - Fixed wrong glyphs in DOS Frotz's Amiga font mode.  1/2 and 1/4 were
   there instead of the oe and OE ligatures.
+
+- Fixed a failure of the -q flag to actually silence sound effects.
 
 
 Summary of changes between Frotz 2.52 and Frotz 2.53:

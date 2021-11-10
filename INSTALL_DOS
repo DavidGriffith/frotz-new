@@ -13,85 +13,119 @@ audio and graphic data.  For now, only the old Infocom-style mechanism
 for these are supported.
 
 Sound is supported through Soundblaster compatible sound cards.  Graphic
-levels from Hercules to MCGA are supported.
+levels from Hercules to MCGA and VGA are supported.
 
-To compile DOS Frotz, you need the following:
-	* Borland Turbo C++ 3.00.  This is the latest version I'm aware 
-	  of capable of building 16-bit DOS applications.
-	  Alternatively, use Open Watcom C 2.0 beta, May 17 2020, or higher.
-	* PC-DOS, MS-DOS, or DR-DOS version 5.0 or higher.
-	  FreeDOS 1.2 works well too.
+To compile DOS Frotz, you need one of following:
 
+	* Borland Turbo C++ 3.00.  This is the latest version I'm aware
+	  of that are capable of building 16-bit DOS applications. Turbo
+	  C 2.01 may also work, but is untested.  Both of these may be
+	  obtained from archive.org.
 
-=============================
-Compilation with Turbo C++ ||
-=============================
+	* Open Watcom C 2.0 or later.  This application suite can be
+	  installed to a DOS machine to directly compile Frotz there or
+	  to a Linux machine to cross-compile Frotz for DOS. It may be
+	  obtained from https://github.com/open-watcom/open-watcom-v2.
 
-Turbo C++ is typically installed to C:\tc.  Make sure your path contains 
-C:\tc\bin.  When this is done, type "make".  Did Borland's make program 
-run?  Now type "tcc".  If those two commands work, then you should be 
-ready to compile.
+To compile in a DOS environment PC-DOS, MS-DOS or DR-DOS version 5.0 or
+higher is required.  FreeDOS 1.2 and later will also work.  The earliest
+version of PC-DOS or MS-DOS under which DOS Frotz will run is currently
+unknown.  Real or virtualized hardware will work, including Virtualbox
+and DOSBox.
 
-To compile, you need to first get the source code into a DOS machine,
-whether it's real or emulated.  Do "make dos" to produce a zip file,
-frotzsrc.zip, which can then be copied to your real or virtual DOS
-machine.
-
-To compile, open up this zip file and go into the frotzsrc directory and
-type "build".  That will invoke "build.bat", a batch file that simply
-executes "make -f makefile.tc".  The reason for this is a bit of
-syntactic sugar to deal with the fact that it is impractical to have one
-Makefile build both Unix and DOS versions.  After about a minute, you
-should have FROTZ.EXE.  This file is all you need to run Frotz.  Put it
-somewhere in your path and go to wherever you keep your Infocom games.
-Type "frotz zork1.dat" or whatever and there you go.
-
-Compile-time options are set in src/dos/defs.h.  There should be no need
-to edit Makefile.tc.  Having compile-time options like this allows for
-the Turbo C IDE to be used.  At the moment, the settings in frotz.prj do
-not result in an optimized executable.  I'm not sure how to get that
-file in agreement with what's in Makefile.tc.
-
-To clean up after a build, type "build clean".
+DOS Frotz is currently built only as a 16-bit application.
 
 
-===============================================
-Compilation with Open Watcom C hosted on DOS ||
-===============================================
+===================================
+Installing Borland Turbo C / C++ ||
+===================================
 
-You should be able to find an installer program for the DOS version of Open
-Watcom at https://github.com/open-watcom/open-watcom-v2/releases ; it will
-likely be under the name open-watcom-2_0-c-dos.exe.
+If you already have a copy of Turbo C++ or Turbo C, follow the
+instructions to install it on your DOS machine.  Fortunately Borland's
+successor, Embarcadero Technologies, has released these compiler suites
+as freeware.  They can be obtained from archive.org at
+https://archive.org/details/TURBOC3_20180515 and
+https://archive.org/details/msdos_borland_turbo_c_2.01.  Instruction
+manuals can also be found there.
 
-Open Watcom is typically installed to C:\watcom.  Make sure the environment
-variable WATCOM points to the installation path, e.g.
+You'll want the Turbo C and TASM binary directories in your path.  This
+is what I use under DOSBox:
 
-	set WATCOM=C:\watcom
+	path=z:\;c:\bin;%PATH%;c:\tc;c:\tc\bin;c:\tasm\bin
 
-When this is done, type "%WATCOM%\binw\dos4gw".  Did the DOS/4GW program
-run?  If this command works, then you should be ready to compile.
 
-To compile, you need to first get the source code into a DOS machine,
-whether it's real or emulated.  Do "make dos" to produce a zip file,
-frotzsrc.zip, which can then be copied to your real or virtual DOS
-machine.
+===========================
+Installing Open Watcom C ||
+===========================
 
-To compile, open up this zip file and go into the frotzsrc directory and
-type "owbuild".  That will invoke "owbuild.bat", a batch file that sets some
-environment variables and then executes "wmake -f makefile.ow".  After about
-a minute, you should have FROTZ.EXE.  This file is all you need to run
-Frotz.  Put it somewhere in your path and go to wherever you keep your
-Infocom games.  Type "frotz zork1.dat" or whatever and there you go.
+Visit https://github.com/open-watcom/open-watcom-v2/releases and go into
+one of the recent builds.  Download ow-snapshot.tar.gz and open it into
+$HOME/watcom/.  You can also download the source and build it yourself.
 
-Compile-time options are set in src/owdos/defs.h.  There should be no need
-to edit Makefile.ow.
+Once you have $HOME/watcom/ populated correctly, add this to your
+.bashrc or .profile files or wherever you set this stuff:
 
-To clean up after a build, type "owbuild clean".
+	export WATCOM=$HOME/watcom
+
+You will then need to add to your path which bin directory is
+appropriate for your OS.
+
+If you are running Linux on amd64, add this:
+	export PATH=$PATH:$WATCOM/binl64
+
+If you are running Linux on i386, add this:
+	export PATH=$PATH:$WATCOM/binl
+
+You will also want the Watcom tools binary directory in your path.  This
+is what I use under DOSBox:
+
+	path=z:\;c:\bin;%PATH%;C:\WATCOM
+
+It doesn't look like cross-compiling is supported from any combination
+of OS and architecture other than Linux on i386 or amd64.
 
 
 ========================
-Hardware Requirements ||
+Compilation under DOS ||
 ========================
 
-The exact hardware requirements of DOS Frotz are yet to be determined.  
-Please send me reports of what Zcode works and what doesn't.
+1.  On a Unix machine, prepare the source code for compilation on a DOS
+    machine.
+
+2.  Copy the source code into your DOS machine and configure the build.
+
+3.  Compile Frotz.
+
+Here we go!
+-----------
+
+1.  On your Unix machine, do "make dos" in the Frotz distribution
+    directory, either in the Git repository or a downloaded tar.gz
+    archive.  This will create a directory named "snavig/" containing
+    source code all set up for compilation.  Zip up this directory and
+    get it into your DOS machine.  The zip file will easily fit onto a
+    single 360K floppy.
+
+2.  Back on the DOS machine, unzip the snavig archive into a directory
+    on the hard drive.  Go into it and edit the file "defs.h".  This is
+    where you can enable or disable features and adjust compile-time
+    options.  Disabling features will result in a smaller executable and
+    run faster, which can be very important if you want to use Frotz on
+    an original IBM PC.
+
+3.  If you're using Turbo C, type "tcbuild".  If you're using Open
+    Watcom C, type "owbuild".  These batch files simply call "make -f
+    makefile.tc" or "wmake -f makefile.ow".  After a couple minutes,
+    Frotz will be compiled and ready for use.  To clean up after a
+    build, type "tcbuild clean" or "owbuild clean".
+
+
+=======================
+Minimum Requirements ||
+=======================
+
+The minimum hardware and operating system requirements of DOS Frotz are
+unknown.  It's fairly clear that the original IBM PC can run all Infocom
+games at least up to V5.  Graphics or sound might be possible.
+
+Please send me reports of what hardware and games work and what don't.
