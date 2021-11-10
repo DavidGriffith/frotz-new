@@ -51,11 +51,7 @@ int scaler = 1;
 #define READ_WORD(v,p,o)	v = *(word far *)(p+o)
 #endif
 
-#ifdef __WATCOMC__
 extern volatile byte _far *get_scrnptr (int);
-#else
-extern unsigned long get_scrnptr(int);
-#endif
 
 extern FILE *os_path_open(const char *, const char *);
 
@@ -78,13 +74,8 @@ static word pic_flags = 0;
 static long pic_data = 0;
 static long pic_colour = 0;
 
-#ifdef __WATCOMC__
 static byte _far *table_val = NULL;
 static word _far *table_ref = NULL;
-#else
-static byte far *table_val = NULL;
-static word far *table_ref = NULL;
-#endif
 
 static FILE *file = NULL;
 
@@ -201,13 +192,8 @@ bool init_pictures(void)
 {
 
 	/* Allocate memory for decompression */
-#ifdef __WATCOMC__
 	table_val = (byte _far *) _fmalloc(3 * 3840);
 	table_ref = (word _far *) (table_val + 3840);
-#else
-	table_val = (byte far *) farmalloc(3 * 3840);
-	table_ref = (word far *) (table_val + 3840);
-#endif
 	if (table_val == NULL)
 		return FALSE;
 
@@ -723,11 +709,7 @@ reverse_buffer:
 	if (bufpos == 0)
 		goto next_code;
 
-#ifdef __WATCOMC__
-	code = buf[--bufpos];
-#else
 	byte0(code) = buf[--bufpos];
-#endif
 	goto reverse_buffer;
 } /* draw_picture */
 

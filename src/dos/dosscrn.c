@@ -35,11 +35,7 @@
  * Return a pointer to the given line in video RAM.
  *
  */
-#ifdef __WATCOMC__
 volatile byte _far *get_scrnptr(int y)
-#else
-byte far *get_scrnptr(int y)
-#endif
 {
 	if (display == _CGA_)
 		return MK_FP((y & 1) ? 0xba00 : 0xb800, 40 * (y & ~1));
@@ -56,11 +52,7 @@ byte far *get_scrnptr(int y)
  * Helper function for clear_line.
  *
  */
-#ifdef __WATCOMC__
 static void clear_byte(volatile byte _far * scrn, word mask)
-#else
-static void clear_byte(byte far * scrn, word mask)
-#endif
 {
 	if (display == _CGA_)
 		if (scrn_attr == 0)
@@ -94,11 +86,7 @@ static void clear_byte(byte far * scrn, word mask)
  *
  */ static void clear_line(int y, int left, int right)
 {
-#ifdef __WATCOMC__
 	volatile byte _far *scrn = get_scrnptr(y);
-#else
-	byte far *scrn = get_scrnptr(y);
-#endif
 	if (display == _MCGA_)
 
 #ifdef __WATCOMC__
@@ -181,12 +169,8 @@ void os_erase_area(int top, int left, int bottom, int right, int win)
  * Helper function for copy_line.
  *
  */
-#ifdef __WATCOMC__
 static void copy_byte(volatile byte _far * scrn1, volatile byte _far * scrn2,
 		      byte mask)
-#else
-static void copy_byte(byte far * scrn1, byte far * scrn2, byte mask)
-#endif
 {
 	int i;
 #ifdef __WATCOMC__
@@ -230,13 +214,8 @@ static void copy_byte(byte far * scrn1, byte far * scrn2, byte mask)
  */
 static void copy_line(int y1, int y2, int left, int right)
 {
-#ifdef __WATCOMC__
 	volatile byte _far *scrn1 = get_scrnptr(y1);
 	volatile byte _far *scrn2 = get_scrnptr(y2);
-#else
-	byte far *scrn1 = get_scrnptr(y1);
-	byte far *scrn2 = get_scrnptr(y2);
-#endif
 	if (display == _MCGA_)
 #ifdef __WATCOMC__
 		_fmemcpy((byte _far *)(scrn1 + left),
