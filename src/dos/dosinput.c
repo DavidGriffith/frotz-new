@@ -63,11 +63,7 @@ static struct {
 
 static bool overwrite = FALSE;
 
-#ifdef __WATCOMC__
 volatile int end_of_sound_flag;
-#else
-int end_of_sound_flag;
-#endif
 
 /*
  * swap_colours
@@ -487,11 +483,7 @@ static void input_move(zchar newc, zchar oldc)
 		cursor_right();
 } /* input_move */
 
-#ifdef __WATCOMC__
 #undef H
-#else
-#undef H(x)
-#endif
 
 /*
  * delete_char

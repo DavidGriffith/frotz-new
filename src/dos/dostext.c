@@ -41,7 +41,7 @@
 #ifdef __WATCOMC__
 extern volatile byte _far *get_scrnptr(int);
 #else
-extern byte far *get_scrnptr(int);
+extern byte _far *get_scrnptr(int);
 #endif
 
 int current_bg = 0;
@@ -81,19 +81,11 @@ char latin1_to_ibm[] = {
 	0x9b, 0x97, 0xa3, 0x96, 0x81, 0xec, 0xe7, 0x98
 };
 
-#ifdef __WATCOMC__
 static word _far *sans_font = NULL;
 static byte _far *sans_width = NULL;
 static byte _far *mcga_font = NULL;
 static byte _far *mcga_width = NULL;
 static byte _far *graphics_font = NULL;
-#else
-static word far *sans_font = NULL;
-static byte far *sans_width = NULL;
-static byte far *mcga_font = NULL;
-static byte far *mcga_width = NULL;
-static byte far *graphics_font = NULL;
-#endif
 
 static char name[] = "FONTS/FONT0.FNT";
 
@@ -150,11 +142,10 @@ static int available_bios(void)
  */
 static void set_user_tfont(word offset, byte height)
 {
-#ifdef __WATCOMC__
 	byte _far *ptr_font = font_data+offset;
+#ifdef __WATCOMC__
 	_asm {
 #else
-	byte far *ptr_font = font_data+offset;
 	asm {
 #endif
 		mov bh,height
@@ -178,11 +169,10 @@ static void set_user_tfont(word offset, byte height)
  */
 static void set_user_gfont(word offset, word height)
 {
-#ifdef __WATCOMC__
 	byte _far *ptr_font = font_data+offset;
+#ifdef __WATCOMC__
 	_asm {
 #else
-	byte far *ptr_font = font_data+offset;
 	asm {
 #endif
 		mov cx,height
@@ -545,44 +535,22 @@ void os_set_font(int new_font)
  * Helper function for drawing characters in EGA and Amiga mode.
  *
  */
-#ifdef __WATCOMC__
 void write_pattern(volatile byte _far * screen, byte val, byte mask)
-#else
-void write_pattern(byte far * screen, byte val, byte mask)
-#endif
 {
-#ifdef __WATCOMC__
 	byte bg = text_bg, fg = text_fg;
-#endif
 	if (mask != 0) {
 		if (display == _CGA_) {
-#ifdef __WATCOMC__
 			if (bg == BLACK)
-#else
-			if (text_bg == BLACK)
-#endif
 				*screen &= ~mask;
-#ifdef __WATCOMC__
 			if (bg == WHITE)
-#else
-			if (text_bg == WHITE)
-#endif
 				*screen |= mask;
-#ifdef __WATCOMC__
 			if (fg != bg)
-#else
-			if (text_fg != text_bg)
-#endif
 				*screen ^= val;
 		} else if (display == _MCGA_) {
 			byte i;
 
 			for (i = 0x80; (mask & i) != 0; i >>= 1)
-#ifdef __WATCOMC__
 				*screen++ = (val & i) ? fg : bg;
-#else
-				*screen++ = (val & i) ? text_fg : text_bg;
-#endif
 		} else {
 #ifdef __WATCOMC__
 			outp(0x3cf, mask);
@@ -688,11 +656,7 @@ void write_pattern(byte far * screen, byte val, byte mask)
 		asm int 0x10
 #endif
 	} else {
-#ifdef __WATCOMC__
 		void _far *table;
-#else
-		void _far *table;
-#endif
 		word mask;
 		word val;
 		byte mask0;
@@ -724,22 +688,14 @@ void write_pattern(byte far * screen, byte val, byte mask)
 			align = 0;
 			type = 2;
 		} else if (display == _CGA_) {
-#ifdef __WATCOMC__
 			table = (byte _far *) MK_FP(0xf000, 0xfa6e) + 8 * c;
-#else
-			table = (byte far *) MK_FP(0xf000, 0xfa6e) + 8 * c;
-#endif
 			mask = 0xff;
 			underline = 7;
 			boldface = (user_bold_typing != -1) ? 1 : -1;
 			align = 0;
 			type = 3;
 		} else if (display >= _EGA_) {
-#ifdef __WATCOMC__
-			table = (byte _far *) _dos_getvect(0x43) + z_header.font_height * c;
-#else
-			table = (byte far *) getvect(0x43) + z_header.font_height * c;
-#endif
+			table = (byte _far *) getvect(0x43) + z_header.font_height * c;
 			mask = 0xff;
 			underline = z_header.font_height - 1;
 			boldface = (user_bold_typing != -1) ? 1 : -1;
@@ -768,33 +724,17 @@ void write_pattern(byte far * screen, byte val, byte mask)
 		}
 
 		for (i = 0; i < z_header.font_height; i++) {
-#ifdef __WATCOMC__
 			volatile byte _far *screen =
 			    get_scrnptr(cursor_y + i) + offset;
-#else
-			byte far *screen = get_scrnptr(cursor_y + i) + offset;
-#endif
 			if (type == 1) {
 				val =
-#ifdef __WATCOM__
 				    *((byte _far *) table +
-#else
-				    *((byte far *) table +
-#endif
 				      8 * i / z_header.font_height);
 			}
 			if (type == 2)
-#ifdef __WATCOMC__
 				val = *((word _far *) table + i);
-#else
-				val = *((word far *) table + i);
-#endif
 			if (type == 3)
-#ifdef __WATCOMC__
 				val = *((byte _far *) table + i);
-#else
-				val = *((byte far *) table + i);
-#endif
 
 			if (align != 0)
 				val >>= align;
