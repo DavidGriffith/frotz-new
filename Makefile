@@ -412,6 +412,8 @@ dos: $(COMMON_DEFINES) $(HASH)
 	@$(SNAVIG) -t dos $(COMMON_DIR) $(DOS_DIR) $(SNAVIG_DIR)
 	@cp Makefile.tc Makefile.ow $(SNAVIG_DIR)
 	@cp owbuild.bat tcbuild.bat $(SNAVIG_DIR)
+	@cp INSTALL_DOS $(SNAVIG_DIR)/INSTALL.txt
+	@cp doc/frotz.txt $(SNAVIG_DIR)
 	@sed -i "/^OW_DOS_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@sed -i "/^CORE_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for 16-bit DOS."
