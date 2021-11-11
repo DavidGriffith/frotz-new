@@ -115,7 +115,7 @@ print " to $target/\n";
 
 # Get a list of input files.
 for my $sourcedir (@sources) {
-	push @inputfiles, glob("$sourcedir/*.[ch]");
+	push @inputfiles, glob("$sourcedir/*.[ch] $sourcedir/*.asm");
 }
 
 # Copy input files to output directory.
