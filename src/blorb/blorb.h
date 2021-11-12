@@ -56,7 +56,7 @@ typedef int bb_err_t;
 
 /* Making a four-byte constant to describe a chunk type. */
 #define bb_make_id(c1, c2, c3, c4)  \
-    (((c1) << 24) | ((c2) << 16) | ((c3) << 8) | (c4))
+    (((uint32)(c1) << 24) | ((uint32)(c2) << 16) | ((uint32)(c3) << 8) | (uint32)(c4))
 
 /* Four-byte constants */
 #define bb_ID_Snd	(bb_make_id('S','n','d',' '))

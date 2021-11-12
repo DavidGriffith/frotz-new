@@ -8,6 +8,13 @@
 #ifndef DOSFROTZ_H
 #define DOSFROTZ_H
 
+#ifndef MAX
+#define MAX(x,y) ((x)>(y)) ? (x) : (y)
+#endif
+#ifndef MIN
+#define MIN(x,y) ((x)<(y)) ? (x) : (y)
+#endif
+
 #define MASK_LINEAR(addr)	(addr & 0x000FFFFF)
 #define RM_TO_LINEAR(addr)	(((addr & 0xFFFF0000) >> 12) + (addr & 0xFFFF))
 #define RM_OFFSET(addr)		(addr & 0xF)
