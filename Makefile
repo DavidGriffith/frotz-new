@@ -409,7 +409,7 @@ dos: $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
 	@mkdir $(SNAVIG_DIR)
 	@echo "** Invoking snavig"
-	@$(SNAVIG) -t dos $(COMMON_DIR) $(DOS_DIR) $(SNAVIG_DIR)
+	@$(SNAVIG) -t dos $(COMMON_DIR) $(BLORB_DIR) $(DOS_DIR) $(SNAVIG_DIR)
 	@cp Makefile.tc Makefile.ow $(SNAVIG_DIR)
 	@cp owbuild.bat tcbuild.bat $(SNAVIG_DIR)
 	@cp INSTALL_DOS $(SNAVIG_DIR)/INSTALL.txt
