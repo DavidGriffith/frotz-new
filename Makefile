@@ -436,6 +436,14 @@ dumb_lib:	$(DUMB_LIB)
 blorb_lib:	$(BLORB_LIB)
 dos_lib:	$(DOS_LIB)
 
+common-lib:	$(COMMON_LIB)
+curses-lib:	$(CURSES_LIB)
+x11-lib:	$(X11_LIB)
+sdl-lib:	$(SDL_LIB)
+dumb-lib:	$(DUMB_LIB)
+blorb-lib:	$(BLORB_LIB)
+dos-lib:	$(DOS_LIB)
+
 $(COMMON_LIB): $(COMMON_DEFINES) $(HASH)
 	$(MAKE) -C $(COMMON_DIR)
 
@@ -462,6 +470,7 @@ $(SUB_CLEAN):
 #
 dosdefs: hash defs
 defs: common_defines
+common-defines: common_defines
 common_defines: $(COMMON_DEFINES)
 $(COMMON_DEFINES):
 ifeq ($(wildcard $(COMMON_DEFINES)),)
@@ -564,6 +573,7 @@ endif
 	@echo "#endif /* COMMON_DEFINES_H */" >> $@
 endif
 
+curses-defines: curses_defines
 curses_defines: $(CURSES_DEFINES)
 $(CURSES_DEFINES):
 ifeq ($(wildcard $(CURSES_DEFINES)),)
@@ -622,6 +632,7 @@ endif
 # Administrative stuff
 #
 install: install_frotz
+install-frotz: install_frotz
 install_frotz: $(FROTZ_BIN)
 	mkdir -p $(DESTDIR)$(BINDIR) && test -w $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(FROTZ_BIN) $(DESTDIR)$(BINDIR)
@@ -629,11 +640,14 @@ install_frotz: $(FROTZ_BIN)
 	install -m 644 doc/frotz.6 $(DESTDIR)$(MANDIR)/man6/
 
 uninstall: uninstall_frotz
+uninstall-frotz: uninstall-frotz
 uninstall_frotz:
 	rm -f $(DESTDIR)$(BINDIR)/frotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/frotz.6
 
 install_dumb: install_dfrotz
+install-dumb: install_dfrotz
+install_dfrotz: install_dfrotz
 install_dfrotz: $(DFROTZ_BIN)
 	mkdir -p $(DESTDIR)$(BINDIR) && test -w $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(DFROTZ_BIN) $(DESTDIR)$(BINDIR)
@@ -641,11 +655,15 @@ install_dfrotz: $(DFROTZ_BIN)
 	install -m 644 doc/dfrotz.6 $(DESTDIR)$(MANDIR)/man6/
 
 uninstall_dumb: uninstall_dfrotz
+uninstall-dumb: uninstall_dfrotz
+uninstall-dfrotz: uninstall_dfrotz
 uninstall_dfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/dfrotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/dfrotz.6
 
 install_x11: install_xfrotz
+install-x11: install_xfrotz
+install-xfrotz: install_xfrotz
 install_xfrotz: $(XFROTZ_BIN)
 	mkdir -p "$(DESTDIR)$(PREFIX)/bin" && test -w $(DESTDIR)$(BINDIR)
 	mkdir -p "$(DESTDIR)$(MANDIR)/man6" && test -w $(DESTDIR)$(MANDIR)/man6
@@ -660,6 +678,8 @@ install_xfrotz: $(XFROTZ_BIN)
 	$(MKFONTDIR) $(X11_FONTDIR)
 
 uninstall_x11: uninstall_xfrotz
+uninstall-x11: uninstall_xfrotz
+uninstall-xfrotz: uninstall_xfrotz
 uninstall_xfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/xfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/xfrotz.6"
@@ -671,20 +691,26 @@ uninstall_xfrotz:
 	rm -f "$(X11_FONTDIR)/fonts.dir"
 	find $(X11_FONTDIR) -type d -depth -empty -exec rmdir "{}" \;
 
+install-sdl: install_sfrotz
 install_sdl: install_sfrotz
+install-sfrotz: install_sfrotz
 install_sfrotz: $(SFROTZ_BIN)
 	mkdir -p $(DESTDIR)$(BINDIR) && test -w $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(SFROTZ_BIN) $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man6 && test -w $(DESTDIR)$(MANDIR)/man6
 	install -m 644 doc/sfrotz.6 $(DESTDIR)$(MANDIR)/man6/
 
+uninstall-sdl: uninstall_sfrotz
 uninstall_sdl: uninstall_sfrotz
+uninstall-sfrotz: uninstall_sfrotz
 uninstall_sfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/sfrotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/sfrotz.6
 
+install-all:	install_all
 install_all:	install_frotz install_dfrotz install_sfrotz install_xfrotz
 
+uninstall-all:	uninstall_all
 uninstall_all:	uninstall_frotz uninstall_dfrotz uninstall_sfrotz uninstall_xfrotz
 
 
