@@ -117,6 +117,7 @@ void os_reset_screen(void)
  */
 void os_quit(int status)
 {
+	os_stop_sample(0);
 	exit(status);
 } /* os_quit */
 

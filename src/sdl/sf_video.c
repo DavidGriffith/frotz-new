@@ -449,6 +449,8 @@ bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
 		       int ysize, int xsize)
 {
 	/* TODO */
+
+	fprintf(stderr, "SHIT\n");
 	return FALSE;
 }
 
@@ -977,6 +979,9 @@ zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
 	static int pos = 0, searchpos = -1;
 	int ptx, pty;
 	int len = mywcslen(buf);
+
+	fprintf(stderr, "os_read_line()\n");
+
 	SF_textsetting *ts = sf_curtextsetting();
 	SDL_Event event;
 	sf_flushtext();
@@ -999,9 +1004,11 @@ zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
 		mytimeout = sf_ticks() + m_timerinterval * timeout;
 	SDL_StartTextInput();
 	while (true) {
+//		fprintf(stderr, "-");
 		/* Get the next input */
 		while (SDL_PollEvent(&event)) {
 			zword c;
+//			fprintf(stderr, "o");
 			if ((c = goodzkey(&event, 1))) {
 				switch (c) {
 				case ZC_BACKSPACE:
@@ -1135,6 +1142,7 @@ zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
 			SDL_StopTextInput();
 			return ZC_TIME_OUT;
 		}
+//		fprintf(stderr, "z");
 		sf_checksound();
 		sf_sleep(10);
 	}
@@ -1346,6 +1354,7 @@ static void sf_quitconf()
 
 void os_tick()
 {
+//	fprintf(stderr, ".");
 	sf_checksound();
 	if (SDL_AtomicSet(&SFticked, 0)) {
 		if (!sf_flushdisplay()) {

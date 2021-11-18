@@ -173,12 +173,20 @@ static void music_finished(void)
 /* This may be called also via a Mix_Haltetc. */
 static void channel_finished(int channel)
 {
+	fprintf(stderr, "  channel_finished(%d)\n", channel);
+
 	if (channel != 0)
 		return;
-	if (!e_sfx)
+	if (!e_sfx) {
+		fprintf(stderr, "  e_sfx doesn't exist!!!\n");
 		return;
-	if (!e_sfx->active)
+	}
+
+	if (!e_sfx->active) {
+		fprintf(stderr, "  e_sfx->active not true\n");
+		fprintf(stderr, "  e_sfx->ended: %d\n", e_sfx->ended);
 		return;
+	}
 	e_sfx->active = 0;
 	e_sfx->ended = 1;	/* stopsample will take care of this... */
 }
@@ -186,8 +194,10 @@ static void channel_finished(int channel)
 
 static void stopsample()
 {
+	fprintf(stderr, "Starting stopsample()\n");
 	if (!e_sfx)
 		return;
+	fprintf(stderr, "stopsample() ok\n");
 	e_sfx->active = 0;
 	Mix_HaltChannel(0);
 	e_sfx->ended = 0;
@@ -206,8 +216,11 @@ static void stopmodule()
 
 static void startsample()
 {
+	fprintf(stderr, "Starting startsample() %d\n", e_sfx->number);
 	if (!e_sfx)
 		return;
+	fprintf(stderr, "startsample() ok\n");
+
 	Mix_PlayChannel(0, e_sfx->sam, e_sfx->repeats);
 	Mix_Volume(0, e_sfx->volume);
 	e_sfx->active = 1;
@@ -336,8 +349,12 @@ void os_beep(int number)
  */
 void os_finish_with_sample(int number)
 {
-	if (!SFaudiorunning)
+	fprintf(stderr, "os_finish_with_sample(%d)...\n", number);
+	if (!SFaudiorunning) {
+		fprintf(stderr, "  WHOOPS!  SFaudiorunning is false!\n");
 		return;
+	}
+
 	os_stop_sample(number);
 }
 
@@ -369,9 +386,16 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 {
 	EFFECT *e;
 
-	if (!SFaudiorunning)
+	if (!SFaudiorunning) {
+		if (number == 9) {
+			fprintf(stderr, "Whoopsie in os_start_sample.");
+			fprintf(stderr, "Should see os_start_sample(%d,%d,%d,%d)...\n",number,volume,repeats, eos);
+		}
 		return;
+	}
 
+
+	fprintf(stderr, "os_start_sample(%d,%d,%d,%d)...\n",number,volume,repeats, eos);
 
 	/* NOTE: geteffect may return an already loaded effect */
 	e = geteffect(number);
@@ -396,8 +420,10 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 	e->eos = eos;
 	e->ended = 0;
 	if (e->type == SFX_TYPE) {
-		if ((e_sfx) && (e_sfx != e))
+		if ((e_sfx) && (e_sfx != e)) {
+//			fprintf(stderr, "POOP!\n");
 			e_sfx->destroy(e_sfx);
+		}
 		e_sfx = e;
 		startsample();
 	} else {
@@ -419,13 +445,18 @@ void os_stop_sample(int number)
 {
 	if (!SFaudiorunning)
 		return;
+
+	fprintf(stderr, "os_stop_sample(%d)...\n", number);
+
 	if (number == 0) {
 		stopsample();
 		stopmodule();
 		return;
 	}
-	if ((e_sfx) && (e_sfx->number == number))
+	if ((e_sfx) && (e_sfx->number == number)) {
+		fprintf(stderr, "  Stopping sample %d\n", e_sfx->number);
 		stopsample();
+	}
 	if ((e_mod) && (e_mod->number == number))
 		stopmodule();
 }
@@ -433,10 +464,17 @@ void os_stop_sample(int number)
 
 void sf_checksound()
 {
+
+	if (e_sfx) {
+//		fprintf(stderr, "%d", e_sfx->ended);
+	}
+
 	if ((e_sfx) && (e_sfx->ended)) {
+		fprintf(stderr, "\n-->sound effect ended\n");
 		e_sfx->ended = 0;
 		if (z_header.version <= V4 || e_sfx->eos) {
 			end_of_sound_flag = 1;
+			fprintf(stderr, "-->end_of_sound() in sf_checksound()\n");
 			end_of_sound();
 		}
 	}

@@ -103,6 +103,10 @@ static void start_sample(int number, int volume, int repeats, zword eos)
 		repeats = lh_repeats[number];
 
 	os_start_sample(number, volume, repeats, eos);
+
+//	if (number == 8)
+//		sleep(3);
+
 	routine = eos;
 	playing = TRUE;
 } /* start_sample */
@@ -118,8 +122,10 @@ static void start_sample(int number, int volume, int repeats, zword eos)
  */
 static void start_next_sample(void)
 {
-	if (next_sample != 0)
+	fprintf(stderr, " $$$ start_next_sample(): %d\n", next_sample);
+	if (next_sample != 0) {
 		start_sample(next_sample, next_volume, 0, 0);
+	}
 
 	next_sample = 0;
 	next_volume = 0;
@@ -142,8 +148,10 @@ void end_of_sound(void)
 
 	playing = FALSE;
 
-	if (!locked) {
+	fprintf(stderr, "  *end_of_sound() pre lock check\n");
 
+	if (!locked) {
+		fprintf(stderr, "  *end_of_sound() not locked\n");
 		if (story_id == LURKING_HORROR)
 			start_next_sample();
 
@@ -171,6 +179,9 @@ void z_sound_effect(void)
 	zword effect = zargs[1];
 	zword volume = zargs[2];
 
+	fprintf(stderr, "    ** zs(%d, %d, %d)", number, effect, volume);
+	fprintf(stderr, " playing: %d\n", playing);
+
 	/* By default play sound 1 at volume 8 */
 	if (zargc < 1)
 		number = 1;
@@ -191,13 +202,15 @@ void z_sound_effect(void)
 
 	if (number >= 3 || number == 0) {
 		locked = TRUE;
-		if (story_id == LURKING_HORROR && (number == 9 || number == 16)) {
+		if (story_id == LURKING_HORROR && (number == 9 || number == 8 || number == 16)) {
 			if (effect == EFFECT_PLAY) {
 				next_sample = number;
 				next_volume = volume;
 				locked = FALSE;
-				if (!playing)
+				if (!playing) {
+					fprintf(stderr, "      next sample...\n");
 					start_next_sample();
+				}
 			} else
 				locked = FALSE;
 			return;

@@ -187,7 +187,7 @@ typedef struct {
 } sound_engine_t;
 
 static sound_engine_t frotz_audio;
-/* FILE *audio_log; */
+FILE *audio_log;
 
 /**********************************************************************
  *                         Utilities                                  *
@@ -858,8 +858,9 @@ os_init_sound(void)
 	if (!f_setup.sound) return;
 
 	/* Initialize sound engine */
-	/* audio_log = fopen("audio_log.txt", "w"); */
-	/* fprintf(audio_log, "os_init_sound...\n"); */
+//	audio_log = fopen("audio_log.txt", "w");
+	audio_log = stderr;
+	fprintf(audio_log, "os_init_sound...\n");
 	frotz_audio.buffer_size = 1024;
 	frotz_audio.sample_rate = 48000;
 	frotz_audio.outl        = (float*)calloc(frotz_audio.buffer_size, sizeof(float));
@@ -904,8 +905,8 @@ void
 os_start_sample(int number, int volume, int repeats, zword eos)
 {
 	(void) eos;
-	/* fprintf(audio_log, "os_start_sample(%d,%d,%d,%d)...\n",number,volume,repeats, eos); */
-	/* fflush(audio_log); */
+	fprintf(audio_log, "os_start_sample(%d,%d,%d,%d)...\n",number,volume,repeats, eos);
+	fflush(audio_log);
 	extern bb_map_t     *blorb_map;
 	extern FILE         *blorb_fp;
 
@@ -969,14 +970,16 @@ void os_prepare_sample(int id)
 
 void os_stop_sample(int id)
 {
-	/* fprintf(audio_log, "os_stop_sample(%d)...\n", id); */
+	fprintf(audio_log, "os_stop_sample(%d)...\n", id);
+	fflush(audio_log);
 	if (!f_setup.sound) return;
 	sound_stop_id(id);
 }
 
 void os_finish_with_sample(int id)
 {
-	/* fprintf(audio_log, "os_finish_with_sample(%d)...\n", id); */
+	fprintf(audio_log, "os_finish_with_sample(%d)...\n", id);
+	fflush(audio_log);
 	os_stop_sample(id);
 }
 
