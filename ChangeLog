@@ -24,6 +24,9 @@ BUG FIXES
 
 - Fixed a failure of the -q flag to actually silence sound effects.
 
+- Fixed an oversight in SDL Frotz that prevented some sounds from
+  playing in Lurking Horror.
+
 
 Summary of changes between Frotz 2.52 and Frotz 2.53:
 =====================================================
