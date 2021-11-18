@@ -199,7 +199,10 @@ static void stopsample()
 		return;
 	fprintf(stderr, "stopsample() ok\n");
 	e_sfx->active = 0;
-	Mix_HaltChannel(0);
+	if (!Mix_Playing(0)) {
+		Mix_HaltChannel(0);
+	}
+
 	e_sfx->ended = 0;
 }
 
