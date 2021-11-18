@@ -202,7 +202,7 @@ void z_sound_effect(void)
 
 	if (number >= 3 || number == 0) {
 		locked = TRUE;
-		if (story_id == LURKING_HORROR && (number == 9 || number == 8 || number == 16)) {
+		if (story_id == LURKING_HORROR && (number == 9 || number == 16)) {
 			if (effect == EFFECT_PLAY) {
 				next_sample = number;
 				next_volume = volume;
