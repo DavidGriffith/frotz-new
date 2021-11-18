@@ -204,11 +204,12 @@ void z_sound_effect(void)
 		locked = TRUE;
 		if (story_id == LURKING_HORROR && (number == 9 || number == 16)) {
 			if (effect == EFFECT_PLAY) {
+				fprintf(stderr, "    Lurking Horror special\n");
 				next_sample = number;
 				next_volume = volume;
 				locked = FALSE;
 				if (!playing) {
-					fprintf(stderr, "      next sample...\n");
+					fprintf(stderr, "    next sample...\n");
 					start_next_sample();
 				}
 			} else
@@ -223,6 +224,7 @@ void z_sound_effect(void)
 		case EFFECT_PLAY:
 			start_sample(number, lo(volume), hi(volume),
 				(zargc == 4) ? zargs[3] : 0);
+			fprintf(stderr, "    playing: %d\n", playing);
 			break;
 		case EFFECT_STOP:
 			os_stop_sample(number);
