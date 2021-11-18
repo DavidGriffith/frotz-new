@@ -188,6 +188,8 @@ static void stopsample()
 {
 	if (!e_sfx)
 		return;
+	if (!e_sfx->ended)
+		return;
 	e_sfx->active = 0;
 	Mix_HaltChannel(0);
 	e_sfx->ended = 0;
