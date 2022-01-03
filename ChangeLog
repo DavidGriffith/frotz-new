@@ -27,6 +27,9 @@ BUG FIXES
 - Fixed an oversight in SDL Frotz that prevented some sounds from
   playing in Lurking Horror.
 
+- Made the dumb and curses interfaces read the resolution chunk from
+  Blorb files.  Previously they would assume a resolution of 320x200.
+
 
 Summary of changes between Frotz 2.52 and Frotz 2.53:
 =====================================================
