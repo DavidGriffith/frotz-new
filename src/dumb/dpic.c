@@ -64,6 +64,7 @@ bool dumb_init_pictures (void)
 	unsigned char jfif_name[5]	= {'J', 'F', 'I', 'F', 0x00};
 
 	bb_result_t res;
+	bb_resolution_t *reso;
 	uint32 pos;
 
 	if (blorb_map == NULL) return FALSE;
@@ -74,8 +75,14 @@ bool dumb_init_pictures (void)
 	pict_info[0].height = num_pictures;
 	pict_info[0].width = bb_get_release_num(blorb_map);
 
-	y_scale = 200;
-	x_scale = 320;
+	reso = bb_get_resolution(blorb_map);
+	if (reso) {
+		x_scale = reso->px;
+		y_scale = reso->py;
+	} else {
+		y_scale = 200;
+		x_scale = 320;
+	}
 
 	for (i = 1; i <= num_pictures; i++) {
 		if (bb_load_resource(blorb_map, bb_method_Memory, &res, bb_ID_Pict, i) == bb_err_None) {
