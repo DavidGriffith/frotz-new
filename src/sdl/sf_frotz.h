@@ -101,6 +101,8 @@ extern char *m_setupfile;
 extern int m_frequency;
 
 extern double m_gamma;
+extern double m_xscale;
+extern double m_yscale;
 
 extern bool sdl_active;
 

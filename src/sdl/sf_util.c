@@ -37,6 +37,7 @@
 
 #ifdef UNIX
 #include <unistd.h>
+#include <getopt.h>
 #endif
 
 extern f_setup_t f_setup;
@@ -248,14 +249,23 @@ static void usage(int type)
 
 static const char *progname = NULL;
 
-/*
 extern char *optarg;
 extern int optind;
-*/
 
 extern int m_timerinterval;
 
+double m_xscale = 0;
+double m_yscale = 0;
+
+static int xscale_flag = 0;
+static int yscale_flag = 0;
+
 static char *options = "@:%aAb:B:c:C:df:FH:iI:l:L:m:N:oOPqr:s:S:tTu:vVW:xXZ:";
+static struct option long_options[] = {
+	{"xscale", required_argument, &xscale_flag, 1},
+	{"yscale", required_argument, &yscale_flag, 1},
+	{0, 0, 0, 0}
+};
 
 static int limit(int v, int m, int M)
 {
@@ -273,12 +283,25 @@ static void parse_options(int argc, char **argv)
 
 	do {
 		int num = 0, copt = 0;;
+		int option_index = 0;
 
-		c = zgetopt(argc, argv, options);
+		c = getopt_long(argc, argv, options, long_options, &option_index);
 
-		if (zoptarg != NULL) {
-			num = atoi(zoptarg);
-			copt = zoptarg[0];
+		if (optarg != NULL) {
+			num = atoi(optarg);
+			copt = optarg[0];
+		}
+
+		if (c == 0) {
+			fprintf(stderr, "Long flag x:%d y:%d...  ", xscale_flag, yscale_flag);
+			if (xscale_flag) {
+				m_xscale = atof(optarg);
+				fprintf(stderr, "Got x: %f\n", m_xscale);
+			}
+			if (yscale_flag) {
+				m_yscale = atof(optarg);
+				fprintf(stderr, "Got y: %f\n", m_yscale);
+			}
 		}
 
 		if (c == '%')
@@ -288,7 +311,7 @@ static void parse_options(int argc, char **argv)
 		if (c == 'A')
 			f_setup.attribute_testing = 1;
 		if (c == 'b')
-			user_background = getcolor(zoptarg);
+			user_background = getcolor(optarg);
 		if (c == 'B')
 			option_scrollback_buffer = num;
 		if (c == 'c')
@@ -296,7 +319,7 @@ static void parse_options(int argc, char **argv)
 		if (c == 'C') {
 			/* originally allocated in os_init_setup() */
 			free(f_setup.config_file);
-			f_setup.config_file = strdup(zoptarg);
+			f_setup.config_file = strdup(optarg);
 		}
 		if (c == 'd')
 			option_disable_color = 1;
@@ -305,9 +328,9 @@ static void parse_options(int argc, char **argv)
 		if (c == 'N')
 			user_names_format = copt;
 		if (c == '@')
-			m_reslist_file = zoptarg;
+			m_reslist_file = optarg;
 		if (c == 'f')
-			user_foreground = getcolor(zoptarg);
+			user_foreground = getcolor(optarg);
 		if (c == 'F')
 			m_fullscreen = 1;
 		if (c == 'H')
@@ -322,7 +345,7 @@ static void parse_options(int argc, char **argv)
 			f_setup.left_margin = num;
 		if (c == 'L') {
 			f_setup.restore_mode = TRUE;
-			f_setup.tmp_save_name = strdup(zoptarg);
+			f_setup.tmp_save_name = strdup(optarg);
 		}
 		if (c == 'q')
 			m_no_sound = 1;
@@ -420,7 +443,7 @@ void os_process_arguments(int argc, char *argv[])
 {
 	char *p;
 
-	zoptarg = NULL;
+	optarg = NULL;
 
 	sf_installhandlers();
 
@@ -433,14 +456,14 @@ void os_process_arguments(int argc, char *argv[])
 	sf_readsettings();
 	parse_options(argc, argv);
 
-	if (argv[zoptind] == NULL) {
+	if (argv[optind] == NULL) {
 		usage(USAGE_NORMAL);
 		os_quit(EXIT_SUCCESS);
 	}
-	f_setup.story_file = strdup(argv[zoptind]);
+	f_setup.story_file = strdup(argv[optind]);
 
-	if (argv[zoptind + 1] != NULL)
-		f_setup.blorb_file = argv[zoptind + 1];
+	if (argv[optind + 1] != NULL)
+		f_setup.blorb_file = argv[optind + 1];
 
 	/* Strip path and extension off the story file name */
 	f_setup.story_name = new_basename(f_setup.story_file);
@@ -463,7 +486,7 @@ void os_process_arguments(int argc, char *argv[])
 			*p = '\0';	/* extension removed */
 		}
 	}
-	f_setup.story_path = new_dirname(argv[zoptind]);
+	f_setup.story_path = new_dirname(argv[optind]);
 
 	/* Create nice default file names */
 	f_setup.script_name = malloc((strlen(f_setup.story_name) + strlen(EXT_SCRIPT) + 1) * sizeof(char));
