@@ -123,6 +123,16 @@ int sf_load_resources(void)
 		checkwidths();
 		bb_count_resources(blorb_map, bb_ID_Pict, &countedpics, NULL,
 				   &maxlegalpic);
+
+		/* For Infocom's V6 games with EGA graphics, the width of all
+		 * pictures must be halved.  This is because EGA pixels are
+		 * about twice as wide as square pixels.
+		 */
+
+		/* EGA Shogun has 62 max legal pics. */
+		if (story_id == SHOGUN && maxlegalpic == 62)
+			m_xscale = 0.5;
+
 		releaseno = bb_get_release_num(blorb_map);
 		if (bb_load_chunk_by_type (blorb_map,
 					   bb_method_Memory,
