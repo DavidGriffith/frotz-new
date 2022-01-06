@@ -970,13 +970,14 @@ zchar os_read_key (int timeout, int cursor)
  *
  * Return the name of a file.  Flag can be one of:
  *
- *    FILE_SAVE     - Save game file
- *    FILE_RESTORE  - Restore game file
- *    FILE_SCRIPT   - Transcript file
- *    FILE_RECORD   - Command file for recording
- *    FILE_PLAYBACK - Command file for playback
- *    FILE_SAVE_AUX - Save auxilary ("preferred settings") file
- *    FILE_LOAD_AUX - Load auxilary ("preferred settings") file
+ *    FILE_SAVE      - Save game file
+ *    FILE_RESTORE   - Restore game file
+ *    FILE_SCRIPT    - Transcript file
+ *    FILE_RECORD    - Command file for recording
+ *    FILE_PLAYBACK  - Command file for playback
+ *    FILE_SAVE_AUX  - Save auxilary ("preferred settings") file
+ *    FILE_LOAD_AUX  - Load auxilary ("preferred settings") file
+ *    FILE_NO_PROMPT - Return file without prompting the user
  *
  * The length of the file name is limited by MAX_FILE_NAME. Ideally
  * an interpreter should open a file requester to ask for the file
@@ -1006,7 +1007,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	/* If we're restoring a game before the interpreter starts,
 	 * our filename is already provided.  Just go ahead silently.
 	 */
-	if (f_setup.restore_mode) {
+	if (f_setup.restore_mode || flag == FILE_NO_PROMPT) {
 		file_name[0]=0;
 	} else {
 		print_string ("Enter a file name.\nDefault is \"");

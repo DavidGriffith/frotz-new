@@ -414,6 +414,7 @@ extern const char build_timestamp[];
 #define FILE_RECORD 4
 #define FILE_LOAD_AUX 5
 #define FILE_SAVE_AUX 6
+#define FILE_NO_PROMPT 7
 
 /*** Data access macros ***/
 #ifdef TOPS20
