@@ -293,17 +293,11 @@ static void parse_options(int argc, char **argv)
 		}
 
 		if (c == 0) {
-			fprintf(stderr, "Long flag x:%d y:%d...  ", xscale_flag, yscale_flag);
-			if (xscale_flag) {
+			if (xscale_flag)
 				m_xscale = atof(optarg);
-				fprintf(stderr, "Got x: %f\n", m_xscale);
-			}
-			if (yscale_flag) {
+			if (yscale_flag)
 				m_yscale = atof(optarg);
-				fprintf(stderr, "Got y: %f\n", m_yscale);
-			}
 		}
-
 		if (c == '%')
 			m_localfiles = true;
 		if (c == 'a')

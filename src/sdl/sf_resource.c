@@ -87,28 +87,11 @@ static void checkwidths()
 	bb_resolution_t *reso;
 	reso = bb_get_resolution(blorb_map);
 	if (reso) {
-		fprintf(stderr, "FART\n");
-		fprintf(stderr, "reso->px: %d\n", reso->px);
-		fprintf(stderr, "reso->py: %d\n", reso->py);
-		fprintf(stderr, "AcWidth:  %d\n", AcWidth);
-		fprintf(stderr, "AcHeight: %d\n", AcHeight);
-
 		/* ignore small resolution hints */
-		if ((reso->px) && (reso->px >= AcWidth)) {
-			fprintf(stderr, "POOP WIDTH: %d\n", reso->px);
-
-			// This indicated EGA mode.
-			if (reso->px == 640) {
-//				AcWidth = reso->px * 1.125;
-//				AcWidth = 320;
-				fprintf(stderr, "AAA: %d\n", AcWidth);
-			}
-
+		if ((reso->px) && (reso->px >= AcWidth))
 			AcWidth = reso->px;
-		}
-		if ((reso->py) && (reso->py >= AcHeight)) {
+		if ((reso->py) && (reso->py >= AcHeight))
 			AcHeight = reso->py;
-		}
 	}
 }
 
@@ -672,22 +655,6 @@ void os_init_screen(void)
 
 	if (m_yscale > 0.0)
 		m_gfxScale_h *= m_yscale;
-
-
-//	m_gfxScale_w *= (double) AcWidth /640.0;
-//	m_gfxScale_w *= (double) AcWidth /1280.0;
-//	m_gfxScale_w *= (double) 0.5;
-//	m_gfxScale_h *= (double) AcHeight /400.0;
-
-//	m_gfxScale_w *= m_xscale;
-//	m_gfxScale_h *= m_yscale;
-
-	fprintf(stderr, "AcWidth:      %d\n", AcWidth);
-	fprintf(stderr, "m_gfxScale_w: %f\n", m_gfxScale_w);
-	fprintf(stderr, "m_gfxScale_h: %f\n", m_gfxScale_h);
-	fprintf(stderr, "m_xscale:     %f\n", m_xscale);
-	fprintf(stderr, "m_yscale:     %f\n", m_yscale);
-
 
 	/* Set the configuration */
 	if (z_header.version == V3) {
