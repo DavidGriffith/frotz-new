@@ -41,6 +41,9 @@ bool sf_IsAdaptive(int picture);
 
 #define CONFIG_FILE	".sfrotzrc"
 
+#define DEFAULT_WIDTH	640
+#define DEFAULT_HEIGHT	400
+
 #define MAX(x,y) ((x)>(y)) ? (x) : (y)
 #define MIN(x,y) ((x)<(y)) ? (x) : (y
 

@@ -77,14 +77,17 @@ static char *ResDir = "./";
 static char *ResPict = "PIC%d";
 static char *ResSnd = "SND%d";
 
-int AcWidth = 640, AcHeight = 400;
+int AcWidth  = DEFAULT_WIDTH;
+int AcHeight = DEFAULT_HEIGHT;
+
 int option_scrollback_buffer = 0;
 bool option_disable_color = 0;
 bool m_adaptiveMode = FALSE;
 
+bb_resolution_t *reso;
+
 static void checkwidths()
 {
-	bb_resolution_t *reso;
 	reso = bb_get_resolution(blorb_map);
 	if (reso) {
 		/* ignore small resolution hints */
@@ -123,15 +126,6 @@ int sf_load_resources(void)
 		checkwidths();
 		bb_count_resources(blorb_map, bb_ID_Pict, &countedpics, NULL,
 				   &maxlegalpic);
-
-		/* For Infocom's V6 games with EGA graphics, the width of all
-		 * pictures must be halved.  This is because EGA pixels are
-		 * about twice as wide as square pixels.
-		 */
-
-		/* EGA Shogun has 62 max legal pics. */
-		if (story_id == SHOGUN && maxlegalpic == 62)
-			m_xscale = 0.5;
 
 		releaseno = bb_get_release_num(blorb_map);
 		if (bb_load_chunk_by_type (blorb_map,
@@ -653,6 +647,13 @@ void os_init_screen(void)
 
 	/* Set the graphics scaling */
 	if (sf_IsInfocomV6() || (story_id == BEYOND_ZORK)) {
+		/* EGA's 640x200 mode has rectangular pixels that are
+		 * narrower than they are tall.  For Infocom's V6 EGA
+		 * graphics to look correct, the X scale must be halved.
+		 */
+		if (reso != NULL && (reso->px == 640 && reso->py == 200))
+			m_v6scale_x /= 2.0;
+
 		m_gfxScale_w = (double)m_v6scale_x;
 		m_gfxScale_h = (double)m_v6scale_y;
 	} else {
