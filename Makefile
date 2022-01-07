@@ -77,6 +77,7 @@ CURSES ?= ncursesw
 
 # Uncomment this to disable Blorb support for dumb and curses interfaces.
 # SDL interface always has Blorb support.
+# Doing this for the X11 interface will make it use old-style graphics.
 #NO_BLORB = yes
 
 # These are for enabling local version of certain functions which may be

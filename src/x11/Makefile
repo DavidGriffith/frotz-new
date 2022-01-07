@@ -1,6 +1,6 @@
 # For GNU Make.
 
-SOURCES = x_init.c x_input.c x_pic.c x_sample.c x_screen.c x_text.c x_blorb.c
+SOURCES = x_init.c x_input.c x_pic.c x_oldpic.c x_sample.c x_screen.c x_text.c x_blorb.c
 OBJECTS = $(SOURCES:.c=.o)
 HEADERS = x_frotz.h x_setup.h x_blorb.h
 
