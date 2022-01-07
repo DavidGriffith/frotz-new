@@ -24,7 +24,10 @@
  *
  */
 
+
 #include "x_frotz.h"
+#ifndef NO_BLORB
+
 #include <X11/Xutil.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -907,3 +910,5 @@ int os_picture_data(int picture, int *height, int *width)
 	return TRUE;
 
 } /* os_picture_data */
+
+#endif /* NO_BLORB */
