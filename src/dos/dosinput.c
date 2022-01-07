@@ -860,14 +860,13 @@ zchar os_read_key(int timeout, bool cursor)
  *
  * Return the name of a file. Flag can be one of:
  *
- *    FILE_SAVE      - Save game file
- *    FILE_RESTORE   - Restore game file
- *    FILE_SCRIPT    - Transscript file
- *    FILE_RECORD    - Command file for recording
- *    FILE_PLAYBACK  - Command file for playback
- *    FILE_SAVE_AUX  - Save auxilary ("preferred settings") file
- *    FILE_LOAD_AUX  - Load auxilary ("preferred settings") file
- *    FILE_NO_PROMPT - Return file without prompting the user
+ *    FILE_SAVE     - Save game file
+ *    FILE_RESTORE  - Restore game file
+ *    FILE_SCRIPT   - Transscript file
+ *    FILE_RECORD   - Command file for recording
+ *    FILE_PLAYBACK - Command file for playback
+ *    FILE_SAVE_AUX - Save auxilary ("preferred settings") file
+ *    FILE_LOAD_AUX - Load auxilary ("preferred settings") file
  *
  * The length of the file name is limited by MAX_FILE_NAME. Ideally
  * an interpreter should open a file requester to ask for the file
@@ -904,17 +903,14 @@ char *os_read_file_name (const char *default_name, int flag)
 	if (flag == FILE_RECORD || flag == FILE_PLAYBACK)
 		extension = ".rec";
 
-	if (flag == FILE_NO_PROMPT) {
-		file_name[0] = 0;
-	} else {
-		/* Input file name (reserve four bytes for a file name extension) */
-		print_string("Enter file name (\"");
-		print_string(extension);
-		print_string("\" will be added).\nDefault is \"");
-		print_string(default_name);
-		print_string("\": ");
-		read_string(MAX_FILE_NAME - 4, (zchar *) file_name);
-	}
+	/* Input file name (reserve four bytes for a file name extension) */
+	print_string("Enter file name (\"");
+	print_string(extension);
+	print_string("\" will be added).\nDefault is \"");
+	print_string(default_name);
+	print_string("\": ");
+
+	read_string(MAX_FILE_NAME - 4, (zchar *) file_name);
 
 	/* Use the default name if nothing was typed */
 	if (file_name[0] == 0)

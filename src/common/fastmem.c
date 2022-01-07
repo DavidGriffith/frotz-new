@@ -833,18 +833,12 @@ void z_restore(void)
 		/* Get the file name */
 		get_default_name(default_name, MAX_FILE_NAME + 1, (zargc >= 3) ? zargs[2] : 0);
 
-		if ((zargc >= 4) ? zargs[3] : 1) {
-			new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
-			if (new_name == NULL)
-				goto finished;
+		new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
+		if (new_name == NULL)
+			goto finished;
 
-			free(f_setup.aux_name);
-			f_setup.aux_name = strdup(default_name);
-		} else {
-			new_name = os_read_file_name (default_name, FILE_NO_PROMPT);
-			if (new_name != NULL)
-				goto finished;
-		}
+		free(f_setup.aux_name);
+		f_setup.aux_name = strdup(default_name);
 
 		/* Open auxilary file */
 		if ((gfp = fopen (new_name, "rb")) == NULL)
@@ -1065,19 +1059,12 @@ void z_save(void)
 	if (zargc != 0) {
 		/* Get the file name */
 		get_default_name(default_name, MAX_FILE_NAME + 1, (zargc >= 3) ? zargs[2] : 0);
+		new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
+		if (new_name == NULL)
+			goto finished;
 
-		if ((zargc >= 4) ? zargs[3] : 1) {
-			new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
-			if (new_name == NULL)
-				goto finished;
-
-			free(f_setup.aux_name);
-			f_setup.aux_name = strdup(default_name);
-		} else {
-			new_name = os_read_file_name (default_name, FILE_NO_PROMPT);
-			if (new_name == NULL)
-				goto finished;
-		}
+		free(f_setup.aux_name);
+		f_setup.aux_name = strdup(default_name);
 
 		/* Open auxilary file */
 		if ((gfp = fopen(new_name, "wb")) == NULL)
