@@ -234,9 +234,10 @@ void restart_header(void)
 		SET_BYTE(H_DEFAULT_FOREGROUND, z_header.default_foreground);
 	}
 
-	if (z_header.version == V6)
+	if (z_header.version >= V3 && (z_header.user_name[0] != 0)) {
 		for (i = 0; i < 8; i++)
-	storeb((zword) (H_USER_NAME + i), z_header.user_name[i]);
+			storeb((zword) (H_USER_NAME + i), z_header.user_name[i]);
+	}
 
 	SET_BYTE(H_STANDARD_HIGH, z_header.standard_high);
 	SET_BYTE(H_STANDARD_LOW, z_header.standard_low);
