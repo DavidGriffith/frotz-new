@@ -648,7 +648,7 @@ uninstall_frotz:
 
 install_dumb: install_dfrotz
 install-dumb: install_dfrotz
-install_dfrotz: install_dfrotz
+install-dfrotz: install_dfrotz
 install_dfrotz: $(DFROTZ_BIN)
 	mkdir -p $(DESTDIR)$(BINDIR) && test -w $(DESTDIR)$(BINDIR)
 	install -c -m 755 $(DFROTZ_BIN) $(DESTDIR)$(BINDIR)
