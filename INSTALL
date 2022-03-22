@@ -39,21 +39,11 @@ certain features needed by Frotz.  I don't know about the other *BSD
 curses.  Of the current BSDs, only NetBSD still uses the old BSD curses 
 library.  All the others, including macOS, now use ncurses.
 
-For macOS users, Frotz with all three of its user interfaces should
-compile without any changes to the source code or Makefiles. If you
-install Xcode from the Mac App Store, you should be able to run
-"make nosound" to build Frotz. To enable sound support, you can use
-Homebrew https://brew.sh/ to install the sound support libraries:
-"brew install libao libmodplug libsamplerate libsndfile libvorbis".
-
-If you're going to do that, you might ask well install ncurses from
-Homebrew as well: "brew install ncurses".
-
-Once the sound libraries are installed, a simple "make" should build
-Frotz.  The ncurses that comes with macOS should not be used as it is
-extremely old and does not support italic characters.  If you insist on
-using it, make sure you comment out the line in the Makefile that reads
-"ITALIC ?= yes".
+A constant problem with macOS is the built-in ncurses.  Even on the
+latest releases of macOS; ncurses is very old and seems to identify
+itself incorrectly.  For this reason, it is highly recommended that
+ncurses from Homebrew be installed before compiling Frotz.  See
+"Apple-specific installation issues" below.
 
 For older systems, especially ones not Linux or [Net|Free|Open]BSD...
 You can download ncurses from https://www.gnu.org/software/ncurses/ or
@@ -219,6 +209,62 @@ libraries; not even curses.
 
 To build dfrotz, frotz, and sfrotz; you can type "make all" and then
 "make install_all" to install them all.
+
+
+=====================================
+Apple-specific installation issues ||
+=====================================
+
+To start with, you need to make sure development tools are installed.
+Apple provides the "Xcode" package from the Mac App Store.
+
+The version of ncurses that Apple puts in macOS is very old and contains
+lots of bugs that have been fixed long ago.  It also doesn't report its
+own version correctly, which leads to problems supporting certain
+features.  Therefore it is highly-recommnded that the lastest version of
+ncurses be installed, preferably through Homebrew (https://brew.sh/).
+
+Start with installing its support scripts by typing this command in a
+terminal window:
+
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+This will download and install Homebrew's support software.  It's very quick.
+
+Then install ncurses like this:
+
+    brew install ncurses
+
+Now Frotz should compile just fine with this command:
+
+    make nosound
+
+This tells the build process to not bother with sound support.
+
+For sound support, some additional libraries are needed: libao,
+libmodplug, libsamplerate, libsndfile, and libvorbis.  Install these
+like this:
+
+    brew install libao libmodplug libsamplerate libsndfile libvorbis
+
+Now Frotz should compile just fine with this command:
+
+    make
+
+If you want graphics support through SDL, you'll need some more
+libraries, which may or may not already be present on your Mac.  To
+install them from Homebrew, do this:
+
+    brew install sdl2 sdl2-mixer freetype libpng jpeg zlib
+
+Now Frotz you should get SDL Frotz using the command:
+
+    make sdl
+
+If you insist on using Apple's own install of ncurses, make sure you
+comment out the line in the Makefile that reads "ITALIC ?= yes".  This
+is because it doesn't support italic text even though its reported
+version suggests it does.
 
 
 ========================================
