@@ -229,7 +229,7 @@ terminal window:
 
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-This will download and install Homebrew's support software.  It's very quick.
+This will download and install Homebrew's support software.
 
 Then install ncurses like this:
 
@@ -261,10 +261,13 @@ Now Frotz you should get SDL Frotz using the command:
 
     make sdl
 
-If you insist on using Apple's own install of ncurses, make sure you
-comment out the line in the Makefile that reads "ITALIC ?= yes".  This
-is because it doesn't support italic text even though its reported
-version suggests it does.
+If you insist on using Apple's own install of ncurses, you can
+pass CURSES_CONFIG and ITALIC arguments like this.
+
+    make CURSES_CONFIG=ncurses5.4-config ITALIC= nosound
+
+This is because the built-in ncurses doesn't support italic
+text, even though its reported version suggests it does.
 
 
 ========================================
