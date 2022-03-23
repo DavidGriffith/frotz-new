@@ -28,7 +28,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <freetype2/freetype/freetype.h>
+#include <freetype/freetype.h>
 
 #include "sf_font3ttf.h"
 
