@@ -205,26 +205,19 @@ endif
 # macOS
 ifeq ($(UNAME_S),Darwin)
 MACOS = yes
-# On macOS, curses is actually ncurses, but to get wide
-# char support you need to define _XOPEN_SOURCE_EXTENDED
-# Often ncursesw is not present, but has wide support anyhow.
-# Reset CURSES, use CURSES_MACOS on command line to override.
+# On macOS, we'll try to use Homebrew's ncurses
+HOMEBREW_PREFIX ?= $(shell brew --prefix)
+LDFLAGS += -L$(HOMEBREW_PREFIX)/lib
+
 CURSES_MACOS ?= ncurses
 CURSES = $(CURSES_MACOS)
-# get flags from pkg-config curses if available
-ifndef PKG_CONFIG_CURSES
-# macOS provided ncurses, but doesn't have pkg-config .pc files installed.
-# Since ncursesx.x-config (should be) available if curses is installed,
-# use that instead of pkg-config to get --libs and --cflags.
-# Search $PATH for ncursesx.x-config, use the first one.
-CURSES_CONFIG ?= $(shell echo $$PATH | while read -d ':' p; do \
-	stat -f'%N' $$p/$(CURSES)[0-9]*-config 2>/dev/null; done | head -n1)
+
+CURSES_CONFIG ?= $(shell stat -f'%N' $(HOMEBREW_PREFIX)/opt/ncurses/bin/ncurses6-config)
 # Reset CURSES_LDFLAGS, CURSES_CFLAGS.
 CURSES_LDFLAGS = $(shell $(CURSES_CONFIG) --libs)
 CURSES_CFLAGS = $(shell $(CURSES_CONFIG) --cflags)
 ifeq ($(CURSES_CONFIG),)
-$(error no $(CURSES)x.x-config found)
-endif
+$(error no ncurses6-config found. Install Homebrew and brew install ncurses, or set CURSES_CONFIG yourself)
 endif
 SDL_CFLAGS += -D_XOPEN_SOURCE
 endif

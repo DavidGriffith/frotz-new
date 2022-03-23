@@ -14,9 +14,15 @@ ARFLAGS = rc
 
 SOUND_TYPE ?= ao
 
+UNAME_S := $(shell uname -s)
+
 ifeq ($(SOUND_TYPE), ao)
 ifneq ($(UNAME_S),Haiku)
 CFLAGS += -pthread
+ifeq ($(UNAME_S),Darwin)
+HOMEBREW_PREFIX ?= $(shell brew --prefix)
+CFLAGS += -I$(HOMEBREW_PREFIX)/include
+endif
 endif
 else ifeq ($(SOUND_TYPE), none)
 
