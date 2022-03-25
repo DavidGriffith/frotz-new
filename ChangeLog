@@ -17,7 +17,7 @@ NEW FEATURES
 
 BUG FIXES
 
-- Fixed another problem with compilation under macOS.
+- Fixed several problems with compilation under macOS.
 
 - Fixed wrong glyphs in DOS Frotz's Amiga font mode.  1/2 and 1/4 were
   there instead of the oe and OE ligatures.
