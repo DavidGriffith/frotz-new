@@ -218,11 +218,11 @@ Apple-specific installation issues ||
 To start with, you need to make sure development tools are installed.
 Apple provides the "Xcode" package from the Mac App Store.
 
-The version of ncurses that Apple puts in macOS is very old and contains
-lots of bugs that have been fixed long ago.  It also doesn't report its
-own version correctly, which leads to problems supporting certain
-features.  Therefore it is highly-recommnded that the lastest version of
-ncurses be installed, preferably through Homebrew (https://brew.sh/).
+As of 2022, the version of ncurses that Apple puts in macOS predates
+6.0, which was released in 2015.  Among other things, this version lacks
+support for italic text.  If you want Frotz to be able to produce italic
+text, you should install the latest version of ncurses, preferably
+through Homebrew (https://brew.sh/).
 
 Start with installing its support scripts by typing this command in a
 terminal window:
@@ -371,14 +371,9 @@ versions of ncurses supplied on SGI's freeware CDs and in SGI's freeware
 archive.  You MUST compile and install at least ncurses 5.0 from source.
 Versions of ncurses older than 5.0 are also broken on Irix.
 
-macOS X:  You must use "cc" instead of "gcc" even though it's really GCC.
-This is a quirk of the Mac OS X Developer Tools.  MAN_PREFIX in the
-Makefile should be set to "/usr/local/share".
-
-Installing ncurses on macOS X used to be troublesome because of some
-nonstandard places for things, but it seems that thse problems have been
-solved with ncurses 5.2.  A precompiled version of ncurses for macOS X is
-available at http://gnu-darwin.sourceforge.net/.
+macOS 10 and later: Install the "Xcode" package from the Mac App Store.
+The supplied version of ncurses predates 6.0, so italics will not be
+supported.  See "Apple-specific installation issues" above.
 
 Solaris:  Some versions of curses on Solaris have trouble with color
 support.  At least the one in Solaris 2.6 works okay.  If compiled with
