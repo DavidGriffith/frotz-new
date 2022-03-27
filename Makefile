@@ -249,7 +249,7 @@ export NO_SOUND
 
 NAME = frotz
 VERSION = 2.54
-RELEASE_NOTES = "Development release."
+RELEASE_NOTES = "Official release."
 
 # If we're working from git, we have access to proper variables. If
 # not, make it clear that we're working from a release.
