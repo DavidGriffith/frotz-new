@@ -411,8 +411,12 @@ dos: $(COMMON_DEFINES) $(HASH)
 	@sed -i "/^OW_DOS_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@sed -i "/^CORE_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@sed -i "/^BLORB_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
+	@unix2dos $(SNAVIG_DIR)/*
+	@cp frotz.prj $(SNAVIG_DIR)
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for 16-bit DOS."
-	@echo "Use Borland Turbo C 3.00 and Borland MAKE 3.6".
+	@echo "Supported compilers are:"
+	@echo "  Borland Turbo C 3.00 and Borland MAKE 3.6"
+	@echo "  Open Watcom C 2.0 and Open Watcom MAKE (wmake)"
 
 tops20: $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
