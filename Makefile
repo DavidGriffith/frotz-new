@@ -410,6 +410,7 @@ dos: $(COMMON_DEFINES) $(HASH)
 	@cp doc/frotz.txt $(SNAVIG_DIR)
 	@sed -i "/^OW_DOS_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@sed -i "/^CORE_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
+	@sed -i "/^BLORB_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for 16-bit DOS."
 	@echo "Use Borland Turbo C 3.00 and Borland MAKE 3.6".
 
