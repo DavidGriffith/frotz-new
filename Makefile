@@ -717,7 +717,7 @@ dist: $(NAME)-$(VERSION).tar.gz
 frotz-$(VERSION).tar.gz:
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	git archive --format=tgz --prefix $(NAME)-$(VERSION)/ HEAD -o $(NAME)-$(VERSION).tar.gz
-	@echo frotz-$(VERSION).tar.gz created.
+	@echo $(NAME)-$(VERSION).tar.gz created.
 else
 	@echo "Not in a git repository or git command not found.  Cannot make a zip file."
 endif
