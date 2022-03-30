@@ -2,6 +2,8 @@
 An interpreter for all Infocom and other Z-machine games.
 Complies with standard 1.0 of Graham Nelson's specification.
 
+[![Liberapay](https://img.shields.io/liberapay/receives/DavidG.svg?logo=liberapay)](https://liberapay.com/DavidG)
+
 Originally written by Stefan Jokisch in 1995-1997.
 Ported to Unix by Galen Hazelwood.
 Reference code and Unix port currently maintained by David Griffith.
