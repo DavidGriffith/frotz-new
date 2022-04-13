@@ -392,7 +392,7 @@ snavig:
 	@echo "Snavig: Change an object's shape..."
 	@echo "Possible snavig-processed targets:"
 	@echo "  dos    (done)"
-	@echo "  tops20 (working on it)"
+	@echo "  tops20 (done)"
 	@echo "  its    (not even started)"
 	@echo "  tops10 (not even started)"
 	@echo "  tenex  (not even started)"
