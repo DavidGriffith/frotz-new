@@ -60,6 +60,8 @@ my $target;
 my @sources;
 my @inputfiles;
 
+my $sed = "sed";
+#my $sed = "gsed";  # You actually need GNU sed, so if you're on MacOS...
 my $sedfile = "urbzig.sed";
 my $sedinplace = "-i.bak";
 
@@ -166,7 +168,7 @@ sub transform_symbols {
 	my ($dir, @junk) = @_;
 
 	chdir $dir;
-	`sed $sedinplace -f $sedfile *.c *h`;
+	`$sed $sedinplace -f $sedfile *.c *h`;
 	unlink glob("*.bak");
 	chdir $topdir;
 }
