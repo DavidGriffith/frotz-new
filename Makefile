@@ -411,7 +411,6 @@ dos: $(COMMON_DEFINES) $(HASH)
 	@sed -i "/^OW_DOS_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@sed -i "/^CORE_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@sed -i "/^BLORB_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
-	@unix2dos $(SNAVIG_DIR)/*
 	@cp frotz.prj $(SNAVIG_DIR)
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for 16-bit DOS."
 	@echo "Supported compilers are:"
