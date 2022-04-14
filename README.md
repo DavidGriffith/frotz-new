@@ -28,7 +28,9 @@ file "HOW_TO_PLAY".
 
 For installation information, see the file "INSTALL".
 
-For information on building for DOS, see the file "DOSBUILD.txt".
+For information on building for DOS, see the file "INSTALL_DOS".
+
+For information on building for TOPS20, see the file "INSTALL_PDP10".
 
 For update history, see the file "Changelog".
 
