@@ -1,5 +1,5 @@
 # This file is used to build Frotz for TOPS20 using the KCC compiler.
-#
+# KCC-6.620(c2l3) is required.  Other versions are untested.
 
 CC = cc
 
