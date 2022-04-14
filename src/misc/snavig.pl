@@ -51,6 +51,7 @@ GetOptions('usage|?' => \$options{usage},
 
 my $shorten_filenames;
 my $transform_symbols;
+my $dos_end;		# To convert \n line endings to \r\n
 
 my $type = $options{type};
 
@@ -61,8 +62,9 @@ my @sources;
 my @inputfiles;
 
 my $sed = "sed";
-#my $sed = "gsed";  # You actually need GNU sed, so if you're on MacOS...
+#my $sed = "gsed";  # GNU sed required, so if you're on macOS, BSD, etc...
 my $sedfile = "urbzig.sed";
+my $sedfilepath;
 my $sedinplace = "-i.bak";
 
 my %symbolmap = ();
@@ -79,8 +81,9 @@ print "  Preparing files for $type.\n";
 if ($type eq "tops20") {
 	$shorten_filenames = 1;
 	$transform_symbols = 1;
+	$dos_end = 1;
 } elsif ($type eq "dos") {
-	# nothing special
+	$dos_end = 1;
 } else {
 	print "  Unknown target type $type.\n";
 	usage();
@@ -93,8 +96,7 @@ for my $arg (@ARGV) {
 }
 $target = pop @sources;
 
-$sedfile = "$topdir/$target/$sedfile";
-
+$sedfilepath = "$topdir/$target/$sedfile";
 
 print "  Copying sources from: ";
 my $source_dir_count = @sources;
@@ -132,12 +134,12 @@ if ($shorten_filenames) {
 	shorten_filenames($target, 6);
 }
 
-if ($transform_symbols) {
-	print "  Transforming symbols...\n";
-	# Scan source code and build a symbol map.
-	%symbolmap = build_symbolmap($target, 6, 6);
+open my $mapfile, '>', $sedfilepath;
 
-	open my $mapfile, '>', $sedfile;
+if ($transform_symbols) {
+	# Scan source code and build a symbol map.
+	print "  Adding to " . $sedfile . " list of symbols to convert...\n";
+	%symbolmap = build_symbolmap($target, 6, 6);
 	for my $k (reverse(sort(keys %symbolmap))) {
 		my $symbol = $symbolmap{$k}{'original'};
 		my $newsym = $symbolmap{$k}{'new'};
@@ -147,8 +149,19 @@ if ($transform_symbols) {
 			print $mapfile "s/$symbol/$newsym/g\n";
 		}		
 	}
-	transform_symbols($target);
 }
+
+if ($dos_end) {
+	print "  Adding to " . $sedfile . " line ending conversion of LF to CR LF...\n";
+	print $mapfile 's/$/\r/' . "\n";
+}
+
+print "  Running conversion...\n";
+chdir $target;
+`$sed $sedinplace -f $sedfilepath *`;
+unlink glob("*.bak");
+chdir $topdir;
+
 
 print "  Done!\n";
 exit;
@@ -161,16 +174,6 @@ sub usage {
 	print "  tops20\n";
 	print "  dos\n";
 	exit;
-}
-
-# Ensure that all symbols are changed.
-sub transform_symbols {
-	my ($dir, @junk) = @_;
-
-	chdir $dir;
-	`$sed $sedinplace -f $sedfile *.c *h`;
-	unlink glob("*.bak");
-	chdir $topdir;
 }
 
 
