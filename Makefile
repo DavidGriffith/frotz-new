@@ -402,8 +402,7 @@ snavig:
 dos: $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
 	@mkdir $(SNAVIG_DIR)
-	@echo "** Invoking snavig"
-	@$(SNAVIG) -t dos $(COMMON_DIR) $(BLORB_DIR) $(DOS_DIR) $(SNAVIG_DIR)
+	@echo "** Copying support text files to $(SNAVIG_DIR)"
 	@cp Makefile.tc Makefile.ow $(SNAVIG_DIR)
 	@cp owbuild.bat tcbuild.bat $(SNAVIG_DIR)
 	@cp INSTALL_DOS $(SNAVIG_DIR)/INSTALL.txt
@@ -411,6 +410,9 @@ dos: $(COMMON_DEFINES) $(HASH)
 	@sed -i "/^OW_DOS_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@sed -i "/^CORE_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
 	@sed -i "/^BLORB_DIR.*/d" $(SNAVIG_DIR)/Makefile.ow
+	@echo "** Invoking snavig"
+	@$(SNAVIG) -t dos $(COMMON_DIR) $(BLORB_DIR) $(DOS_DIR) $(SNAVIG_DIR)
+	@echo "** Adding frotz.prj for building with Turbo C IDE"
 	@cp frotz.prj $(SNAVIG_DIR)
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for 16-bit DOS."
 	@echo "Supported compilers are:"
