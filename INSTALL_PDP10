@@ -22,8 +22,12 @@ http://panda.trailing-edge.com/ and the KCC C compiler which is included.
 To compile, do "make tops20".  This will copy the needed source files to
 the "snavig/" directory and process them to fit TOPS20's limit of six
 alphanumeric caps-insensitive characters on extern symbols and
-filenames.  The contents of this directory then needs to be uploaded to
-a subdirectory on a PDP10.  Then while in the directory with the source,
+filenames.  This requires the GNU version of sed.  So if you're on
+macOS, *BSD, or something else non-GNU; install GNU sed before
+proceeding.
+
+The contents of this "snavig/" directory then needs to be uploaded to a
+subdirectory on a PDP10.  Then while in the directory with the source,
 the following command will then compile and link the code to produce an
 executable:
 

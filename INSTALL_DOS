@@ -104,7 +104,9 @@ Here we go!
     archive.  This will create a directory named "snavig/" containing
     source code all set up for compilation.  Zip up this directory and
     get it into your DOS machine.  The zip file will easily fit onto a
-    single 360K floppy.
+    single 360K floppy.  Snavig requires the use of GNU sed, so if
+    you're on macOS, BSD, or some other non-Linux platform; install GNU
+    sed before proceeding.
 
 2.  Back on the DOS machine, unzip the snavig archive into a directory
     on the hard drive.  Go into it and edit the file "defs.h".  This is
