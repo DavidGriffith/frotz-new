@@ -722,7 +722,7 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 	git archive --format=tgz --prefix $(NAME)-$(VERSION)/ HEAD -o $(NAME)-$(VERSION).tar.gz
 	@echo $(NAME)-$(VERSION).tar.gz created.
 else
-	@echo "Not in a git repository or git command not found.  Cannot make a zip file."
+	@echo "Not in a git repository or git command not found.  Cannot make an archive file."
 endif
 
 dosdist:
