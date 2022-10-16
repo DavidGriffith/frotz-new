@@ -716,13 +716,13 @@ zchar os_read_line (int bufmax, zchar *buf, int timeout, int width,
 		int x2, max;
 		if (scrpos >= width)
 			scrpos = width - 1;
-			move(y, x + scrpos);
-			/* Maybe there's a cleaner way to do this,
-			 * but refresh() is  still needed here to
-			 * print spaces.  --DG
-			 */
-			refresh();
-			ch = unix_read_char(1);
+		move(y, x + scrpos);
+		/* Maybe there's a cleaner way to do this,
+		 * but refresh() is  still needed here to
+		 * print spaces.  --DG
+		 */
+		refresh();
+		ch = unix_read_char(1);
 		getyx(stdscr, y, x2);
 		x2++;
 		width = z_header.screen_width - margin;
