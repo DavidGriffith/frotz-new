@@ -7,7 +7,7 @@ particular machine, especially when the curses library is inadequate and
 installing ncurses isn't an option.  It's also good for getting Frotz to
 run when you have a C compiler and know nothing else of how to do
 things.  This way you can run Frotz on VMS, MVS, VM/CMS and all those
-other stodgy operating system.  More on that later.  Maybe you'd like to
+other stodgy operating systems.  More on that later.  Maybe you'd like to
 experience what it's like to play Adventure on a teletype.
 
 A much cooler use for compiling Frotz with the dumb interface is that it
