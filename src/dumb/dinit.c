@@ -213,7 +213,7 @@ void os_process_arguments(int argc, char *argv[])
 			break;
 		}
 	}
-	if (f_setup.format == FORMAT_UNKNOWN || FORMAT_DISABLED)
+	if (f_setup.format == FORMAT_UNKNOWN || f_setup.format == FORMAT_DISABLED)
 		f_setup.format = FORMAT_NORMAL;
 
 	/* Save the story file name */
