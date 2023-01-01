@@ -691,7 +691,7 @@ uninstall_xfrotz:
 	rm -f "$(X11_FONTDIR)/Zork_r400-16.pcf"
 	rm -f "$(X11_FONTDIR)/Zork_r400-20.pcf"
 	rm -f "$(X11_FONTDIR)/fonts.dir"
-	find $(X11_FONTDIR) -type d -depth -empty -exec rmdir "{}" \;
+	find $(X11_FONTDIR) -depth -type d -empty -exec rmdir "{}" \;
 
 install-sdl: install_sfrotz
 install_sdl: install_sfrotz
