@@ -43,7 +43,7 @@ static char latin1_to_ascii[] =
 static char frotz_to_dumb [256];
 
 static char* bbcode_colour[] = {
-	"black", "red", "green", "yellow", "blue", "magenda",
+	"black", "red", "green", "yellow", "blue", "magenta",
 	"cyan", "white", "lightgrey", "grey", "dimgrey"
 };
 
