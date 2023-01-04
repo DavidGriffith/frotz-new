@@ -13,7 +13,7 @@ The source is rather generic C code and runs well on pretty much all
 current Unixen.  These are the only three things needed to compile and
 run Frotz:
   * Some variant of Unix with an ANSI C compiler (gcc works fine)
-  * A POSIX-compliant version of make (GNU make will do)
+  * GNU Make
   * A reasonably good SYSV derived curses library (ncurses is best)
 
 For Unicode support by way of UTF-8, libncursesw is required.  Unicode
@@ -52,7 +52,15 @@ the vendor-supplied curses library, see the platform-specific info
 below.  If your system provides a means to install ncurses, that's
 usually the best approach.
 
-Frotz's Makefile now requires the use of GNU Make.
+GCC 10 introduced a switch in what is acceptable for declaring global
+variables.  A brief discussion of this is at
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85678.  Before GCC 10, the
+default was changed from -fcommon to -fno-common.  CLANG also did this,
+though I'm not clear when the change was made.  This means that commits
+done before version 2.51 will fail unless you add "CFLAGS+=-fcommom" to
+the make command line.  For instance, "make CFLAGS+=-fcommon dumb".
+
+When building Frotz under any form of Unix, GNU Make is required.
 
 
 =======================
