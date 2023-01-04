@@ -358,15 +358,7 @@ static void show_cell_bbcode(cell_t cel)
 /* Print a cell to stdout without using formatting codes.  */
 static void show_cell_normal(cell_t cel)
 {
-	switch (cel.style) {
-	case NORMAL_STYLE:
-	case FIXED_WIDTH_STYLE:	/* NORMAL_STYLE falls through to here */
-		zputchar(cel.c);
-		break;
-	case PICTURE_STYLE:
-		zputchar(show_pictures ? cel.c : ' ');
-		break;
-	case REVERSE_STYLE:
+	if (cel.style & REVERSE_STYLE) {
 		if (cel.c == ' ')
 			printf("%s", rv_blank_str);
 		else {
@@ -391,8 +383,11 @@ static void show_cell_normal(cell_t cel)
 				break;
 			}
 		}
-		break;
 	}
+	else if (cel.style & PICTURE_STYLE)
+		zputchar(show_pictures ? cel.c : ' ');
+	else	/* Only NORMAL_STYLE and FIXED_WIDTH_STYLE are left. */
+		zputchar(cel.c);
 }
 
 
