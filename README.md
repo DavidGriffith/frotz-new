@@ -41,10 +41,10 @@ https://gitlab.com/DavidGriffith/frotz
 
 ## Downloads
 The latest release of Unix Frotz is available from the Interactive
-Fiction Archive at:  
-http://www.ifarchive.org/if-archive/infocom/interpreters/frotz/  
-and  
-ftp://ftp.ifarchive.org/if-archive/infocom/interpreters/frotz/  
+Fiction Archive at:
+http://www.ifarchive.org/if-archive/infocom/interpreters/frotz/
+and
+ftp://ftp.ifarchive.org/if-archive/infocom/interpreters/frotz/
 
 
 ## Mirrors
