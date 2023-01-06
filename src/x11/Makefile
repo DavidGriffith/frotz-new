@@ -21,7 +21,7 @@ CFLAGS += `pkg-config $(X11_PKGS) --cflags`
 .DELETE_ON_ERROR:
 
 $(TARGET): $(OBJECTS) $(ZFONTSPCF)
-	$(AR) $(ARFLAGS) $(TARGET) $(OBJECTS) $?
+	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 	$(RANLIB) $@
 	@echo "** Done with X11 interface."
 
