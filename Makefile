@@ -232,6 +232,7 @@ CURSES_DEFINE = USE_NCURSES_H
 endif
 
 MKFONTDIR ?= $(shell which mkfontdir)
+XSET ?= $(shell which xset)
 
 export CC
 export CFLAGS
@@ -678,6 +679,7 @@ install_xfrotz: $(XFROTZ_BIN)
 	install -m 644 "$(X11_DIR)/Zork_r400-16.pcf" "$(X11_FONTDIR)"
 	install -m 644 "$(X11_DIR)/Zork_r400-20.pcf" "$(X11_FONTDIR)"
 	$(MKFONTDIR) $(X11_FONTDIR)
+	$(XSET) +fp $(X11_FONTDIR)
 
 uninstall_x11: uninstall_xfrotz
 uninstall-x11: uninstall_xfrotz
@@ -692,6 +694,7 @@ uninstall_xfrotz:
 	rm -f "$(X11_FONTDIR)/Zork_r400-20.pcf"
 	rm -f "$(X11_FONTDIR)/fonts.dir"
 	find $(X11_FONTDIR) -depth -type d -empty -exec rmdir "{}" \;
+	$(XSET) -fp $(X11_FONTDIR)
 
 install-sdl: install_sfrotz
 install_sdl: install_sfrotz
