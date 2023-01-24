@@ -8,6 +8,8 @@ BUG FIXES
 - Not a bug in Frotz itself, but the BUGS text file was deleted from the
   source repository and tarball before the release of Frotz 2.50.
 
+- Fixed faulty handling of text styles in dumb interface.
+
 
 Summary of changes between Frotz 2.53 and Frotz 2.54:
 =====================================================
