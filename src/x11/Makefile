@@ -4,9 +4,6 @@ SOURCES = x_init.c x_input.c x_pic.c x_oldpic.c x_sample.c x_screen.c x_text.c x
 OBJECTS = $(SOURCES:.c=.o)
 HEADERS = x_frotz.h x_setup.h x_blorb.h
 
-ZFONTSBDF = Zork_r400-10.bdf Zork_r400-11.bdf Zork_r400-13.bdf Zork_r400-16.bdf Zork_r400-20.bdf
-ZFONTSPCF = $(ZFONTSBDF:.bdf=.pcf)
-
 TARGET = frotz_x11.a
 
 ARFLAGS = rc
@@ -17,7 +14,7 @@ CFLAGS += -DNO_SOUND
 CFLAGS += `pkg-config $(X11_PKGS) --cflags`
 
 .PHONY: clean
-.SUFFIXES: .bdf .c .o .pcf
+.SUFFIXES: .c .o
 .DELETE_ON_ERROR:
 
 $(TARGET): $(OBJECTS) $(ZFONTSPCF)
@@ -30,7 +27,4 @@ clean:
 
 %.o: %.c
 	$(CC) $(CFLAGS) -fPIC -fpic -o $@ -c $<
-
-.bdf.pcf:
-	bdftopcf -t $< -o $@
 

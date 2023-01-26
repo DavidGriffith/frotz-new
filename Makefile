@@ -247,6 +247,8 @@ export COLOR
 export ITALIC
 export SOUND_TYPE
 export NO_SOUND
+export DESTDIR
+export PREFIX
 
 NAME = frotz
 VERSION = 2.54
@@ -277,6 +279,7 @@ COMMON_DEFINES = $(COMMON_DIR)/defs.h
 HASH = $(COMMON_DIR)/hash.h
 
 MISC_DIR = $(SRCDIR)/misc
+FONTS_DIR = fonts
 
 BLORB_DIR = $(SRCDIR)/blorb
 BLORB_LIB = $(BLORB_DIR)/blorblib.a
@@ -664,6 +667,9 @@ uninstall_dfrotz:
 	rm -f $(DESTDIR)$(BINDIR)/dfrotz
 	rm -f $(DESTDIR)$(MANDIR)/man6/dfrotz.6
 
+fonts_pcf:
+	$(MAKE) -C $(FONTS_DIR) pcf
+
 install_x11: install_xfrotz
 install-x11: install_xfrotz
 install-xfrotz: install_xfrotz
@@ -672,14 +678,16 @@ install_xfrotz: $(XFROTZ_BIN)
 	mkdir -p "$(DESTDIR)$(MANDIR)/man6" && test -w $(DESTDIR)$(MANDIR)/man6
 	install "$(XFROTZ_BIN)" "$(DESTDIR)$(PREFIX)/bin/"
 	install -m 644 doc/xfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
-	mkdir -p "$(X11_FONTDIR)"
-	install -m 644 "$(X11_DIR)/Zork_r400-10.pcf" "$(X11_FONTDIR)"
-	install -m 644 "$(X11_DIR)/Zork_r400-11.pcf" "$(X11_FONTDIR)"
-	install -m 644 "$(X11_DIR)/Zork_r400-13.pcf" "$(X11_FONTDIR)"
-	install -m 644 "$(X11_DIR)/Zork_r400-16.pcf" "$(X11_FONTDIR)"
-	install -m 644 "$(X11_DIR)/Zork_r400-20.pcf" "$(X11_FONTDIR)"
-	$(MKFONTDIR) $(X11_FONTDIR)
-	$(XSET) +fp $(X11_FONTDIR)
+	$(MAKE) -C $(FONTS_DIR) install_pcf
+
+#	mkdir -p "$(X11_FONTDIR)"
+#	install -m 644 "$(X11_DIR)/Zork_r400-10.pcf" "$(X11_FONTDIR)"
+#	install -m 644 "$(X11_DIR)/Zork_r400-11.pcf" "$(X11_FONTDIR)"
+#	install -m 644 "$(X11_DIR)/Zork_r400-13.pcf" "$(X11_FONTDIR)"
+#	install -m 644 "$(X11_DIR)/Zork_r400-16.pcf" "$(X11_FONTDIR)"
+#	install -m 644 "$(X11_DIR)/Zork_r400-20.pcf" "$(X11_FONTDIR)"
+#	$(MKFONTDIR) $(X11_FONTDIR)
+#	$(XSET) +fp $(X11_FONTDIR)
 
 uninstall_x11: uninstall_xfrotz
 uninstall-x11: uninstall_xfrotz
@@ -687,14 +695,16 @@ uninstall-xfrotz: uninstall_xfrotz
 uninstall_xfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/xfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/xfrotz.6"
-	rm -f "$(X11_FONTDIR)/Zork_r400-10.pcf"
-	rm -f "$(X11_FONTDIR)/Zork_r400-11.pcf"
-	rm -f "$(X11_FONTDIR)/Zork_r400-13.pcf"
-	rm -f "$(X11_FONTDIR)/Zork_r400-16.pcf"
-	rm -f "$(X11_FONTDIR)/Zork_r400-20.pcf"
-	rm -f "$(X11_FONTDIR)/fonts.dir"
-	find $(X11_FONTDIR) -depth -type d -empty -exec rmdir "{}" \;
-	$(XSET) -fp $(X11_FONTDIR)
+	$(MAKE) -C $(FONTS_DIR) uninstall_pcf
+
+#	rm -f "$(X11_FONTDIR)/Zork_r400-10.pcf"
+#	rm -f "$(X11_FONTDIR)/Zork_r400-11.pcf"
+#	rm -f "$(X11_FONTDIR)/Zork_r400-13.pcf"
+#	rm -f "$(X11_FONTDIR)/Zork_r400-16.pcf"
+#	rm -f "$(X11_FONTDIR)/Zork_r400-20.pcf"
+#	rm -f "$(X11_FONTDIR)/fonts.dir"
+#	find $(X11_FONTDIR) -depth -type d -empty -exec rmdir "{}" \;
+#	$(XSET) -fp $(X11_FONTDIR)
 
 install-sdl: install_sfrotz
 install_sdl: install_sfrotz
