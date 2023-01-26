@@ -8,11 +8,6 @@ X11_FONTDIR = $(DESTDIR)$(PREFIX)/share/fonts/X11/zork
 MKFONTDIR ?= $(shell which mkfontdir)
 XSET ?= $(shell which xset)
 
-
-
-.SUFFIXES: .bdf .pcf
-.DELETE_ON_ERROR:
-
 help:
 	@echo "Font Targets:"
 	@echo "         pcf: Build PCF fonts from BDF fonts"
@@ -41,4 +36,6 @@ clean:
 .bdf.pcf:
 	bdftopcf -t $< -o $@
 
-
+.SUFFIXES: .bdf .pcf
+.DELETE_ON_ERROR:
+.PHONY:	clean install_pcf uninstall_pcf
