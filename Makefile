@@ -231,8 +231,6 @@ CURSES_CFLAGS += -D_XOPEN_SOURCE_EXTENDED
 CURSES_DEFINE = USE_NCURSES_H
 endif
 
-MKFONTDIR ?= $(shell which mkfontdir)
-XSET ?= $(shell which xset)
 
 export CC
 export CFLAGS
@@ -296,7 +294,6 @@ DOS_DIR = $(SRCDIR)/dos
 X11_DIR = $(SRCDIR)/x11
 X11_LIB = $(X11_DIR)/frotz_x11.a
 export X11_PKGS = x11 xt libpng libjpeg zlib
-X11_FONTDIR = $(DESTDIR)$(PREFIX)/share/fonts/X11/zork
 X11_LDFLAGS = `pkg-config $(X11_PKGS) --libs` -lm
 
 SDL_DIR = $(SRCDIR)/sdl
@@ -680,15 +677,6 @@ install_xfrotz: $(XFROTZ_BIN)
 	install -m 644 doc/xfrotz.6 "$(DESTDIR)$(MANDIR)/man6/"
 	$(MAKE) -C $(FONTS_DIR) install_pcf
 
-#	mkdir -p "$(X11_FONTDIR)"
-#	install -m 644 "$(X11_DIR)/Zork_r400-10.pcf" "$(X11_FONTDIR)"
-#	install -m 644 "$(X11_DIR)/Zork_r400-11.pcf" "$(X11_FONTDIR)"
-#	install -m 644 "$(X11_DIR)/Zork_r400-13.pcf" "$(X11_FONTDIR)"
-#	install -m 644 "$(X11_DIR)/Zork_r400-16.pcf" "$(X11_FONTDIR)"
-#	install -m 644 "$(X11_DIR)/Zork_r400-20.pcf" "$(X11_FONTDIR)"
-#	$(MKFONTDIR) $(X11_FONTDIR)
-#	$(XSET) +fp $(X11_FONTDIR)
-
 uninstall_x11: uninstall_xfrotz
 uninstall-x11: uninstall_xfrotz
 uninstall-xfrotz: uninstall_xfrotz
@@ -696,15 +684,6 @@ uninstall_xfrotz:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/xfrotz"
 	rm -f "$(DESTDIR)$(MANDIR)/man6/xfrotz.6"
 	$(MAKE) -C $(FONTS_DIR) uninstall_pcf
-
-#	rm -f "$(X11_FONTDIR)/Zork_r400-10.pcf"
-#	rm -f "$(X11_FONTDIR)/Zork_r400-11.pcf"
-#	rm -f "$(X11_FONTDIR)/Zork_r400-13.pcf"
-#	rm -f "$(X11_FONTDIR)/Zork_r400-16.pcf"
-#	rm -f "$(X11_FONTDIR)/Zork_r400-20.pcf"
-#	rm -f "$(X11_FONTDIR)/fonts.dir"
-#	find $(X11_FONTDIR) -depth -type d -empty -exec rmdir "{}" \;
-#	$(XSET) -fp $(X11_FONTDIR)
 
 install-sdl: install_sfrotz
 install_sdl: install_sfrotz
