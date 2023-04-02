@@ -258,7 +258,7 @@ RELEASE_NOTES = "Official release."
 GIT_DIR ?= .git
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
 GIT_HASH = $(shell git rev-parse HEAD)
-GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+GIT_HASH_SHORT = $(shell git rev-parse --short=8 HEAD)
 GIT_DATE = $(shell git show -s --format=%ci)
 else
 GIT_HASH = $Format:%H$
