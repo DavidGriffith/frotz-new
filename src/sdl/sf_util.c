@@ -540,17 +540,17 @@ void sf_sleep(int msecs)
 }
 
 #ifdef WIN32
-unsigned long sf_ticks(void)
+zlong sf_ticks(void)
 {
 	return (GetTickCount());
 }
 #else
-unsigned long sf_ticks(void)
+zlong sf_ticks(void)
 {
 	struct timeval now;
 	static struct timeval start;
 	static int started = 0;
-	unsigned long ticks;
+	zlong ticks;
 	now.tv_sec = now.tv_usec = 0;
 	gettimeofday(&now, NULL);
 	if (!started) {
@@ -928,7 +928,7 @@ static char *findid(const char *sect, const char *id)
 		if (!r)
 			break;
 		rq = r + nid;
-		if ((*(byte *) (r - 1) <= ' ')
+		if ((*(zbyte *) (r - 1) <= ' ')
 		    && ((*rq == ' ') || (*rq == '='))) {
 			while (*rq)
 				if (*rq++ == '=')
@@ -981,7 +981,7 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 					p++;
 					break;
 				}
-				if ((byte) (*p) > ' ')
+				if ((zbyte) (*p) > ' ')
 					break;
 			}
 			if (*p) {
@@ -1032,13 +1032,13 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 #define pshort( b) (((int)((b)[1]) << 8) + (int)((b)[0]))
 
 
-static unsigned myin(void *d, byte ** b)
+static unsigned myin(void *d, zbyte ** b)
 {
 	return 0;
 }
 
 
-static int myout(void *udata, byte * b, unsigned n)
+static int myout(void *udata, zbyte * b, unsigned n)
 {
 	memmove(udata, b, n);
 	udata += n;
@@ -1046,9 +1046,9 @@ static int myout(void *udata, byte * b, unsigned n)
 }
 
 
-static int myunzip(int csize, byte * cdata, byte * udata)
+static int myunzip(int csize, zbyte * cdata, zbyte * udata)
 {
-	byte window[32768];
+	zbyte window[32768];
 	z_stream z;
 	int st;
 
@@ -1076,8 +1076,8 @@ static int myunzip(int csize, byte * cdata, byte * udata)
 
 int sf_pkread(FILE * f, int foffs, void **out, int *size)
 {
-	byte hd[30];
-	byte *data, *cdata;
+	zbyte hd[30];
+	zbyte *data, *cdata;
 	int csize, usize, cmet, skip, st;
 
 	fseek(f, foffs, SEEK_SET);

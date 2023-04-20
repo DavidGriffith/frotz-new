@@ -31,7 +31,7 @@
 
 static char banner[256];
 static int isfullscreen;
-static ulong *sbuffer = NULL;
+static zlong *sbuffer = NULL;
 static int sbpitch;		/* in longs */
 static int dirty = 0;
 static int ewidth, eheight;
@@ -45,7 +45,7 @@ extern bool sdl_active;
 static void sf_quitconf();
 
 static bool ApplyPalette(sf_picture *);
-static ulong screen_palette[16];
+static zlong screen_palette[16];
 
 extern z_header_t z_header;
 
@@ -99,7 +99,7 @@ static void myGrefresh()
 }
 
 
-void sf_wpixel(int x, int y, ulong c)
+void sf_wpixel(int x, int y, zlong c)
 {
 	if (x < xmin || x >= xmax || y < ymin || y >= ymax)
 		return;
@@ -108,7 +108,7 @@ void sf_wpixel(int x, int y, ulong c)
 }
 
 
-ulong sf_rpixel(int x, int y)
+zlong sf_rpixel(int x, int y)
 {
 	if (x < 0 || x >= ewidth || y < 0 || y >= eheight)
 		return 0;
@@ -116,7 +116,7 @@ ulong sf_rpixel(int x, int y)
 }
 
 #define MAXCUR 64
-static ulong savedcur[MAXCUR];
+static zlong savedcur[MAXCUR];
 
 static void drawthecursor(int x, int y, int onoff)
 {
@@ -137,7 +137,7 @@ static void drawthecursor(int x, int y, int onoff)
 }
 
 
-bool sf_IsValidChar(unsigned short c)
+bool sf_IsValidChar(zword c)
 {
 	if (c >= ZC_ASCII_MIN && c <= ZC_ASCII_MAX)
 		return true;
@@ -156,9 +156,9 @@ void sf_drawcursor(bool c)
 }
 
 
-void sf_chline(int x, int y, ulong c, int n)
+void sf_chline(int x, int y, zlong c, int n)
 {
-	ulong *s;
+	zlong *s;
 	if (y < ymin || y >= ymax)
 		return;
 	if (x < xmin) {
@@ -176,9 +176,9 @@ void sf_chline(int x, int y, ulong c, int n)
 }
 
 
-void sf_cvline(int x, int y, ulong c, int n)
+void sf_cvline(int x, int y, zlong c, int n)
 {
-	ulong *s;
+	zlong *s;
 	if (x < xmin || x >= xmax)
 		return;
 	if (y < xmin) {
@@ -198,9 +198,9 @@ void sf_cvline(int x, int y, ulong c, int n)
 }
 
 
-ulong sf_blendlinear(int a, ulong s, ulong d)
+zlong sf_blendlinear(int a, zlong s, zlong d)
 {
-	ulong r;
+	zlong r;
 	r = ((s & 0xff) * a + (d & 0xff) * (256 - a)) >> 8;
 	s >>= 8;
 	d >>= 8;
@@ -220,7 +220,7 @@ void sf_writeglyph(SF_glyph * g)
 
 	int w = g->dx;
 	int weff = g->xof + g->w;
-	byte *bmp = (byte *) (&(g->bitmap[0]));
+	zbyte *bmp = (zbyte *) (&(g->bitmap[0]));
 	int h = g->h;
 	int nby = (g->w + 7) / 8;
 	int byw = g->w;
@@ -234,7 +234,7 @@ void sf_writeglyph(SF_glyph * g)
 	int height = ts->font->height(ts->font);
 	int width;
 
-	ulong color, bc;
+	zlong color, bc;
 
 	if ((ts->style & REVERSE_STYLE) != 0) {
 		bc = ts->fore;
@@ -262,7 +262,7 @@ void sf_writeglyph(SF_glyph * g)
 				int t = *bmp++;
 				if (xx < byw) {
 					if (t) {
-						ulong sval = color;
+						zlong sval = color;
 						if (t < 255)
 							sval = sf_blend((int) (t + (t >> 7)), sval, sf_rpixel(x + xx, y));
 						sf_wpixel(x + xx, y, sval);
@@ -290,9 +290,9 @@ void sf_writeglyph(SF_glyph * g)
 }
 
 
-void sf_fillrect(unsigned long color, int x, int y, int w, int h)
+void sf_fillrect(zlong color, int x, int y, int w, int h)
 {
-	ulong *dst;
+	zlong *dst;
 	int i;
 	if (x < xmin) {
 		w += x - xmin;
@@ -320,7 +320,7 @@ void sf_fillrect(unsigned long color, int x, int y, int w, int h)
 }
 
 
-void sf_rect(unsigned long color, int x, int y, int w, int h)
+void sf_rect(zlong color, int x, int y, int w, int h)
 {
 	sf_chline(x, y, color, w);
 	sf_chline(x, y + h - 1, color, w);
@@ -380,7 +380,7 @@ int os_peek_colour(void)
 
 static void scroll(int x, int y, int w, int h, int n)
 {
-	ulong *src, *dst;
+	zlong *src, *dst;
 	int nmove, step;
 	if (n > 0) {
 		dst = sbuffer + x + sbpitch * y;
@@ -397,7 +397,7 @@ static void scroll(int x, int y, int w, int h, int n)
 		return;
 	if (nmove > 0) {
 		while (nmove--) {
-			memmove(dst, src, w * sizeof(ulong));
+			memmove(dst, src, w * sizeof(zlong));
 			dst += step;
 			src += step;
 		}
@@ -414,7 +414,7 @@ bool sf_flushdisplay()
 {
 	if (dirty) {
 		SDL_UpdateTexture(texture, NULL, sbuffer,
-				  sbpitch * sizeof(ulong));
+				  sbpitch * sizeof(zlong));
 		myGrefresh();
 		dirty = 0;
 		return true;
@@ -537,7 +537,7 @@ void sf_initvideo(int W, int H, int full)
 					  SDL_TEXTUREACCESS_STREAMING, W, H)))
 		os_fatal("Failed to create texture: %s", SDL_GetError());
 
-	sbuffer = calloc(W * H, sizeof(ulong));
+	sbuffer = calloc(W * H, sizeof(zlong));
 	if (!sbuffer)
 		os_fatal("Could not create gc");
 
@@ -564,7 +564,7 @@ void os_draw_picture(int picture, int y, int x)
 	int ox, oy, ow, oh;
 	Zwindow *winpars;
 	sf_picture *pic = sf_getpic(picture);
-	ulong *src, *dst, sval, dval, alpha;
+	zlong *src, *dst, sval, dval, alpha;
 
 	sf_flushtext();
 
@@ -572,7 +572,7 @@ void os_draw_picture(int picture, int y, int x)
 		return;
 	if (!pic->pixels)
 		return;
-	src = (ulong *) pic->pixels;
+	src = (zlong *) pic->pixels;
 
 	x--;
 	y--;
@@ -647,8 +647,8 @@ void os_draw_picture(int picture, int y, int x)
 		for (yy = 0; yy < eh; yy++) {
 			for (xx = 0; xx < ew; xx++) {
 				dst =
-				    sbuffer + x + (uint32_t)(xx * m_gfxScale_w) +
-				    sbpitch * (y + (uint32_t)(yy * m_gfxScale_h));
+				    sbuffer + x + (zlong)(xx * m_gfxScale_w) +
+				    sbpitch * (y + (zlong)(yy * m_gfxScale_h));
 				sval = src[xx];
 				alpha = (sval >> 24);
 				if (alpha == 255)
@@ -673,7 +673,7 @@ void os_draw_picture(int picture, int y, int x)
 }
 
 
-static ulong mytimeout;
+static zlong mytimeout;
 int mouse_button;
 static int numAltQ = 0;
 
@@ -1180,7 +1180,7 @@ void sf_DrawInput(zchar * buffer, int pos, int ptx, int pty, int width,
  */
 zword os_read_mouse(void)
 {
-	byte c;
+	zbyte c;
 	int x, y;
 	zword btn = 0;
 	/* Get the mouse position */
@@ -1238,9 +1238,9 @@ void os_more_prompt(void)
 }
 
 
-ulong *sf_savearea(int x, int y, int w, int h)
+zlong *sf_savearea(int x, int y, int w, int h)
 {
-	ulong *r, *p, *s;
+	zlong *r, *p, *s;
 	int i;
 
 	if (x < 0) {
@@ -1261,7 +1261,7 @@ ulong *sf_savearea(int x, int y, int w, int h)
 	if (h <= 0)
 		return NULL;
 
-	r = p = malloc((w * h + 4) * sizeof(ulong));
+	r = p = malloc((w * h + 4) * sizeof(zlong));
 	if (!r)
 		return NULL;
 
@@ -1272,7 +1272,7 @@ ulong *sf_savearea(int x, int y, int w, int h)
 
 	s = sbuffer + x + y * sbpitch;
 	for (i = 0; i < h; i++) {
-		memmove(p, s, w * sizeof(ulong));
+		memmove(p, s, w * sizeof(zlong));
 		p += w;
 		s += sbpitch;
 	}
@@ -1280,9 +1280,9 @@ ulong *sf_savearea(int x, int y, int w, int h)
 }
 
 
-void sf_restoreareaandfree(ulong * s)
+void sf_restoreareaandfree(zlong * s)
 {
-	ulong *p, *d;
+	zlong *p, *d;
 	int i, x, y, w, h;
 	if (!s)
 		return;
@@ -1295,7 +1295,7 @@ void sf_restoreareaandfree(ulong * s)
 
 	d = sbuffer + x + y * sbpitch;
 	for (i = 0; i < h; i++) {
-		memmove(d, p, w * sizeof(ulong));
+		memmove(d, p, w * sizeof(zlong));
 		p += w;
 		d += sbpitch;
 	}
@@ -1307,7 +1307,7 @@ void sf_restoreareaandfree(ulong * s)
 
 
 int (*sf_osdialog)(bool ex, const char *def, const char *filt, const char *tit,
-		   char **res, ulong * sbuf, int sbp, int ew, int eh,
+		   char **res, zlong * sbuf, int sbp, int ew, int eh,
 		   int isfull) = NULL;
 
 
@@ -1322,7 +1322,7 @@ int sf_user_fdialog(bool existing, const char *defaultname, const char *filter,
 }
 
 
-void sf_videodata(ulong ** sb, int *sp, int *ew, int *eh)
+void sf_videodata(zlong ** sb, int *sp, int *ew, int *eh)
 {
 	*sb = sbuffer;
 	*sp = sbpitch;
@@ -1367,7 +1367,7 @@ static bool ApplyPalette(sf_picture * graphic)
 	bool changed = FALSE;
 	int i, colors;
 
-	memset(&screen_palette, 0, sizeof(ulong));
+	memset(&screen_palette, 0, sizeof(zlong));
 
 	if (graphic->usespalette) {
 		colors = graphic->palette_entries;

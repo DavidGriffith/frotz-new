@@ -47,7 +47,7 @@ static char pattern[64];
 static zword pushed = 0;
 static int wentry;
 
-static ulong *sbuffer = NULL;
+static zlong *sbuffer = NULL;
 static int sbpitch;		/* in longs */
 static int ewidth, eheight;
 static int X, Y, W, H, xdlg, ydlg, wdlg, hdlg;
@@ -92,7 +92,7 @@ STATIC void goup()
 typedef struct {
 	int x, y, w, h;		/* internal */
 	 zword(*click) (int, int);
-	ulong back;
+	zlong back;
 	int isbutton;
 } BAREA;
 
@@ -118,7 +118,7 @@ static SF_textsetting *ts;
 
 STATIC void frame_upframe(int x, int y, int w, int h)
 {
-	ulong v = O_WHITE;
+	zlong v = O_WHITE;
 	sf_chline(x, y, v, w);
 	sf_cvline(x, y, v, --h);
 	v = O_BLACK;
@@ -137,7 +137,7 @@ STATIC void frame_upframe(int x, int y, int w, int h)
 
 STATIC void frame_downframe(int x, int y, int w, int h)
 {
-	ulong v = O_BLACK;
+	zlong v = O_BLACK;
 	sf_chline(x, y, v, w);
 	sf_cvline(x, y, v, --h);
 	v = O_WHITE;
@@ -219,7 +219,7 @@ STATIC size_t utf8_len(const char *str)
 #endif	/* USE_UTF8 */
 
 
-STATIC void writetext(ulong color, const char *s, int x, int y, int w,
+STATIC void writetext(zlong color, const char *s, int x, int y, int w,
 		      int center)
 {
 	int ox, oy, ow, oh;
@@ -365,11 +365,11 @@ int (*sf_sysdialog)(bool existing, const char *def, const char *filt,
 
 
 STATIC int myosdialog(bool existing, const char *def, const char *filt,
-		      const char *tit, char **res, ulong * sbuf, int sbp,
+		      const char *tit, char **res, zlong * sbuf, int sbp,
 		      int ew, int eh, int isfull)
 {
 	char *pp;
-	ulong *saved;
+	zlong *saved;
 	int y0, y1, y2, x1;
 	zword c = 0;
 	int wtext, htext, buttw;
@@ -759,7 +759,7 @@ STATIC int utf8_char_pos(char *s, int pos)
 /*********************************************
  * white, black, gray, yellow
  */
-static ulong bcolors[4] = { 0xfcfcfc, 0, 0xa0a0a0, 0xa0d0e0 };
+static zlong bcolors[4] = { 0xfcfcfc, 0, 0xa0a0a0, 0xa0d0e0 };
 
 static unsigned char folderbmp[] = {
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -1001,12 +1001,12 @@ STATIC zword Zselect(int x, int y)
 }
 
 
-extern void sf_videodata(ulong ** sb, int *sp, int *ew, int *eh);
+extern void sf_videodata(zlong ** sb, int *sp, int *ew, int *eh);
 zword sf_yesnooverlay(int xc, int yc, char *t, int saverest)
 {
 	zword c = ZC_RETURN;
 	int nsav = nbareas;
-	ulong *saved = NULL;
+	zlong *saved = NULL;
 	int hx = BUTTW + 3 * SPC, hy = HTEXT + 2 * SPC, heff;
 
 	heff = 8 * strlen(t);

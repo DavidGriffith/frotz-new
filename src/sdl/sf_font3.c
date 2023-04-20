@@ -22,7 +22,7 @@
 #include "sf_frotz.h"
 #include <string.h>
 
-static byte Zfont3[] = {
+static zbyte Zfont3[] = {
 /* 32*/	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 /* 33*/	0x00,0x00,0x20,0x60,0xfe,0x60,0x20,0x00,
 /* 34*/	0x00,0x00,0x08,0x0c,0xfe,0x0c,0x08,0x00,
@@ -121,10 +121,10 @@ static byte Zfont3[] = {
 
 /* glyph buffer */
 static struct {
-	byte dx;
-	byte w, h;
+	zbyte dx;
+	zbyte w, h;
 	char xof, yof;
-	byte bitmap[16];
+	zbyte bitmap[16];
 } myglyph = {8,8,8,0,-2};
 
 static void nodestroy(SFONT *s){}
@@ -133,15 +133,15 @@ static int myascent(SFONT *s){ return 6;}
 static int mydescent(SFONT *s){ return 2;}
 static int myminchar(SFONT *s){ return 32;}
 static int mymaxchar(SFONT *s){ return 126;}
-static int myhasglyph(SFONT *s, word c, int allowdef)
+static int myhasglyph(SFONT *s, zword c, int allowdef)
 {
 	return (c >= 32 && c <= 126) || allowdef;
 }
 
 
-static SF_glyph * mygetglyph(SFONT *s, word c, int allowdef)
+static SF_glyph * mygetglyph(SFONT *s, zword c, int allowdef)
 {
-	byte *src;
+	zbyte *src;
 	if (c < 32 || c > 126) {
 		if (!allowdef)
 			return NULL;
@@ -173,9 +173,9 @@ SFONT * SF_font3 = &myfont3;
 static int myheight2(SFONT *s){ return 16;}
 static int myascent2(SFONT *s){ return 14;}
 static int mydescent2(SFONT *s){ return 2;}
-static SF_glyph * mygetglyph2(SFONT *s, word c, int allowdef)
+static SF_glyph * mygetglyph2(SFONT *s, zword c, int allowdef)
 {
-	byte *src, *dst; int i;
+	zbyte *src, *dst; int i;
 	if (c < 32 || c > 126) {
 		if (!allowdef)
 			return NULL;

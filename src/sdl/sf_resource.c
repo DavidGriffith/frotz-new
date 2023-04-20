@@ -51,10 +51,10 @@ int m_v6scale_x;
 int m_v6scale_y;
 double m_gfxScale_w = 1.0;
 double m_gfxScale_h = 1.0;
-ulong m_defaultFore;
-ulong m_defaultBack;
-ulong m_colours[11];
-ulong m_nonStdColours[NON_STD_COLS];
+zlong m_defaultFore;
+zlong m_defaultBack;
+zlong m_colours[11];
+zlong m_nonStdColours[NON_STD_COLS];
 int m_nonStdIndex;
 bool m_exitPause = 0;
 bool m_lineInput = 0;
@@ -478,7 +478,7 @@ void sf_readsettings(void)
 
 
 /* Get a colour */
-ulong sf_GetColour(int colour)
+zlong sf_GetColour(int colour)
 {
 	/* Standard colours */
 	if ((colour >= BLACK_COLOUR) && (colour <= DARKGREY_COLOUR))
@@ -500,7 +500,7 @@ ulong sf_GetColour(int colour)
 
 
 /* Get a default colour */
-ulong sf_GetDefaultColour(bool fore)
+zlong sf_GetDefaultColour(bool fore)
 {
 	if (m_IsInfocomV6)
 		return sf_GetColour(fore ? WHITE_COLOUR : BLACK_COLOUR);
@@ -509,7 +509,7 @@ ulong sf_GetDefaultColour(bool fore)
 
 
 /* Get an index for a non-standard colour */
-int sf_GetColourIndex(ulong colour)
+int sf_GetColourIndex(zlong colour)
 {
 	int i, index = -1;
 	/* Is this a standard colour? */
@@ -898,7 +898,7 @@ static int loadlocal(int num, int ispic, int method, myresource * res)
 {
 	FILE *f;
 	int size;
-	byte hd[4];
+	zbyte hd[4];
 
 	f = findlocal(ispic, num, &size);
 	if (!f)
@@ -950,7 +950,7 @@ static int loadlocal(int num, int ispic, int method, myresource * res)
 int sf_getresource(int num, int ispic, int method, myresource * res)
 {
 	int st;
-	ulong usage;
+	zlong usage;
 
 	res->bbres.data.ptr = NULL;
 	res->file = NULL;
@@ -981,7 +981,7 @@ int sf_getresource(int num, int ispic, int method, myresource * res)
 typedef struct {
 	void *next;
 	int num, ispic;
-	ulong type;
+	zlong type;
 	char *name;
 } LLENTRY;
 
@@ -989,7 +989,7 @@ static LLENTRY *Lpics = NULL, *Lsnds = NULL;
 
 static int numlocal = 0, numlocalpic = 0, numlocalsnd = 0;
 static int p_ispic, p_num;
-static ulong p_type;
+static zlong p_type;
 static char *p_name;
 
 

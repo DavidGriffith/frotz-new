@@ -69,6 +69,7 @@ typedef int bool;
 /* For everything */
 /******************************************************************************/
 #include <stdio.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "hash.h"
@@ -101,10 +102,9 @@ typedef int bool;
 #define PATH_SEPARATOR '/'
 #endif
 
-/* typedef unsigned short zbyte; */
-typedef unsigned char zbyte;
-typedef unsigned short zword;
-typedef unsigned long zlong;
+typedef uint8_t zbyte;
+typedef uint16_t zword;
+typedef uint32_t zlong;
 
 #ifndef USE_UTF8
 typedef unsigned char zchar;

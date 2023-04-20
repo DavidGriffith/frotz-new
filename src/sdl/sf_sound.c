@@ -52,7 +52,7 @@ typedef struct EFFECT {
 	int volume;
 	int ended;
 	zword eos;
-	ulong endtime;
+	zlong endtime;
 } EFFECT;
 
 /* no effects cache */
@@ -246,7 +246,7 @@ static EFFECT *getaiff(FILE * f, size_t pos, int len, int num)
 static EFFECT *getmodule(FILE * f, size_t pos, int len, int num)
 {
 	EFFECT *res;
-	byte h[2];
+	zbyte h[2];
 
 	res = new_effect(MOD_TYPE, num);
 	if (!res)

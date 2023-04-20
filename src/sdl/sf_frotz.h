@@ -12,13 +12,10 @@
 #include "../blorb/blorb.h"
 
 #include <stdint.h>
-typedef uint8_t byte;
-typedef uint16_t word;
-#define ulong uint32_t
 
 typedef struct {
 	bb_result_t bbres;
-	ulong type;
+	zlong type;
 	FILE *file;
 } myresource;
 
@@ -54,7 +51,7 @@ bool sf_IsAdaptive(int picture);
 #endif
 
 /* this assumes RGBA with lsb = R */
-static inline ulong RGB5ToTrue(word w)
+static inline zlong RGB5ToTrue(zword w)
 {
 	int _r = w & 0x001F;
 	int _g = (w & 0x03E0) >> 5;
@@ -62,12 +59,12 @@ static inline ulong RGB5ToTrue(word w)
 	_r = (_r << 3) | (_r >> 2);
 	_g = (_g << 3) | (_g >> 2);
 	_b = (_b << 3) | (_b >> 2);
-	return (ulong) (_r | (_g << 8) | (_b << 16));
+	return (zlong) (_r | (_g << 8) | (_b << 16));
 }
 
-static inline word TrueToRGB5(ulong u)
+static inline zword TrueToRGB5(zlong u)
 {
-	return (word) (((u >> 3) & 0x001f) | ((u >> 6) & 0x03e0) |
+	return (zword) (((u >> 3) & 0x001f) | ((u >> 6) & 0x03e0) |
 		       ((u >> 9) & 0x7c00));
 }
 
@@ -81,10 +78,10 @@ extern bool m_tandy;
 extern int m_v6scale;
 extern double m_gfxScale_w;
 extern double m_gfxScale_h;
-extern ulong m_defaultFore;
-extern ulong m_defaultBack;
-extern ulong m_colours[11];
-extern ulong m_nonStdColours[NON_STD_COLS];
+extern zlong m_defaultFore;
+extern zlong m_defaultBack;
+extern zlong m_colours[11];
+extern zlong m_nonStdColours[NON_STD_COLS];
 extern int m_nonStdIndex;
 extern bool m_exitPause;
 extern bool m_lineInput;
@@ -117,8 +114,8 @@ int sf_load_resources(void);
 typedef struct {
 	int number;	/* 0 means unallocated */
 	int width, height;
-	byte *pixels;
-	ulong palette[16];
+	zbyte *pixels;
+	zlong palette[16];
 	int palette_entries;
 	int transparentcolor;
 	bool adaptive;
@@ -137,10 +134,10 @@ void sf_flushtext();
 
 /* glyph */
 typedef struct {
-	byte dx;
-	byte w, h;
+	zbyte dx;
+	zbyte w, h;
 	char xof, yof;
-	byte bitmap[0];
+	zbyte bitmap[0];
 } SF_glyph;
 
 typedef struct sfontstruct SFONT;
@@ -156,8 +153,8 @@ struct sfontstruct {
 	int (*descent)(SFONT *);
 	int (*minchar)(SFONT *);
 	int (*maxchar)(SFONT *);
-	int (*hasglyph)(SFONT *, word, int);
-	SF_glyph *(*getglyph)(SFONT *, word, int);
+	int (*hasglyph)(SFONT *, zword, int);
+	SF_glyph *(*getglyph)(SFONT *, zword, int);
 	int antialiased;
 	void *data;
 };
@@ -168,7 +165,7 @@ typedef struct {
 	int style, zfontnum;
 	int cx, cy;		/* cursor position - 0 based */
 	int oh;			/* overhang */
-	unsigned long fore, back;
+	zlong fore, back;
 	bool foreDefault, backDefault, backTransparent;
 } SF_textsetting;
 
@@ -182,7 +179,7 @@ int sf_charwidth(zword c, int *oh);
 
 void sf_writeglyph(SF_glyph * g);
 
-void sf_fillrect(unsigned long color, int x, int y, int w, int h);
+void sf_fillrect(zlong color, int x, int y, int w, int h);
 
 int sf_GetProfileInt(const char *sect, const char *id, int def);
 double sf_GetProfileDouble(const char *sect, const char *id, double def);
@@ -190,9 +187,9 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def);
 
 void sf_readsettings();
 
-ulong sf_GetColour(int colour);
-ulong sf_GetDefaultColour(bool fore);
-int sf_GetColourIndex(ulong colour);
+zlong sf_GetColour(int colour);
+zlong sf_GetDefaultColour(bool fore);
+int sf_GetColourIndex(zlong colour);
 
 void sf_initvideo(int w, int h, int full);
 
@@ -221,11 +218,11 @@ enum { IDS_BLORB_GLULX, IDS_BLORB_NOEXEC, IDS_MORE, IDS_HIT_KEY_EXIT, IDS_TITLE,
 
 bool sf_IsInfocomV6(void);
 
-ulong sf_blend(int a, ulong s, ulong d);
+zlong sf_blend(int a, zlong s, zlong d);
 
 void sf_sleep(int millisecs);
 
-unsigned long sf_ticks(void);
+zlong sf_ticks(void);
 
 void sf_DrawInput(zchar * buffer, int pos, int ptx, int pty, int width,
 		  bool cursor);
@@ -234,8 +231,8 @@ int sf_aiffwav(FILE * f, int foffs, void **wav, int *size);
 
 int sf_pkread(FILE * f, int foffs, void **out, int *size);
 
-ulong *sf_savearea(int x, int y, int w, int h);
-void sf_restoreareaandfree(ulong * s);
+zlong *sf_savearea(int x, int y, int w, int h);
+void sf_restoreareaandfree(zlong * s);
 #define SF_NOTIMP (-9999)
 
 zword sf_read_key(int timeout, bool cursor, bool allowed, bool text);
@@ -243,7 +240,7 @@ zword sf_read_key(int timeout, bool cursor, bool allowed, bool text);
 int sf_user_fdialog(bool exist, const char *def, const char *filt,
 		    const char *title, char **res);
 extern int (*sf_osdialog)(bool ex, const char *def, const char *filt,
-			  const char *tit, char **res, ulong * sbuf, int sbp,
+			  const char *tit, char **res, zlong * sbuf, int sbp,
 			  int ew, int eh, int isfull);
 
 void sf_checksound(void);
@@ -255,13 +252,13 @@ void sf_poptextsettings(void);
 
 char *sf_searchfile(char *, int, char *, char *);
 
-void sf_chline(int x, int y, ulong c, int n);
-void sf_cvline(int x, int y, ulong c, int n);
+void sf_chline(int x, int y, zlong c, int n);
+void sf_cvline(int x, int y, zlong c, int n);
 bool sf_flushdisplay(void);
 void sf_getclip(int *x, int *y, int *w, int *h);
-void sf_rect(unsigned long color, int x, int y, int w, int h);
+void sf_rect(zlong color, int x, int y, int w, int h);
 void sf_setclip(int x, int y, int w, int h);
-void sf_wpixel(int x, int y, ulong c);
+void sf_wpixel(int x, int y, zlong c);
 
 void sf_InitProfile(const char *fn);
 void sf_FinishProfile(void);

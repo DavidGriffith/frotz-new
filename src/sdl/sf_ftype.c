@@ -103,7 +103,7 @@ static int bmaxchar(SFONT * s)
 
 static void setglyph(MYFONT * f, FT_Face face, int ch);
 
-static SF_glyph *getglyph(SFONT * s, word c, int allowdef)
+static SF_glyph *getglyph(SFONT * s, zword c, int allowdef)
 {
 	if (s) {
 		MYFONT *f = (MYFONT *) s;
@@ -121,7 +121,7 @@ static SF_glyph *getglyph(SFONT * s, word c, int allowdef)
 }
 
 
-static int hasglyph(SFONT * fo, word c, int allowdef)
+static int hasglyph(SFONT * fo, zword c, int allowdef)
 {
 	return (getglyph(fo, c, allowdef) != NULL);
 }

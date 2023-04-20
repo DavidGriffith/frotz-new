@@ -30,8 +30,8 @@
 
 typedef struct {
 	int refcount;
-	word minchar, maxchar, defchar;
-	byte ascent, descent;
+	zword minchar, maxchar, defchar;
+	zbyte ascent, descent;
 	int glyphs[0];		/* offsets to glyphs from start of rec */
 } SF_bdffont;
 
@@ -64,7 +64,7 @@ static int hexd(char c)
 }
 
 
-static void gethex(char *p, byte * dst, int n)
+static void gethex(char *p, zbyte * dst, int n)
 {
 	while (n--) {
 		*dst++ = 16 * hexd(p[0]) + hexd(p[1]);
@@ -78,7 +78,7 @@ static void gethex(char *p, byte * dst, int n)
 static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 {
 	int totb, i, k = 0, wh[4];
-	byte *po, *pbeg;
+	zbyte *po, *pbeg;
 	char *p, *q;
 	char *fontname = "", *copyright = "unknown";
 	int fngot = 0, cpgot = 0;
@@ -197,8 +197,8 @@ static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 	font->defchar = defchar;
 	font->ascent = ascent;
 	font->descent = descent;
-	pbeg = (byte *) font;
-	po = (byte *) (&(font->glyphs[maxch - minch + 1]));
+	pbeg = (zbyte *) font;
+	po = (zbyte *) (&(font->glyphs[maxch - minch + 1]));
 	k = strlen(fontname) + 1;
 	memmove(po, fontname, k);
 	po += k;
@@ -259,7 +259,7 @@ static SF_bdffont *sBDXload(FILE * f, int *err, int *size, int MAXCHAR)
 				bg->h = h = wh[1];
 				bg->xof = wh[2];
 				bg->yof = wh[3];
-				po = (byte *) (&(bg->bitmap[0]));
+				po = (zbyte *) (&(bg->bitmap[0]));
 				for (j = 0; j < h; j++) {
 					fgets(s, 1024, f);
 					if (feof(f))
@@ -336,7 +336,7 @@ static int bmaxchar(SFONT * s)
 	return 0;
 }
 
-static SF_glyph *getglyph(SFONT * fo, word c, int allowdef)
+static SF_glyph *getglyph(SFONT * fo, zword c, int allowdef)
 {
 	int m;
 	SF_bdffont *b;
@@ -358,11 +358,11 @@ static SF_glyph *getglyph(SFONT * fo, word c, int allowdef)
 		else
 			return NULL;
 	}
-	return (SF_glyph *) (((byte *) b) + m);
+	return (SF_glyph *) (((zbyte *) b) + m);
 }
 
 
-static int hasglyph(SFONT * fo, word c, int allowdef)
+static int hasglyph(SFONT * fo, zword c, int allowdef)
 {
 	return (getglyph(fo, c, allowdef) != NULL);
 }
@@ -854,7 +854,7 @@ SFONT *sf_VGA_SFONT;
 void sf_initfonts()
 {
 	int i, j, size = 0;
-	byte *cfont, *bmp;
+	zbyte *cfont, *bmp;
 	SF_glyph *g;
 	SF_bdffont *norm, *emph, *bold, *bemp;
 	SFONT *Norm, *Emph = NULL, *Bold = NULL, *Bemp = NULL;
@@ -877,13 +877,13 @@ void sf_initfonts()
 		os_fatal("malloc() failure in initfonts()");
 	memmove(emph, norm, size);
 	/* emphasize (underline)... */
-	cfont = (byte *) emph;
+	cfont = (zbyte *) emph;
 	for (i = norm->minchar; i <= norm->maxchar; i++) {
 		int m = norm->glyphs[i - norm->minchar];
 		if (!m)
 			continue;
 		g = (SF_glyph *) (cfont + m);
-		bmp = (byte *) (&(g->bitmap[0]));
+		bmp = (zbyte *) (&(g->bitmap[0]));
 		bmp[g->h - 2] = 0xff;
 	}
 	/* make a copy for bold */
@@ -895,14 +895,14 @@ void sf_initfonts()
 		os_fatal("malloc() failure in initfonts()");
 	memmove(bold, norm, size);
 	/* boldify... */
-	cfont = (byte *) bold;
+	cfont = (zbyte *) bold;
 	for (i = norm->minchar; i <= norm->maxchar; i++) {
 		int h, m = norm->glyphs[i - norm->minchar];
 		if (!m)
 			continue;
 		g = (SF_glyph *) (cfont + m);
 		h = g->h;
-		bmp = (byte *) (&(g->bitmap[0]));
+		bmp = (zbyte *) (&(g->bitmap[0]));
 		for (j = 0; j < h; j++) {
 			int c = bmp[j];
 			bmp[j] = (c) | (c >> 1);
@@ -917,13 +917,13 @@ void sf_initfonts()
 		os_fatal("malloc() failure in initfonts()");
 	memmove(bemp, bold, size);
 	/* emphasize (underline)... */
-	cfont = (byte *) bemp;
+	cfont = (zbyte *) bemp;
 	for (i = norm->minchar; i <= norm->maxchar; i++) {
 		int m = norm->glyphs[i - norm->minchar];
 		if (!m)
 			continue;
 		g = (SF_glyph *) (cfont + m);
-		bmp = (byte *) (&(g->bitmap[0]));
+		bmp = (zbyte *) (&(g->bitmap[0]));
 		bmp[g->h - 2] = 0xff;
 	}
 

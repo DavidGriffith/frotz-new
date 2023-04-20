@@ -34,13 +34,13 @@
 
 #include "../blorb/blorblow.h"
 
-static byte toLinear[256];
-static byte fromLinear[256];
+static zbyte toLinear[256];
+static zbyte fromLinear[256];
 extern bool m_adaptiveMode;
 
-ulong sf_blend(int a, ulong s, ulong d)
+zlong sf_blend(int a, zlong s, zlong d)
 {
-	ulong r;
+	zlong r;
 	r = fromLinear[(toLinear[s & 0xff] * a +
 			toLinear[d & 0xff] * (256 - a)) >> 8];
 	s >>= 8;
@@ -76,8 +76,8 @@ void sf_setgamma(double gamma)
  */
 
 typedef struct {
-	byte *gfxData;
-	unsigned long offset;
+	zbyte *gfxData;
+	zlong offset;
 } PNGData;
 
 
@@ -89,7 +89,7 @@ static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 }
 
 
-static int loadpng(byte * data, int length, sf_picture * graphic)
+static int loadpng(zbyte * data, int length, sf_picture * graphic)
 {
 	png_bytep *rowPointers = NULL;
 	png_structp png_ptr = NULL;
@@ -171,7 +171,7 @@ static int loadpng(byte * data, int length, sf_picture * graphic)
 			graphic->transparentcolor = trans[0];
 
 		size = width * height;
-		graphic->pixels = (byte *) malloc(size);
+		graphic->pixels = (zbyte *) malloc(size);
 
 		rowPointers = malloc(sizeof(png_bytep) * height);
 		for (int i = 0; i < (int)height; i++)
@@ -186,7 +186,7 @@ static int loadpng(byte * data, int length, sf_picture * graphic)
 		if (png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette)) {
 			graphic->palette_entries = num_palette;
 			for (int i = 0; i < num_palette; i++) {
-				ulong color =
+				zlong color =
 				    palette[i].red | (palette[i].
 						      green << 8) | (palette[i].
 								     blue <<
@@ -213,7 +213,7 @@ static int loadpng(byte * data, int length, sf_picture * graphic)
 
 		png_set_filler(png_ptr,0xff,PNG_FILLER_AFTER);
 		size = width*height*4;
-		graphic->pixels = (byte *) malloc(size);
+		graphic->pixels = (zbyte *) malloc(size);
 		rowPointers = malloc(sizeof(png_bytep) * height);
 		for (int i = 0; i < (int)height; i++)
 			rowPointers[i] = graphic->pixels + (width * i * 4);
@@ -289,7 +289,7 @@ static void memJPEGTerm(j_decompress_ptr unused)
 }
 
 
-static int loadjpeg(byte * data, int length, sf_picture * graphic)
+static int loadjpeg(zbyte * data, int length, sf_picture * graphic)
 {
 	struct jpeg_decompress_struct info;
 	struct JPEGErrorInfo error;
@@ -332,7 +332,7 @@ static int loadjpeg(byte * data, int length, sf_picture * graphic)
 	graphic->width = width;
 	graphic->height = height;
 	size = width * height * 4;
-	graphic->pixels = (byte *) malloc(size);
+	graphic->pixels = (zbyte *) malloc(size);
 
 	/* Force RGB output */
 	info.out_color_space = JCS_RGB;
@@ -343,7 +343,7 @@ static int loadjpeg(byte * data, int length, sf_picture * graphic)
 
 	jpeg_start_decompress(&info);
 	while ((int)info.output_scanline < height) {
-		byte *pixelRow;
+		zbyte *pixelRow;
 		int i;
 		jpeg_read_scanlines(&info, buffer, 1);
 
@@ -367,7 +367,7 @@ static int loadjpeg(byte * data, int length, sf_picture * graphic)
  ****************************************************************************
  */
 
-static int loadrect(byte * data, int length, sf_picture * graphic)
+static int loadrect(zbyte * data, int length, sf_picture * graphic)
 {
 	graphic->width =
 	    (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
@@ -389,7 +389,7 @@ static int sf_loadpic(int picture, sf_picture * graphic)
 	graphic->adaptive = sf_IsAdaptive(picture) ? TRUE : FALSE;
 
 	if (sf_getresource(picture, 1, bb_method_Memory, &res) == bb_err_None) {
-		byte *data = (byte *) res.bbres.data.ptr;
+		zbyte *data = (zbyte *) res.bbres.data.ptr;
 		int length = res.bbres.length;
 		unsigned int id = res.type;
 
