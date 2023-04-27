@@ -26,6 +26,9 @@
 # source code for use on a PDP10.  This version is meant to be called
 # from the Unix Frotz's top level Makefile and work on the files present.
 
+# This requires File::Slurp, which is typically not installed by default.
+#   Debian: sudo apt-get install libfile-slurp-perl
+
 # TODO: Save the names of header files that need to be shortened.  Then
 # go through the .c files and shorten them there too.
 
