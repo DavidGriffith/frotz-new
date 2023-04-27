@@ -5,6 +5,8 @@ Frotz 2.55 is currently in development.
 
 BUG FIXES
 
+- Fixed compile failure of the SDL interface for GCC 12 and maybe GCC 11.
+
 - Not a bug in Frotz itself, but the BUGS text file was deleted from the
   source repository and tarball before the release of Frotz 2.50.
 
