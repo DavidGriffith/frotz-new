@@ -27,6 +27,7 @@ typedef struct frotz_setup_struct {
 	int ignore_errors;
 	int interpreter_number;
 	int piracy;
+	int tandy;
 	int undo_slots;
 	int expand_abbreviations;
 	int script_cols;

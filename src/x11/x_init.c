@@ -42,7 +42,6 @@ x_setup_t x_setup;
 static int saved_argc;
 static char **saved_argv;
 static char *user_bg, *user_fg;
-static int user_tandy_bit;
 static int user_random_seed = -1;
 char *x_class;
 char *x_name;
@@ -237,7 +236,7 @@ void os_process_arguments(int argc, char *argv[])
 		{".Piracy", ".piracy", parse_boolean,
 		 &f_setup.piracy},
 		{".Tandy", ".tandy", parse_boolean,
-		 &x_setup.tandy_bit},
+		 &f_setup.tandy},
 		{".UndoSlots", ".undoSlots", parse_int,
 		 &f_setup.undo_slots},
 		{".ShowVersion", ".showVersion", parse_boolean,
@@ -430,7 +429,7 @@ void os_init_screen(void)
 	XGCValues gc_setup;
 
 	/* First, configuration parameters get set up */
-	if (z_header.version == V3 && user_tandy_bit != 0)
+	if (z_header.version == V3 && f_setup.tandy != 0)
 		z_header.config |= CONFIG_TANDY;
 	if (z_header.version == V3)
 		z_header.config |= CONFIG_SPLITSCREEN | CONFIG_PROPORTIONAL;

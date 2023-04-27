@@ -55,7 +55,6 @@ While running, enter \"\\help\" to list the runtime escape sequences.\n"
 static int user_text_width = 80;
 static int user_text_height = 24;
 static int user_random_seed = -1;
-static int user_tandy_bit = 0;
 static bool plain_ascii = FALSE;
 
 bool quiet_mode;
@@ -152,7 +151,7 @@ void os_process_arguments(int argc, char *argv[])
 			f_setup.script_cols = atoi(zoptarg);
 			break;
 		case 't':
-			user_tandy_bit = 1;
+			f_setup.tandy = 1;
 			break;
 		case 'u':
 			f_setup.undo_slots = atoi(zoptarg);
@@ -268,7 +267,7 @@ void os_process_arguments(int argc, char *argv[])
 
 void os_init_screen(void)
 {
-	if (z_header.version == V3 && user_tandy_bit)
+	if (z_header.version == V3 && f_setup.tandy)
 		z_header.config |= CONFIG_TANDY;
 
 	if (z_header.version >= V5 && f_setup.undo_slots == 0)

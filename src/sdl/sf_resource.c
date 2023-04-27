@@ -46,7 +46,6 @@ extern FILE *blorb_fp;
 
 
 /* various data */
-bool m_tandy = 0;
 int m_v6scale_x;
 int m_v6scale_y;
 double m_gfxScale_w = 1.0;
@@ -425,7 +424,7 @@ void sf_readsettings(void)
 	    sf_GetProfileInt("Interpreter", "Ignore Errors", 0);
 	f_setup.expand_abbreviations =
 	    sf_GetProfileInt("Interpreter", "Expand Abbreviations", 0);
-	m_tandy =
+	f_setup.tandy =
 	    sf_GetProfileInt("Interpreter", "Tandy Bit", 0) ? true : false;
 	f_setup.script_cols =
 	    sf_GetProfileInt("Interpreter", "Wrap Script Lines", 1) ? 80 : 0;
@@ -671,7 +670,7 @@ void os_init_screen(void)
 	if (z_header.version == V3) {
 		z_header.config |= CONFIG_SPLITSCREEN;
 		z_header.config |= CONFIG_PROPORTIONAL;
-		if (m_tandy)
+		if (f_setup.tandy)
 			z_header.config |= CONFIG_TANDY;
 		else
 			z_header.config &= ~CONFIG_TANDY;

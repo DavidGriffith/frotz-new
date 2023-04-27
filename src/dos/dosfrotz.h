@@ -101,7 +101,6 @@ extern int user_reverse_bg;
 extern int user_reverse_fg;
 extern int user_screen_height;
 extern int user_screen_width;
-extern int user_tandy_bit;
 extern int user_bold_typing;
 extern int user_random_seed;
 extern int user_font;

@@ -12,7 +12,6 @@ typedef struct unix_setup_struct {
 	int screen_width;
 	int screen_height;
 	int random_seed;
-	int tandy_bit;
 	int current_text_style;		/* also in ux_text.c and ux_screen.c */
 	int curses_active;
 	int plain_ascii;

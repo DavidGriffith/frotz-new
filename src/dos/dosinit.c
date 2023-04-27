@@ -83,7 +83,6 @@ int user_reverse_bg = -1;
 int user_reverse_fg = -1;
 int user_screen_height = -1;
 int user_screen_width = -1;
-int user_tandy_bit = -1;
 int user_random_seed = -1;
 int user_font = 1;
 
@@ -330,7 +329,7 @@ static void parse_options(int argc, char **argv)
 		if (c == 'S')
 			f_setup.script_cols = num;
 		if (c == 't')
-			user_tandy_bit = 1;
+			f_setup.tandy = 1;
 		if (c == 'u')
 			f_setup.undo_slots = num;
 		if (c == 'v') {
@@ -711,7 +710,7 @@ static void standard_palette(void)
 
 	/* Set various bits in the configuration byte. These bits tell
 	   the game which features are supported by the interpreter. */
-	if (z_header.version == V3 && user_tandy_bit != -1)
+	if (z_header.version == V3 && f_setup.tandy != -1)
 		z_header.config |= CONFIG_TANDY;
 	if (z_header.version == V3)
 		z_header.config |= CONFIG_SPLITSCREEN;

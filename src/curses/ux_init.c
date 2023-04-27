@@ -371,7 +371,7 @@ static void parse_options(int argc, char **argv)
 		case 'R': f_setup.restricted_path = strndup(zoptarg, PATH_MAX); break;
 		case 's': u_setup.random_seed = atoi(zoptarg); break;
 		case 'S': f_setup.script_cols = atoi(zoptarg); break;
-		case 't': u_setup.tandy_bit = 1; break;
+		case 't': f_setup.tandy = 1; break;
 		case 'u': f_setup.undo_slots = atoi(zoptarg); break;
 		case 'v': print_version(); os_quit(EXIT_SUCCESS); break;
 		case 'w': u_setup.screen_width = atoi(zoptarg); break;
@@ -480,7 +480,7 @@ void os_init_screen (void)
 	/* It's nice to know what terminal we have to work with. */
 	u_setup.term = strdup(getenv("TERM"));
 
-	if (z_header.version == V3 && u_setup.tandy_bit != 0)
+	if (z_header.version == V3 && f_setup.tandy != 0)
 		z_header.config |= CONFIG_TANDY;
 
 	if (z_header.version == V3)
@@ -940,7 +940,7 @@ static int getconfig(char *configfile)
 			f_setup.sound = getbool(value);
 		}
 		else if (strcmp(varname, "tandy") == 0) {
-			u_setup.tandy_bit = getbool(value);
+			f_setup.tandy = getbool(value);
 		}
 		else if (strcmp(varname, "expand_abb") == 0) {
 			f_setup.expand_abbreviations = getbool(value);
@@ -1169,7 +1169,6 @@ void os_init_setup(void)
 	u_setup.screen_height = -1;
 	u_setup.random_seed = -1;
 	u_setup.random_seed = -1;
-	u_setup.tandy_bit = 0;
 	u_setup.current_text_style = 0;
 			/* Since I can't use attr_get, which
 			would make things easier, I need

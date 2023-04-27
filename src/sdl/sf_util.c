@@ -129,7 +129,6 @@ int user_reverse_bg = -1;
 int user_reverse_fg = -1;
 int user_screen_height = -1;
 int user_screen_width = -1;
-int user_tandy_bit = -1;
 int user_font = 1;
 int m_random_seed = -1;
 int m_fullscreen = -1;
@@ -356,7 +355,7 @@ static void parse_options(int argc, char **argv)
 		if (c == 'S')
 			f_setup.script_cols = num;
 		if (c == 't')
-			user_tandy_bit = 1;
+			f_setup.tandy = 1;
 		if (c == 'T')
 			sf_osdialog = NULL;
 		if (c == 'u')
@@ -520,8 +519,6 @@ void os_process_arguments(int argc, char *argv[])
 		m_defaultBack = sf_GetColour(user_background);
 	if (user_foreground != -1)
 		m_defaultFore = sf_GetColour(user_foreground);
-	if (user_tandy_bit != -1)
-		m_tandy = user_tandy_bit;
 
 	sf_initfonts();
 } /* os_process_arguments */
