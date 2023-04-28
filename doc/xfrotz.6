@@ -38,7 +38,7 @@ Enables watching of attribute assignment.
 (class \fBWatchAttribute\fP, name \fBwatchAttrTest\fP)
 Enables watching of attribute testing.
 .TP
-.BI \-bg " color"
+.B \-bg <color>
 (class \fBBackground\fP, name \fBbackground\fP)
 Sets the default background color.  In addition to the standard X
 color specification formats,
@@ -46,7 +46,7 @@ color specification formats,
 supports the format \fBz:\fP\fInum\fP, which refers to a z-machine
 color from 2 to 9.
 .TP
-.BI \-c " number"
+.B \-c <number>
 (class \fBContextLines\fP, name \fBcontextLines\fP)
 Specifies the number of context lines used.  When scrolling large
 amounts of text,
@@ -56,11 +56,11 @@ specifies how many lines of a previous screen
 .I xfrotz
 will keep at the top of the next screen.
 .TP
-.BI \-fg " color"
+.B \-fg <color>
 (class \fBForeground\fP, name \fBforeground\fP)
 Sets the default foreground color.  See \fB\-bg\fP above.
 .TP
-.BI \-fn[\-z|[f][b][i]] " font name"
+.B \-fn[\-z|[f][b][i]] <font name>
 (class \fBFont\fP, name \fBfont[Z|[F][B][I]]\fP)
 Sets the fonts to be used for various styles.  For example,
 \fB\-fn\-fbi\fP sets the font for fixed, bold, italic text, and
@@ -73,9 +73,12 @@ Ignore runtime errors.  This can be useful when running
 .I xfrotz
 with buggy story files which cause fatal errors.
 .TP
-.BI \-lm " number"
+.B \-lm <number>
 (class \fBMargin\fP, name \fBleftMargin\fP)
 Sets the left margin.
+.TP
+.B \-L <filename>
+When the game starts, load this saved game file.
 .TP
 .B \-ol
 (class \fBWatchObject\fP, name \fBwatchObjLocating\fP)
@@ -91,18 +94,18 @@ Enable branching on the
 .I @piracy
 opcode.  This opcode is seldom used.
 .TP
-.BI \-rm " number"
+.B \-rm <number>
 (class \fBMargin\fP, name \fBrightMargin\fP)
 Sets the right margin.
 .TP
-.BI \-rs " number"
+.B \-rs <number>
 (class \fBRandomSeed\fP, name \fBrandomSeed\fP)
 Set the random seed.  By default, the random number generator is
 initialized based on the system clock; this allows you to make the
 random number generator predictable, for use in recorded scripts or
 debugging.
 .TP
-.BI \-sc " number"
+.B \-sc <number>
 (class \fBScriptColumns\fP, name \fBscriptColumns\fP)
 Set the transcript width (default 80).  Set to 0 to disable line
 splitting in transcripts.
@@ -113,7 +116,7 @@ Set the z-machine's Tandy bit, which affects the behavior of certain
 Infocom games.  For example, \fIZork I\fP pretends not to have
 sequels, and \fIWitness\fP has its language censored.
 .TP
-.BI \-u " number"
+.B \-u <number>
 (class \fBUndoSlots\fP, name \fBundoSlots\fP)
 Set the number of undo slots available.  The default number is 25.
 Note that many Infocom games do not support an ``undo'' command, and
@@ -129,10 +132,10 @@ expands ``x'' to ``examine,'' ``o'' to ``oops,'' and ``g'' to
 ``again.''  This is convenient when running certain Infocom games
 which do not implement these abbreviations.
 .TP
-.BI \-xrm " resources"
+.B \-xrm <resources>
 This allows setting resources on the command line.
 .TP
-.BI \-zs " level"
+.B \-zs <level>
 (class \fBZStrict\fP, name \fBzStrict\fP)
 Set the reporting level of ``Vile Zero Error From Hell'' bugs.  The
 possible levels are: 0 to print no error messages, 1 to print just one

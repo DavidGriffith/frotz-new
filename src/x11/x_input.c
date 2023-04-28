@@ -245,11 +245,15 @@ char *os_read_file_name(const char *default_name, int flag)
 	istream_replay = 0;
 	ostream_record = 0;
 
-	print_string("Enter a file name.\nDefault is \"");
-	print_string(default_name);
-	print_string("\": ");
+	if (f_setup.restore_mode) {
+		file_name[0] = 0;
+	} else {
+		print_string("Enter a file name.\nDefault is \"");
+		print_string(default_name);
+		print_string("\": ");
 
-	read_string(MAX_FILE_NAME, (zchar *) file_name);
+		read_string(MAX_FILE_NAME, (zchar *) file_name);
+	}
 
 	/* Use the default name if nothing was typed */
 	if (file_name[0] == 0)

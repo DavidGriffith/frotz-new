@@ -3,6 +3,10 @@ Summary of changes between Frotz 2.55 and Frotz 2.55:
 
 Frotz 2.55 is currently in development.
 
+NEW FEATURES
+
+- Added -L option to xfrotz - supply a Quetzal file to load on command line.
+
 BUG FIXES
 
 - Fixed compile failure of the SDL interface for GCC 12 and maybe GCC 11.

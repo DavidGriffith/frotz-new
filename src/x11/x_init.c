@@ -209,7 +209,8 @@ void os_process_arguments(int argc, char *argv[])
 		{"-fn-fb", ".fontFB", XrmoptionSepArg, (void *)NULL},
 		{"-fn-fi", ".fontFI", XrmoptionSepArg, (void *)NULL},
 		{"-fn-fbi", ".fontFBI", XrmoptionSepArg, (void *)NULL},
-		{"-fn-z", ".fontZ", XrmoptionSepArg, (void *)NULL}
+		{"-fn-z", ".fontZ", XrmoptionSepArg, (void *)NULL},
+		{"-L", ".loadthis", XrmoptionSepArg, (void *)NULL}
 	};
 	static struct {
 		char *class;
@@ -270,7 +271,9 @@ void os_process_arguments(int argc, char *argv[])
 		{".Font", ".fontFBI", parse_string,
 		 &font_names[7]},
 		{".Font", ".fontZ", parse_string,
-		 &font_names[8]}
+		 &font_names[8]},
+		{".Loadthis", ".loadthis", parse_string,
+		 &f_setup.tmp_save_name}
 	};
 	XtAppContext app_context;
 	char *str_type_return;
@@ -328,6 +331,9 @@ void os_process_arguments(int argc, char *argv[])
 		os_quit(EXIT_SUCCESS);
 	}
 
+	if (f_setup.tmp_save_name != NULL)
+		f_setup.restore_mode = 1;
+
 	f_setup.story_file = strdup(argv[1]);
 	f_setup.story_name = strdup(basename(argv[1]));
 
@@ -371,7 +377,7 @@ void os_process_arguments(int argc, char *argv[])
 		memcpy(f_setup.save_name, f_setup.tmp_save_name,
 		       (strlen(f_setup.tmp_save_name) +
 			strlen(EXT_SAVE)) * sizeof(char));
-		free(f_setup.tmp_save_name);
+		/* No need to free f_setup.tmp_save_name */
 	}
 
 	f_setup.aux_name =
@@ -627,6 +633,7 @@ int os_random_seed(void)
 
 void os_init_setup(void)
 {
+	memset(&f_setup, 0, sizeof(x_setup));
 	return;
 }
 
