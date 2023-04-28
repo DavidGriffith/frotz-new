@@ -1007,7 +1007,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	/* If we're restoring a game before the interpreter starts,
 	 * our filename is already provided.  Just go ahead silently.
 	 */
-	if (f_setup.restore_mode) {
+	if (f_setup.restore_mode || flag == FILE_NO_PROMPT) {
 		file_name[0]=0;
 	} else {
 		print_string ("Enter a file name.\nDefault is \"");

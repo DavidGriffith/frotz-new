@@ -820,7 +820,9 @@ static void get_default_name(char *default_name, size_t length, zword addr)
  *	zargs[0] = address of area to restore (optional)
  *	zargs[1] = number of bytes to restore
  *	zargs[2] = address of suggested file name
- *
+ *      zargs[3] = 1 if frotz should ask for confirmation of filename
+ *		   0 if frotz should silently use provided filename
+ *		   default depends on interface
  */
 void z_restore(void)
 {
@@ -834,12 +836,22 @@ void z_restore(void)
 		/* Get the file name */
 		get_default_name(default_name, MAX_FILE_NAME + 1, (zargc >= 3) ? zargs[2] : 0);
 
-		new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
-		if (new_name == NULL)
-			goto finished;
-
-		free(f_setup.aux_name);
-		f_setup.aux_name = strdup(default_name);
+		/* Do we have the fourth paramenter?
+		 * If the fourth paramenter is 0, skip to the else.
+		 * Otherwise, any value is equivalent to 1, do the first.
+		 * If no fourth parameter, give a prompt.
+		 */
+		if ((zargc >= 4) ? zargs[3] : 1) {
+			new_name = os_read_file_name(default_name, FILE_LOAD_AUX);
+			if (new_name == NULL)
+				goto finished;
+			free(f_setup.aux_name);
+			f_setup.aux_name = strdup(default_name);
+		} else {
+			new_name = os_read_file_name (default_name, FILE_NO_PROMPT);
+			if (new_name == NULL)
+				goto finished;
+		}
 
 		/* Open auxilary file */
 		if ((gfp = fopen (new_name, "rb")) == NULL)
@@ -1047,7 +1059,9 @@ void z_restore_undo(void)
  *	zargs[0] = address of memory area to save (optional)
  *	zargs[1] = number of bytes to save
  *	zargs[2] = address of suggested file name
- *
+ *      zargs[3] = 1 if frotz should ask for confirmation of filename
+ *		   0 if frotz should silently use provided filename
+ *		   default depends on interface
  */
 void z_save(void)
 {
@@ -1060,12 +1074,23 @@ void z_save(void)
 	if (zargc != 0) {
 		/* Get the file name */
 		get_default_name(default_name, MAX_FILE_NAME + 1, (zargc >= 3) ? zargs[2] : 0);
-		new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
-		if (new_name == NULL)
-			goto finished;
 
-		free(f_setup.aux_name);
-		f_setup.aux_name = strdup(default_name);
+		/* Do we have the fourth paramenter?
+		 * If the fourth paramenter is 0, skip to the else.
+		 * Otherwise, any value is equivalent to 1, do the first.
+		 * If no fourth parameter, give a prompt.
+		 */
+		if ((zargc >= 4) ? zargs[3] : 1) {
+			new_name = os_read_file_name(default_name, FILE_SAVE_AUX);
+			if (new_name == NULL)
+				goto finished;
+			free(f_setup.aux_name);
+			f_setup.aux_name = strdup(default_name);
+		} else {
+			new_name = os_read_file_name (default_name, FILE_NO_PROMPT);
+			if (new_name == NULL)
+				goto finished;
+		}
 
 		/* Open auxilary file */
 		if ((gfp = fopen(new_name, "wb")) == NULL)
