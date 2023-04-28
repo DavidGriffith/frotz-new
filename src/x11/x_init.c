@@ -49,10 +49,10 @@ char *x_name;
 
 static void print_c_string(const char *s)
 {
-	zchar c;
+	int i;
 
-	while ((c = *s++) != 0)
-		os_display_char(c);
+	for (i = 0; i <= strlen(s); i++)
+		os_display_char(translate_to_zscii(s[i]));
 } /* print_c_string */
 
 
@@ -65,13 +65,21 @@ static void print_c_string(const char *s)
 void os_fatal(const char *s, ...)
 {
 	va_list m;
+	char errorstring[81];
 
-	fprintf(stderr, "\nFatal Error: ");
+	os_beep(BEEP_HIGH);
+	fprintf(stderr, "\nFatal error: ");
 	va_start(m, s);
 	vfprintf(stderr, s, m);
-	print_c_string(s);
+	vsnprintf(errorstring, sizeof(char) * 80, s, m);
 	va_end(m);
-	fprintf(stderr, "\n");
+	fprintf(stderr, "\n\n");
+
+	os_set_text_style(BOLDFACE_STYLE);
+	print_c_string("Fatal error: ");
+	os_set_text_style(NORMAL_STYLE);
+	print_c_string(errorstring);
+	new_line();
 
 	if (f_setup.ignore_errors) {
 		os_display_string((zchar *) "Continuing anyway...");
@@ -79,8 +87,7 @@ void os_fatal(const char *s, ...)
 		new_line();
 	}
 
-	
-
+	os_reset_screen();
 	os_quit(EXIT_FAILURE);
 } /* os_fatal */
 
