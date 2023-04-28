@@ -879,7 +879,6 @@ void 	os_display_char(zchar);
 void 	os_display_string(const zchar *);
 void 	os_draw_picture(int, int, int);
 void 	os_erase_area(int, int, int, int, int);
-void 	os_fatal(const char *, ...);
 void 	os_finish_with_sample(int);
 int  	os_font_data(int, int *, int *);
 void 	os_init_screen(void);
@@ -909,8 +908,14 @@ int	os_storyfile_tell(FILE *);
 int  	os_string_width(const zchar *);
 zword	os_to_true_colour (int);
 void	os_init_setup(void);
-void 	os_warn(const char *, ...);
 void	os_quit(int);
+
+/* Don't use string expansions from the core!  The dumb interface
+ * doesn't support it for historical reasons.  Suuport in the interfaces is
+ * optional.
+ */
+void 	os_fatal(const char *, ...);
+void 	os_warn(const char *, ...);
 
 /**
  * Called regularly by the interpreter, at least every few instructions
