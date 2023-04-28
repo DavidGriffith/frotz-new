@@ -629,13 +629,14 @@ static int dialog_read_file_name(char *file_name, const char *default_name,
  *
  * Return the name of a file. Flag can be one of:
  *
- *    FILE_SAVE     - Save game file
- *    FILE_RESTORE  - Restore game file
- *    FILE_SCRIPT   - Transscript file
- *    FILE_RECORD   - Command file for recording
- *    FILE_PLAYBACK - Command file for playback
- *    FILE_SAVE_AUX - Save auxilary ("preferred settings") file
- *    FILE_LOAD_AUX - Load auxilary ("preferred settings") file
+ *    FILE_SAVE      - Save game file
+ *    FILE_RESTORE   - Restore game file
+ *    FILE_SCRIPT    - Transcript file
+ *    FILE_RECORD    - Command file for recording
+ *    FILE_PLAYBACK  - Command file for playback
+ *    FILE_SAVE_AUX  - Save auxilary ("preferred settings") file
+ *    FILE_LOAD_AUX  - Load auxilary ("preferred settings") file
+ *    FILE_NO_PROMPT - Return file without prompting the user
  *
  * The length of the file name is limited by MAX_FILE_NAME. Ideally
  * an interpreter should open a file requester to ask for the file

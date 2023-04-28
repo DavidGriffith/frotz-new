@@ -496,7 +496,27 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 	return terminator;
 }
 
-
+/*
+ * os_read_file_name
+ *
+ * Return the name of a file. Flag can be one of:
+ *
+ *    FILE_SAVE      - Save game file
+ *    FILE_RESTORE   - Restore game file
+ *    FILE_SCRIPT    - Transcript file
+ *    FILE_RECORD    - Command file for recording
+ *    FILE_PLAYBACK  - Command file for playback
+ *    FILE_SAVE_AUX  - Save auxilary ("preferred settings") file
+ *    FILE_LOAD_AUX  - Load auxilary ("preferred settings") file
+ *    FILE_NO_PROMPT - Return file without prompting the user
+ *
+ * The length of the file name is limited by MAX_FILE_NAME. Ideally
+ * an interpreter should open a file requester to ask for the file
+ * name. If it is unable to do that then this function should call
+ * print_string and read_string to ask for a file name.
+ *
+ * Return value is NULL if there was a problem.
+ */
 char *os_read_file_name (const char *default_name, int flag)
 {
 	char file_name[FILENAME_MAX + 1];
