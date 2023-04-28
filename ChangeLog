@@ -9,6 +9,8 @@ NEW FEATURES
 
 BUG FIXES
 
+- Fixed a segfault when xfrotz detects a fatal error.
+
 - Fixed compile failure of the SDL interface for GCC 12 and maybe GCC 11.
 
 - Not a bug in Frotz itself, but the BUGS text file was deleted from the
