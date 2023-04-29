@@ -895,14 +895,14 @@ char *os_read_file_name (const char *default_name, int flag)
 	ostream_record = FALSE;
 
 	/* Select appropriate extension */
-	extension = ".aux";
+	extension = EXT_AUX;
 
 	if (flag == FILE_SAVE || flag == FILE_RESTORE)
-		extension = ".sav";
+		extension = EXT_SAVE;
 	if (flag == FILE_SCRIPT)
-		extension = ".scr";
+		extension = EXT_SCRIPT;
 	if (flag == FILE_RECORD || flag == FILE_PLAYBACK)
-		extension = ".rec";
+		extension = EXT_COMMAND;
 
 	/* Input file name (reserve four bytes for a file name extension) */
 	print_string("Enter file name (\"");
