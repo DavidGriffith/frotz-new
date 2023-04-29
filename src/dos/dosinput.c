@@ -889,6 +889,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	int i;
 	char *tempname;
 	char file_name[FILENAME_MAX + 1];
+	char *ext;
 
 	/* Turn off playback and recording temporarily */
 	istream_replay = FALSE;
@@ -904,14 +905,17 @@ char *os_read_file_name (const char *default_name, int flag)
 	if (flag == FILE_RECORD || flag == FILE_PLAYBACK)
 		extension = EXT_COMMAND;
 
-	/* Input file name (reserve four bytes for a file name extension) */
-	print_string("Enter file name (\"");
-	print_string(extension);
-	print_string("\" will be added).\nDefault is \"");
-	print_string(default_name);
-	print_string("\": ");
-
-	read_string(MAX_FILE_NAME - 4, (zchar *) file_name);
+	if (flag == FILE_NO_PROMPT) {
+		file_name[0] = 0;
+	} else {
+		/* Input file name (reserve four bytes for a file name extension) */
+		print_string("Enter file name (\"");
+		print_string(extension);
+		print_string("\" will be added).\nDefault is \"");
+		print_string(default_name);
+		print_string("\": ");
+		read_string(MAX_FILE_NAME - 4, (zchar *) file_name);
+	}
 
 	/* Use the default name if nothing was typed */
 	if (file_name[0] == 0)
@@ -935,6 +939,13 @@ char *os_read_file_name (const char *default_name, int flag)
 		strcat(file_name, tempname);
 	}
 
+	if (flag == FILE_NO_PROMPT) {
+		ext = strrchr(file_name, '.');
+		if (strncmp(ext, EXT_AUX, 4)) {
+			os_warn("Blocked unprompted access of %s. Should only be %s files.", file_name, EXT_AUX);
+                        return NULL;
+		}
+	}
 	/* Make sure it is safe to use this file name */
 	result = TRUE;
 

@@ -22,6 +22,7 @@
 #include <conio.h>
 #include <dos.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include "frotz.h"
@@ -236,6 +237,44 @@ void os_quit(int status)
     cleanup();
     exit(status);
 }
+
+
+static void print_c_string (const char *s)
+{
+	zchar c;
+
+	while ((c = *s++) != 0)
+		os_display_char (c);
+} /* print_c_string */
+
+
+/*
+ * os_warn
+ *
+ * Display a warning message and continue with the game.
+ *
+ */
+void os_warn (const char *s, ...)
+{
+	va_list m;
+	char errorstring[81];
+	int style;
+
+	va_start(m, s);
+	vsnprintf(errorstring, sizeof(char) * 80, s, m);
+	va_end(m);
+
+	os_beep(BEEP_HIGH);
+	style = os_get_text_style();
+	os_set_text_style(BOLDFACE_STYLE);
+	print_c_string("Warning: ");
+	os_set_text_style(NORMAL_STYLE);
+	print_c_string(errorstring);
+	new_line();
+	os_set_text_style(style);
+
+	return;
+} /* os_warn */
 
 /*
  * os_fatal
