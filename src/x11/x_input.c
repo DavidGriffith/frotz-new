@@ -241,12 +241,13 @@ char *os_read_file_name(const char *default_name, int flag)
 	int saved_record = ostream_record;
 	char file_name[FILENAME_MAX + 1];
 	zchar answer[4];
+	char *ext;
 
 	/* Turn off playback and recording temporarily */
 	istream_replay = 0;
 	ostream_record = 0;
 
-	if (f_setup.restore_mode) {
+	if (f_setup.restore_mode || flag == FILE_NO_PROMPT) {
 		file_name[0] = 0;
 	} else {
 		print_string("Enter a file name.\nDefault is \"");
@@ -259,6 +260,14 @@ char *os_read_file_name(const char *default_name, int flag)
 	/* Use the default name if nothing was typed */
 	if (file_name[0] == 0)
 		strcpy(file_name, default_name);
+
+	if (flag == FILE_NO_PROMPT) {
+		ext = strrchr(file_name, '.');
+		if (strncmp(ext, EXT_AUX, 4)) {
+			os_warn("Blocked unprompted access of %s. Should only be %s files.", file_name, EXT_AUX);
+			return NULL;
+		}
+	}
 
 	/* Warn if overwriting a file. */
 	if ((flag == FILE_SAVE || flag == FILE_SAVE_AUX ||

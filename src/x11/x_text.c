@@ -258,6 +258,25 @@ const XFontStruct *get_font(int font, int style)
 	return font_info_cache[style];
 }
 
+static int current_zfont = TEXT_FONT;
+static int current_style = 0;
+
+/*
+ * os_get_text_style
+ *
+ * Return the current text style.  Following flags can be set:
+ *
+ *     REVERSE_STYLE
+ *     BOLDFACE_STYLE
+ *     EMPHASIS_STYLE (aka underline aka italics)
+ *     FIXED_WIDTH_STYLE
+ *
+ */
+int os_get_text_style (void)
+{
+	return current_style;
+}
+
 
 /*
  * os_set_text_style
@@ -270,9 +289,6 @@ const XFontStruct *get_font(int font, int style)
  *     FIXED_WIDTH_STYLE
  *
  */
-static int current_zfont = TEXT_FONT;
-static int current_style = 0;
-
 void os_set_text_style(int new_style)
 {
 	if (new_style & REVERSE_STYLE)

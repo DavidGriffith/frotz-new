@@ -57,6 +57,34 @@ static void print_c_string(const char *s)
 
 
 /*
+ * os_warn
+ *
+ * Display a warning message and continue with the game.
+ *
+ */
+void os_warn (const char *s, ...)
+{
+	va_list m;
+	char errorstring[81];
+	int style;
+
+	va_start(m, s);
+	vsnprintf(errorstring, sizeof(char) * 80, s, m);
+	va_end(m);
+
+	style = os_get_text_style();
+	os_beep(BEEP_HIGH);
+	os_set_text_style(BOLDFACE_STYLE);
+	print_c_string("Warning: ");
+	os_set_text_style(NORMAL_STYLE);
+	print_c_string(errorstring);
+	new_line();
+	os_set_text_style(style);
+	return;
+}
+
+
+/*
  * os_fatal
  *
  * Display error message and exit program.
