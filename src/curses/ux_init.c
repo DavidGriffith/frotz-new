@@ -124,17 +124,27 @@ static void print_c_string (const char *s)
  */
 void os_warn (const char *s, ...)
 {
+	va_list m;
+	char errorstring[81];
+	int style;
+
+	va_start(m, s);
+	vsnprintf(errorstring, sizeof(char) * 80, s, m);
+	va_end(m);
+
 	if (u_setup.curses_active) {
-		/* Solaris 2.6's cc complains if the below cast is missing */
-		print_c_string("\n\n");
 		os_beep(BEEP_HIGH);
+		style = u_setup.current_text_style;
 		os_set_text_style(BOLDFACE_STYLE);
 		print_c_string("Warning: ");
-		os_set_text_style(0);
-		print_c_string(s);
-		print_c_string("\n");
+		print_c_string(errorstring);
+		os_set_text_style(NORMAL_STYLE);
 		new_line();
-	}
+		os_set_text_style(style);
+	} else
+		printf("Warning: %s\n", errorstring);
+
+	return;
 } /* os_warn */
 
 

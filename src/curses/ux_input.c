@@ -996,6 +996,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	zchar answer[4];
 	char path_separator[2];
 	char file_name[FILENAME_MAX + 1];
+	char *ext;
 
 	path_separator[0] = PATH_SEPARATOR;
 	path_separator[1] = 0;
@@ -1116,6 +1117,14 @@ char *os_read_file_name (const char *default_name, int flag)
 			strncat(file_name, path_separator, FILENAME_MAX - strlen(file_name) - 2);
 		}
 		strncat(file_name, tempname, strlen(file_name) - strlen(tempname) - 1);
+	}
+
+	if (flag == FILE_NO_PROMPT) {
+		ext = strrchr(file_name, '.');
+		if (strncmp(ext, EXT_AUX, 4)) {
+			os_warn("Blocked unprompted access of %s. Should only be %s files.", file_name, EXT_AUX);
+			return NULL;
+		}
 	}
 
 	/* Warn if overwriting a file. */
