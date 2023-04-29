@@ -199,7 +199,7 @@ extern const char build_timestamp[];
 #define EXT_AUX		".aux"
 
 #ifndef DEFAULT_SAVE_NAME
-#define DEFAULT_SAVE_NAME "story.sav"
+#define DEFAULT_SAVE_NAME "story.qzl"
 #endif
 #ifndef DEFAULT_SCRIPT_NAME
 #define DEFAULT_SCRIPT_NAME "story.scr"
