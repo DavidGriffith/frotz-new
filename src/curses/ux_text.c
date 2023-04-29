@@ -159,6 +159,22 @@ void os_set_colour (int new_foreground, int new_background)
 
 
 /*
+ * os_get_text_style
+ *
+ * Return the current text style.  Following flags can be set:
+ *
+ *     REVERSE_STYLE
+ *     BOLDFACE_STYLE
+ *     EMPHASIS_STYLE (aka underline aka italics)
+ *     FIXED_WIDTH_STYLE
+ *
+ */
+int os_get_text_style (void)
+{
+	return u_setup.current_text_style;
+} /* os_get_text_style */
+
+/*
  * os_set_text_style
  *
  * Set the current text style.  Following flags can be set:

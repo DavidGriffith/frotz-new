@@ -902,6 +902,7 @@ int	os_from_true_colour(zword);
 void 	os_set_cursor(int, int);
 void 	os_set_font(int);
 void 	os_set_text_style(int);
+int	os_get_text_style(void);
 void 	os_start_sample(int, int, int, zword);
 void 	os_stop_sample(int);
 int	os_storyfile_seek(FILE *, long, int);

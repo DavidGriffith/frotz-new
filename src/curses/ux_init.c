@@ -134,11 +134,11 @@ void os_warn (const char *s, ...)
 
 	if (u_setup.curses_active) {
 		os_beep(BEEP_HIGH);
-		style = u_setup.current_text_style;
+		style = os_get_text_style();
 		os_set_text_style(BOLDFACE_STYLE);
 		print_c_string("Warning: ");
-		print_c_string(errorstring);
 		os_set_text_style(NORMAL_STYLE);
+		print_c_string(errorstring);
 		new_line();
 		os_set_text_style(style);
 	} else
@@ -171,10 +171,11 @@ void os_fatal (const char *s, ...)
 		style = u_setup.current_text_style;
 		os_set_text_style(BOLDFACE_STYLE);
 		print_c_string("Fatal error: ");
-		os_set_text_style(style);
+		os_set_text_style(NORMAL_STYLE);
 		print_c_string(errorstring);
 		print_c_string("\n");
 		new_line();
+		os_set_text_style(style);
 		if (f_setup.ignore_errors) {
 			print_c_string("Continuing anyway...");
 			new_line();
