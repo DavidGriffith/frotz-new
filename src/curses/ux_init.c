@@ -156,14 +156,23 @@ void os_warn (const char *s, ...)
  */
 void os_fatal (const char *s, ...)
 {
+	va_list m;
+	char errorstring[81];
+	int style;
+
+	va_start(m, s);
+	vsnprintf(errorstring, sizeof(char) * 80, s, m);
+	va_end(m);
+
 	if (u_setup.curses_active) {
 		/* Solaris 2.6's cc complains if the below cast is missing */
 		print_c_string("\n\n");
 		os_beep(BEEP_HIGH);
+		style = u_setup.current_text_style;
 		os_set_text_style(BOLDFACE_STYLE);
 		print_c_string("Fatal error: ");
-		os_set_text_style(0);
-		print_c_string(s);
+		os_set_text_style(style);
+		print_c_string(errorstring);
 		print_c_string("\n");
 		new_line();
 		if (f_setup.ignore_errors) {
@@ -182,9 +191,9 @@ void os_fatal (const char *s, ...)
 	}
 
 	fputs ("\nFatal error: ", stderr);
-	fputs (s, stderr);
+	fputs (errorstring, stderr);
 	if (f_setup.ignore_errors) {
-		fputs ("\n\rContinuing anyway", stderr);
+		fputs ("\n\rContinuing anyway...", stderr);
 		return;
 	}
 
