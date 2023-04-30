@@ -267,6 +267,7 @@ void os_warn(const char *s, ...)
 	va_list va;
 	char buf[1024];
 	int len;
+	int style;
 
 	/* XXX Too lazy to do this right
 	 * (try again with a bigger buf if necessary). */
@@ -276,9 +277,10 @@ void os_warn(const char *s, ...)
 	/* Solaris 2.6's cc complains if the below cast is missing */
 	print_c_string("\n\n");
 	os_beep(BEEP_HIGH);
+	style = os_get_text_style();
 	os_set_text_style(BOLDFACE_STYLE);
 	print_c_string("Warning: ");
-	os_set_text_style(0);
+	os_set_text_style(NORMAL_STYLE);
 	print_c_string((len < 0 ? s : buf));
 	print_c_string("\n");
 	if (len < 0)
@@ -286,6 +288,7 @@ void os_warn(const char *s, ...)
 	else if (len >= sizeof(buf))
 		print_c_string("(truncated)\n");
 	new_line();
+	os_set_text_style(style);
 }
 
 

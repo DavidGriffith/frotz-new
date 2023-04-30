@@ -663,7 +663,14 @@ char *os_read_file_name(const char *default_name, int flag)
 	 * and our filename is already provided with the -L flag,
 	 * just go ahead silently.
 	 */
-	if (f_setup.restore_mode) {
+	if (flag == FILE_NO_PROMPT) {
+		const char *ext = strrchr(default_name, '.');
+		if (strncmp(ext, EXT_AUX, 4)) {
+			os_warn("Blocked unprompted access of %s. Should only be %s files.", default_name, EXT_AUX);
+			return NULL;
+		} else 
+			strncpy(file_name, default_name, FILENAME_MAX);
+	} else if (f_setup.restore_mode) {
 		strncpy(file_name, f_setup.save_name, FILENAME_MAX);
 	} else {
 		st = dialog_read_file_name(file_name, initname, flag);

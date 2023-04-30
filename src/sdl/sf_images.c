@@ -227,7 +227,7 @@ static int loadpng(zbyte * data, int length, sf_picture * graphic)
 		free(rowPointers);
 
 	return 1;
-}
+} /* loadpng */
 
 /****************************************************************************
  * Loader for JPEG images
@@ -410,7 +410,7 @@ static int sf_loadpic(int picture, sf_picture * graphic)
 	if (st)
 		graphic->number = picture;
 	return st;
-}
+} /* sf_loadpic */
 
 /*******************
  * CACHE
