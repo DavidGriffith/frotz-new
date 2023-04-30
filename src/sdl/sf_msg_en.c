@@ -93,4 +93,4 @@ const char *sf_msgstring(int id)
 	}
 
 	return p;
-}
+} /* sf_msgstring */

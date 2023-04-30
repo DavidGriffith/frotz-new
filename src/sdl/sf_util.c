@@ -72,7 +72,7 @@ void sf_regcleanfunc(void *f, const char *p)
 		n->next = cflist;
 		cflist = n;
 	}
-}
+} /* sf_regcleanfunc */
 
 
 void sf_cleanup_all()
@@ -84,7 +84,7 @@ void sf_cleanup_all()
 		free(cflist);
 		cflist = n;
 	}
-}
+} /* sf_cleanup_all */
 
 
 /*
@@ -109,7 +109,9 @@ void os_reset_screen(void)
 	}
 
 	sf_cleanup_all();
-}
+} /* os_reset_screen */
+
+
 /*
  * os_quit
  *
@@ -120,6 +122,7 @@ void os_quit(int status)
 {
 	exit(status);
 } /* os_quit */
+
 
 int user_background = -1;
 int user_foreground = -1;
@@ -236,7 +239,7 @@ static void usage(int type)
 		puts(info_footer);
 	puts(footer);
 
-}
+} /* usage */
 
 
 /*
@@ -273,7 +276,7 @@ static int limit(int v, int m, int M)
 	if (v > M)
 		return M;
 	return v;
-}
+} /* limit */
 
 
 static void parse_options(int argc, char **argv)
@@ -398,7 +401,7 @@ static void print_version(void)
 	printf("  The core and SDL port are maintained by David Griffith.\n");
 	printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n\n");
 	os_quit(EXIT_SUCCESS);
-}
+} /* print_version */
 
 
 /**
@@ -410,7 +413,7 @@ static char *new_dirname(const char *path)
 	char *p = strdup(path), *p2 = strdup(dirname(p));
 	free(p);
 	return p2;
-}
+} /* new_dirname */
 
 
 /**
@@ -422,7 +425,7 @@ static char *new_basename(const char *path)
 	char *p = strdup(path), *p2 = strdup(basename(p));
 	free(p);
 	return p2;
-}
+} /* new_basename */
 
 
 /*
@@ -534,7 +537,8 @@ void os_process_arguments(int argc, char *argv[])
 void sf_sleep(int msecs)
 {
 	SDL_Delay(msecs);
-}
+} /* sf_sleep */
+
 
 #ifdef WIN32
 zlong sf_ticks(void)
@@ -558,7 +562,7 @@ zlong sf_ticks(void)
 	    (now.tv_sec - start.tv_sec) * 1000 + (now.tv_usec -
 						  start.tv_usec) / 1000;
 	return ticks;
-}
+} /* sf_ticks */
 #endif
 
 
@@ -574,7 +578,7 @@ static char *getextension(int flag)
 		ext = EXT_COMMAND;
 
 	return ext;
-}
+} /* getextension */
 
 
 static bool newfile(int flag)
@@ -582,7 +586,7 @@ static bool newfile(int flag)
 	if (flag == FILE_SAVE || flag == FILE_SAVE_AUX || flag == FILE_RECORD)
 		return true;
 	return false;
-}
+} /* newfile */
 
 
 static char buf[FILENAME_MAX];
@@ -598,7 +602,7 @@ static const char *getnumbername(const char *def, char *ext)
 			break;
 	}
 	return buf;
-}
+} /* getnumbername */
 
 
 static const char *getdatename(const char *def, char *ext)
@@ -616,7 +620,7 @@ static const char *getdatename(const char *def, char *ext)
 		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 		tm->tm_hour, tm->tm_min, ext);
 	return buf;
-}
+} /* getdatename */
 
 
 static int ingame_read_file_name(char *file_name, const char *default_name,
@@ -682,7 +686,7 @@ char *os_read_file_name(const char *default_name, int flag)
 	}
 
 	return strdup(file_name);
-}
+} /* os_read_file_name */
 
 
 static int ingame_read_file_name(char *file_name, const char *default_name,
@@ -777,7 +781,7 @@ static int ingame_read_file_name(char *file_name, const char *default_name,
 	ostream_record = saved_record;
 
 	return result;
-} /* os_read_file_name */
+} /* ingame_read_file_name */
 
 
 static int dialog_read_file_name(char *file_name, const char *default_name,
@@ -832,7 +836,7 @@ static int dialog_read_file_name(char *file_name, const char *default_name,
 		return 1;
 	}
 	return 0;
-}
+} /* dialog_read_file_name */
 
 static char *rc = NULL;
 
@@ -842,7 +846,7 @@ void sf_FinishProfile()
 		return;
 	free(rc);
 	rc = NULL;
-}
+} /* sf_FinishProfile */
 
 
 void sf_InitProfile(const char *fn)
@@ -898,7 +902,7 @@ void sf_InitProfile(const char *fn)
 	*d = 0;
 
 	CLEANREG(sf_FinishProfile);
-}
+} /* sf_InitProfile */
 
 
 static char *findsect(const char *sect)
@@ -915,7 +919,7 @@ static char *findsect(const char *sect)
 		return (r + ns);
 	}
 	return NULL;
-}
+} /* findsect */
 
 
 static char *findid(const char *sect, const char *id)
@@ -948,7 +952,7 @@ static char *findid(const char *sect, const char *id)
 	if (sav)
 		*sav = '[';
 	return fnd;
-}
+} /* findid */
 
 
 int sf_GetProfileInt(const char *sect, const char *id, int def)
@@ -959,7 +963,7 @@ int sf_GetProfileInt(const char *sect, const char *id, int def)
 			def = atoi(p);
 	}
 	return def;
-}
+} /* sf_GetProfileInt */
 
 
 double sf_GetProfileDouble(const char *sect, const char *id, double def)
@@ -970,7 +974,7 @@ double sf_GetProfileDouble(const char *sect, const char *id, double def)
 			def = atof(p);
 	}
 	return def;
-}
+} /* sf_GetProfileDouble */
 
 
 char *sf_GetProfileString(const char *sect, const char *id, char *def)
@@ -1010,7 +1014,7 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 	if (sav)
 		*q = sav;
 	return def;
-}
+} /* sf_GetProfileString */
 
 
 /*  A.  Local file header:
@@ -1040,7 +1044,7 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 static unsigned myin(void *d, zbyte ** b)
 {
 	return 0;
-}
+} /* myin */
 
 
 static int myout(void *udata, zbyte * b, unsigned n)
@@ -1048,7 +1052,7 @@ static int myout(void *udata, zbyte * b, unsigned n)
 	memmove(udata, b, n);
 	udata += n;
 	return 0;
-}
+} /* myout */
 
 
 static int myunzip(int csize, zbyte * cdata, zbyte * udata)
@@ -1076,7 +1080,7 @@ static int myunzip(int csize, zbyte * cdata, zbyte * udata)
 
 	st = inflateBackEnd(&z);
 	return st;
-}
+} /* myunzip */
 
 
 int sf_pkread(FILE * f, int foffs, void **out, int *size)
@@ -1118,7 +1122,7 @@ int sf_pkread(FILE * f, int foffs, void **out, int *size)
 	*out = (void *)data;
 	*size = usize;
 	return st;
-}
+} /* sf_pkread */
 
 
 /*

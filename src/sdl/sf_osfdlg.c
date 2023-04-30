@@ -70,7 +70,7 @@ STATIC void updatelist()
 	First = 0;
 	selected = NULL;
 	drawlist();
-}
+} /* updatelist */
 
 STATIC void goright();
 STATIC void goleft();
@@ -87,7 +87,7 @@ STATIC void goup()
 		updatelist();
 	} else
 		strcat(lastdir, "/");
-}
+} /* goup */
 
 typedef struct {
 	int x, y, w, h;		/* internal */
@@ -132,7 +132,7 @@ STATIC void frame_upframe(int x, int y, int w, int h)
 	v = O_GRAY1;
 	sf_chline(x, y + h, v, w--);
 	sf_cvline(x + w, y, v, h);
-}
+} /* frame_upframe */
 
 
 STATIC void frame_downframe(int x, int y, int w, int h)
@@ -151,7 +151,7 @@ STATIC void frame_downframe(int x, int y, int w, int h)
 	v = O_GRAY3;
 	sf_chline(x, y + h, v, w--);
 	sf_cvline(x + w, y, v, h);
-}
+} /* frame_downframe */
 
 /* internal coords */
 STATIC int addarea(int x, int y, int w, int h, zword(*click) (int, int))
@@ -164,14 +164,14 @@ STATIC int addarea(int x, int y, int w, int h, zword(*click) (int, int))
 	a->click = click;
 	a->back = O_GRAY2;
 	return nbareas++;
-}
+} /* addarea */
 
 
 STATIC void clarea(int n)
 {
 	BAREA *a = bareas + n;
 	sf_fillrect(a->back, a->x, a->y, a->w, a->h);
-}
+} /* clarea */
 
 
 #ifdef USE_UTF8
@@ -204,7 +204,7 @@ error:
 	}
 	*out = ch;
 	return idx;
-}
+} /* utf8_to_zchar */
 
 
 STATIC size_t utf8_len(const char *str)
@@ -215,7 +215,7 @@ STATIC size_t utf8_len(const char *str)
 			ret++;
 	}
 	return ret;
-}
+} /* utf8_len */
 #endif	/* USE_UTF8 */
 
 
@@ -254,7 +254,7 @@ STATIC void writetext(zlong color, const char *s, int x, int y, int w,
 	}
 #endif
 	sf_setclip(ox, oy, ow, oh);
-}
+} /* writetext */
 
 
 STATIC int addbutton(int x, int y, int w, int h, char *text,
@@ -267,7 +267,7 @@ STATIC int addbutton(int x, int y, int w, int h, char *text,
 	if (text)
 		writetext(0, text, x, y, w, 1);
 	return b;
-}
+} /* addbutton */
 
 static int B_up, B_ok, B_cancel;
 static int A_dir, A_filter, A_entry, A_list;
@@ -285,7 +285,7 @@ STATIC void showfilename(int pos)
 		os_font_data(0, &height, &width);
 		sf_cvline(a->x + width * pos, a->y, O_BLACK, height);
 	}
-}
+} /* showfilename */
 
 
 STATIC void clicked(BAREA * a)
@@ -295,7 +295,7 @@ STATIC void clicked(BAREA * a)
 	sf_sleep(100);
 	frame_upframe(a->x - 2, a->y - 2, a->w + 4, a->h + 4);
 	sf_flushdisplay();
-}
+} /* clicked */
 
 
 STATIC zword checkmouse(int i0)
@@ -314,26 +314,26 @@ STATIC zword checkmouse(int i0)
 		}
 	}
 	return 0;
-}
+} /* checkmouse */
 
 
 STATIC zword Zup(int x, int y)
 {
 	goup();
 	return 0;
-}
+} /* Zup */
 
 
 STATIC zword Zok(int x, int y)
 {
 	return ZC_RETURN;
-}
+} /* Zok */
 
 
 STATIC zword Zcanc(int x, int y)
 {
 	return ZC_ESCAPE;
-}
+} /* Zcanc */
 
 STATIC zword Zselect(int x, int y);
 STATIC zword yesnoover(int xc, int yc);
@@ -358,7 +358,7 @@ STATIC zword inputkey(bool text)
 		}
 	}
 	return c;
-}
+} /* inputkey */
 
 int (*sf_sysdialog)(bool existing, const char *def, const char *filt,
 		    const char *tit, char **res) = NULL;
@@ -533,13 +533,13 @@ STATIC int myosdialog(bool existing, const char *def, const char *filt,
 	}
 
 	return SF_NOTIMP;
-}
+} /* myosdialog */
 
 
 void sf_setdialog(void)
 {
 	sf_osdialog = myosdialog;
-}
+} /* sf_setdialog */
 
 /*********************************/
 
@@ -576,7 +576,7 @@ STATIC int myfnmatch(const char *pattern, const char *p, int dummy)
 	if (lp < lpat)
 		return 1;	/* too short */
 	return strcmp(pattern, p + lp - lpat);
-}
+} /* myfnmatch */
 
 
 STATIC void cleanlist(ENTRY * t)
@@ -588,7 +588,7 @@ STATIC void cleanlist(ENTRY * t)
 		free(t);
 		t = n;
 	}
-}
+} /* cleanlist */
 
 
 STATIC ENTRY *newentry(char *s)
@@ -603,7 +603,7 @@ STATIC ENTRY *newentry(char *s)
 		}
 	}
 	return r;
-}
+} /* newentry */
 
 
 STATIC void addentry(char *s, ENTRY ** ae)
@@ -633,7 +633,7 @@ STATIC void addentry(char *s, ENTRY ** ae)
 			}
 		}
 	}
-}
+} /* addentry */
 
 
 STATIC char *resolvedir(char *dir, char *res, int size)
@@ -658,7 +658,7 @@ STATIC char *resolvedir(char *dir, char *res, int size)
 			}
 	}
 	return p;
-}
+} /* resolvedir */
 
 
 static void exhaust(ENTRY * e, ENTRY ** resp, int *n)
@@ -670,7 +670,7 @@ static void exhaust(ENTRY * e, ENTRY ** resp, int *n)
 	*resp = e;
 	(*n)++;
 	exhaust(e->right, resp, n);
-}
+} /* exhaust */
 
 
 STATIC ENTRY *dodir(char *dirname, char *pattern, char *resdir, int size,
@@ -736,7 +736,7 @@ STATIC ENTRY *dodir(char *dirname, char *pattern, char *resdir, int size,
 		}
 
 	return res;
-}
+} /* dodir */
 
 
 #ifdef USE_UTF8
@@ -752,7 +752,7 @@ STATIC int utf8_char_pos(char *s, int pos)
 			idx++;
 	}
 	return cpos;
-}
+} /* utf8_char_pos */
 #endif
 
 
@@ -876,7 +876,7 @@ STATIC void drawit(int x, int y, ENTRY * e, int w, int issub)
 	} else
 		color = O_BLACK;
 	writetext(color, s, x, y, w, 0);
-}
+} /* drawit */
 
 
 static int Nrows, Ncols, Ewid, Fh;
@@ -926,7 +926,7 @@ STATIC void drawnames(int x, int y, int w, int h, ENTRY * files, int first,
 		       ewid, i < nsub);
 		files = files->right;
 	}
-}
+} /* drawnames */
 
 
 STATIC void drawlist()
@@ -938,7 +938,7 @@ STATIC void drawlist()
 	drawnames(a->x, a->y, a->w, a->h, curdir, First, Numdirs, Numtot,
 		21 * 8);
 
-}
+} /* drawlist */
 
 
 STATIC void goright()
@@ -947,7 +947,7 @@ STATIC void goright()
 		return;
 	First += Nrows;
 	drawlist();
-}
+} /* goright */
 
 
 STATIC void goleft()
@@ -956,7 +956,7 @@ STATIC void goleft()
 		return;
 	First -= Nrows;
 	drawlist();
-}
+} /* goleft */
 
 
 STATIC ENTRY *filesat(int n)
@@ -967,7 +967,7 @@ STATIC ENTRY *filesat(int n)
 			e = e->right;
 	}
 	return e;
-}
+} /* filesat */
 
 
 STATIC zword Zselect(int x, int y)
@@ -998,7 +998,7 @@ STATIC zword Zselect(int x, int y)
 	showfilename(-1);
 	drawlist();
 	return 0;
-}
+} /* Zselect */
 
 
 extern void sf_videodata(zlong ** sb, int *sp, int *ew, int *eh);
@@ -1057,7 +1057,7 @@ zword sf_yesnooverlay(int xc, int yc, char *t, int saverest)
 
 	nbareas = nsav;
 	return c;
-}
+} /* sf_yesnooverlay */
 
 
 STATIC zword yesnoover(int xc, int yc)
@@ -1068,7 +1068,7 @@ STATIC zword yesnoover(int xc, int yc)
 
 	drawlist();
 	return c;
-}
+} /* yesnoover */
 
 
 /* this is needed for overlapping source and dest in Zentry
@@ -1077,7 +1077,7 @@ STATIC zword yesnoover(int xc, int yc)
 static void mystrcpy(char *d, const char *s)
 {
 	while ((*d++ = *s++)) ;
-}
+} /* mystrcpy */
 
 
 STATIC zword Zentry(int x, int y)
@@ -1214,4 +1214,4 @@ STATIC zword Zentry(int x, int y)
 	}
 	showfilename(-1);
 	return c;
-}
+} /* Zentry */

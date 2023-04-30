@@ -64,7 +64,7 @@ static int isblorb(FILE * fp)
 		return 0;
 
 	return 1;
-}
+} /* isblorb */
 
 
 /*
@@ -152,7 +152,7 @@ bb_err_t gen_blorb_init(char *filename)
 	}
 
 	return blorb_err;
-}
+} /* gen_blorb_init */
 
 
 /*
@@ -193,7 +193,7 @@ FILE *os_load_story(void)
 		fseek(fp, blorb_res.data.startpos, SEEK_SET);
 
 	return fp;
-}
+} /* os_load_story */
 
 
 /*
@@ -225,7 +225,7 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
 	} else {
 		return fseek(fp, offset, whence);
 	}
-}
+} /* os_storyfile_seek */
 
 
 /*
@@ -243,7 +243,7 @@ int os_storyfile_tell(FILE * fp)
 	} else {
 		return ftell(fp);
 	}
-}
+} /* os_storyfile_tell */
 
 
 static void print_c_string(const char *s)
@@ -253,7 +253,7 @@ static void print_c_string(const char *s)
 	while ((c = *s++) != 0) {
 		os_display_char(c);
 	}
-}
+} /* print_c_string */
 
 
 /*
@@ -289,7 +289,7 @@ void os_warn(const char *s, ...)
 		print_c_string("(truncated)\n");
 	new_line();
 	os_set_text_style(style);
-}
+} /* os_warn */
 
 
 size_t zcharstrlen(zchar * str)
@@ -300,7 +300,7 @@ size_t zcharstrlen(zchar * str)
 		ret++;
 	}
 	return ret;
-}
+} /* zcharstrlen */
 
 
 zchar *zcharstrcpy(zchar * dest, zchar * src)
@@ -312,7 +312,7 @@ zchar *zcharstrcpy(zchar * dest, zchar * src)
 	dest[i] = 0;
 
 	return dest;
-}
+} /* zcharstrcpy */
 
 
 int zcharstrncmp(zchar * s1, zchar * s2, size_t n)
@@ -327,7 +327,7 @@ int zcharstrncmp(zchar * s1, zchar * s2, size_t n)
 			return 0;
 	}
 	return 0;
-}
+} /* zcharstrncmp */
 
 
 zchar *zcharstrdup(zchar * src)
@@ -336,7 +336,7 @@ zchar *zcharstrdup(zchar * src)
 	if (dest)
 		zcharstrcpy(dest, src);
 	return dest;
-}
+} /* zcharstrdup */
 
 
 /* These are useful for circular buffers.
@@ -363,7 +363,7 @@ void gen_add_to_history(zchar * str)
 	history_view = history_next;	/* Reset user frame after each line */
 
 	return;
-}
+} /* gen_add_to_history */
 
 
 /**
@@ -372,7 +372,7 @@ void gen_add_to_history(zchar * str)
 void gen_history_reset()
 {
 	history_view = history_next;
-}
+} /* gen_history_reset */
 
 
 /**
@@ -397,7 +397,7 @@ int gen_history_back(zchar * str, int searchlen, int maxlen)
 		     && zcharstrncmp(str, *history_view, searchlen)));
 	zcharstrcpy(str + searchlen, *history_view + searchlen);
 	return 1;
-}
+} /* gen_history_back */
 
 
 /**
@@ -421,4 +421,4 @@ int gen_history_forward(zchar * str, int searchlen, int maxlen)
 		     && zcharstrncmp(str, *history_view, searchlen)));
 	zcharstrcpy(str + searchlen, *history_view + searchlen);
 	return 1;
-}
+} /* gen_history_forward */

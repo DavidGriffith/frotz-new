@@ -58,7 +58,7 @@ static void bdestroy(SFONT * s)
 			FT_Done_Face(f->face);
 		free(s);
 	}
-}
+} /* bdestroy */
 
 
 static int bheight(SFONT * s)
@@ -66,7 +66,7 @@ static int bheight(SFONT * s)
 	if (s)
 		return ((MYFONT *) s)->height;
 	return 0;
-}
+} /* bheight */
 
 
 static int bascent(SFONT * s)
@@ -74,7 +74,7 @@ static int bascent(SFONT * s)
 	if (s)
 		return ((MYFONT *) s)->ascent;
 	return 0;
-}
+} /* bascent */
 
 
 static int bdescent(SFONT * s)
@@ -82,7 +82,7 @@ static int bdescent(SFONT * s)
 	if (s)
 		return ((MYFONT *) s)->descent;
 	return 0;
-}
+} /* bdescent */
 
 
 static int bminchar(SFONT * s)
@@ -90,7 +90,7 @@ static int bminchar(SFONT * s)
 	if (s)
 		return ((MYFONT *) s)->minchar;
 	return 0;
-}
+} /* bminchar */
 
 
 static int bmaxchar(SFONT * s)
@@ -98,7 +98,7 @@ static int bmaxchar(SFONT * s)
 	if (s)
 		return ((MYFONT *) s)->maxchar;
 	return 0;
-}
+} /* bmaxchar */
 
 
 static void setglyph(MYFONT * f, FT_Face face, int ch);
@@ -118,13 +118,13 @@ static SF_glyph *getglyph(SFONT * s, zword c, int allowdef)
 		return f->glyphs[c];
 	}
 	return NULL;
-}
+} /* getglyph */
 
 
 static int hasglyph(SFONT * fo, zword c, int allowdef)
 {
 	return (getglyph(fo, c, allowdef) != NULL);
-}
+} /* hasglyph */
 
 
 static int inited = 0, initerr = 0;
@@ -136,7 +136,7 @@ static void libfinish()
 		return;
 	FT_Done_FreeType(library);
 	inited = 0;
-}
+} /* libfinish */
 
 
 static void libinit()
@@ -153,7 +153,7 @@ static void libinit()
 		inited = 1;
 		atexit(libfinish);
 	}
-}
+} /* libinit */
 
 
 static MYFONT *makefont(int totglyphs)
@@ -178,7 +178,7 @@ static MYFONT *makefont(int totglyphs)
 	res->totglyphs = totglyphs;
 	res->maxchar = totglyphs - 1;
 	return res;
-}
+} /* makefont */
 
 
 #define MAXUNI 0xffff
@@ -226,7 +226,7 @@ static void setglyph(MYFONT * f, FT_Face face, int ch)
 	res->yof = slot->bitmap_top - bitmap->rows + 1;
 
 	f->glyphs[ch] = res;
-}
+} /* setglyph */
 
 
 static SFONT *loadftype(char *fname, int size, SFONT * like, int *err)
@@ -295,7 +295,7 @@ static SFONT *loadftype(char *fname, int size, SFONT * like, int *err)
 	setglyph(res, face, 0x153);
 
 	return (SFONT *) res;
-}
+} /* loadftype */
 
 
 #ifdef WIN32
@@ -336,11 +336,11 @@ SFONT *sf_loadftype(char *fspec, SFONT * like, int *err)
 		return NULL;
 
 	return loadftype(fn, size, like, err);
-}
+} /* sf_loadftype */
 
 /****************************************/
 
 void sf_initloader()
 {
 	ttfontloader = sf_loadftype;
-}
+} /* sf_initloader */

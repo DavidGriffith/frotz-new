@@ -35,7 +35,8 @@ static void resethandlers()
 	signal(SIGINT, SIG_DFL);
 	signal(SIGFPE, SIG_DFL);
 	signal(SIGSEGV, SIG_DFL);
-}
+} /* resethandlers */
+
 
 static const char *signame(int sig)
 {
@@ -49,20 +50,22 @@ static const char *signame(int sig)
 	default:
 		return "";
 	}
-}
+} /* signame */
+
 
 static void myhandler(int s)
 {
 	resethandlers();
 	os_fatal("Signal %d received %s", s, signame(s));
-}
+} /* myhandler */
+
 
 void sf_installhandlers()
 {
 	signal(SIGINT, myhandler);
 	signal(SIGFPE, myhandler);
 	signal(SIGSEGV, myhandler);
-}
+} /* sf_installhandlers */
 
 #else
 
@@ -104,7 +107,7 @@ static char *getsigname(int s)
 		i++;
 	}
 	return NULL;
-}
+} /* getsigname */
 
 static void bt_sighandler(int sig, siginfo_t * info, void *secret)
 {
@@ -144,7 +147,8 @@ static void bt_sighandler(int sig, siginfo_t * info, void *secret)
 	}
 
 	os_quit(EXIT_SUCCESS);
-}
+} /* bt_sighandler */
+
 
 void sf_installhandlers()
 {
@@ -162,6 +166,6 @@ void sf_installhandlers()
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGILL, &sa, NULL);
 
-}
+} /* sf_installhandlers */
 
 #endif

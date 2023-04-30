@@ -89,7 +89,8 @@ static void finishaudio()
 	e_sfx = e_mod = NULL;
 
 	Mix_CloseAudio();
-}
+} /* finishaudio */
+
 
 static void music_finished(void);
 static void channel_finished(int channel);
@@ -101,7 +102,8 @@ static void channel_finished(int channel);
  */
 void os_init_sound()
 {
-}
+} /* os_init_sound */
+
 
 int sf_initsound()
 {
@@ -129,7 +131,7 @@ int sf_initsound()
 	Mix_AllocateChannels(1);
 	CLEANREG(finishaudio);
 	return 1;
-}
+} /* sf_initsound */
 
 
 static void baredestroy(EFFECT * r)
@@ -141,7 +143,7 @@ static void baredestroy(EFFECT * r)
 			Mix_FreeChunk(r->sam);
 		free(r);
 	}
-}
+} /* baredestroy */
 
 
 static EFFECT *new_effect(int type, int num)
@@ -153,7 +155,7 @@ static EFFECT *new_effect(int type, int num)
 		reader->destroy = baredestroy;
 	}
 	return (EFFECT *) reader;
-}
+} /* new_effect */
 
 
 /* According to specs, this is only called when music ends "naturally",
@@ -167,7 +169,7 @@ static void music_finished(void)
 		return;
 	e_mod->active = 0;
 	e_mod->ended = 1;
-}
+} /* music_finished */
 
 
 /* This may be called also via a Mix_Haltetc. */
@@ -181,7 +183,7 @@ static void channel_finished(int channel)
 		return;
 	e_sfx->active = 0;
 	e_sfx->ended = 1;	/* stopsample will take care of this... */
-}
+} /* channel_finished */
 
 
 static void stopsample()
@@ -193,7 +195,7 @@ static void stopsample()
 	e_sfx->active = 0;
 	Mix_HaltChannel(0);
 	e_sfx->ended = 0;
-}
+} /* stopsample */
 
 
 static void stopmodule()
@@ -203,7 +205,7 @@ static void stopmodule()
 	e_mod->active = 0;
 	Mix_HaltMusic();
 	e_mod->ended = 0;
-}
+} /* stopmodule */
 
 
 static void startsample()
@@ -213,7 +215,7 @@ static void startsample()
 	Mix_PlayChannel(0, e_sfx->sam, e_sfx->repeats);
 	Mix_Volume(0, e_sfx->volume);
 	e_sfx->active = 1;
-}
+} /* startsample */
 
 
 static void startmodule()
@@ -223,7 +225,7 @@ static void startmodule()
 	Mix_PlayMusic(e_mod->mod, e_mod->repeats);
 	Mix_VolumeMusic(e_mod->volume);
 	e_mod->active = 1;
-}
+} /* startmodule */
 
 
 static EFFECT *getaiff(FILE * f, size_t pos, int len, int num)
@@ -240,7 +242,7 @@ static EFFECT *getaiff(FILE * f, size_t pos, int len, int num)
 		return NULL;
 	}
 	return res;
-}
+} /* getaiff */
 
 
 static EFFECT *getmodule(FILE * f, size_t pos, int len, int num)
@@ -274,7 +276,7 @@ static EFFECT *getmodule(FILE * f, size_t pos, int len, int num)
 		return NULL;
 	}
 	return res;
-}
+} /* getmodule */
 
 
 static EFFECT *geteffect(int num)
@@ -306,7 +308,8 @@ static EFFECT *geteffect(int num)
 	sf_freeresource(&res);
 
 	return result;
-}
+} /* geteffect */
+
 
 /* sound handling */
 
@@ -327,7 +330,7 @@ void os_beep(int number)
 		return;
 /*	theWnd->FlushDisplay();
 	::MessageBeep(MB_ICONEXCLAMATION);*/
-}
+} /* os_beep */
 
 
 /*
@@ -341,7 +344,7 @@ void os_finish_with_sample(int number)
 	if (!SFaudiorunning)
 		return;
 	os_stop_sample(number);
-}
+} /* os_finish_with_sample */
 
 
 /*
@@ -354,7 +357,7 @@ void os_prepare_sample(int number)
 {
 	if (!SFaudiorunning)
 		return;
-}
+} /* os_prepare_sample */
 
 
 /*
@@ -408,7 +411,7 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
 		e_mod = e;
 		startmodule();
 	}
-}
+} /* os_start_sample */
 
 
 /*
@@ -430,7 +433,7 @@ void os_stop_sample(int number)
 		stopsample();
 	if ((e_mod) && (e_mod->number == number))
 		stopmodule();
-}
+} /* os_stop_sample */
 
 
 void sf_checksound()
@@ -449,6 +452,6 @@ void sf_checksound()
 			end_of_sound();
 		}
 	}
-}
+} /* sf_checksound */
 
 /*************************************/

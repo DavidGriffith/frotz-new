@@ -54,7 +54,7 @@ zlong sf_blend(int a, zlong s, zlong d)
 	      [(toLinear[s & 0xff] * a +
 		toLinear[d & 0xff] * (256 - a)) >> 8]) << 16;
 	return r;
-}
+} /* sf_blend */
 
 
 /* Set the screen gamma and build gamma correction tables */
@@ -68,7 +68,7 @@ void sf_setgamma(double gamma)
 	gamma = 1.0 / gamma;
 	for (i = 0; i < 256; i++)
 		fromLinear[i] = (int)((pow(i / 255.0, gamma) * 255.0) + 0.5);
-}
+} /* sf_setgamma */
 
 /****************************************************************************
  * Loader for PNG images
@@ -86,7 +86,7 @@ static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 	PNGData *pngData = (PNGData *) png_get_io_ptr(png_ptr);
 	memmove(data, pngData->gfxData + pngData->offset, length);
 	pngData->offset += length;
-}
+} /* readPNGData */
 
 
 static int loadpng(zbyte * data, int length, sf_picture * graphic)
@@ -227,7 +227,8 @@ static int loadpng(zbyte * data, int length, sf_picture * graphic)
 		free(rowPointers);
 
 	return 1;
-} /* loadpng */
+} /* loadpng * /
+
 
 /****************************************************************************
  * Loader for JPEG images
@@ -248,27 +249,27 @@ static void errorJPEGExit(j_common_ptr cinfo)
 	struct JPEGErrorInfo *error = (struct JPEGErrorInfo *)cinfo->err;
 	(*cinfo->err->output_message) (cinfo);
 	longjmp(error->errorJump, 1);
-}
+} /* errorJPEGExit */
 
 
 static void outputJPEGMessage(j_common_ptr cinfo)
 {
 	char buffer[JMSG_LENGTH_MAX];
 	(*cinfo->err->format_message) (cinfo, buffer);
-}
+} /* outputJPEGMessage */
 
 
 /* Memory Data Source */
 static void memJPEGInit(j_decompress_ptr unused)
 {
 	/* Nothing here */
-}
+} /* memJPEGInit */
 
 
 static int memJPEGFillInput(j_decompress_ptr unused)
 {
 	return 0;
-}
+} /* memJPEGFillInput */
 
 
 static void memJPEGSkipInput(j_decompress_ptr cinfo, long num_bytes)
@@ -280,13 +281,13 @@ static void memJPEGSkipInput(j_decompress_ptr cinfo, long num_bytes)
 		cinfo->src->next_input_byte += num_bytes;
 		cinfo->src->bytes_in_buffer -= num_bytes;
 	}
-}
+} /* memJPEGSkipInput */
 
 
 static void memJPEGTerm(j_decompress_ptr unused)
 {
 	/* Nothing here */
-}
+} /* memJPEGTerm */
 
 
 static int loadjpeg(zbyte * data, int length, sf_picture * graphic)
@@ -360,7 +361,7 @@ static int loadjpeg(zbyte * data, int length, sf_picture * graphic)
 	jpeg_destroy_decompress(&info);
 
 	return 1;
-}
+} /* loadjpeg */
 
 /****************************************************************************
  * Loader for simple rectangles
@@ -375,7 +376,7 @@ static int loadrect(zbyte * data, int length, sf_picture * graphic)
 	    (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
 	graphic->pixels = NULL;
 	return 1;
-}
+} /* loadrect */
 
 /*****************************/
 
@@ -433,7 +434,7 @@ static void cacheflush()
 		cached[i].pixels = NULL;
 	}
 	cacheinited = 0;
-}
+} /* cacheflush */
 
 
 static void cacheinit()
@@ -447,7 +448,7 @@ static void cacheinit()
 		cached[i].pixels = NULL;
 	}
 	cacheinited = 1;
-}
+} /* cacheinit */
 
 
 static sf_picture *cachefind(int n)
@@ -464,7 +465,7 @@ static sf_picture *cachefind(int n)
 		return (cached + 0);
 	}
 	return NULL;
-}
+} /* cachefind */
 
 
 sf_picture *sf_getpic(int num)
@@ -479,4 +480,4 @@ sf_picture *sf_getpic(int num)
 	if (sf_loadpic(num, res))
 		return res;
 	return NULL;
-}
+} /* sf_getpic */

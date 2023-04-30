@@ -151,7 +151,7 @@ static SF_glyph * mygetglyph(SFONT *s, zword c, int allowdef)
 	memmove(&(myglyph.bitmap[0]),src,8);
 	myglyph.h = 8;
 	return (SF_glyph *)&myglyph;
-}
+} /* mygetglyph */
 
 
 static SFONT myfont3 = {
@@ -189,7 +189,7 @@ static SF_glyph * mygetglyph2(SFONT *s, zword c, int allowdef)
 	}
 	myglyph.h = 16;
 	return (SF_glyph *)&myglyph;
-}
+} /* mygetglyph2 */
 
 
 static SFONT myfont3dbl = {

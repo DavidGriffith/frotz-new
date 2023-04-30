@@ -95,7 +95,7 @@ static void checkwidths()
 		if ((reso->py) && (reso->py >= AcHeight))
 			AcHeight = reso->py;
 	}
-}
+} /* checkwidths */
 
 
 static void sf_cleanup_resources(void)
@@ -106,7 +106,7 @@ static void sf_cleanup_resources(void)
 	if (blorb_fp)
 		fclose(blorb_fp);
 	blorb_fp = NULL;
-}
+} /* sf_cleanup_resources */
 
 static void load_local_resources(void);
 
@@ -141,7 +141,7 @@ int sf_load_resources(void)
 		load_local_resources();
 
 	return 0;
-}
+} /* sf_load_resources */
 
 
 /*
@@ -249,7 +249,7 @@ int os_picture_data(int picture, int *height, int *width)
 	*height = 0;
 	*width = 0;
 	return 0;
-}
+} /* os_picture_data */
 
 
 /*
@@ -275,7 +275,7 @@ void os_menu(int action, int menu, const zword * text)
 		theWnd->RemoveMenu(menu);
 		break;
 	}*/
-}
+} /* os_menu */
 
 
 /*
@@ -293,7 +293,7 @@ int os_random_seed(void)
 		return ((int)(time(NULL))) & 32767;
 	}
 	return m_random_seed;
-}
+} /* os_random_seed */
 
 
 /* The following assumes Unicode */
@@ -321,7 +321,7 @@ void os_scrollback_char(zword c)
 			putchar(0x80 + (c & 0x3f));
 		}
 	}
-}
+} /* os_scrollback_char */
 
 
 /*
@@ -335,7 +335,7 @@ void os_scrollback_erase(int erase)
 	if (option_scrollback_buffer)
 		while (erase--)
 			putchar(8);
-}
+} /* os_scrollback_erase */
 
 
 /*
@@ -360,7 +360,7 @@ void os_restart_game(int stage)
 			sf_read_key(0, false, false, false);
 		}
 	}
-}
+} /* os_restart_game */
 
 
 #define DEFAULT_GAMMA 2.2
@@ -389,7 +389,7 @@ void sf_initcolours()
 		m_nonStdColours[i] = 0xFFFFFFFF;
 	m_nonStdIndex = 0;
 
-}
+} /* sf_initcolours */
 
 
 /* Read in settings */
@@ -473,7 +473,7 @@ void sf_readsettings(void)
 	}
 
 	sf_FinishProfile();
-}
+} /* sf_readsettings */
 
 
 /* Get a colour */
@@ -495,7 +495,7 @@ zlong sf_GetColour(int colour)
 			return m_nonStdColours[colour - 18];
 	}
 	return m_colours[0];
-}
+} /* sf_GetColour */
 
 
 /* Get a default colour */
@@ -504,7 +504,7 @@ zlong sf_GetDefaultColour(bool fore)
 	if (m_IsInfocomV6)
 		return sf_GetColour(fore ? WHITE_COLOUR : BLACK_COLOUR);
 	return fore ? m_defaultFore : m_defaultBack;
-}
+} /* sf_GetColour */
 
 
 /* Get an index for a non-standard colour */
@@ -541,7 +541,7 @@ int sf_GetColourIndex(zlong colour)
 			m_nonStdIndex = 0;
 	}
 	return index;
-}
+} /* sf_GetColourIndex */
 
 
 /*
@@ -586,7 +586,7 @@ void os_set_colour(int new_foreground, int new_background)
 		ts->back = sf_GetColour(new_background);
 	ts->backDefault = (new_background == 1);
 	ts->backTransparent = (new_background == 15);
-}
+} /* os_set_colour */
 
 
 /*
@@ -598,7 +598,7 @@ void os_set_colour(int new_foreground, int new_background)
 int os_from_true_colour(zword colour)
 {
 	return sf_GetColourIndex(RGB5ToTrue(colour));
-}
+} /* os_from_true_colour */
 
 
 /*
@@ -610,7 +610,7 @@ int os_from_true_colour(zword colour)
 zword os_to_true_colour(int index)
 {
 	return TrueToRGB5(sf_GetColour(index));
-}
+} /* os_to_true_colour */
 
 
 /*
@@ -744,7 +744,7 @@ void os_init_screen(void)
 		hx_fore_colour = TrueToRGB5(sf_GetDefaultColour(true));
 		hx_back_colour = TrueToRGB5(sf_GetDefaultColour(false));
 	}
-}
+} /* os_init_screen */
 
 
 static void print_c_string (const char *s)
@@ -798,7 +798,7 @@ void os_fatal(const char *s, ...)
 	}
 	sf_cleanup_all();
 	os_quit(EXIT_FAILURE);
-}
+} /* os_fatal */
 
 
 /* If true, running one of Infocom's V6 games */
@@ -814,7 +814,7 @@ bool sf_IsInfocomV6()
 		break;
 	}
 	return false;
-}
+} /* sf_IsInfocomV6 */
 
 
 /* If true, this picture has an adaptive palette */
@@ -841,7 +841,7 @@ bool sf_IsAdaptive(int picture)
 	}
 	bb_unload_chunk(blorb_map, result.chunknum);
 	return adaptive;
-}
+} /* sf_IsAdaptive */
 
 
 #define LOCAL_MEM	-1
@@ -869,7 +869,7 @@ void sf_freeresource(myresource * res)
 
 	if ((blorb_map) && (cnu >= 0))
 		bb_unload_chunk(blorb_map, cnu);
-}
+} /* sf_freeresource */
 
 
 static FILE *findlocal(int ispic, int num, int *size)
@@ -887,7 +887,7 @@ static FILE *findlocal(int ispic, int num, int *size)
 	*size = ftell(f);
 	fseek(f, 0, SEEK_SET);
 	return f;
-}
+} /* findlocal */
 
 
 static FILE *findfromlist(int ispic, int num, int *size);
@@ -943,7 +943,7 @@ static int loadlocal(int num, int ispic, int method, myresource * res)
 	}
 
 	return bb_err_None;
-}
+} /* loadlocal */
 
 
 int sf_getresource(int num, int ispic, int method, myresource * res)
@@ -973,7 +973,8 @@ int sf_getresource(int num, int ispic, int method, myresource * res)
 			res->file = blorb_fp;
 	}
 	return st;
-}
+} /* sf_getresource */
+
 
 /***************/
 
@@ -1001,7 +1002,7 @@ static void cleanLLENTRY(LLENTRY * e)
 		free(e);
 		e = n;
 	}
-}
+} /* cleanLLENTRY */
 
 
 static void cleanlocallist()
@@ -1010,7 +1011,7 @@ static void cleanlocallist()
 	Lpics = NULL;
 	cleanLLENTRY(Lsnds);
 	Lsnds = NULL;
-}
+} /* cleanlocal */
 
 
 static int parseline(char *s)
@@ -1046,7 +1047,7 @@ static int parseline(char *s)
 		return -1;
 	p_name = p;
 	return 1;
-}
+} /* parseline */
 
 
 static void load_local_resources(void)
@@ -1089,7 +1090,7 @@ static void load_local_resources(void)
 	if (numlocal)
 		m_localfiles = 1;
 	fclose(f);
-}
+} /* load_local_resources */
 
 
 static FILE *findfromlist(int ispic, int num, int *size)
@@ -1120,7 +1121,7 @@ static FILE *findfromlist(int ispic, int num, int *size)
 	*size = ftell(f);
 	fseek(f, 0, SEEK_SET);
 	return f;
-}
+} /* findfromlist */
 
 
 void os_init_setup(void)
@@ -1129,4 +1130,4 @@ void os_init_setup(void)
 	sf_setdialog();
 	sf_initloader();
 	sdl_active = FALSE;
-}
+} /* os_init_setup */

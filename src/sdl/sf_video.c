@@ -70,7 +70,7 @@ void sf_setclip(int x, int y, int w, int h)
 	xmax = x + w;
 	ymin = y;
 	ymax = y + h;
-}
+} /* sf_setclip */
 
 
 void sf_getclip(int *x, int *y, int *w, int *h)
@@ -79,7 +79,7 @@ void sf_getclip(int *x, int *y, int *w, int *h)
 	*y = ymin;
 	*w = xmax - xmin;
 	*h = ymax - ymin;
-}
+} /* sf_getclip */
 
 
 static int mywcslen(zchar * b)
@@ -88,7 +88,7 @@ static int mywcslen(zchar * b)
 	while (*b++)
 		n++;
 	return n;
-}
+} /* mywcslen */
 
 
 static void myGrefresh()
@@ -96,7 +96,7 @@ static void myGrefresh()
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
-}
+} /* myGrefresh */
 
 
 void sf_wpixel(int x, int y, zlong c)
@@ -105,7 +105,7 @@ void sf_wpixel(int x, int y, zlong c)
 		return;
 	sbuffer[x + sbpitch * y] = c;
 	dirty = 1;
-}
+} /* sf_wpixel */
 
 
 zlong sf_rpixel(int x, int y)
@@ -113,7 +113,7 @@ zlong sf_rpixel(int x, int y)
 	if (x < 0 || x >= ewidth || y < 0 || y >= eheight)
 		return 0;
 	return sbuffer[x + sbpitch * y];
-}
+} /* sf_rpixel */
 
 #define MAXCUR 64
 static zlong savedcur[MAXCUR];
@@ -134,7 +134,7 @@ static void drawthecursor(int x, int y, int onoff)
 			sf_wpixel(x, y + i, savedcur[i]);
 		}
 	}
-}
+} /* drawthecursor */
 
 
 bool sf_IsValidChar(zword c)
@@ -146,14 +146,14 @@ bool sf_IsValidChar(zword c)
 	if (c >= 0x100)
 		return true;
 	return false;
-}
+} /* sf_IsValidChar */
 
 
 void sf_drawcursor(bool c)
 {
 	SF_textsetting *ts = sf_curtextsetting();
 	drawthecursor(ts->cx, ts->cy, c);
-}
+} /* sf_drawcursor */
 
 
 void sf_chline(int x, int y, zlong c, int n)
@@ -173,7 +173,7 @@ void sf_chline(int x, int y, zlong c, int n)
 	while (n--)
 		*s++ = c;
 	dirty = 1;
-}
+} /* sf_chline */
 
 
 void sf_cvline(int x, int y, zlong c, int n)
@@ -195,7 +195,7 @@ void sf_cvline(int x, int y, zlong c, int n)
 		s += sbpitch;
 	}
 	dirty = 1;
-}
+} /* sf_cvline */
 
 
 zlong sf_blendlinear(int a, zlong s, zlong d)
@@ -209,7 +209,7 @@ zlong sf_blendlinear(int a, zlong s, zlong d)
 	d >>= 8;
 	r |= (((s & 0xff) * a + (d & 0xff) * (256 - a)) >> 8) << 16;
 	return r;
-}
+} /* sf_blendlinear */
 
 
 void sf_writeglyph(SF_glyph * g)
@@ -287,7 +287,7 @@ void sf_writeglyph(SF_glyph * g)
 
 	ts->cx += (w);
 	ts->oh = (weff > w) ? weff - w : 0;
-}
+} /* sf_writeglyph */
 
 
 void sf_fillrect(zlong color, int x, int y, int w, int h)
@@ -317,7 +317,7 @@ void sf_fillrect(zlong color, int x, int y, int w, int h)
 		dst += sbpitch;
 	}
 	dirty = 1;
-}
+} /* sf_fillrect */
 
 
 void sf_rect(zlong color, int x, int y, int w, int h)
@@ -326,7 +326,7 @@ void sf_rect(zlong color, int x, int y, int w, int h)
 	sf_chline(x, y + h - 1, color, w);
 	sf_cvline(x, y, color, h);
 	sf_cvline(x + w - 1, y, color, h);
-}
+} /* sf_rect */
 
 
 void sf_flushtext()
@@ -334,7 +334,7 @@ void sf_flushtext()
 	SF_textsetting *ts = sf_curtextsetting();
 	ts->cx += ts->oh;
 	ts->oh = 0;
-}
+} /* sf_flushtext */
 
 
 /*
@@ -353,7 +353,7 @@ void os_erase_area(int top, int left, int bottom, int right, int win)
 	sf_flushtext();
 	sf_fillrect((sf_curtextsetting())->back, left - 1, top - 1,
 		    right - left + 1, bottom - top + 1);
-}
+} /* os_erase_area */
 
 
 /*
@@ -375,7 +375,7 @@ int os_peek_colour(void)
 	SF_textsetting *ts = sf_curtextsetting();
 	sf_flushtext();
 	return sf_GetColourIndex(sf_rpixel(ts->cx, ts->cy));
-}
+} /* os_peek_colour */
 
 
 static void scroll(int x, int y, int w, int h, int n)
@@ -403,7 +403,7 @@ static void scroll(int x, int y, int w, int h, int n)
 		}
 		dirty = 1;
 	}
-}
+} /* scroll */
 
 
 /**
@@ -420,7 +420,7 @@ bool sf_flushdisplay()
 		return true;
 	} else
 		return false;
-}
+} /* sf_flushdisplay */
 
 
 /*
@@ -442,7 +442,7 @@ void os_scroll_area(int top, int left, int bottom, int right, int units)
 	else if (units < 0)
 		sf_fillrect((sf_curtextsetting())->back, left - 1, top - 1,
 			    right - left + 1, units);
-}
+} /* os_scroll_area */
 
 
 bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
@@ -450,7 +450,7 @@ bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
 {
 	/* TODO */
 	return FALSE;
-}
+} /* os_repaint_window */
 
 
 int SFdticks = 200;
@@ -466,7 +466,7 @@ static Uint32 SDLCALL mytimer(Uint32 inter, void *parm)
 	event.user.type = refreshEventType;
 	SDL_PushEvent(&event);
 	return inter;
-}
+} /* mytimer */
 
 
 static void cleanvideo()
@@ -474,7 +474,7 @@ static void cleanvideo()
 	if (timerid)
 		SDL_RemoveTimer(timerid);
 	SDL_Quit();
-}
+} /* cleanvideo */
 
 #define RM 0x0000ff
 #define GM 0x00ff00
@@ -492,7 +492,7 @@ static void sf_toggle_fullscreen()
 			SDL_SetWindowSize(window, AcWidth, AcHeight);
 		myGrefresh();
 	}
-}
+} /* sf_toggle_fullscreen */
 
 
 void sf_initvideo(int W, int H, int full)
@@ -549,7 +549,7 @@ void sf_initvideo(int W, int H, int full)
 	ymax = eheight = H;
 	sbpitch = W;
 	dirty = 1;
-}
+} /* sf_initvideo */
 
 
 /*
@@ -670,7 +670,7 @@ void os_draw_picture(int picture, int y, int x)
 	}
 
 	dirty = 1;
-}
+} /* os_draw_picture */
 
 
 static zlong mytimeout;
@@ -683,7 +683,7 @@ static void set_mouse_xy(int x, int y)
 	 * SDL maps mouse events to logical coordinates. */
 	mouse_x = x + 1;
 	mouse_y = y + 1;
-}
+} /* set_mouse_xy */
 
 
 /**
@@ -713,7 +713,7 @@ static zword decode_utf8(char *str)
 		res |= (str[i] & 077);
 	}
 	return res;
-}
+} /* decode_utf8 */
 
 
 static void handle_window_event(SDL_Event * e)
@@ -722,7 +722,7 @@ static void handle_window_event(SDL_Event * e)
 	case SDL_WINDOWEVENT_EXPOSED:
 		myGrefresh();
 	}
-}
+} /* handle_window_event */
 
 
 static zword goodzkey(SDL_Event * e, int allowed)
@@ -872,7 +872,7 @@ static zword goodzkey(SDL_Event * e, int allowed)
 		handle_window_event(e);
 	}
 	return 0;
-}
+} /* goodzkey */
 
 
 zword sf_read_key(int timeout, bool cursor, bool allowed, bool text)
@@ -911,7 +911,7 @@ zword sf_read_key(int timeout, bool cursor, bool allowed, bool text)
 		sf_drawcursor(false);
 
 	return inch;
-}
+} /* sf_read_key */
 
 
 /*
@@ -924,7 +924,7 @@ zword sf_read_key(int timeout, bool cursor, bool allowed, bool text)
 zchar os_read_key(int timeout, int cursor)
 {
 	return sf_read_key(timeout, cursor, false, true);
-}
+} /* os_read_key */
 
 
 /*
@@ -1138,7 +1138,7 @@ zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
 		sf_checksound();
 		sf_sleep(10);
 	}
-}
+} /* os_read_line */
 
 /* Draw the current input line */
 void sf_DrawInput(zchar * buffer, int pos, int ptx, int pty, int width,
@@ -1167,7 +1167,7 @@ void sf_DrawInput(zchar * buffer, int pos, int ptx, int pty, int width,
 
 	/* Update the window */
 	sf_flushdisplay();
-}
+} /* sf_DrawInput */
 
 
 /*
@@ -1199,7 +1199,7 @@ zword os_read_mouse(void)
 		btn |= 4;
 
 	return btn;
-}
+} /* os_read_mouse */
 
 
 /*
@@ -1235,7 +1235,7 @@ void os_more_prompt(void)
 		/* Restore the current text position */
 		sf_poptextsettings();
 	}
-}
+} /* os_more_prompt */
 
 
 zlong *sf_savearea(int x, int y, int w, int h)
@@ -1277,7 +1277,7 @@ zlong *sf_savearea(int x, int y, int w, int h)
 		s += sbpitch;
 	}
 	return r;
-}
+} /* sf_savearea */
 
 
 void sf_restoreareaandfree(zlong * s)
@@ -1303,7 +1303,7 @@ void sf_restoreareaandfree(zlong * s)
 	free(s);
 	dirty = 1;
 	sf_flushdisplay();
-}
+} /* sf_restoreareaandfree */
 
 
 int (*sf_osdialog)(bool ex, const char *def, const char *filt, const char *tit,
@@ -1319,7 +1319,7 @@ int sf_user_fdialog(bool existing, const char *defaultname, const char *filter,
 				   sbuffer, sbpitch, ewidth, eheight,
 				   isfullscreen);
 	return SF_NOTIMP;
-}
+} /* sf_user_fdialog */
 
 
 void sf_videodata(zlong ** sb, int *sp, int *ew, int *eh)
@@ -1328,7 +1328,7 @@ void sf_videodata(zlong ** sb, int *sp, int *ew, int *eh)
 	*sp = sbpitch;
 	*ew = ewidth;
 	*eh = eheight;
-}
+} /* sf_videodata */
 
 
 extern zword sf_yesnooverlay(int xc, int yc, char *t, int sr);
@@ -1341,7 +1341,7 @@ static void sf_quitconf()
 		SDL_Quit();
 		os_quit(EXIT_SUCCESS);
 	}
-}
+} /* sf_quitconf */
 
 
 void os_tick()
@@ -1357,7 +1357,7 @@ void os_tick()
 				handle_window_event(&ev);
 		}
 	}
-}
+} /* os_tick */
 
 
 /* Apply the picture's palette to the screen palette. */
@@ -1381,4 +1381,4 @@ static bool ApplyPalette(sf_picture * graphic)
 		}
 	}
 	return changed;
-}
+} /* ApplyPalette */
