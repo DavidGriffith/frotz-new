@@ -422,7 +422,7 @@ static int sf_loadpic(int picture, sf_picture * graphic)
 static sf_picture cached[MAXCACHE];
 static int cacheinited = 0;
 
-static void cacheflush()
+static void cacheflush(void)
 {
 	int i;
 	if (!cacheinited)
@@ -437,7 +437,7 @@ static void cacheflush()
 } /* cacheflush */
 
 
-static void cacheinit()
+static void cacheinit(void)
 {
 	int i;
 	if (cacheinited)

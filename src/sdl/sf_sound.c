@@ -73,7 +73,7 @@ static int audio_buffers = 512;
 static Uint16 audio_format;
 static int bits;
 
-static void finishaudio()
+static void finishaudio(void)
 {
 	if (!SFaudiorunning)
 		return;
@@ -100,12 +100,12 @@ static void channel_finished(int channel);
  * whether sound is desired and has no means for indicating whether sound is
  * available.  See sf_initsound for the real init.
  */
-void os_init_sound()
+void os_init_sound(void)
 {
 } /* os_init_sound */
 
 
-int sf_initsound()
+int sf_initsound(void)
 {
 	if (SFaudiorunning)
 		return 1;
@@ -186,7 +186,7 @@ static void channel_finished(int channel)
 } /* channel_finished */
 
 
-static void stopsample()
+static void stopsample(void)
 {
 	if (!e_sfx)
 		return;
@@ -198,7 +198,7 @@ static void stopsample()
 } /* stopsample */
 
 
-static void stopmodule()
+static void stopmodule(void)
 {
 	if (!e_mod)
 		return;
@@ -208,7 +208,7 @@ static void stopmodule()
 } /* stopmodule */
 
 
-static void startsample()
+static void startsample(void)
 {
 	if (!e_sfx)
 		return;
@@ -218,7 +218,7 @@ static void startsample()
 } /* startsample */
 
 
-static void startmodule()
+static void startmodule(void)
 {
 	if (!e_mod)
 		return;
@@ -436,7 +436,7 @@ void os_stop_sample(int number)
 } /* os_stop_sample */
 
 
-void sf_checksound()
+void sf_checksound(void)
 {
 	if ((e_sfx) && (e_sfx->ended)) {
 		e_sfx->ended = 0;

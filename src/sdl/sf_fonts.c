@@ -483,7 +483,7 @@ static void setfontk(int k, SFONT * f)
 }
 
 
-static void cleanfonts()
+static void cleanfonts(void)
 {
 	int i;
 	for (i = 0; i < 8; i++)
@@ -493,13 +493,13 @@ static void cleanfonts()
 }
 
 
-SF_textsetting *sf_curtextsetting()
+SF_textsetting *sf_curtextsetting(void)
 {
 	return &current;
 }
 
 
-void sf_pushtextsettings()
+void sf_pushtextsettings(void)
 {
 	if (tsstackptr < MAXSTACK) {
 		tsstack[tsstackptr] = current;
@@ -508,7 +508,7 @@ void sf_pushtextsettings()
 }
 
 
-void sf_poptextsettings()
+void sf_poptextsettings(void)
 {
 	if (tsstackptr) {
 		tsstackptr--;
@@ -868,7 +868,7 @@ SFONT *sf_VGA_SFONT;
 
 
 /* ensure a font loaded */
-void sf_initfonts()
+void sf_initfonts(void)
 {
 	int i, j, size = 0;
 	zbyte *cfont, *bmp;

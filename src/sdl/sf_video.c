@@ -42,7 +42,7 @@ int m_timerinterval = 100;
 
 extern bool sdl_active;
 
-static void sf_quitconf();
+static void sf_quitconf(void);
 
 static bool ApplyPalette(sf_picture *);
 static zlong screen_palette[16];
@@ -91,7 +91,7 @@ static int mywcslen(zchar * b)
 } /* mywcslen */
 
 
-static void myGrefresh()
+static void myGrefresh(void)
 {
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -329,7 +329,7 @@ void sf_rect(zlong color, int x, int y, int w, int h)
 } /* sf_rect */
 
 
-void sf_flushtext()
+void sf_flushtext(void)
 {
 	SF_textsetting *ts = sf_curtextsetting();
 	ts->cx += ts->oh;
@@ -410,7 +410,7 @@ static void scroll(int x, int y, int w, int h, int n)
  * Update the display if contents have changed.
  * Return whether contents had changed, i.e., display was updated.
  */
-bool sf_flushdisplay()
+bool sf_flushdisplay(void)
 {
 	if (dirty) {
 		SDL_UpdateTexture(texture, NULL, sbuffer,
@@ -469,7 +469,7 @@ static Uint32 SDLCALL mytimer(Uint32 inter, void *parm)
 } /* mytimer */
 
 
-static void cleanvideo()
+static void cleanvideo(void)
 {
 	if (timerid)
 		SDL_RemoveTimer(timerid);
@@ -480,7 +480,7 @@ static void cleanvideo()
 #define GM 0x00ff00
 #define BM 0xff0000
 
-static void sf_toggle_fullscreen()
+static void sf_toggle_fullscreen(void)
 {
 	if (SDL_SetWindowFullscreen
 	    (window, isfullscreen ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP))
@@ -1332,7 +1332,7 @@ void sf_videodata(zlong ** sb, int *sp, int *ew, int *eh)
 
 
 extern zword sf_yesnooverlay(int xc, int yc, char *t, int sr);
-static void sf_quitconf()
+static void sf_quitconf(void)
 {
 	if (sf_yesnooverlay(ewidth / 2, eheight / 2, "Quit: are you sure?", 1)
 	    == ZC_RETURN) {
@@ -1344,7 +1344,7 @@ static void sf_quitconf()
 } /* sf_quitconf */
 
 
-void os_tick()
+void os_tick(void)
 {
 	sf_checksound();
 	if (SDL_AtomicSet(&SFticked, 0)) {

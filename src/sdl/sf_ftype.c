@@ -130,7 +130,7 @@ static int hasglyph(SFONT * fo, zword c, int allowdef)
 static int inited = 0, initerr = 0;
 static FT_Library library;
 
-static void libfinish()
+static void libfinish(void)
 {
 	if (!inited)
 		return;
@@ -139,7 +139,7 @@ static void libfinish()
 } /* libfinish */
 
 
-static void libinit()
+static void libinit(void)
 {
 	if (initerr)
 		return;
@@ -340,7 +340,7 @@ SFONT *sf_loadftype(char *fspec, SFONT * like, int *err)
 
 /****************************************/
 
-void sf_initloader()
+void sf_initloader(void)
 {
 	ttfontloader = sf_loadftype;
 } /* sf_initloader */

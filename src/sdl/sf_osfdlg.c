@@ -55,13 +55,13 @@ static int X, Y, W, H, xdlg, ydlg, wdlg, hdlg;
 #define HTEXT 18
 
 STATIC void cleanlist(ENTRY * t);
-STATIC void drawlist();
+STATIC void drawlist(void);
 STATIC ENTRY *dodir(char *dirname, char *pattern, char *resdir, int size,
 		    int *ndirs, int *ntot);
 static int Numdirs, Numtot, First;
 static ENTRY *curdir = NULL, *selected;
 
-STATIC void updatelist()
+STATIC void updatelist(void)
 {
 	if (curdir)
 		cleanlist(curdir);
@@ -72,10 +72,10 @@ STATIC void updatelist()
 	drawlist();
 } /* updatelist */
 
-STATIC void goright();
-STATIC void goleft();
+STATIC void goright(void);
+STATIC void goleft(void);
 /* assumes a / at end */
-STATIC void goup()
+STATIC void goup(void)
 {
 	char *p;
 	if (strlen(lastdir) < 2)
@@ -929,7 +929,7 @@ STATIC void drawnames(int x, int y, int w, int h, ENTRY * files, int first,
 } /* drawnames */
 
 
-STATIC void drawlist()
+STATIC void drawlist(void)
 {
 	BAREA *a = bareas + A_list, *b = bareas + A_dir;
 
@@ -941,7 +941,7 @@ STATIC void drawlist()
 } /* drawlist */
 
 
-STATIC void goright()
+STATIC void goright(void)
 {
 	if (First + Nrows * Ncols > Numtot)
 		return;
@@ -950,7 +950,7 @@ STATIC void goright()
 } /* goright */
 
 
-STATIC void goleft()
+STATIC void goleft(void)
 {
 	if (!First)
 		return;

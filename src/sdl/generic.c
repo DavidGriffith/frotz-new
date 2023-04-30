@@ -369,7 +369,7 @@ void gen_add_to_history(zchar * str)
 /**
  * Reset the view to the end of history.
  */
-void gen_history_reset()
+void gen_history_reset(void)
 {
 	history_view = history_next;
 } /* gen_history_reset */

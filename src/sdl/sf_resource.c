@@ -85,7 +85,7 @@ bool m_adaptiveMode = FALSE;
 
 bb_resolution_t *reso;
 
-static void checkwidths()
+static void checkwidths(void)
 {
 	reso = bb_get_resolution(blorb_map);
 	if (reso) {
@@ -217,7 +217,7 @@ FILE *os_path_open(const char *name, const char *mode)
 		return fp;
 	}
 	return NULL;	/* give up */
-} /* os_path_open() */
+} /* os_path_open */
 
 
 /*
@@ -366,7 +366,7 @@ void os_restart_game(int stage)
 #define DEFAULT_GAMMA 2.2
 double m_gamma = DEFAULT_GAMMA;
 
-void sf_initcolours()
+void sf_initcolours(void)
 {
 	int i;
 
@@ -802,7 +802,7 @@ void os_fatal(const char *s, ...)
 
 
 /* If true, running one of Infocom's V6 games */
-bool sf_IsInfocomV6()
+bool sf_IsInfocomV6(void)
 {
 	switch (story_id) {
 	case ARTHUR:
@@ -1005,7 +1005,7 @@ static void cleanLLENTRY(LLENTRY * e)
 } /* cleanLLENTRY */
 
 
-static void cleanlocallist()
+static void cleanlocallist(void)
 {
 	cleanLLENTRY(Lpics);
 	Lpics = NULL;

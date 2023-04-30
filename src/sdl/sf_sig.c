@@ -30,7 +30,7 @@
 
 #ifdef WIN32
 
-static void resethandlers()
+static void resethandlers(void)
 {
 	signal(SIGINT, SIG_DFL);
 	signal(SIGFPE, SIG_DFL);
@@ -60,7 +60,7 @@ static void myhandler(int s)
 } /* myhandler */
 
 
-void sf_installhandlers()
+void sf_installhandlers(void)
 {
 	signal(SIGINT, myhandler);
 	signal(SIGFPE, myhandler);
@@ -150,7 +150,7 @@ static void bt_sighandler(int sig, siginfo_t * info, void *secret)
 } /* bt_sighandler */
 
 
-void sf_installhandlers()
+void sf_installhandlers(void)
 {
 
 	/* Install our signal handler */

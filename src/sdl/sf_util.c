@@ -75,7 +75,7 @@ void sf_regcleanfunc(void *f, const char *p)
 } /* sf_regcleanfunc */
 
 
-void sf_cleanup_all()
+void sf_cleanup_all(void)
 {
 	while (cflist) {
 		cfrec *n = cflist->next;
@@ -840,7 +840,7 @@ static int dialog_read_file_name(char *file_name, const char *default_name,
 
 static char *rc = NULL;
 
-void sf_FinishProfile()
+void sf_FinishProfile(void)
 {
 	if (!rc)
 		return;

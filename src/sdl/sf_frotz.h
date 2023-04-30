@@ -130,7 +130,7 @@ void sf_setgamma(double gamma);
 /* get pointer from cache */
 sf_picture *sf_getpic(int num);
 
-void sf_flushtext();
+void sf_flushtext(void);
 
 /* glyph */
 typedef struct {
@@ -185,7 +185,7 @@ int sf_GetProfileInt(const char *sect, const char *id, int def);
 double sf_GetProfileDouble(const char *sect, const char *id, double def);
 char *sf_GetProfileString(const char *sect, const char *id, char *def);
 
-void sf_readsettings();
+void sf_readsettings(void);
 
 zlong sf_GetColour(int colour);
 zlong sf_GetDefaultColour(bool fore);
