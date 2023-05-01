@@ -210,14 +210,14 @@ getfiledata(FILE *fp, long *size)
 	fread(data, *size, sizeof(char), fp);
 	fseek(fp, offset, SEEK_SET);
 	return(data);
-}
+} /* getfiledata */
 
 
 static
 int32_t make_id(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
 {
 	return (a << 24) | (b << 16) | (c << 8) | d;
-}
+} /* make_id */
 
 
 static int
@@ -231,7 +231,7 @@ get_type(int magic)
 	if (magic == make_id('O','G','G','V'))
 		return OGGV;
 	return -1;
-}
+} /* get_type */
 
 
 static float
@@ -240,7 +240,7 @@ limit(float mn, float mx, float v)
 	if (v<mn) return mn;
 	if (v>mx) return mx;
 	return v;
-}
+} /* limit */
 
 
 /**********************************************************************
@@ -275,7 +275,9 @@ resampler_init(int sample_rate_input)
 	rsmp->src_data.end_of_input  = 0;
 
 	return rsmp;
-}
+} /* resampler_init */
+
+
 static void
 resampler_cleanup(resampler_t *rsmp)
 {
@@ -283,7 +285,7 @@ resampler_cleanup(resampler_t *rsmp)
 	free(rsmp->input);
 	free(rsmp->output);
 	free(rsmp->scratch);
-}
+} /* resampler_cleanup */
 
 
 /*0 done running, 1 run again with more data*/
@@ -318,7 +320,7 @@ resampler_step(resampler_t *rsmp, float *block)
 	if (rsmp->src_data.output_frames == 0)
 		return 0;
 	return 1;
-}
+} /* resampler_step */
 
 
 static void
@@ -326,7 +328,7 @@ resampler_consume(resampler_t *rsmp)
 {
 	rsmp->src_data.data_out      = rsmp->output;
 	rsmp->src_data.output_frames = frotz_audio.buffer_size;
-}
+} /* resampler_consume */
 
 
 /**********************************************************************
@@ -356,7 +358,8 @@ process_mod(sound_stream_t *self_, float *outl, float *outr, unsigned samples)
 		return 0;
 
     return 1;
-}
+} /* process_mod */
+
 
 static void
 cleanup_mod(sound_stream_t *s)
@@ -365,7 +368,7 @@ cleanup_mod(sound_stream_t *s)
 	ModPlug_Unload(self->mod);
 	free(self->shortbuffer);
 	free(self->filedata);
-}
+} /* cleanup_mod */
 
 
 /*file, data start, id, volume*/
@@ -410,7 +413,8 @@ load_mod(FILE *fp, long startpos, int id, float volume)
 	stream->shortbuffer = (int16_t*)calloc(frotz_audio.buffer_size, sizeof(short) * 2);
 
 	return (sound_stream_t*)stream;
-}
+} /* load_mod */
+
 
 /**********************************************************************
  *                         AIFF/OGG                                   *
@@ -500,7 +504,7 @@ process_aiff(sound_stream_t *self_, float *outl, float *outr, unsigned samples)
 	}
 
 	return 1;
-}
+} /* process_aiff */
 
 
 static void
@@ -513,7 +517,7 @@ cleanup_aiff(sound_stream_t *s)
 	free(self->rsmp);
 	sf_close(self->sndfile);
 	free(self->floatbuffer);
-}
+} /* cleanup_aiff */
 
 
 static sf_count_t
@@ -536,7 +540,7 @@ mem_snd_read(void *ptr_, sf_count_t size, void* datasource)
 		to_read    -= did_read;
 	}
 	return read_total;
-}
+} /* mem_snd_read */
 
 
 static sf_count_t
@@ -556,14 +560,14 @@ mem_snd_seek(sf_count_t offset, int whence, void *datasource) {
 	fr->pos = pos;
 
 	return 0;
-}
+} /* mem_snd_seek */
 
 
 static long
 mem_tell(void *datasource) {
 	file_reader_t *fr = (file_reader_t*)datasource;
 	return fr->pos;
-}
+} /* mem_tell */
 
 
 static sf_count_t
@@ -571,7 +575,7 @@ mem_get_filelen(void *datasource)
 {
 	file_reader_t *fr = (file_reader_t*)datasource;
 	return fr->len;
-}
+} /* mem_get_filelen */
 
 
 static sound_stream_t *
@@ -610,7 +614,7 @@ load_aiff(FILE *fp, long startpos, long length, int id, float volume, int repeat
 		aiff->sf_info.channels * sizeof(float));
 
 	return (sound_stream_t*) aiff;
-}
+} /* load_aiff */
 
 
 
@@ -675,7 +679,7 @@ process_engine(sound_engine_t *e)
 			}
 		}
 	}
-}
+} /* process_engine */
 
 
 static void*
@@ -709,7 +713,7 @@ audio_loop(void*v)
 		ao_play(device, (char*)buf, outsize);
 	}
 	return 0;
-}
+} /* audio_loop */
 
 
 static void
@@ -725,7 +729,7 @@ sound_halt_aiff(void)
 			free(s);
 		}
 	}
-}
+} /* sound_halt_aiff */
 
 
 static void
@@ -741,7 +745,7 @@ sound_halt_mod(void)
 			free(s);
 		}
 	}
-}
+} /* sound_halt_mod */
 
 
 static void
@@ -757,7 +761,7 @@ sound_halt_ogg(void)
 			free(s);
 		}
 	}
-}
+} /* sound_halt_ogg */
 
 
 static sound_stream_t *load_mod(FILE *fp, long startpos, int id, float volume);
@@ -771,7 +775,7 @@ sound_stop_id(int id)
 	frotz_audio.event.type   = EVENT_STOP_STREAM;
 	frotz_audio.event.data.i = id;
 	ux_sem_post(&frotz_audio.ev_pending);
-}
+} /* sound_stop_id */
 
 
 static void
@@ -787,7 +791,7 @@ sound_stop_id_real(sound_engine_t *e, int id)
 			free(s);
 		}
 	}
-}
+} /* sound_stop_id_real */
 
 
 static void
@@ -797,7 +801,7 @@ sound_enqueue(sound_stream_t *s)
 	frotz_audio.event.type   = EVENT_START_STREAM;
 	frotz_audio.event.data.e = s;
 	ux_sem_post(&frotz_audio.ev_pending);
-}
+} /* sound_enqueue */
 
 
 static void
@@ -828,7 +832,7 @@ sound_enqueue_real(sound_engine_t *e, sound_stream_t *s)
 		e->voices[i].repid  = 0;
 		break;
 	}
-}
+} /* sound_enqueue_real */
 
 
 static float
@@ -840,7 +844,7 @@ volume_factor(int vol)
 	if (vol > 8) vol = 8;
 	return lut[vol-1];
 	/* return powf(2, vol - 8); */
-}
+} /* volume_factor */
 
 
 /**********************************************************************
@@ -884,7 +888,7 @@ os_init_sound(void)
 		fprintf(stderr, "Can't create audio thread :[%s]", strerror(err));
 		os_quit(EXIT_FAILURE);
 	}
-}
+} /* os_init_sound */
 
 
 /*
@@ -945,7 +949,7 @@ os_start_sample(int number, int volume, int repeats, zword eos)
 
 	if (s)
 		sound_enqueue(s);
-}
+} /* os_start_sample */
 
 
 void os_beep(int bv)
@@ -956,7 +960,7 @@ void os_beep(int bv)
 	/* low frequency for bv=2 */
 	/* fprintf(audio_log, "os_beep(%d)...\n", bv); */
 	beep();
-}
+} /* os_beep */
 
 
 void os_prepare_sample(int id)
@@ -964,7 +968,7 @@ void os_prepare_sample(int id)
 	(void) id;
 	/* Currently not implemented */
 	/* fprintf(audio_log, "os_prepare_sample(%d)...\n", id); */
-}
+} /* os_prepare_sample */
 
 
 void os_stop_sample(int id)
@@ -972,12 +976,13 @@ void os_stop_sample(int id)
 	/* fprintf(audio_log, "os_stop_sample(%d)...\n", id); */
 	if (!f_setup.sound) return;
 	sound_stop_id(id);
-}
+} /* os_stop_sample */
+
 
 void os_finish_with_sample(int id)
 {
 	/* fprintf(audio_log, "os_finish_with_sample(%d)...\n", id); */
 	os_stop_sample(id);
-}
+} /* os_finish_with_sample */
 
 #endif /* NO_SOUND */

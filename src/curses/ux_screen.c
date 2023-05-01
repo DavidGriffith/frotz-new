@@ -192,7 +192,7 @@ void unix_suspend_program(void)
 	save_screen();
 	raise(SIGTSTP);
 	resize_restore_screen();
-}
+} /* unix_suspend_program */
 
 
 /**
@@ -252,13 +252,15 @@ zlong RGB5ToTrue(zword w)
         _g = (_g << 3) | (_g >> 2);
         _b = (_b << 3) | (_b >> 2);
         return (zlong) (_r | (_g << 8) | (_b << 16));
-}
+} /* RGB5ToTrue */
+
+
 /* Move to a static inline in ux_frotz.h later */
 zword TrueToRGB5(zlong u)
 {
 	return (zword) (((u >> 3) & 0x001f) | ((u >> 6) & 0x03e0) |
 			((u >> 9) & 0x7c00));
-}
+} /* TrueToRGB5 */
 
 
 /*
@@ -294,7 +296,7 @@ int os_from_true_colour(zword colour)
 		default: return 1; /* Can't happen */
 		}
 	}
-}
+} /* os_from_true_colour */
 
 
 /*
@@ -323,4 +325,4 @@ zword os_to_true_colour(int index)
 	case 12: return 0x2D6B;
 	default: return 0x0000;
 	}
-}
+} /* os_to_true_colour */

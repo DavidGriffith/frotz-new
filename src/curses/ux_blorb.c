@@ -141,7 +141,7 @@ bb_err_t ux_blorb_init(char *filename)
 	}
 
 	return blorb_err;
-}
+} /* ux_blorb_init */
 #endif
 
 
@@ -162,7 +162,7 @@ void ux_blorb_stop(void)
 #else
 	return;
 #endif
-}
+} /* ux_blorb_stop */
 
 
 /*
@@ -197,5 +197,5 @@ static int isblorb(FILE *fp)
 		return FALSE;
 
 	return TRUE;
-}
+} /* isblorb */
 #endif

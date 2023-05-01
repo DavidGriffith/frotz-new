@@ -79,11 +79,13 @@ static void sigterm_handler(int signal) {
 	if (mixer_fd >= 0)
 		ioctl(mixer_fd, SOUND_MIXER_WRITE_VOLUME, &old_volume);
 	_exit(EXIT_SUCCESS);
-}
+} /* sigterm_handler */
+
 
 static void oss_sigint_handler(int signal) {
 	num_repeats = 1;
-}
+} /* oss_sigint_handler */
+
 
 static void play_sound(int volume, int repeats) {
 	struct sigaction sa;
@@ -166,7 +168,7 @@ finish:
 	if (mixer_fd >= 0)
 		ioctl(mixer_fd, SOUND_MIXER_WRITE_VOLUME, &old_volume);
 	_exit(EXIT_SUCCESS);
-}
+} /* play_sound */
 
 
 /*
@@ -176,7 +178,6 @@ finish:
  * or low-pitched (number == 2).
  *
  */
-
 void os_beep (int number)
 {
 	/* This should later be expanded to support high and low beeps. */
@@ -191,7 +192,6 @@ void os_beep (int number)
  * Load the sample from the disk.
  *
  */
-
 void os_prepare_sample (int number)
 {
 	FILE *samples;
@@ -276,7 +276,7 @@ static void sigchld_handler(int signal) {
 	sa.sa_flags = 0;
 	sigaction(SIGCHLD, &sa, NULL);
 	end_of_sound();
-}
+} /* sigchld_handler */
 
 
 /*
@@ -290,7 +290,6 @@ static void sigchld_handler(int signal) {
  * as the sound finishes.
  *
  */
-
 void os_start_sample (int number, int volume, int repeats, zword eos)
 {
 	/* INCOMPLETE */
@@ -351,7 +350,7 @@ static void stop_player(int signal) {
 	sigaction(SIGCHLD, &sa, NULL);
 
 	sigprocmask(SIG_UNBLOCK, &sigchld_mask, NULL);
-}
+} /* stop_player */
 
 
 /*
@@ -374,7 +373,6 @@ void os_stop_sample (int number)
  * Remove the current sample from memory (if any).
  *
  */
-
 void os_finish_with_sample (int number)
 {
 	/* INCOMPLETE */
@@ -390,7 +388,6 @@ void os_finish_with_sample (int number)
  * Stop repeating the current sample and wait until it finishes.
  *
  */
-
 void os_wait_sample (void)
 {
 	stop_player(SIGINT);

@@ -707,7 +707,7 @@ FILE *os_path_open(const char *name, const char *mode)
 		return fp;
 	}
 	return NULL;	/* give up */
-} /* os_path_open() */
+} /* os_path_open */
 
 
 /*
@@ -1041,7 +1041,7 @@ static int getemph(char *value)
 		return EMPHASIS_NONE;
 
 	return EMPHASIS_ITALIC;
-}
+} /* getemph */
 
 
 /*
@@ -1145,7 +1145,7 @@ static int geterrmode(char *value)
 		return ERR_REPORT_FATAL;
 
 	return ERR_DEFAULT_REPORT_MODE;
-} /* geterrmode() */
+} /* geterrmode */
 
 
 /*
@@ -1160,7 +1160,7 @@ static void sigwinch_handler(int UNUSED(sig))
 {
 	terminal_resized = 1;
 	signal(SIGWINCH, sigwinch_handler);
-}
+} /* sigwinch_handler */
 
 
 /*
@@ -1224,6 +1224,7 @@ char *my_strrchr(const char *s, int c)
 } /* my_strrchr */
 #endif	/* NO_STRRCHR */
 
+
 static void usage(void)
 {
 	printf("FROTZ V%s - Curses interface.  ", VERSION);
@@ -1235,7 +1236,8 @@ static void usage(void)
 	puts(INFORMATION);
 	puts(INFO2);
 	return;
-}
+} /* usage */
+
 
 static void print_version(void)
 {

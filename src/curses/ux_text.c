@@ -322,7 +322,7 @@ int os_check_unicode(int UNUSED(font), zchar UNUSED(c))
 {
 	/* Assume full input and output.  */
 	return 3;
-}
+} /* os_check_unicode */
 
 
 /*
