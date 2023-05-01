@@ -622,7 +622,7 @@ zword os_read_mouse(void)
 	return 0;
 }
 
-void os_tick()
+void os_tick(void)
 {
 	/* Nothing here yet */
 }
