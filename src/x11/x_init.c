@@ -307,7 +307,7 @@ void os_process_arguments(int argc, char *argv[])
 		 &font_names[7]},
 		{".Font", ".fontZ", parse_string,
 		 &font_names[8]},
-		{".Loadthis", ".loadthis", parse_string,
+		{".LoadThis", ".loadthis", parse_string,
 		 &f_setup.tmp_save_name}
 	};
 	XtAppContext app_context;
