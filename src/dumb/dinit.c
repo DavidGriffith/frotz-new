@@ -19,6 +19,8 @@
  * Or visit http://www.fsf.org/
  */
 
+#include <stdarg.h>
+
 #include "dfrotz.h"
 #include "dblorb.h"
 
@@ -315,6 +317,37 @@ void os_quit(int status)
 void os_restart_game (int UNUSED (stage)) {}
 
 
+/*
+ * os_warn
+ *
+ * Display a warning message and continue with the game.
+ *
+ */
+void os_warn (const char *s, ...)
+{
+	va_list m;
+	int style;
+
+	os_beep(BEEP_HIGH);
+	style = os_get_text_style();
+	os_set_text_style(BOLDFACE_STYLE);
+	fprintf(stderr, "Warning: ");
+	os_set_text_style(NORMAL_STYLE);
+	va_start(m, s);
+	vfprintf(stderr, s, m);
+	va_end(m);
+	fprintf(stderr, "\n");
+	os_set_text_style(style);
+	return;
+}
+
+
+/*
+ * os_fatal
+ *
+ * Display error message and exit program.
+ *
+ */
 void os_fatal (const char *s, ...)
 {
 	fprintf(stderr, "\nFatal error: %s\n", s);
@@ -322,7 +355,7 @@ void os_fatal (const char *s, ...)
 		fprintf(stderr, "Continuing anyway...\n");
 	else
 		os_quit(EXIT_FAILURE);
-}
+} /* os_fatal */
 
 
 FILE *os_load_story(void)

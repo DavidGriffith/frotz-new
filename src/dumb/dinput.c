@@ -529,6 +529,7 @@ char *os_read_file_name (const char *default_name, int flag)
 	char *tempname;
 	char path_separator[2];
 	int i;
+	char *ext;
 
 	path_separator[0] = PATH_SEPARATOR;
 	path_separator[1] = 0;
@@ -538,6 +539,13 @@ char *os_read_file_name (const char *default_name, int flag)
 	 */
 	if (f_setup.restore_mode) {
 		return strdup(default_name);
+	} else if (flag == FILE_NO_PROMPT) {
+		ext = strrchr(default_name, '.');
+		if (strncmp(ext, EXT_AUX, 4)) {
+			os_warn("Blocked unprompted access of %s. Should only be %s files.", default_name, EXT_AUX);
+			return NULL;
+		}
+		buf = strndup(default_name, MAX_FILE_NAME);
 	} else {
 		if (f_setup.restricted_path) {
 			for (i = strlen(default_name); i > 0; i--) {
@@ -561,10 +569,10 @@ char *os_read_file_name (const char *default_name, int flag)
 		}
 	}
 
-	if (buf[0])
-		strncpy(file_name, fullpath, FILENAME_MAX);
-	else
+	if (buf == NULL || flag == FILE_NO_PROMPT)
 		strncpy(file_name, default_name, FILENAME_MAX);
+	else
+		strncpy(file_name, fullpath, FILENAME_MAX);
 
 	/* Check if we're restricted to one directory. */
 	if (f_setup.restricted_path != NULL) {

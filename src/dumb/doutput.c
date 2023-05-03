@@ -718,6 +718,34 @@ bool os_repaint_window(int UNUSED(win), int UNUSED(ypos_old),
 }
 
 
+/*
+ * os_get_text_style
+ *
+ * Return the current text style.  Following flags can be set:
+ *
+ *     REVERSE_STYLE
+ *     BOLDFACE_STYLE
+ *     EMPHASIS_STYLE (aka underline aka italics)
+ *     FIXED_WIDTH_STYLE
+ *
+ */
+int os_get_text_style(void)
+{
+	return current_style;
+}
+
+
+/*
+ * os_set_text_style
+ *
+ * Set the current text style.  Following flags can be set:
+ *
+ *     REVERSE_STYLE
+ *     BOLDFACE_STYLE
+ *     EMPHASIS_STYLE (aka underline aka italics)
+ *     FIXED_WIDTH_STYLE
+ *
+ */
 void os_set_text_style(int x)
 {
 	current_style = x;
