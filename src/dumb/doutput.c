@@ -998,10 +998,10 @@ void dumb_dump_screen(void)
 /* Called when it's time for a more prompt but user has them turned off.  */
 void dumb_elide_more_prompt(void)
 {
-    dumb_show_screen(FALSE);
-    if (compression_mode == COMPRESSION_SPANS && hide_lines == 0) {
-	show_row(-1);
-    }
+	dumb_show_screen(FALSE);
+	if (compression_mode == COMPRESSION_SPANS && hide_lines == 0) {
+		show_row(-1);
+	}
 } /* dumb_elide_more_prompt */
 
 
