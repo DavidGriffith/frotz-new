@@ -47,7 +47,7 @@ static int round_div(int x, int y)
 	if ((dblremain > y) || ((dblremain == y) && (quotient & 1)))
 		quotient++;
 	return quotient;
-}
+} /* round_div */
 #endif /* NO_BLORB */
 
 
@@ -157,7 +157,7 @@ bool dumb_init_pictures (void)
 #else
 	return FALSE;
 #endif
-}
+} /* dumb_init_pictures */
 
 
 /* Convert a Z picture number to an index into pict_info.  */
@@ -170,7 +170,7 @@ static int z_num_to_index(int n)
 			return i;
 	}
 	return -1;
-}
+} /* z_num_to_index */
 #endif
 
 
@@ -192,7 +192,7 @@ bool os_picture_data(int num, int *height, int *width)
 	*width = pict_info[index].width;
 #endif
 	return TRUE;
-}
+} /* os_picture_data */
 
 
 void os_draw_picture (int num, int row, int col)
@@ -227,7 +227,7 @@ void os_draw_picture (int num, int row, int col)
 			dumb_set_picture_cell(row + height - 2, c, num ? (num % 10 + '0') : ':');
 	}
 #endif
-}
+} /* os_draw_picture */
 
 
 int os_peek_colour (void) {return BLACK_COLOUR; }

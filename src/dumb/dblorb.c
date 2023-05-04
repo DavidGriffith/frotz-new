@@ -130,7 +130,7 @@ bb_err_t dumb_blorb_init(char *filename)
 	}
 
 	return blorb_err;
-}
+} /* dumb_blorb_init */
 
 
 /*
@@ -157,6 +157,6 @@ static int isblorb(FILE *fp)
 		return 0;
 
 	return 1;
-}
+} /* isblorb */
 
 #endif /* NO_BLORB */

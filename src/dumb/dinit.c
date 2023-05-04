@@ -264,7 +264,7 @@ void os_process_arguments(int argc, char *argv[])
 	f_setup.aux_name = malloc((strlen(f_setup.story_name) + strlen(EXT_AUX) + 1) * sizeof(char));
 	memcpy(f_setup.aux_name, f_setup.story_name, (strlen(f_setup.story_name) + strlen(EXT_AUX)) * sizeof(char));
 	strncat(f_setup.aux_name, EXT_AUX, strlen(EXT_AUX) + 1);
-}
+} /* os_process_arguments */
 
 
 void os_init_screen(void)
@@ -291,7 +291,7 @@ void os_init_screen(void)
 	dumb_init_input();
 	dumb_init_output();
 	dumb_init_pictures();
-}
+} /* os_init_screen */
 
 
 int os_random_seed (void)
@@ -299,7 +299,7 @@ int os_random_seed (void)
 	if (user_random_seed == -1)	/* Use the epoch as seed value */
 		return (time(0) & 0x7fff);
 	return user_random_seed;
-}
+} /* os_random_seed */
 
 
 /*
@@ -311,7 +311,7 @@ int os_random_seed (void)
 void os_quit(int status)
 {
 	exit(status);
-}
+} /* os_quit */
 
 
 void os_restart_game (int UNUSED (stage)) {}
@@ -339,7 +339,7 @@ void os_warn (const char *s, ...)
 	fprintf(stderr, "\n");
 	os_set_text_style(style);
 	return;
-}
+} /* os_warn */
 
 
 /*
@@ -388,7 +388,7 @@ FILE *os_load_story(void)
 #else
 	return fopen(f_setup.story_file, "rb");
 #endif
-}
+} /* os_load_story */
 
 
 /*
@@ -418,7 +418,7 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
 #else
 	return fseek(fp, offset, whence);
 #endif
-}
+} /* os_storyfile_seek */
 
 
 /*
@@ -436,13 +436,14 @@ int os_storyfile_tell(FILE * fp)
 #else
 	return ftell(fp);
 #endif
-}
+} /* os_storyfile_tell */
 
 
 void os_init_setup(void)
 {
 	/* Nothing here */
-}
+} /* os_init_setup */
+
 
 static void usage(void)
 {
@@ -450,7 +451,8 @@ static void usage(void)
 	puts(INFORMATION);
 	puts(INFO2);
 	return;
-}
+} /* usage */
+
 
 static void print_version(void)
 {
@@ -467,4 +469,4 @@ static void print_version(void)
 	printf("  The core and dumb port are maintained by David Griffith.\n");
 	printf("  Frotz's homepage is https://661.org/proj/if/frotz.\n\n");
 	return;
-}
+} /* print_version */

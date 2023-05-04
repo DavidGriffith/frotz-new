@@ -104,7 +104,7 @@ static int xgetchar(void)
 #endif
 	}
 	return c;
-}
+} /* xgetchar */
 
 
 /* Read one line, including the newline, into s.  Safely avoids buffer
@@ -125,7 +125,7 @@ static void dumb_getline(char *s)
 	while ((c = xgetchar()) != '\n')
 		;
 	printf("Line too long, truncated to %s\n", s - INPUT_BUFFER_SIZE);
-}
+} /* dumb_getline */
 
 
 /* Translate in place all the escape characters in s.  */
@@ -175,7 +175,7 @@ static void translate_special_chars(char *s)
 			}
 		}
 	*dest = '\0';
-}
+} /* translate_special_chars */
 
 
 /* The time in tenths of seconds that the user is ahead of z time.  */
@@ -192,14 +192,14 @@ static bool check_timeout(int timeout)
 	else
 		time_ahead -= timeout;
 	return time_ahead != 0;
-}
+} /* check_timeout */
 
 
 /* If val is '0' or '1', set *var accordingly, otherwise toggle it.  */
 static void toggle(bool *var, char val)
 {
 	*var = val == '1' || (val != '0' && !*var);
-}
+} /* toggle */
 
 
 /* Handle input-related user settings and call dumb_output_handle_setting.  */
@@ -220,7 +220,7 @@ bool dumb_handle_setting(const char *setting, bool show_cursor, bool startup)
 		return dumb_output_handle_setting(setting, show_cursor, startup);
 	}
 	return TRUE;
-}
+} /* dumb_handle_setting */
 
 
 /* Read a line, processing commands (lines that start with a backslash
@@ -330,7 +330,7 @@ static bool dumb_read_line(char *s, char *prompt, bool show_cursor,
 			fprintf(stderr, "Enter \\help to see the list of commands\n");
 		}
 	}
-}
+} /* dumb_read_line */
 
 
 /* Read a line that is not part of z-machine input (more prompts and
@@ -340,7 +340,7 @@ static void dumb_read_misc_line(char *s, char *prompt)
 	dumb_read_line(s, prompt, 0, 0, 0, 0);
 	/* Remove terminating newline */
 	s[strlen(s) - 1] = '\0';
-}
+} /* dumb_read_misc_line */
 
 
 /* For allowing the user to input in a single line keys to be returned
@@ -382,7 +382,7 @@ error:
 	}
 	*out = ch;
 	return idx;
-}
+} /* utf8_to_zchar */
 #endif
 
 
@@ -420,7 +420,7 @@ zchar os_read_key (int timeout, bool show_cursor)
 	/* TODO: error messages for invalid special chars.  */
 
 	return c;
-}
+} /* os_read_key */
 
 
 zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width), int continued)
@@ -494,7 +494,8 @@ zchar os_read_line (int UNUSED (max), zchar *buf, int timeout, int UNUSED(width)
 
 	timed_out_last_time = FALSE;
 	return terminator;
-}
+} /* os_read_line */
+
 
 /*
  * os_read_file_name
@@ -601,7 +602,7 @@ char *os_read_file_name (const char *default_name, int flag)
 			return NULL;
 	}
 	return strdup(file_name);
-}
+} /* os_read_file_name */
 
 
 void os_more_prompt (void)
@@ -611,7 +612,7 @@ void os_more_prompt (void)
 		dumb_read_misc_line(buf, "***MORE***");
 	} else
 		dumb_elide_more_prompt();
-}
+} /* os_more_prompt */
 
 
 void dumb_init_input(void)
@@ -621,16 +622,16 @@ void dumb_init_input(void)
 
 	if (z_header.version >= V5)
 		z_header.flags &= ~(MOUSE_FLAG | MENU_FLAG);
-}
+} /* dumb_init_input */
 
 
 zword os_read_mouse(void)
 {
 	/* NOT IMPLEMENTED */
 	return 0;
-}
+} /* os_read_mouse */
 
 void os_tick(void)
 {
 	/* Nothing here yet */
-}
+} /* os_tick */

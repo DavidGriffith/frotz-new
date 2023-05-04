@@ -114,16 +114,17 @@ void zputchar(zchar c)
 	} else {
 		putchar(c);
 	}
-}
+} /* zputchar */
 #else
 #define zputchar(x) putchar(x)
 #endif
+
 
 /* if val is '0' or '1', set *var accordingly, else toggle it.  */
 static void toggle(bool *var, char val)
 {
 	*var = val == '1' || (val != '0' && !*var);
-}
+} /* toggle */
 
 
 /* Print a cell to stdout using IRC formatting codes.  */
@@ -184,7 +185,8 @@ static void show_cell_irc(cell_t cel)
 
 	lastfg = fg;
 	lastbg = bg;
-}
+} /* show_cell_irc */
+
 
 static void show_cell_ansi(cell_t cel)
 {
@@ -257,7 +259,8 @@ static void show_cell_ansi(cell_t cel)
 		zputchar(show_pictures ? cel.c : ' ');
 	else
 		zputchar(cel.c);
-}
+} /* show_cell_ansi */
+
 
 static void show_cell_bbcode(cell_t cel)
 {
@@ -351,7 +354,7 @@ static void show_cell_bbcode(cell_t cel)
 		printf("&nbsp;");
 	else
 		zputchar(cel.c);
-}
+} /* show_cell_bbcode */
 #endif /* DISABLE_FORMATS */
 
 
@@ -388,7 +391,7 @@ static void show_cell_normal(cell_t cel)
 		zputchar(show_pictures ? cel.c : ' ');
 	else	/* Only NORMAL_STYLE and FIXED_WIDTH_STYLE are left. */
 		zputchar(cel.c);
-}
+} /* show_cell_normal */
 
 
 static void show_cell(cell_t cel)
@@ -403,7 +406,7 @@ static void show_cell(cell_t cel)
 	else
 #endif
 		show_cell_normal(cel);
-}
+} /* show_cell */
 
 
 static bool will_print_blank(cell_t c)
@@ -416,7 +419,7 @@ static bool will_print_blank(cell_t c)
 		|| ((c.c == ' ')
 		&& ((c.style != REVERSE_STYLE)
 		|| (*rv_blank_str == ' '))));
-}
+} /* will_print_blank */
 
 
 static cell_t make_cell(int style, short fg, short bg, zchar c)
@@ -431,7 +434,7 @@ static cell_t make_cell(int style, short fg, short bg, zchar c)
 		cel.fg = fg;
 	}
 	return cel;
-}
+} /* make_cell */
 
 
 static void show_line_prefix(int row, char c)
@@ -454,13 +457,13 @@ static void show_line_prefix(int row, char c)
 	/* Add a separator char (unless there's nothing to separate).  */
 	if (show_line_numbers || show_line_types)
 		show_cell(make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, ' '));
-}
+} /* show_line_prefix */
 
 
 static cell_t *dumb_row(int r)
 {
 	return screen_data + r * z_header.screen_cols;
-}
+} /* dumb_row */
 
 
 /* Print a row to stdout.  */
@@ -483,13 +486,13 @@ static void show_row(int r)
 			show_cell(dumb_row(r)[c]);
 	}
 	show_cell(make_cell (0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, '\n'));
-}
+} /* show_row */
 
 
 static char *dumb_changes_row(int r)
 {
 	return screen_changes + r * z_header.screen_cols;
-}
+} /* dumb_changes_row */
 
 
 /* Set a cell and update screen_changes.  */
@@ -509,7 +512,7 @@ static void dumb_set_cell(int row, int col, cell_t c)
 
 	dumb_changes_row(row)[col] = (!result);
 	dumb_row(row)[col] = c;
-}
+} /* dumb_set_cell */
 
 
 /* put a character in the cell at the cursor and advance the cursor.  */
@@ -524,13 +527,13 @@ static void dumb_display_char(zchar c)
 			cursor_col = 0;
 		}
 	}
-}
+} /* dumb_display_char */
 
 
 static void mark_all_unchanged(void)
 {
 	memset(screen_changes, 0, screen_cells);
-}
+} /* mark_all_unchanged */
 
 
 /* Check if a cell is a blank or will display as one.
@@ -539,7 +542,7 @@ static bool is_blank(cell_t c)
 {
 	return ((c.c == ' ')
 		|| ((c.style == PICTURE_STYLE) && !show_pictures));
-}
+} /* is_blank */
 
 
 static void dumb_copy_cell(int dest_row, int dest_col,
@@ -547,7 +550,7 @@ static void dumb_copy_cell(int dest_row, int dest_col,
 {
 	dumb_row(dest_row)[dest_col] = dumb_row(src_row)[src_col];
 	dumb_changes_row(dest_row)[dest_col] = dumb_changes_row(src_row)[src_col];
-}
+} /* dumb_copy_cell */
 
 
 
@@ -575,7 +578,7 @@ void os_display_char (zchar c)
 		dumb_display_char(' ');
 	}
 	return;
-}
+} /* os_display_char */
 
 
 /* Haxor your boxor? */
@@ -592,7 +595,7 @@ void os_display_string (const zchar *s)
 			os_display_char (c);
 		}
 	}
-}
+} /* os_display_string */
 
 
 void os_erase_area (int top, int left, int bottom, int right, int UNUSED (win))
@@ -603,7 +606,7 @@ void os_erase_area (int top, int left, int bottom, int right, int UNUSED (win))
 		for (col = left; col <= right; col++)
 			dumb_set_cell(row, col, make_cell(current_style, current_fg, current_bg, ' '));
 	}
-}
+} /* os_erase_area */
 
 
 void os_scroll_area (int top, int left, int bottom, int right, int units)
@@ -626,7 +629,7 @@ void os_scroll_area (int top, int left, int bottom, int right, int units)
 		}
 		os_erase_area(top + 1, left + 1, top - units, right + 1 , -1);
 	}
-}
+} /* os_scroll_area */
 
 
 int os_font_data(int font, int *height, int *width)
@@ -637,20 +640,20 @@ int os_font_data(int font, int *height, int *width)
 		return 1;
 	}
 	return 0;
-}
+} /* os_font_data */
 
 
 void os_set_colour (int newfg, int newbg)
 {
 	current_fg = frotz_to_dumb[newfg];
 	current_bg = frotz_to_dumb[newbg];
-}
+} /* os_set_colour */
 
 
 void os_reset_screen(void)
 {
 	dumb_show_screen(FALSE);
-}
+} /* os_reset_screen */
 
 
 void os_beep (int volume)
@@ -659,7 +662,7 @@ void os_beep (int volume)
 		printf("[%s-PITCHED BEEP]\n", (volume == 1) ? "HIGH" : "LOW");
 	else
 		putchar('\a'); /* so much for dumb.  */
-}
+} /* os_beep */
 
 
 /* To make the common code happy */
@@ -674,7 +677,7 @@ int os_check_unicode(int font, zchar c)
 {
 	/* Only UTF-8 output, no input yet.  */
 	return 1;
-}
+} /* os_check_unicode */
 
 
 int os_char_width (zchar z)
@@ -684,7 +687,7 @@ int os_char_width (zchar z)
 		return strchr(p, ' ') - p;
 	}
 	return 1;
-}
+} /* os_char_width */
 
 
 int os_string_width (const zchar *s)
@@ -699,7 +702,7 @@ int os_string_width (const zchar *s)
 			width += os_char_width(c);
 	}
 	return width;
-}
+} /* os_string_width */
 
 
 void os_set_cursor(int row, int col)
@@ -707,7 +710,7 @@ void os_set_cursor(int row, int col)
 	cursor_row = row - 1; cursor_col = col - 1;
 	if (cursor_row >= z_header.screen_rows)
 		cursor_row = z_header.screen_rows - 1;
-}
+} /* os_set_cursor */
 
 
 bool os_repaint_window(int UNUSED(win), int UNUSED(ypos_old),
@@ -715,7 +718,7 @@ bool os_repaint_window(int UNUSED(win), int UNUSED(ypos_old),
 			int UNUSED(ysize), int UNUSED(xsize))
 {
 	return FALSE;
-}
+} /* os_repaint_window */
 
 
 /*
@@ -732,7 +735,7 @@ bool os_repaint_window(int UNUSED(win), int UNUSED(ypos_old),
 int os_get_text_style(void)
 {
 	return current_style;
-}
+} /* os_get_text_style */
 
 
 /*
@@ -749,7 +752,7 @@ int os_get_text_style(void)
 void os_set_text_style(int x)
 {
 	current_style = x;
-}
+} /* os_set_text_style */
 
 
 /*
@@ -762,7 +765,8 @@ int os_from_true_colour(zword colour)
 {
 	/* Nothing here yet */
 	return 0;
-}
+} /* os_from_true_colour */
+
 
 /*
  * os_to_true_colour
@@ -774,7 +778,7 @@ zword os_to_true_colour(int index)
 {
 	/* Nothing here yet */
 	return 0;
-}
+} /* os_to_true_colour */
 
 
 /*
@@ -783,7 +787,7 @@ zword os_to_true_colour(int index)
 void dumb_set_picture_cell(int row, int col, zchar c)
 {
 	dumb_set_cell(row, col, make_cell(current_style | PICTURE_STYLE, current_fg, current_bg, c));
-}
+} /* dumb_set_picture_cell */
 
 
 void dumb_init_output(void)
@@ -871,7 +875,7 @@ void dumb_init_output(void)
 	screen_changes = malloc(screen_cells);
 	os_erase_area(1, 1, z_header.screen_rows, z_header.screen_cols, -2);
 	memset(screen_changes, 0, screen_cells);
-}
+} /* dumb_init_output */
 
 
 void dumb_display_user_input(char *s)
@@ -879,7 +883,7 @@ void dumb_display_user_input(char *s)
 	/* copy to screen without marking it as a change.  */
 	while (*s)
 		dumb_row(cursor_row)[cursor_col++] = make_cell(0, DEFAULT_DUMB_COLOUR, DEFAULT_DUMB_COLOUR, *s++);
-}
+} /* dumb_display_user_input */
 
 
 void dumb_discard_old_input(int num_chars)
@@ -893,7 +897,7 @@ void dumb_discard_old_input(int num_chars)
 		cursor_col = 0;
 	os_erase_area(cursor_row + 1, cursor_col + 1,
 	cursor_row + 1, cursor_col + num_chars, -1);
-}
+} /* dumb_discard_old_input */
 
 
 /* Print the part of the cursor row before the cursor.  */
@@ -905,7 +909,7 @@ void dumb_show_prompt(bool show_cursor, char line_type)
 		for (i = 0; i < cursor_col; i++)
 			show_cell(dumb_row(cursor_row)[i]);
 	}
-}
+} /* dumb_show_prompt */
 
 
 /* Show the current screen contents, or what's changed since the last
@@ -979,7 +983,7 @@ void dumb_show_screen(bool show_cursor)
 			show_row((cursor_row == last + 2) ? (last + 1) : -1);
 	}
 	mark_all_unchanged();
-}
+} /* dumb_show_screen */
 
 
 /* Unconditionally show whole screen.  For \s user command.  */
@@ -988,7 +992,7 @@ void dumb_dump_screen(void)
 	int r;
 	for (r = 0; r < z_header.screen_height; r++)
 		show_row(r);
-}
+} /* dumb_dump_screen */
 
 
 /* Called when it's time for a more prompt but user has them turned off.  */
@@ -998,7 +1002,7 @@ void dumb_elide_more_prompt(void)
     if (compression_mode == COMPRESSION_SPANS && hide_lines == 0) {
 	show_row(-1);
     }
-}
+} /* dumb_elide_more_prompt */
 
 
 bool dumb_output_handle_setting(const char *setting, bool show_cursor,
@@ -1079,6 +1083,6 @@ bool dumb_output_handle_setting(const char *setting, bool show_cursor,
 	} else
 		return FALSE;
 	return TRUE;
-}
+} /* dumb_output_handle_setting */
 
 
