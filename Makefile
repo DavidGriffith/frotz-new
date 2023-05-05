@@ -1,9 +1,9 @@
 # Makefile for Unix Frotz
 # GNU make is required.
 
-# Your C compiler
-#CC ?= gcc
-#CC ?= clang
+# Choose your preferred C compiler
+#CC = gcc
+#CC = clang
 
 # Enable compiler warnings. This is an absolute minimum.
 CFLAGS += -Wall -std=c99 -O3 #-Wextra
