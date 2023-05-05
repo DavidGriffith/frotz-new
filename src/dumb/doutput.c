@@ -371,6 +371,7 @@ static void show_cell_normal(cell_t cel)
 					zputchar(toupper(cel.c));
 					break;
 				}
+				/* fall through */
 			case RV_NONE:
 				zputchar(cel.c);
 				break;
@@ -673,7 +674,7 @@ void os_finish_with_sample (int UNUSED (a)) {}
 void os_start_sample (int UNUSED (a), int UNUSED (b), int UNUSED (c), zword UNUSED (d)) {}
 void os_stop_sample (int UNUSED (a)) {}
 
-int os_check_unicode(int font, zchar c)
+int os_check_unicode(int UNUSED (font), zchar UNUSED (c))
 {
 	/* Only UTF-8 output, no input yet.  */
 	return 1;
@@ -761,7 +762,7 @@ void os_set_text_style(int x)
  * Given a true colour, return an appropriate colour index.
  *
  */
-int os_from_true_colour(zword colour)
+int os_from_true_colour(zword UNUSED (colour))
 {
 	/* Nothing here yet */
 	return 0;
@@ -774,7 +775,7 @@ int os_from_true_colour(zword colour)
  * Given a colour index, return the appropriate true colour.
  *
  */
-zword os_to_true_colour(int index)
+zword os_to_true_colour(int UNUSED (index))
 {
 	/* Nothing here yet */
 	return 0;
