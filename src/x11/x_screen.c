@@ -76,8 +76,9 @@ void os_scroll_area(int top, int left, int bottom, int right, int units)
 } /* os_scroll_area */
 
 
-bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
-		       int ysize, int xsize)
+bool os_repaint_window(int UNUSED (win), int UNUSED (ypos_old),
+	int UNUSED (ypos_new), int UNUSED (xpos), int UNUSED (ysize),
+	int UNUSED (xsize))
 {
 	return TRUE;
 }

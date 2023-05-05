@@ -313,7 +313,7 @@ static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 }
 
 
-static int loadpng(uint8_t * data, int length, pict_info_t * graphic)
+static int loadpng(uint8_t * data, int UNUSED (length), pict_info_t * graphic)
 {
 	png_bytep *rowPointers = NULL;
 	png_structp png_ptr = NULL;
@@ -483,13 +483,13 @@ static void outputJPEGMessage(j_common_ptr cinfo)
 
 
 /* Memory Data Source */
-static void memJPEGInit(j_decompress_ptr unused)
+static void memJPEGInit(j_decompress_ptr UNUSED (unused))
 {
 	/* Nothing here */
 }
 
 
-static int memJPEGFillInput(j_decompress_ptr unused)
+static int memJPEGFillInput(j_decompress_ptr UNUSED (unused))
 {
 	return 0;
 }
@@ -507,7 +507,7 @@ static void memJPEGSkipInput(j_decompress_ptr cinfo, long num_bytes)
 }
 
 
-static void memJPEGTerm(j_decompress_ptr unused)
+static void memJPEGTerm(j_decompress_ptr UNUSED (unused))
 {
 	/* Nothing here */
 }
@@ -591,7 +591,7 @@ static int loadjpeg(uint8_t * data, int length, pict_info_t * graphic)
  ****************************************************************************
  */
 
-static int loadrect(uint8_t * data, int length, pict_info_t * graphic)
+static int loadrect(uint8_t * data, int UNUSED (length), pict_info_t * graphic)
 {
 	graphic->orig_width =
 	    (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];

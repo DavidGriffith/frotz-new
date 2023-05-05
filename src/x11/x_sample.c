@@ -61,7 +61,7 @@ void os_beep(int number)
  * Load the sample from the disk.
  *
  */
-void os_prepare_sample(int number)
+void os_prepare_sample(int UNUSED (number))
 {
 
 	/* Not implemented */
@@ -80,7 +80,7 @@ void os_prepare_sample(int number)
  * as the sound finishes.
  *
  */
-void os_start_sample(int number, int volume, int repeats, zword eos)
+void os_start_sample(int UNUSED (number), int UNUSED (volume), int UNUSED (repeats), zword UNUSED (eos))
 {
 
 	/* Not implemented */
@@ -94,7 +94,7 @@ void os_start_sample(int number, int volume, int repeats, zword eos)
  * Turn off the current sample.
  *
  */
-void os_stop_sample(int number)
+void os_stop_sample(int UNUSED (number))
 {
 
 	/* Not implemented */
@@ -108,7 +108,7 @@ void os_stop_sample(int number)
  * Remove the current sample from memory (if any).
  *
  */
-void os_finish_with_sample(int number)
+void os_finish_with_sample(int UNUSED (number))
 {
 
 	/* Not implemented */

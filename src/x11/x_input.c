@@ -83,7 +83,7 @@ extern Pixmap bgpm;
  * to implement word completion (similar to tcsh under Unix).
  *
  */
-zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
+zchar os_read_line(int max, zchar * buf, int timeout, int UNUSED (width), int UNUSED (continued))
 {
 	zchar c;
 	int index;
@@ -121,7 +121,7 @@ zchar os_read_line(int max, zchar * buf, int timeout, int width, int continued)
  * return it. Input aborts after timeout/10 seconds.
  *
  */
-zchar os_read_key(int timeout, int cursor)
+zchar os_read_key(int UNUSED (timeout), int cursor)
 {
 	XEvent ev;
 	char result[2];
