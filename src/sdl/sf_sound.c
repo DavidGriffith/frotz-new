@@ -228,7 +228,7 @@ static void startmodule(void)
 } /* startmodule */
 
 
-static EFFECT *getaiff(FILE * f, size_t pos, int len, int num)
+static EFFECT *getaiff(FILE * f, size_t pos, int UNUSED (len), int num)
 {
 	EFFECT *res = NULL;
 
@@ -245,7 +245,7 @@ static EFFECT *getaiff(FILE * f, size_t pos, int len, int num)
 } /* getaiff */
 
 
-static EFFECT *getmodule(FILE * f, size_t pos, int len, int num)
+static EFFECT *getmodule(FILE * f, size_t pos, int UNUSED (len), int num)
 {
 	EFFECT *res;
 	zbyte h[2];
@@ -320,7 +320,7 @@ static EFFECT *geteffect(int num)
  * or low-pitched (number == 2).
  *
  */
-void os_beep(int number)
+void os_beep(int UNUSED (number))
 {
 	if (m_no_sound)
 		return;
@@ -353,7 +353,7 @@ void os_finish_with_sample(int number)
  * Load the given sample from the disk.
  *
  */
-void os_prepare_sample(int number)
+void os_prepare_sample(int UNUSED (number))
 {
 	if (!SFaudiorunning)
 		return;

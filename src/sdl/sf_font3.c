@@ -127,19 +127,19 @@ static struct {
 	zbyte bitmap[16];
 } myglyph = {8,8,8,0,-2};
 
-static void nodestroy(SFONT *s){}
-static int myheight(SFONT *s){ return 8;}
-static int myascent(SFONT *s){ return 6;}
-static int mydescent(SFONT *s){ return 2;}
-static int myminchar(SFONT *s){ return 32;}
-static int mymaxchar(SFONT *s){ return 126;}
-static int myhasglyph(SFONT *s, zword c, int allowdef)
+static void nodestroy(SFONT * UNUSED (s)){}
+static int myheight(SFONT * UNUSED (s)){ return 8;}
+static int myascent(SFONT * UNUSED (s)){ return 6;}
+static int mydescent(SFONT * UNUSED (s)){ return 2;}
+static int myminchar(SFONT * UNUSED (s)){ return 32;}
+static int mymaxchar(SFONT * UNUSED (s)){ return 126;}
+static int myhasglyph(SFONT * UNUSED (s), zword c, int allowdef)
 {
 	return (c >= 32 && c <= 126) || allowdef;
 }
 
 
-static SF_glyph * mygetglyph(SFONT *s, zword c, int allowdef)
+static SF_glyph * mygetglyph(SFONT * UNUSED (s), zword c, int allowdef)
 {
 	zbyte *src;
 	if (c < 32 || c > 126) {
@@ -170,10 +170,10 @@ static SFONT myfont3 = {
 
 SFONT * SF_font3 = &myfont3;
 
-static int myheight2(SFONT *s){ return 16;}
-static int myascent2(SFONT *s){ return 14;}
-static int mydescent2(SFONT *s){ return 2;}
-static SF_glyph * mygetglyph2(SFONT *s, zword c, int allowdef)
+static int myheight2(SFONT * UNUSED (s)){ return 16;}
+static int myascent2(SFONT * UNUSED (s)){ return 14;}
+static int mydescent2(SFONT * UNUSED (s)){ return 2;}
+static SF_glyph * mygetglyph2(SFONT * UNUSED (s), zword c, int allowdef)
 {
 	zbyte *src, *dst; int i;
 	if (c < 32 || c > 126) {

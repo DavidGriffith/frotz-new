@@ -591,7 +591,7 @@ static bool newfile(int flag)
 
 static char buf[FILENAME_MAX];
 
-static const char *getnumbername(const char *def, char *ext)
+static const char *getnumbername(const char * UNUSED(def), char *ext)
 {
 	int len, number = 0;
 	strcpy(buf, f_setup.story_name);
@@ -605,7 +605,7 @@ static const char *getnumbername(const char *def, char *ext)
 } /* getnumbername */
 
 
-static const char *getdatename(const char *def, char *ext)
+static const char *getdatename(const char * UNUSED (def), char *ext)
 {
 	int len;
 
@@ -1041,7 +1041,7 @@ char *sf_GetProfileString(const char *sect, const char *id, char *def)
 #define pshort( b) (((int)((b)[1]) << 8) + (int)((b)[0]))
 
 
-static unsigned myin(void *d, zbyte ** b)
+static unsigned myin(void * UNUSED (d), zbyte ** UNUSED (b))
 {
 	return 0;
 } /* myin */

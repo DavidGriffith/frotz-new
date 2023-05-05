@@ -525,7 +525,7 @@ void sf_poptextsettings(void)
  *
  *
  */
-int os_check_unicode(int font, zchar c)
+int os_check_unicode(int UNUSED (font), zchar c)
 {
 	return ((current.font->hasglyph(current.font, c, 0) != 0) ? 3 : 2);
 }
@@ -780,7 +780,7 @@ int os_buffer_screen(int mode)
  * Return non-zero if the window should have text wrapped.
  *
  */
-int os_wrap_window(int win)
+int os_wrap_window(int UNUSED (win))
 {
 	return 1;
 }
@@ -792,8 +792,9 @@ int os_wrap_window(int win)
  * Called when the height of a window is changed.
  *
  */
-void os_window_height(int win, int height)
+void os_window_height(int UNUSED (win), int UNUSED (height))
 {
+	/* Not implemented */
 }
 
 

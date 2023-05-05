@@ -109,7 +109,7 @@ static char *getsigname(int s)
 	return NULL;
 } /* getsigname */
 
-static void bt_sighandler(int sig, siginfo_t * info, void *secret)
+static void bt_sighandler(int sig, siginfo_t * info, void * UNUSED (secret))
 {
 
 	void *trace[16];

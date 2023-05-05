@@ -317,20 +317,20 @@ STATIC zword checkmouse(int i0)
 } /* checkmouse */
 
 
-STATIC zword Zup(int x, int y)
+STATIC zword Zup(int UNUSED (x), int UNUSED (y))
 {
 	goup();
 	return 0;
 } /* Zup */
 
 
-STATIC zword Zok(int x, int y)
+STATIC zword Zok(int UNUSED (x), int UNUSED (y))
 {
 	return ZC_RETURN;
 } /* Zok */
 
 
-STATIC zword Zcanc(int x, int y)
+STATIC zword Zcanc(int UNUSED (x), int UNUSED (y))
 {
 	return ZC_ESCAPE;
 } /* Zcanc */
@@ -558,7 +558,7 @@ void sf_setdialog(void)
 
 
 /* simplified fnmatch - only allows a single * at beginning */
-STATIC int myfnmatch(const char *pattern, const char *p, int dummy)
+STATIC int myfnmatch(const char *pattern, const char *p, int UNUSED (dummy))
 {
 	int lpat, lp;
 	if (!pattern)

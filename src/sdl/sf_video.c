@@ -348,7 +348,7 @@ void sf_flushtext(void)
  * being erased.
  *
  */
-void os_erase_area(int top, int left, int bottom, int right, int win)
+void os_erase_area(int top, int left, int bottom, int right, int UNUSED (win))
 {
 	sf_flushtext();
 	sf_fillrect((sf_curtextsetting())->back, left - 1, top - 1,
@@ -445,8 +445,9 @@ void os_scroll_area(int top, int left, int bottom, int right, int units)
 } /* os_scroll_area */
 
 
-bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
-		       int ysize, int xsize)
+bool os_repaint_window(int UNUSED (win), int UNUSED (ypos_old),
+		int UNUSED (ypos_new), int UNUSED (xpos),
+		int UNUSED (ysize), int UNUSED (xsize))
 {
 	/* TODO */
 	return FALSE;
@@ -458,7 +459,7 @@ static SDL_atomic_t SFticked = {0};
 static SDL_TimerID timerid = 0;
 static Uint32 refreshEventType = 0;
 
-static Uint32 SDLCALL mytimer(Uint32 inter, void *parm)
+static Uint32 SDLCALL mytimer(Uint32 inter, void * UNUSED (parm))
 {
 	SDL_AtomicSet(&SFticked, 1);
 	SDL_Event event = {0};

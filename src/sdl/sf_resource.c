@@ -261,7 +261,7 @@ int os_picture_data(int picture, int *height, int *width)
  *     MENU_REMOVE - Remove the menu at the given index
  *
  */
-void os_menu(int action, int menu, const zword * text)
+void os_menu(int UNUSED (action), int UNUSED (menu), const zword * UNUSED (text))
 {
 /*	switch (action)
 	{
