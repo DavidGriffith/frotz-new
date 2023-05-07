@@ -1093,8 +1093,17 @@ char *os_read_file_name (const char *default_name, int flag)
 	}
 
 	/* Use the default name if nothing was typed */
-	if (file_name[0] == 0)
-		strncpy (file_name, default_name, FILENAME_MAX);
+	if (file_name[0] == 0) {
+		/* If FILE_NO_PROMPT, restrict to currect directory. */
+		/* If FILE_NO_PROMPT and using restricted path, then */
+		/*   nothing more needs to be done to restrict the   */
+		/*   file access there. */
+		if (flag == FILE_NO_PROMPT && f_setup.restricted_path == NULL) {
+			tempname = basename((char *)default_name);
+			strncpy(file_name, tempname, FILENAME_MAX);
+		} else
+			strncpy (file_name, default_name, FILENAME_MAX);
+	}
 
 	/* If we're restricted to one directory, strip any leading path left
 	 * over from a previous call to os_read_file_name(), then prepend
