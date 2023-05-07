@@ -29,6 +29,7 @@
 #define XK_MISCELLANY
 #include <X11/keysymdef.h>
 #undef XK_MISCELLANY
+#include <libgen.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -240,8 +241,14 @@ char *os_read_file_name(const char *default_name, int flag)
 	int saved_replay = istream_replay;
 	int saved_record = ostream_record;
 	char file_name[FILENAME_MAX + 1];
+	int i;
+	char *tempname;
 	zchar answer[4];
+	char path_separator[2];
 	char *ext;
+
+	path_separator[0] = PATH_SEPARATOR;
+	path_separator[1] = 0;
 
 	/* Turn off playback and recording temporarily */
 	istream_replay = 0;
@@ -258,8 +265,40 @@ char *os_read_file_name(const char *default_name, int flag)
 	}
 
 	/* Use the default name if nothing was typed */
-	if (file_name[0] == 0)
-		strcpy(file_name, default_name);
+	if (file_name[0] == 0) {
+		/* If FILE_NO_PROMPT, restrict to currect directory. */
+		/* If FILE_NO_PROMPT and using restricted path, then */
+		/*   nothing more needs to be done to restrict the   */
+		/*   file access there. */
+		if (flag == FILE_NO_PROMPT && f_setup.restricted_path == NULL) {
+			tempname = basename((char *)default_name);
+			strncpy(file_name, tempname, FILENAME_MAX);
+		} else
+			strcpy(file_name, default_name);
+	}
+
+	/* If we're restricted to one directory, strip any leading path left
+	 * over from a previous call to os_read_file_name(), then prepend
+	 * the prescribed path to the filename.  Hostile leading paths won't
+	 * get this far.  Instead we return failure a few lines above here if
+	 * someone tries it.
+	 */
+	if (f_setup.restricted_path != NULL) {
+		for (i = strlen(file_name); i > 0; i--) {
+			if (file_name[i] == PATH_SEPARATOR) {
+				i++;
+				break;
+			}
+		}
+		tempname = strdup(file_name + i);
+		strncpy(file_name, f_setup.restricted_path, FILENAME_MAX);
+
+		/* Make sure the final character is the path separator. */
+		if (file_name[strlen(file_name)-1] != PATH_SEPARATOR) {
+			strncat(file_name, path_separator, FILENAME_MAX - strlen(file_name) - 2);
+		}
+		strncat(file_name, tempname, strlen(file_name) - strlen(tempname) - 1);
+	}
 
 	if (flag == FILE_NO_PROMPT) {
 		ext = strrchr(file_name, '.');
