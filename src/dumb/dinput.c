@@ -546,7 +546,10 @@ char *os_read_file_name (const char *default_name, int flag)
 			os_warn("Blocked unprompted access of %s. Should only be %s files.", default_name, EXT_AUX);
 			return NULL;
 		}
-		buf = strndup(default_name, MAX_FILE_NAME);
+		if (f_setup.restricted_path == NULL)
+			buf = strndup(default_name, MAX_FILE_NAME);
+		else
+			buf = basename((char *)default_name);
 	} else {
 		if (f_setup.restricted_path) {
 			for (i = strlen(default_name); i > 0; i--) {
