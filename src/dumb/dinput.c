@@ -551,32 +551,26 @@ char *os_read_file_name (const char *default_name, int flag)
 		else
 			buf = basename((char *)default_name);
 	} else {
-		if (f_setup.restricted_path) {
-			for (i = strlen(default_name); i > 0; i--) {
-				if (default_name[i] == PATH_SEPARATOR) {
-					i++;
-					break;
-				}
-			}
-			tempname = strdup(default_name + i);
-			sprintf(prompt, "Please enter a filename [%s]: ", tempname);
+		if (f_setup.restricted_path != NULL) {
+			sprintf(prompt, "Please enter a filename [%s]: ", basename((char *)default_name));
 		} else
 			sprintf(prompt, "Please enter a filename [%s]: ", default_name);
+
 		dumb_read_misc_line(fullpath, prompt);
-		if (!fullpath[0])
-			buf = fullpath;
-		else
-			buf = basename(fullpath);
+
+		/* If using default filename... */
+		if (strlen(fullpath) == 0)
+			buf = strndup(default_name, MAX_FILE_NAME);
+		else /* Using supplied filename... */
+			buf = strndup(fullpath, MAX_FILE_NAME);
+
 		if (strlen(buf) > MAX_FILE_NAME) {
 			printf("Filename too long\n");
 			return NULL;
 		}
 	}
 
-	if (buf == NULL || flag == FILE_NO_PROMPT)
-		strncpy(file_name, default_name, FILENAME_MAX);
-	else
-		strncpy(file_name, fullpath, FILENAME_MAX);
+	strncpy(file_name, buf, FILENAME_MAX);
 
 	/* Check if we're restricted to one directory. */
 	if (f_setup.restricted_path != NULL) {
