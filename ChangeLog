@@ -7,6 +7,8 @@ NEW FEATURES
 
 - Added -L option to xfrotz - supply a Quetzal file to load on command line.
 
+- Added support for the Z-Machine Standard 1.1 save-restore prompt option.
+
 BUG FIXES
 
 - Fixed a segfault when xfrotz detects a fatal error.
