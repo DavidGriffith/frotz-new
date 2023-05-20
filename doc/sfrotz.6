@@ -445,6 +445,26 @@ https://www.gnu.org/software/freefont/ (Truetype fonts). Logographic
 glyphs (Kanji and Chinese are not currently supported.
 
 
+.SH Z-MACHINE STANDARDS
+.B Frotz
+complies with the Z-Machine Standard 1.1 of May 2006, revised February
+2014.  The authoritative version is found here:
+.br
+http://inform-fiction.org/zmachine/standards/z1point1/index.html
+.P
+As of 1.1, an additional optional parameter
+.B prompt
+is allowed on Version 5 extended save/restore.  This parameter allows
+a game to read or write an auxiliary (aux) file without prompting the
+player.  See section 15 of the Standard for details.
+.B Frotz
+restricts such files to having an ".aux" filename extension.  When the
+.B -R
+(restricted read/write) option is active, reads and writes through this
+mechanism are restricted to the provided path the same as all other file
+accesses.
+
+
 .SH ENVIRONMENT
 If the ZCODE_PATH environmental variable is defined,
 .B Sfrotz
@@ -873,3 +893,4 @@ David Griffith <dave@661.org>.
 .BR jzip (6)
 .BR xzip (6)
 .BR inform (1)
+
