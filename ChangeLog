@@ -11,6 +11,8 @@ NEW FEATURES
 
 BUG FIXES
 
+- Fixed brain-dead handling of undo slots.
+
 - Fixed a segfault when xfrotz detects a fatal error.
 
 - Fixed compile failure of the SDL interface for GCC 12 and maybe GCC 11.

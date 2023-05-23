@@ -170,6 +170,9 @@ typedef struct {
 #include "unused.h"
 
 /*** Constants that may be set at compile time ***/
+#ifndef DEFAULT_UNDO_SLOTS
+#define DEFAULT_UNDO_SLOTS 25
+#endif
 #ifndef MAX_UNDO_SLOTS
 #define MAX_UNDO_SLOTS 500
 #endif

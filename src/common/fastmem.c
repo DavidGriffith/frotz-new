@@ -256,7 +256,7 @@ void init_header(void)
 void init_setup(void)
 {
 	memset(&f_setup, 0, sizeof(f_setup));
-	f_setup.undo_slots = MAX_UNDO_SLOTS;
+	f_setup.undo_slots = DEFAULT_UNDO_SLOTS;
 	f_setup.script_cols = 80;
 	f_setup.err_report_mode = ERR_DEFAULT_REPORT_MODE;
 	f_setup.blorb_file = NULL;
@@ -289,6 +289,7 @@ void init_memory(void)
 	zword addr;
 	unsigned n;
 	int i, j;
+	char errorstring[81];
 
 #ifdef TOPS20
 	zword checksum = 0;
@@ -457,6 +458,12 @@ void init_memory(void)
 		{        UNKNOWN,   0, "------" }
 	};
 	/* INDENT-ON */
+
+	/* Ensure undo slots don't exceed maximum */
+	if (f_setup.undo_slots > MAX_UNDO_SLOTS) {
+		snprintf(errorstring, 80, "Maxmimum undo slots is %d", MAX_UNDO_SLOTS);
+		os_fatal(errorstring);
+	}
 
 	/* Open story file */
 	if ((story_fp = os_load_story()) == NULL)
