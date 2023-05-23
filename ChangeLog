@@ -3,7 +3,11 @@ Summary of changes between Frotz 2.55 and Frotz 2.55:
 
 Frotz 2.55 is currently in development.
 
+This is a minor release focusing on minor enhancements and bug fixes.
+
 NEW FEATURES
+
+- Updated and cleaned up manual pages.
 
 - Added -L option to xfrotz - supply a Quetzal file to load on command line.
 
