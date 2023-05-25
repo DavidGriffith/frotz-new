@@ -84,7 +84,8 @@ static void clear_byte(volatile byte _far * scrn, word mask)
  *
  * Helper function for os_erase_area.
  *
- */ static void clear_line(int y, int left, int right)
+ */
+static void clear_line(int y, int left, int right)
 {
 	volatile byte _far *scrn = get_scrnptr(y);
 	if (display == _MCGA_)

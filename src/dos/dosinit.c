@@ -525,7 +525,8 @@ static void standard_palette(void)
  * Set palette register #i to value i and call VGA BIOS to use DAC
  * registers #64 to #127.
  *
- */ static void special_palette(void)
+ */
+static void special_palette(void)
 {
 
 	static byte palette[] = {
@@ -578,7 +579,8 @@ static void standard_palette(void)
  * Finally, set reserve_mem to the amount of memory (in bytes) that
  * should not be used for multiple undo and reserved for later use.
  *
- */ void os_init_screen(void)
+ */
+void os_init_screen(void)
 {
 	static byte zcolour[] = {
 		BLACK_COLOUR,
