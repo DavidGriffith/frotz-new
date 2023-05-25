@@ -342,4 +342,4 @@ short s16(zword z) {
 	if ((sz > 0 ) && (sz > 32767))
 		sz = - (65536 - sz );
 	return sz;
-}
+} /* s16 */

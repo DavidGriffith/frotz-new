@@ -103,7 +103,7 @@ void huge *zrealloc(void huge *p, long size, size_t old_size)
 	_fmemcpy(q, p, size < old_size ? size : old_size);
 	zfree(p);
 	return q;
-}
+} /* zrealloc */
 #endif /* __WATCOMC__ */
 
 
@@ -250,7 +250,7 @@ void init_header(void)
 	/* Claim to support Z-machine Standard 1.1. */
 	z_header.standard_high = 1;
 	z_header.standard_low = 1;
-}
+} /* init_header */
 
 
 void init_setup(void)
@@ -271,7 +271,7 @@ void init_setup(void)
 	f_setup.story_path = NULL;
 	f_setup.zcode_path = NULL;
 	f_setup.restricted_path = NULL;
-}
+} /* init_setup */
 
 
 /*

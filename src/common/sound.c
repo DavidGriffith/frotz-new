@@ -235,5 +235,5 @@ void z_sound_effect(void)
 	if (number == 1 || number == 2)
 		os_beep(number);
 	return;
-}
+} /* z_sound_effect */
 #endif

@@ -55,7 +55,7 @@ static Zwindow wp[8], *cwp = wp;
 Zwindow *curwinrec()
 {
 	return cwp;
-}
+} /* curwinrec */
 
 
 /*
@@ -177,7 +177,7 @@ static bool amiga_screen_model (void)
 		}
 	}
 	return FALSE;
-}/* amiga_screen_model */
+} /* amiga_screen_model */
 
 
 /*
@@ -1947,4 +1947,4 @@ void reset_window(void)
 {
 	set_window(0);
 	new_line();
-}
+} /* reset_window */

@@ -81,7 +81,7 @@ void init_err(void)
 	/* Initialize the counters. */
 	for (i = 0; i < ERR_NUM_ERRORS; i++)
 	error_count[i] = 0;
-}
+} /* init_err */
 
 
 /*

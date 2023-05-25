@@ -43,7 +43,7 @@ void init_buffer(void)
 	memset(buffer, 0, sizeof (zchar) * TEXT_BUFFER_SIZE);
 	bufpos = 0;
 	prev_c = 0;
-}
+} /* init_buffer */
 
 
 /*

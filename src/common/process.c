@@ -179,7 +179,7 @@ void (*ext_opcodes[0x1d])(void) = {
 void init_process(void)
 {
 	finished = 0;
-}
+} /* init_process */
 
 
 /*
@@ -584,7 +584,7 @@ void z_catch(void)
 #else
 	store(frame_count);
 #endif
-}  /* z_catch */
+} /* z_catch */
 
 
 /*

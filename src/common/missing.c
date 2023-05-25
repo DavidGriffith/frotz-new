@@ -43,7 +43,7 @@ void *my_memmove(void *dest, const void *src, size_t n)
 		while(n--) *d++=*s++;
 
 	return dest;
-}
+} /* my_memmove */
 #endif /* NO_MEMMOVE */
 
 
@@ -67,7 +67,7 @@ char *my_strdup(const char *src)
 	*p++ = *src++;
 	*p = '\0';
 	return str;
-}
+} /* my_strdup */
 
 char *my_strndup(const char *src, size_t n)
 {
@@ -84,5 +84,5 @@ char *my_strndup(const char *src, size_t n)
 	}
 	*p = '\0';
 	return str;
-}
+} /* my_strndup */
 #endif /* NO_STRDUP */

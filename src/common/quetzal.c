@@ -94,7 +94,7 @@ static bool read_word(FILE * f, zword * result)
 
 	*result = ((zword) a << 8) | (zword) b;
 	return TRUE;
-}
+} /* read_word */
 
 
 /* Read one long from file; return TRUE if OK. */
@@ -121,7 +121,7 @@ static bool read_long(FILE * f, zlong * result)
 	    ((zlong) c << 8) | (zlong) d;
 
 	return TRUE;
-}
+} /* read_long */
 
 
 /*
@@ -429,7 +429,7 @@ zword restore_quetzal(FILE * svf, FILE * stf)
 		    ("error: no valid memory (`CMem' or `UMem') chunk in file.\n");
 
 	return (progress == GOT_ALL ? 2 : fatal);
-}
+} /* restore_quetzal */
 
 
 /*
@@ -596,4 +596,4 @@ zword save_quetzal(FILE * svf, FILE * stf)
 
 	/* After all that, still nothing went wrong! */
 	return 1;
-}
+} /* save_quetzal */

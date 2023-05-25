@@ -340,4 +340,4 @@ static bool truncate_question_mark(void)
 	if (story_id == SUSPECT) return TRUE;
 
 	return FALSE;
-}
+} /* truncate_question_mark */
