@@ -64,6 +64,7 @@ static long sample_adr2 = 0;
 static word sample_len1 = 0;
 static word sample_len2 = 0;
 
+
 /*
  * start_of_dma
  *
@@ -228,6 +229,7 @@ void dos_reset_sound(void)
 
 } /* dos_reset_sound */
 
+
 /*
  * os_init_sound
  *
@@ -391,6 +393,7 @@ void os_finish_with_sample(int UNUSED(id))
 	os_stop_sample(0);	/* we keep 64KB allocated all the time */
 } /* os_finish_with_sample */
 
+
 #else /* NO_SOUND */
 
 /* Do-nothing stubs for when sound support is disabled. */
@@ -404,6 +407,7 @@ void dos_reset_sound(void) {}
 bool dos_init_sound(void) { return TRUE; }
 
 #endif /* NO_SOUND */
+
 
 /*
  * os_beep

@@ -85,6 +85,7 @@ static byte _huge *info = NULL;
 static byte far *info = NULL;
 #endif
 
+
 /*
  * open_graphics_file
  *
@@ -772,7 +773,6 @@ int os_peek_colour(void)
  * pictures and the release number instead.
  *
  */
-
 bool os_picture_data(int picture, int *height, int *width)
 {
 	bool avail;

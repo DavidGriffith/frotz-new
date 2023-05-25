@@ -105,6 +105,7 @@ static bool test_enhanced_keyboard(unsigned char b)
 	return b == regs.h.al;
 }
 
+
 /*
  * os_init_setup
  *
@@ -276,6 +277,7 @@ void os_warn (const char *s, ...)
 	return;
 } /* os_warn */
 
+
 /*
  * os_fatal
  *
@@ -397,6 +399,7 @@ static void parse_options(int argc, char **argv)
 
 } /* parse_options */
 
+
 static char *malloc_filename(char *story_name, char *extension)
 {
 	int length = strlen(story_name) + strlen(extension) + 2;
@@ -407,6 +410,7 @@ static char *malloc_filename(char *story_name, char *extension)
 	}
 	return filename;
 }
+
 
 /*
  * os_process_arguments

@@ -65,6 +65,7 @@ static bool overwrite = FALSE;
 
 volatile int end_of_sound_flag;
 
+
 /*
  * swap_colours
  *
@@ -482,8 +483,8 @@ static void input_move(zchar newc, zchar oldc)
 	if (newc != 0)
 		cursor_right();
 } /* input_move */
-
 #undef H
+
 
 /*
  * delete_char
@@ -745,7 +746,6 @@ no_further:
  * to implement word completion (similar to tcsh under Unix).
  *
  */
-
 #define new_history_search() \
     { history.prefix_len = input.pos; history.current = history.latest; }
 
@@ -834,6 +834,7 @@ zchar os_read_line(int max, zchar *buf, int timeout, int width, int continued)
 #undef new_history_search()
 #endif
 
+
 /*
  * os_read_key
  *
@@ -875,7 +876,6 @@ zchar os_read_key(int timeout, bool cursor)
  * print_string and read_string to ask for a file name.
  *
  */
-
 char *os_read_file_name (const char *default_name, int flag)
 {
 	char *extension;

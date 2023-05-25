@@ -23,6 +23,7 @@
 #include "frotz.h"
 #include "dosfrotz.h"
 
+
 /*
  * detect_mouse
  *
@@ -38,7 +39,6 @@ bool detect_mouse(void)
 	asm int 0x33
 	return _AX;
 #endif
-
 } /* detect_mouse */
 
 
@@ -86,7 +86,6 @@ int read_mouse(void)
 		mouse_x = _CX;
 		mouse_y = _DX;
 #endif
-
 		if (display <= _TEXT_) {
 			mouse_x /= 8;
 			mouse_y /= 8;
@@ -98,7 +97,6 @@ int read_mouse(void)
 		mouse_x++;
 		mouse_y++;
 	}
-
 	/* Return single or double click */
 	return click;
 } /* read_mouse */

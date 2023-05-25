@@ -89,6 +89,7 @@ static byte _far *graphics_font = NULL;
 
 static char name[] = "FONTS/FONT0.FNT";
 
+
 /*
  * available_bios
  *
@@ -133,6 +134,7 @@ static int available_bios(void)
 #endif
 
 }
+
 
 /*
  * set_user_tfont
@@ -186,6 +188,7 @@ static void set_user_gfont(word offset, word height)
 	}
 }
 
+
 /*
  * read_font
  *
@@ -203,6 +206,7 @@ static void read_font(word offset, size_t nmemb)
 		fclose(fp);
 	}
 }
+
 
 /*
  * load_fonts
@@ -606,7 +610,8 @@ void write_pattern(volatile byte _far * screen, byte val, byte mask)
  * indentation). The screen should not be scrolled after printing to the
  * bottom right corner.
  *
- */ void os_display_char(zchar c)
+ */
+void os_display_char(zchar c)
 {
 	int width = os_char_width(c);
 
@@ -997,6 +1002,7 @@ int os_from_true_colour(zword colour)
 #endif
 	return 0;
 }
+
 
 /*
  * os_to_true_colour
