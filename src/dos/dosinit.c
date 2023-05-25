@@ -403,7 +403,6 @@ static char *malloc_filename(char *story_name, char *extension)
 	char *filename = malloc(length);
 	if (filename) {
 		strcpy(filename, story_name);
-		strcat(filename, ".");
 		strcat(filename, extension);
 	}
 	return filename;
@@ -470,10 +469,10 @@ void os_process_arguments(int argc, char *argv[])
 	f_setup.story_name = strdup(stripped_story_name);
 
 	/* Create nice default file names */
-	f_setup.script_name = malloc_filename(f_setup.story_name, "scr");
-	f_setup.command_name = malloc_filename(f_setup.story_name, "rec");
-	f_setup.save_name = malloc_filename(f_setup.story_name, "sav");
-	f_setup.aux_name = malloc_filename(f_setup.story_name, "aux");
+	f_setup.script_name = malloc_filename(f_setup.story_name, EXT_SCRIPT);
+	f_setup.command_name = malloc_filename(f_setup.story_name, EXT_COMMAND);
+	f_setup.save_name = malloc_filename(f_setup.story_name, EXT_SAVE);
+	f_setup.aux_name = malloc_filename(f_setup.story_name, EXT_AUX);
 
 	/* Save the executable file name */
 	progname = argv[0];
