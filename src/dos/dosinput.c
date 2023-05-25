@@ -201,9 +201,8 @@ static bool out_of_time(void)
 		now += 24L * 3600 * 10;
 
 		return now >= limit;
-	} else
-		return FALSE;
-
+	}
+	return FALSE;
 } /* out_of_time */
 
 
