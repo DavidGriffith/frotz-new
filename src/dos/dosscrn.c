@@ -317,4 +317,4 @@ bool os_repaint_window(int win, int ypos_old, int ypos_new, int xpos,
 		       int ysize, int xsize)
 {
 	return FALSE;
-}
+} /* os_repaint_window */

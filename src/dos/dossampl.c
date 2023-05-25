@@ -240,10 +240,8 @@ void dos_reset_sound(void)
  *        somehow work around the ifs.
  *
  */
-void os_init_sound(void)
-{
-	/* do nothing */
-}
+void os_init_sound(void) { /* do nothing */ }
+
 
 /*
  * os_prepare_sample

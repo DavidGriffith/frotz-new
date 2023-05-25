@@ -992,4 +992,4 @@ finished:
 void os_tick(void)
 {
 	/* do nothing */
-}
+} /* os_tick */

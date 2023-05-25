@@ -103,7 +103,7 @@ static bool test_enhanced_keyboard(unsigned char b)
 	regs.h.ah = 0x12;
 	int86(0x16, &regs, &regs);
 	return b == regs.h.al;
-}
+} /* test_enhanced_keyboard */
 
 
 /*
@@ -237,7 +237,7 @@ void os_quit(int status)
 {
     cleanup();
     exit(status);
-}
+} /* os_quit */
 
 
 static void print_c_string (const char *s)
@@ -409,7 +409,7 @@ static char *malloc_filename(char *story_name, char *extension)
 		strcat(filename, extension);
 	}
 	return filename;
-}
+} /* malloc_filename */
 
 
 /*
@@ -1006,7 +1006,7 @@ FILE *os_load_story(void)
 #else
 	return fopen(f_setup.story_file, "rb");
 #endif
-}
+} /* os_load_story */
 
 
 /*
@@ -1034,7 +1034,7 @@ int os_storyfile_seek(FILE * fp, long offset, int whence)
 	}
 #endif
 	return fseek(fp, offset, whence);
-}
+} /* os_storyfile_seek */
 
 
 /*
@@ -1049,4 +1049,4 @@ int os_storyfile_tell(FILE * fp)
 		return ftell(fp) - blorb_res.data.startpos;
 #endif
 	return ftell(fp);
-}
+} /* os_storyfile_tell */

@@ -133,7 +133,7 @@ static int available_bios(void)
 	return (_AX);
 #endif
 
-}
+} /* available_bios */
 
 
 /*
@@ -161,7 +161,8 @@ static void set_user_tfont(word offset, byte height)
 		int 10h
 		pop bp
 	}
-}
+} /* set_user */
+
 
 /*
  * set_user_gfont
@@ -186,7 +187,7 @@ static void set_user_gfont(word offset, word height)
 		int 10h
 		pop bp
 	}
-}
+} /* set_user_gfont */
 
 
 /*
@@ -205,7 +206,7 @@ static void read_font(word offset, size_t nmemb)
 		fread(font_data+offset, 1, nmemb, fp);
 		fclose(fp);
 	}
-}
+} /* read_font */
 
 
 /*
@@ -1001,7 +1002,7 @@ int os_from_true_colour(zword colour)
 	}
 #endif
 	return 0;
-}
+} /* os_from_true_colour */
 
 
 /*
@@ -1034,4 +1035,4 @@ zword os_to_true_colour(int index)
 #else
 	return 0;
 #endif
-}
+} /* os_to_true_colour */
