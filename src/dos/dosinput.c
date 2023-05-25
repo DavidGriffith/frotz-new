@@ -80,7 +80,6 @@ static void swap_colours(void)
     temp = text_fg;
     text_fg = text_bg;
     text_bg = temp;
-
 } /* swap_colours */
 
 
@@ -386,7 +385,6 @@ static void last_char(void)
 {
 	while (input.pos < input.length)
 		cursor_right();
-
 } /* last_char */
 
 
@@ -696,7 +694,6 @@ static void get_next_entry(void)
 
 no_further:
 	history.current = i;
-
 } /* get_next_entry */
 
 

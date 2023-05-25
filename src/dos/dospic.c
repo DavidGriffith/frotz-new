@@ -155,7 +155,6 @@ failure2:
 
 failure1:
 	return FALSE;
-
 } /* open_graphics_file */
 
 
@@ -179,7 +178,6 @@ static void close_graphics_file(void)
 #endif
 		info = NULL;
 	}
-
 } /* close_graphics_file */
 
 
@@ -232,7 +230,6 @@ void reset_pictures(void)
 #endif
 		info = NULL;
 	}
-
 } /* reset_pictures */
 
 
@@ -726,7 +723,6 @@ void os_draw_picture(int picture, int y, int x)
 {
 	if (load_picture_info(picture))
 		draw_picture(y, x);
-
 } /* os_draw_picture */
 
 

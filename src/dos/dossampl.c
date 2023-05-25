@@ -125,7 +125,6 @@ static void interrupt end_of_dma(void)
 	if (sound_irq >= 8)
 		outportb(0xa0, 0x20);
 	inportb(sound_adr + 14);
-
 } /* end_of_dma */
 
 
@@ -196,7 +195,6 @@ bool dos_init_sound(void)
 
 	/* Indicate success */
 	return TRUE;
-
 } /* init_sound */
 
 
@@ -226,7 +224,6 @@ void dos_reset_sound(void)
 #endif
 		sound_adr = 0;
 	}
-
 } /* dos_reset_sound */
 
 

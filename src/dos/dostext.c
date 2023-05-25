@@ -132,7 +132,6 @@ static int available_bios(void)
 	label_ret:
 	return (_AX);
 #endif
-
 } /* available_bios */
 
 
@@ -496,7 +495,6 @@ void os_set_colour(int new_foreground, int new_background)
 
 	/* Apply changes */
 	adjust_style();
-
 } /* os_set_colour */
 
 
@@ -534,7 +532,6 @@ void os_set_text_style(int new_style)
 
 	/* Apply changes */
 	adjust_style();
-
 } /* os_set_text_style */
 
 
