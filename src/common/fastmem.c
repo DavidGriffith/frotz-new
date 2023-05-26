@@ -289,7 +289,7 @@ void init_memory(void)
 	zword addr;
 	unsigned n;
 	int i, j;
-	char errorstring[81];
+	char errorstring[26]; /* Don't reuse this. */
 
 #ifdef TOPS20
 	zword checksum = 0;
@@ -461,7 +461,7 @@ void init_memory(void)
 
 	/* Ensure undo slots don't exceed maximum */
 	if (f_setup.undo_slots > MAX_UNDO_SLOTS) {
-		snprintf(errorstring, 80, "Maxmimum undo slots is %d", MAX_UNDO_SLOTS);
+		sprintf(errorstring, "Maximum undo slots is %d", MAX_UNDO_SLOTS);
 		os_fatal(errorstring);
 	}
 
