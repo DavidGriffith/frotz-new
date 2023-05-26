@@ -69,7 +69,10 @@ typedef int bool;
 /* For everything */
 /******************************************************************************/
 #include <stdio.h>
+
+#ifndef __TURBOC__
 #include <stdint.h>
+#endif
 
 #include "defs.h"
 #include "hash.h"
@@ -102,9 +105,15 @@ typedef int bool;
 #define PATH_SEPARATOR '/'
 #endif
 
+#ifdef __TURBOC__
+typedef unsigned char zbyte;
+typedef unsigned short zword;
+typedef unsigned long zlong;
+#else
 typedef uint8_t zbyte;
 typedef uint16_t zword;
 typedef uint32_t zlong;
+#endif
 
 #ifndef USE_UTF8
 typedef unsigned char zchar;
