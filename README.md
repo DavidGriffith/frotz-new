@@ -1,6 +1,6 @@
-# FROTZ V2.54
+# FROTZ V2.55
 An interpreter for all Infocom and other Z-machine games.
-Complies with standard 1.0 of Graham Nelson's specification.
+Complies with the Z-Machine Standard version 1.1.
 
 [![Liberapay](https://img.shields.io/liberapay/receives/DavidG.svg?logo=liberapay)](https://liberapay.com/DavidG)
 

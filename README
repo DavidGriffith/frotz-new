@@ -1,5 +1,5 @@
-FROTZ V2.54 - An interpreter for all Infocom and other Z-machine games.
-Complies with standard 1.0 of Graham Nelson's specification.
+FROTZ V2.55 - An interpreter for all Infocom and other Z-machine games.
+Complies with the Z-Machine Standard version 1.1.
 
 Originally written by Stefan Jokisch in 1995-1997.
 Ported to Unix by Galen Hazelwood.
