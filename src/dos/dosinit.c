@@ -262,7 +262,7 @@ void os_warn (const char *s, ...)
 	int style;
 
 	va_start(m, s);
-	vsnprintf(errorstring, sizeof(char) * 80, s, m);
+	vsprintf(errorstring, s, m);
 	va_end(m);
 
 	os_beep(BEEP_HIGH);
