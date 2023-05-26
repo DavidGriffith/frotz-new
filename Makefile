@@ -624,8 +624,12 @@ hash: $(HASH)
 $(HASH):
 ifeq ($(wildcard $(HASH)),)
 	@echo "** Generating $@"
-	@echo "#define VERSION \"$(VERSION)\"" > $@
+	@echo "#ifndef VERSION" > $@
+	@echo "#define VERSION \"$(VERSION)\"" >> $@
+	@echo "#endif" >> $@
+	@echo "#ifndef RELEASE_NOTES" >> $@
 	@echo "#define RELEASE_NOTES \"$(RELEASE_NOTES)\"" >> $@
+	@echo "#endif" >> $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
