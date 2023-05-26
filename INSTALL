@@ -123,7 +123,7 @@ X11 Frotz ||
 ============
 
 X11 Frotz (aka xfrotz) was created by Daniel Schepler from around 1998 to
-2000 based in Frotz 2.32.  Like SDK Frotz, it languished for several years.
+2000 based in Frotz 2.32.  Like SDL Frotz, it languished for several years.
 It does have rudimentary audio support for playback of Infocom's original
 .snd audio file format and no Blorb support.  It also supports rune
 characters in Beyond Zork through .pcf fonts.  This interface is not yet
