@@ -352,7 +352,7 @@ void os_process_arguments(int argc, char *argv[])
 		printf("Git commit:     %s\n", GIT_HASH);
 		printf("Notes:          %s\n", RELEASE_NOTES);
 		printf("  Frotz was originally written by Stefan Jokisch.\n");
-		printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+		printf("  It complies with standard 1.1 of the Z-Machine Standard.\n");
 		printf("  The X11 interface code was done by Daniel Schepler,\n");
 		printf("  It is distributed under the GNU General Public License version 2 or\n");
 		printf("    (at your option) any later version.\n");

@@ -379,7 +379,7 @@ static void parse_options(int argc, char **argv)
 			printf("Git commit:     %s\n", GIT_HASH);
 			printf("Notes:          %s\n", RELEASE_NOTES);
 			printf("  Frotz was originally written by Stefan Jokisch.\n");
-			printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+			printf("  It complies with standard 1.1 of the Z-Machine Standard.\n");
 			printf("  It was ported to Unix by Galen Hazelwood.\n");
 			printf("  The core and DOS port are maintained by David Griffith.\n");
 			printf("  Frotz's homepage is https://661.org/proj/if/frotz/\n");

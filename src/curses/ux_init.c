@@ -1251,7 +1251,7 @@ static void print_version(void)
 	printf("Git commit:     %s\n", GIT_HASH);
 	printf("Notes:          %s\n", RELEASE_NOTES);
 	printf("  Frotz was originally written by Stefan Jokisch.\n");
-	printf("  It complies with standard 1.0 of Graham Nelson's specification.\n");
+	printf("  It complies with standard 1.1 of the Z-Machine Standard.\n");
 	printf("  It was ported to Unix by Galen Hazelwood.\n");
 	printf("  It is distributed under the GNU General Public License version 2 or\n");
 	printf("    (at your option) any later version.\n");
