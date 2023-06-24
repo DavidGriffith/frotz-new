@@ -108,7 +108,20 @@ languishing for several years, it is now incorporated into the Unix
 Frotz codebase as a one of the available interfaces.  With SDL Frotz, 
 full support for V6 games is provided.
 
-Prerequisite packages for sfrotz (Debian nomenclature):
+Prerequisite packages for sfrotz:
+  Debian nomenclature:
+    libsdl2-dev libsdl2-mixer-dev libfreetype6-dev libpng-dev libjpeg-dev zlib1g-dev
+  macOS Homebrew nomenclature:
+    pkg-config sdl2 sdl2_mixer freetype libpng jpeg zlib
+  NetBSD nomenclature:
+    SDL2 SDL2_mixer freetype png jpeg zlib
+  OpenBSD nomenclature:
+    sdl2 sdl2-mixer freetype png jpeg zlib
+  FreeBSD nomenclature:
+    sdl2 sdl2-mixer freetype2 png ??? ???
+
+
+
   * libsdl2-dev		(2.0.9 or higher)
   * libsdl2-mixer-dev	(2.0.4 or higher)
   * libfreetype6-dev	(2.6.x or higher)
@@ -129,6 +142,10 @@ It does have rudimentary audio support for playback of Infocom's original
 characters in Beyond Zork through .pcf fonts.  This interface is not yet
 ready.  On startup, the screen has a tendency to be black.  Saves and
 restores also don't work -- doing so causes a segfault.
+
+Prerequisite packages for xfrotz
+  Debian nomenclature):
+    libx11-dev libxt-dev libpng-dev libjpeg-dev zlib1g-dev
 
 
 ================
