@@ -64,6 +64,8 @@ my $target;
 my @sources;
 my @inputfiles;
 
+my @transformations;
+
 my $sed = "sed";
 #my $sed = "gsed";  # GNU sed required, so if you're on macOS, BSD, etc...
 my $sedfile = "urbzig.sed";
@@ -148,8 +150,10 @@ if ($transform_symbols) {
 		my $newsym = $symbolmap{$k}{'new'};
 		if ($newsym =~ /A\d*/) {
 			print $mapfile "s/\\b$symbol\\b/$newsym/g\n";
+			push @transformations, "s/\\b$symbol\\b/$newsym/g";
 		} else {
 			print $mapfile "s/$symbol/$newsym/g\n";
+			push @transformations, "s/$symbol/$newsym/g";
 		}		
 	}
 }
@@ -161,8 +165,28 @@ if ($dos_end) {
 
 print "  Running conversion...\n";
 chdir $target;
-`$sed $sedinplace -f $sedfilepath *`;
-unlink glob("*.bak");
+
+our $^I = '.bak';
+my $processing;
+my $targetfile;
+my $targetline;
+foreach my $targetfilename (glob("*")) {
+	print "Processing $targetfilename...\n";
+	open $targetfile, '<', "$targetfilename";
+	while (<$targetfile>) {
+		foreach $processing (@transformations) {
+#			$processing if $. == 1;
+#			print $processing;
+#			print "Foo: $processing\n";
+			$targetline =~ $processing;
+#			print $targetline;
+		}
+	}
+}
+
+
+#`$sed $sedinplace -f $sedfilepath *`;
+#unlink glob("*.bak");
 chdir $topdir;
 
 
@@ -413,4 +437,10 @@ sub shorten_filenames {
 		}
 	}
 	chdir $orig_dir;
+}
+
+# Perform the conversion
+sub modify {
+
+
 }
