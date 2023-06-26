@@ -64,8 +64,8 @@ my $target;
 my @sources;
 my @inputfiles;
 
-my $sed = "sed";
-#my $sed = "gsed";  # GNU sed required, so if you're on macOS, BSD, etc...
+my $sed = "sed";	# We'll check what sed we have,
+my $sed_real;		# and store its identity here.
 my $sedfile = "urbzig.sed";
 my $sedfilepath;
 my $sedinplace = "-i.bak";
@@ -79,6 +79,9 @@ print "  Snavig -- Change an object's shape.\n";
 
 if ($argc < 2 || $options{help} || !$type) { usage(); }
 
+if (!($sed_real = checksed($sed))) {
+	die "Sed not found.  Either GNU or BSD sed are required.\n";
+}
 
 print "  Preparing files for $type.\n";
 if ($type eq "tops20") {
@@ -137,8 +140,18 @@ if ($shorten_filenames) {
 	shorten_filenames($target, 6);
 }
 
-open my $mapfile, '>', $sedfilepath;
+my $startbound;
+my $endbound;
 
+if ($sed_real eq "gnu") {
+	$startbound = "\\b";
+	$endbound = $startbound;
+} else {
+	$startbound = "\[\[:<:\]\]";
+	$endbound = "\[\[:>:\]\]";
+}
+
+open my $mapfile, '>', $sedfilepath;
 if ($transform_symbols) {
 	# Scan source code and build a symbol map.
 	print "  Adding to " . $sedfile . " list of symbols to convert...\n";
@@ -147,7 +160,7 @@ if ($transform_symbols) {
 		my $symbol = $symbolmap{$k}{'original'};
 		my $newsym = $symbolmap{$k}{'new'};
 		if ($newsym =~ /A\d*/) {
-			print $mapfile "s/\\b$symbol\\b/$newsym/g\n";
+			print $mapfile "s/".$startbound.$symbol.$endbound."/$newsym/g\n";
 		} else {
 			print $mapfile "s/$symbol/$newsym/g\n";
 		}		
@@ -161,7 +174,7 @@ if ($dos_end) {
 
 print "  Running conversion...\n";
 chdir $target;
-`$sed $sedinplace -f $sedfilepath *`;
+`$sed -r $sedinplace -f $sedfilepath *c *h`;
 unlink glob("*.bak");
 chdir $topdir;
 
@@ -177,6 +190,33 @@ sub usage {
 	print "  tops20\n";
 	print "  dos\n";
 	exit;
+}
+
+
+# Check to see if we have GNU sed.
+#
+# GNU sed differs from BSD sed in several important and
+# mutually-incompatible ways.  Unfortunately one of these affects
+# applying snavig to source code.  We need to identify the boundaries of
+# words.  That is, you want to match "message", but not "messages". With
+# GNU sed, you enclose the troublesome match with "\b".  BSD sed, which
+# is found in macOS, requires the use of "[[:<:]]" at the beginning and
+# "[[:>:]]" at the end. For background, see
+# https://riptutorial.com/sed/topic/9436/bsd-macos-sed-vs--gnu-sed-vs--the-posix-sed-specification
+sub checksed {
+	my ($sed, @junk) = @_;
+
+	my @sed_result = split(/\s/, `$sed --version 2>&1`);
+
+	# Return -1 if the program doesn't exist or exists but is not sed.
+	if (!($sed_result[0] =~ /^.*sed/)) { return -1; }	
+
+	# GNU sed always has "GNU" in the second word.
+	if ($sed_result[1] =~ /GNU/) { return "gnu"; }
+
+	# So, this might be a BSD-style sed.
+	# If not, we'll know soon enough.
+	return "bsd";
 }
 
 
