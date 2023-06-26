@@ -154,11 +154,11 @@ if ($sed_real eq "gnu") {
 	$endbound = "\[\[:>:\]\]";
 }
 
-my @transformations;
+my %transformations;
 
 if ($dos_end) {
 	print "  Adding to " . $sedfile . " line ending conversion of LF to CR LF...\n";
-	push @transformations, 's/$/\r/';
+	$transformations{"\$"} = "\\r";
 }
 
 if ($transform_symbols) {
@@ -169,10 +169,9 @@ if ($transform_symbols) {
 		my $symbol = $symbolmap{$k}{'original'};
 		my $newsym = $symbolmap{$k}{'new'};
 		if ($newsym =~ /A\d*/) {
-			push @transformations, "s/".$startbound.$symbol.$endbound."/$newsym/g";
-		} else {
-			push @transformations, "s/$symbol/$newsym/g";
+			$symbol = $startbound . $symbol . $endbound;
 		}		
+		$transformations{$symbol} = $newsym;
 	}
 }
 
@@ -180,13 +179,12 @@ print "  Running conversion...\n";
 chdir $target;
 if ($external_sed) {
 	open my $mapfile, '>', $sedfilepath;
-	foreach my $i (@transformations) {
-		print $mapfile "$i\n";
+	while(my($symbol, $newsym) = each %transformations) {
+		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
 	}
 	close $mapfile;
 	`$sed -r $sedinplace -f $sedfilepath *c *h`;
 }
-
 
 unlink glob("*.bak");
 chdir $topdir;
