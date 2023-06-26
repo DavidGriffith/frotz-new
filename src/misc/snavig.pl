@@ -43,8 +43,11 @@ use File::Basename;
 use File::Temp qw(tempfile);
 use Getopt::Long qw(:config no_ignore_case);
 
-my %options;
 
+my $external_sed = 1;
+
+
+my %options;
 GetOptions('usage|?' => \$options{usage},
 	'h|help' => \$options{help},
 	'v|verbose' => \$options{verbose},
@@ -80,8 +83,9 @@ print "  Snavig -- Change an object's shape.\n";
 if ($argc < 2 || $options{help} || !$type) { usage(); }
 
 if (!($sed_real = checksed($sed))) {
-	die "Sed not found.  Either GNU or BSD sed are required.\n";
+	die "  Sed not found.  Either GNU or BSD sed are required.\n";
 }
+print "  Using the $sed_real version of sed...\n";
 
 print "  Preparing files for $type.\n";
 if ($type eq "tops20") {
@@ -134,7 +138,6 @@ for my $inputfile (@inputfiles) {
 }
 
 # Shorten the filenames and note shortened headers for rewriting later.
-
 if ($shorten_filenames) {
 	print "  Shortening filenames...\n";
 	shorten_filenames($target, 6);
@@ -151,7 +154,13 @@ if ($sed_real eq "gnu") {
 	$endbound = "\[\[:>:\]\]";
 }
 
-open my $mapfile, '>', $sedfilepath;
+my @transformations;
+
+if ($dos_end) {
+	print "  Adding to " . $sedfile . " line ending conversion of LF to CR LF...\n";
+	push @transformations, 's/$/\r/';
+}
+
 if ($transform_symbols) {
 	# Scan source code and build a symbol map.
 	print "  Adding to " . $sedfile . " list of symbols to convert...\n";
@@ -160,25 +169,27 @@ if ($transform_symbols) {
 		my $symbol = $symbolmap{$k}{'original'};
 		my $newsym = $symbolmap{$k}{'new'};
 		if ($newsym =~ /A\d*/) {
-			print $mapfile "s/".$startbound.$symbol.$endbound."/$newsym/g\n";
+			push @transformations, "s/".$startbound.$symbol.$endbound."/$newsym/g";
 		} else {
-			print $mapfile "s/$symbol/$newsym/g\n";
+			push @transformations, "s/$symbol/$newsym/g";
 		}		
 	}
 }
 
-if ($dos_end) {
-	print "  Adding to " . $sedfile . " line ending conversion of LF to CR LF...\n";
-	print $mapfile 's/$/\r/' . "\n";
-}
-
 print "  Running conversion...\n";
 chdir $target;
-`$sed -r $sedinplace -f $sedfilepath *c *h`;
+if ($external_sed) {
+	open my $mapfile, '>', $sedfilepath;
+	foreach my $i (@transformations) {
+		print $mapfile "$i\n";
+	}
+	close $mapfile;
+	`$sed -r $sedinplace -f $sedfilepath *c *h`;
+}
+
+
 unlink glob("*.bak");
 chdir $topdir;
-
-
 print "  Done!\n";
 exit;
 
