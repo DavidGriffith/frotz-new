@@ -38,13 +38,11 @@ use warnings;
 
 use Cwd;
 use File::Copy;
+use File::Copy qw(cp);
 use File::Slurp qw(edit_file_lines);
 use File::Basename;
 use File::Temp qw(tempfile);
 use Getopt::Long qw(:config no_ignore_case);
-
-
-my $external_sed = 1;
 
 
 my %options;
@@ -53,6 +51,7 @@ GetOptions('usage|?' => \$options{usage},
 	'v|verbose' => \$options{verbose},
 	'q|quiet' => \$options{quiet},
 	't|type=s' => \$options{type},
+	'i|internal' => \$options{internal},
 	);
 
 my $shorten_filenames;
@@ -67,11 +66,14 @@ my $target;
 my @sources;
 my @inputfiles;
 
+my $external_sed = 1;
 my $sed = "sed";	# We'll check what sed we have,
 my $sed_real;		# and store its identity here.
 my $sedfile = "urbzig.sed";
 my $sedfilepath;
 my $sedinplace = "-i.bak";
+my $startbound = "\\b";
+my $endbound = "\\b";
 
 my %symbolmap = ();
 my $counter = 0;
@@ -82,10 +84,20 @@ print "  Snavig -- Change an object's shape.\n";
 
 if ($argc < 2 || $options{help} || !$type) { usage(); }
 
-if (!($sed_real = checksed($sed))) {
-	die "  Sed not found.  Either GNU or BSD sed are required.\n";
+
+if ($options{internal}) { 
+	$external_sed = 0;
+	print "  Using internal conversion...\n";
+} else {
+	if (!($sed_real = checksed($sed))) {
+		die "  Sed not found.  Either GNU or BSD sed are required.\n";
+	}
+	print "  Using the $sed_real version of sed...\n";
+	if ($sed_real ne "gnu") {
+		$startbound = "\[\[:<:\]\]";
+		$endbound = "\[\[:>:\]\]";
+	}
 }
-print "  Using the $sed_real version of sed...\n";
 
 print "  Preparing files for $type.\n";
 if ($type eq "tops20") {
@@ -143,16 +155,6 @@ if ($shorten_filenames) {
 	shorten_filenames($target, 6);
 }
 
-my $startbound;
-my $endbound;
-
-if ($sed_real eq "gnu") {
-	$startbound = "\\b";
-	$endbound = $startbound;
-} else {
-	$startbound = "\[\[:<:\]\]";
-	$endbound = "\[\[:>:\]\]";
-}
 
 my %transformations;
 
@@ -179,11 +181,37 @@ print "  Running conversion...\n";
 chdir $target;
 if ($external_sed) {
 	open my $mapfile, '>', $sedfilepath;
-	while(my($symbol, $newsym) = each %transformations) {
+	while (my($symbol, $newsym) = each %transformations) {
 		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
 	}
 	close $mapfile;
 	`$sed -r $sedinplace -f $sedfilepath *c *h`;
+} else {
+	my $targetfile;
+	my $IN;
+	my $OUT;
+
+	open my $mapfile, '>', $sedfilepath;
+	while (my($symbol, $newsym) = each %transformations) {
+		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
+	}
+
+
+	foreach my $targetfilename (glob("*")) {
+		print "  Processing $targetfilename\n";
+		cp($targetfilename, "$targetfilename.bak");
+		open $IN, '<', "$targetfilename.bak";
+		open $OUT, '>', "$targetfilename";	
+		while (<$IN>) {
+			while (my($symbol, $newsym) = each %transformations) {
+				s/$symbol/$newsym/g;
+				print {$OUT} $_;
+			}
+		}
+		close $IN;
+		close $OUT;
+		exit;
+	}
 }
 
 unlink glob("*.bak");
