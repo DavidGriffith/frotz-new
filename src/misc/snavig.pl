@@ -178,8 +178,8 @@ if ($transform_symbols) {
 }
 
 print "  Running conversion...\n";
-chdir $target;
 if ($external_sed) {
+	chdir $target;
 	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
 	while (my($symbol, $newsym) = each %transformations) {
 		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
@@ -187,30 +187,64 @@ if ($external_sed) {
 	close $mapfile;
 	`$sed -r $sedinplace -f $sedfilepath *c *h`;
 } else {
-	my $targetfile;
-	my $IN;
-	my $OUT;
+	chdir "$topdir/$target";
+#	my $targetfile;
+#	my $IN;
+#	my $OUT;
 
 	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
 	while (my($symbol, $newsym) = each %transformations) {
 		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
 	}
 
-	foreach my $targetfilename (glob("*")) {
-		print "  Processing $targetfilename\n";
-		cp($targetfilename, "$targetfilename.bak");
-		open $IN, '<', "$targetfilename.bak" || die "Unable to read $targetfilename.bak: $!\n";
-		open $OUT, '>', "$targetfilename" || die "Unable to write $targetfilename: $!\n";
-		while (<$IN>) {
-			while (my($symbol, $newsym) = each %transformations) {
-				s/$symbol/$newsym/g;
-				print {$OUT} $_;
-			}
-		}
-		close $IN;
-		close $OUT;
-		exit;
+
+#	print "  Processing $targetfilename\n";
+	print "  Looking into $topdir/$target\n";
+
+	local $^I = '.bak'; 
+	my $re = join '|', keys %transformations;
+
+
+#	my @targetfiles = glob("$topdir/$target/*.c $topdir/$target/*.h");
+#	print "Targeting:\n";
+#	foreach my $i (@targetfiles) {
+#		print "$i\n";
+#	}
+
+
+	# FIXME  Why won't this work???
+	@ARGV = glob("*.c");
+	while (<>) {
+		s/($re)/$transformations{$1}/g;
+		print;
 	}
+
+	print "\n";
+exit;
+
+
+	while (<>) {
+		print "  Processing $_";
+		s/\b($re)\b/$transformations{$1}/g;
+#		print;
+	}
+exit;
+#	foreach my $targetfilename (glob("*")) {
+#		local $^I = '.bak'; 
+#		print "  Processing $targetfilename\n";
+#		cp($targetfilename, "$targetfilename.bak");
+#		open $IN, '<', "$targetfilename.bak" || die "Unable to read $targetfilename.bak: $!\n";
+#		open $OUT, '>', "$targetfilename" || die "Unable to write $targetfilename: $!\n";
+#		while (<$IN>) {
+#			while (my($symbol, $newsym) = each %transformations) {
+#				s/$symbol/$newsym/g;
+#				print {$OUT} $_;
+#			}
+#		}
+#		close $IN;
+#		close $OUT;
+#		exit;
+#	}
 }
 
 unlink glob("*.bak");

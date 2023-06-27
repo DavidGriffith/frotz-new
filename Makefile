@@ -424,9 +424,9 @@ tops20: $(COMMON_DEFINES) $(HASH)
 	@rm -rf $(SNAVIG_DIR)
 	@mkdir $(SNAVIG_DIR)
 	@echo "** Invoking snavig"
-	@cp Makefile.kcc $(SNAVIG_DIR)/Makefile
 	@$(SNAVIG) -i -t tops20 $(COMMON_DIR) $(DUMB_DIR) $(SNAVIG_DIR)
 #	@$(SNAVIG) -t tops20 $(COMMON_DIR) $(DUMB_DIR) $(SNAVIG_DIR)
+	@cp Makefile.kcc $(SNAVIG_DIR)/Makefile
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for $(EXPORT_TYPE)."
 	@echo "Supported compilers are:"
 	@echo "  KCC-6.620(c2l3)"
