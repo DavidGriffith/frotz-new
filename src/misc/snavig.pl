@@ -180,7 +180,7 @@ if ($transform_symbols) {
 print "  Running conversion...\n";
 chdir $target;
 if ($external_sed) {
-	open my $mapfile, '>', $sedfilepath;
+	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
 	while (my($symbol, $newsym) = each %transformations) {
 		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
 	}
@@ -191,17 +191,16 @@ if ($external_sed) {
 	my $IN;
 	my $OUT;
 
-	open my $mapfile, '>', $sedfilepath;
+	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
 	while (my($symbol, $newsym) = each %transformations) {
 		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
 	}
 
-
 	foreach my $targetfilename (glob("*")) {
 		print "  Processing $targetfilename\n";
 		cp($targetfilename, "$targetfilename.bak");
-		open $IN, '<', "$targetfilename.bak";
-		open $OUT, '>', "$targetfilename";	
+		open $IN, '<', "$targetfilename.bak" || die "Unable to read $targetfilename.bak: $!\n";
+		open $OUT, '>', "$targetfilename" || die "Unable to write $targetfilename: $!\n";
 		while (<$IN>) {
 			while (my($symbol, $newsym) = each %transformations) {
 				s/$symbol/$newsym/g;
@@ -273,7 +272,7 @@ sub build_symbolmap {
 		if (substr($file, -2) eq ".h") {
 			$header = 1;
 		}
-		open $infile, '<', "$file";
+		open $infile, '<', "$file" || die "Unable to read $file: $1\n";
 TRANS:		while (<$infile>) {
 			# Rewrite includes for shortened filenames.
 			if (/^#include/) {
