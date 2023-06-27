@@ -193,7 +193,7 @@ if ($external_sed) {
 	while (my($symbol, $newsym) = each %transformations) {
 		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
 	}
-
+	close $mapfile;
 
 #	print "  Processing $targetfilename\n";
 	print "  Looking into $topdir/$target\n";
