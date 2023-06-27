@@ -170,9 +170,9 @@ if ($transform_symbols) {
 	for my $k (reverse(sort(keys %symbolmap))) {
 		my $symbol = $symbolmap{$k}{'original'};
 		my $newsym = $symbolmap{$k}{'new'};
-		if ($newsym =~ /A\d*/) {
-			$symbol = $startbound . $symbol . $endbound;
-		}		
+#		if ($newsym =~ /A\d*/) {
+#			$symbol = $startbound . $symbol . $endbound;
+#		}		
 		$transformations{$symbol} = $newsym;
 	}
 }
