@@ -188,9 +188,6 @@ if ($external_sed) {
 	`$sed -r $sedinplace -f $sedfilepath *c *h`;
 } else {
 	chdir "$topdir/$target";
-#	my $targetfile;
-#	my $IN;
-#	my $OUT;
 
 	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
 	while (my($symbol, $newsym) = each %transformations) {
@@ -204,14 +201,6 @@ if ($external_sed) {
 	local $^I = '.bak'; 
 	my $re = join '|', keys %transformations;
 
-
-#	my @targetfiles = glob("$topdir/$target/*.c $topdir/$target/*.h");
-#	print "Targeting:\n";
-#	foreach my $i (@targetfiles) {
-#		print "$i\n";
-#	}
-
-
 	# FIXME  Why won't this work???
 	@ARGV = glob("*.c");
 	while (<>) {
@@ -220,31 +209,8 @@ if ($external_sed) {
 	}
 
 	print "\n";
-exit;
 
-
-	while (<>) {
-		print "  Processing $_";
-		s/\b($re)\b/$transformations{$1}/g;
-#		print;
-	}
 exit;
-#	foreach my $targetfilename (glob("*")) {
-#		local $^I = '.bak'; 
-#		print "  Processing $targetfilename\n";
-#		cp($targetfilename, "$targetfilename.bak");
-#		open $IN, '<', "$targetfilename.bak" || die "Unable to read $targetfilename.bak: $!\n";
-#		open $OUT, '>', "$targetfilename" || die "Unable to write $targetfilename: $!\n";
-#		while (<$IN>) {
-#			while (my($symbol, $newsym) = each %transformations) {
-#				s/$symbol/$newsym/g;
-#				print {$OUT} $_;
-#			}
-#		}
-#		close $IN;
-#		close $OUT;
-#		exit;
-#	}
 }
 
 unlink glob("*.bak");
