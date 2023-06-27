@@ -188,32 +188,28 @@ if ($external_sed) {
 	`$sed -r $sedinplace -f $sedfilepath *c *h`;
 } else {
 	chdir "$topdir/$target";
+	print "  Processing files in $topdir/$target\n";
 
+	# Print this as a reference.  Will remove later on.
 	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
 	while (my($symbol, $newsym) = each %transformations) {
 		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
 	}
 	close $mapfile;
 
-#	print "  Processing $targetfilename\n";
-	print "  Looking into $topdir/$target\n";
-
+	# FIXME  Why won't this block work???
 	local $^I = '.bak'; 
 	my $re = join '|', keys %transformations;
-
-	# FIXME  Why won't this work???
 	@ARGV = glob("*.c");
 	while (<>) {
 		s/($re)/$transformations{$1}/g;
 		print;
 	}
 
-	print "\n";
-
-exit;
 }
 
-unlink glob("*.bak");
+# Maybe remove later.
+#unlink glob("*.bak");
 chdir $topdir;
 print "  Done!\n";
 exit;
