@@ -862,6 +862,7 @@ static void tokenise_text(zword text, zword length, zword from, zword parse,
 	if (token_count < token_max) {	/* sufficient space left for token? */
 		storeb(parse++, token_count + 1);
 		load_string((zword) (text + from), length);
+		encode_text(0x05);
 		addr = lookup_text(0x05, dct);
 		if (addr != 0 || !flag) {
 			parse += 4 * token_count;
