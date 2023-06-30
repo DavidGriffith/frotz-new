@@ -271,16 +271,20 @@ export CFLAGS
 # Source locations
 #
 SRCDIR = src
-COMMON_DIR = $(SRCDIR)/common
+COMMON_DIRNAME = common
+COMMON_DIR = $(SRCDIR)/$(COMMON_DIRNAME)
 COMMON_LIB = $(COMMON_DIR)/frotz_common.a
 COMMON_DEFINES = $(COMMON_DIR)/defs.h
 HASH = $(COMMON_DIR)/hash.h
+CFLAGS += -I$(PWD)/$(SRCDIR)/$(COMMON_DIRNAME)
 
 MISC_DIR = $(SRCDIR)/misc
 FONTS_DIR = fonts
 
-BLORB_DIR = $(SRCDIR)/blorb
+BLORB_DIRNAME = blorb
+BLORB_DIR = $(SRCDIR)/$(BLORB_DIRNAME)
 BLORB_LIB = $(BLORB_DIR)/blorblib.a
+CFLAGS += -I$(PWD)/$(SRCDIR)/$(BLORB_DIRNAME)
 
 CURSES_DIR = $(SRCDIR)/curses
 CURSES_LIB = $(CURSES_DIR)/frotz_curses.a

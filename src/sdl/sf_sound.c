@@ -28,7 +28,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "../blorb/blorblow.h"
+#include "blorblow.h"
 
 #include <SDL.h>
 #include <SDL_thread.h>

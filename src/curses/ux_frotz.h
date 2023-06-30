@@ -10,9 +10,9 @@
 
 #include <signal.h>
 
-#include "../common/frotz.h"
-#include "../blorb/blorb.h"
-#include "../blorb/blorblow.h"
+#include "frotz.h"
+#include "blorb.h"
+#include "blorblow.h"
 #include "ux_setup.h"
 
 #define MASTER_CONFIG		"frotz.conf"

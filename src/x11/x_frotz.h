@@ -14,7 +14,7 @@
 #include <config.h>
 #endif
 
-#include "../common/frotz.h"
+#include "frotz.h"
 #include "x_setup.h"
 
 #include <X11/Xlib.h>

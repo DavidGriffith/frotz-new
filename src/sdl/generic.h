@@ -7,7 +7,7 @@
 #ifndef FROTZ_GENERIC_H_
 #define FROTZ_GENERIC_H_
 
-#include "../common/frotz.h"
+#include "frotz.h"
 
 void gen_add_to_history(zchar *buf);
 void gen_history_reset(void);

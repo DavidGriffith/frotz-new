@@ -32,7 +32,7 @@
 #include "png.h"
 #include <setjmp.h>
 
-#include "../blorb/blorblow.h"
+#include "blorblow.h"
 
 static zbyte toLinear[256];
 static zbyte fromLinear[256];

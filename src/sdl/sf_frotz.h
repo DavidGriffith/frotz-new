@@ -8,8 +8,8 @@
 #ifndef _SF_FROTZ_H
 #define _SF_FROTZ_H
 
-#include "../common/frotz.h"
-#include "../blorb/blorb.h"
+#include "frotz.h"
+#include "blorb.h"
 
 #include <stdint.h>
 

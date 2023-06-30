@@ -32,8 +32,8 @@
 
 #include <SDL.h>
 
-#include "../blorb/blorb.h"
-#include "../blorb/blorblow.h"
+#include "blorb.h"
+#include "blorblow.h"
 
 zword hx_flags;
 zword hx_fore_colour;

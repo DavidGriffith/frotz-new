@@ -23,7 +23,7 @@
  * Or visit http://www.fsf.org/
  */
 
-#include "../common/frotz.h"
+#include "frotz.h"
 #include "sf_frotz.h"
 
 #include <stddef.h>
@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../blorb/blorb.h"
+#include "blorb.h"
 #include "generic.h"
 
 FILE *blorb_fp;

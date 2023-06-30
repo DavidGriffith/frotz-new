@@ -22,7 +22,7 @@
 #define __UNIX_PORT_FILE
 
 /* For the MACOS port, get the _DARWIN_C_SOURCE define */
-#include "../common/defs.h"
+#include "defs.h"
 
 #include <stdio.h>
 #include <stdlib.h>

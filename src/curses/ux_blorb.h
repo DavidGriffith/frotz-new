@@ -8,8 +8,8 @@
 #ifndef CURSES_UX_BLORB_H
 #define CURSES_UX_BLORB_H
 
-#include "../blorb/blorb.h"
-#include "../blorb/blorblow.h"
+#include "blorb.h"
+#include "blorblow.h"
 
 typedef struct sampledata_struct {
 	unsigned short channels;
