@@ -155,7 +155,6 @@ if ($shorten_filenames) {
 	shorten_filenames($target, 6);
 }
 
-
 my %transformations;
 
 if ($dos_end) {
@@ -170,10 +169,6 @@ if ($transform_symbols) {
 	for my $k (reverse(sort(keys %symbolmap))) {
 		my $symbol = $symbolmap{$k}{'original'};
 		my $newsym = $symbolmap{$k}{'new'};
-		if ($newsym =~ /A\d*/) {
-#			$symbol = $startbound . $symbol . $endbound;
-#			$symbol = $symbol . "(?!\w)";
-		}		
 		$transformations{$symbol} = $newsym;
 	}
 }
@@ -194,16 +189,15 @@ if ($external_sed) {
 	# Print this as a reference.  Will remove later on.
 	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
 	while (my($symbol, $newsym) = each %transformations) {
-		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
+		print $mapfile "s/\\b" . $symbol . "\\b/" . $newsym . "/g\n";
 	}
 	close $mapfile;
 
-	# FIXME  Why won't this block work???
 	local $^I = '.bak'; 
 	my $re = join '|', keys %transformations;
 	@ARGV = glob("*.c");
 	while (<>) {
-		s/($re)/$transformations{$1}/g;
+		s/\b($re)\b/$transformations{$1}/g;
 		print;
 	}
 
@@ -271,18 +265,18 @@ sub build_symbolmap {
 		}
 		open $infile, '<', "$file" || die "Unable to read $file: $1\n";
 TRANS:		while (<$infile>) {
-			# Rewrite includes for shortened filenames.
-			if (/^#include/) {
-				my $tmpline = $_;
-				chomp $tmpline;
-				$tmpline =~ s/\\/\//g;
-				# Strip leading paths from local includes.
-				if (/\"/) {
-					(my $tmpline_no_ext = $tmpline) =~ s/\.[^.]+$//;
-					%symbolmap = insert_header(\%symbolmap, $tmpline, $flimit);
-				}
-				next TRANS;
-			}
+#			# Rewrite includes for shortened filenames.
+#			if (/^#include/) {
+#				my $tmpline = $_;
+#				chomp $tmpline;
+#				$tmpline =~ s/\\/\//g;
+#				# Strip leading paths from local includes.
+#				if (/\"/) {
+#					(my $tmpline_no_ext = $tmpline) =~ s/\.[^.]+$//;
+#					%symbolmap = insert_header(\%symbolmap, $tmpline, $flimit);
+#				}
+#				next TRANS;
+#			}
 			# Only fix up externs in C source.
 			if (not $header and not /^extern\s/) {
 				next TRANS;
