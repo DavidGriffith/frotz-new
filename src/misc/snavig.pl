@@ -210,9 +210,9 @@ if ($external_sed) {
 	@ARGV = glob("*.c *h");
 	while (<>) {
 		s/\b($oldsymbols)\b/$transformations{$1}/g;
+		s/($oldfilenames)/$includes{$1}/g;
 		print;
 	}
-	print "$oldfilenames\n";
 }
 
 # Maybe remove later.
