@@ -76,6 +76,7 @@ my $startbound = "\\b";
 my $endbound = "\\b";
 
 my %symbolmap = ();
+my %includesmap = ();
 my $counter = 0;
 
 my $argc = @ARGV;
@@ -149,22 +150,17 @@ for my $inputfile (@inputfiles) {
 	copy($inputfile, $target);
 }
 
-# Shorten the filenames and note shortened headers for rewriting later.
-if ($shorten_filenames) {
-	print "  Shortening filenames...\n";
-	shorten_filenames($target, 6);
-}
-
 my %transformations;
+my %includes;
 
 if ($dos_end) {
-	print "  Adding to " . $sedfile . " line ending conversion of LF to CR LF...\n";
+	print "  Adding rule to convert line endings of LF to CR LF...\n";
 	$transformations{"\$"} = "\\r";
 }
 
 if ($transform_symbols) {
 	# Scan source code and build a symbol map.
-	print "  Adding to " . $sedfile . " list of symbols to convert...\n";
+	print "  Building list of symbols to convert...\n";
 	%symbolmap = build_symbolmap($target, 6, 6);
 	for my $k (reverse(sort(keys %symbolmap))) {
 		my $symbol = $symbolmap{$k}{'original'};
@@ -173,34 +169,50 @@ if ($transform_symbols) {
 	}
 }
 
+
+# Shorten the filenames and note shortened headers for rewriting later.
+if ($shorten_filenames) {
+	print "  Shortening filenames...\n";
+	shorten_filenames($target, 6);
+	%includesmap = shorten_includes($target, 6);
+	for my $k (reverse(sort(keys %includesmap))) {
+		my $symbol = $includesmap{$k}{'original'};
+		my $newsym = $includesmap{$k}{'new'};
+		$includes{$symbol} = $newsym;
+	}
+}
+
+
+# Print this as a reference.  May remove later on.
+# This file will do the transformations when submitted to GNU sed.
+print "  Building sed file $sedfile for reference...\n";
+open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
+while (my($symbol, $newsym) = each %transformations) {
+	print $mapfile "s/\\b" . $symbol . "\\b/" . $newsym . "/g\n";
+}
+while (my($oldfilename, $newfilename) = each %includes) {
+	print $mapfile "s/" . $oldfilename . "/" . $newfilename . "/g\n";
+}
+close $mapfile;
+
+
 print "  Running conversion...\n";
 if ($external_sed) {
 	chdir $target;
-	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
-	while (my($symbol, $newsym) = each %transformations) {
-		print $mapfile "s/" . $symbol . "/" . $newsym . "/g\n";
-	}
-	close $mapfile;
 	`$sed -r $sedinplace -f $sedfilepath *c *h`;
 } else {
 	chdir "$topdir/$target";
 	print "  Processing files in $topdir/$target\n";
 
-	# Print this as a reference.  Will remove later on.
-	open my $mapfile, '>', $sedfilepath || die "Unable to write $sedfilepath: $!\n";
-	while (my($symbol, $newsym) = each %transformations) {
-		print $mapfile "s/\\b" . $symbol . "\\b/" . $newsym . "/g\n";
-	}
-	close $mapfile;
-
 	local $^I = '.bak'; 
-	my $re = join '|', keys %transformations;
-	@ARGV = glob("*.c");
+	my $oldsymbols = join '|', keys %transformations;
+	my $oldfilenames = join '|', keys %includes; 
+	@ARGV = glob("*.c *h");
 	while (<>) {
-		s/\b($re)\b/$transformations{$1}/g;
+		s/\b($oldsymbols)\b/$transformations{$1}/g;
 		print;
 	}
-
+	print "$oldfilenames\n";
 }
 
 # Maybe remove later.
@@ -244,6 +256,43 @@ sub checksed {
 	# So, this might be a BSD-style sed.
 	# If not, we'll know soon enough.
 	return "bsd";
+}
+
+
+# Shorten included filenames to conform to filename length limit of $limit.
+# This cannot be done within the build_symbolmap() subroutine because
+# putting \b must be done for all substitutions.  Doing it for includes
+# ends up replacing the included filename with nothing at all, not even quote
+# marks.
+sub shorten_includes {
+	my ($dir, $limit, @junk) = @_;
+	my %includemap = ();
+#	my $header = 0;
+	my $infile;
+	my $discard = tempfile();
+
+	for my $file (glob("$dir/*.[ch]")) {
+#		if (substr($file, -2) eq ".h") {
+#			$header = 1;
+#		}
+		open $infile, '<', "$file" || die "Unable to read $file: $1\n";
+TRANS:		while (<$infile>) {
+			# Rewrite includes for shortened filenames.
+			if (/^#include/) {
+				my $tmpline = $_;
+				chomp $tmpline;
+				$tmpline =~ s/\\/\//g;
+				# Strip leading paths from local includes.
+				if (/\"/) {
+					(my $tmpline_no_ext = $tmpline) =~ s/\.[^.]+$//;
+					%includemap = insert_header(\%includemap, $tmpline, $limit);
+				}
+				next TRANS;
+			}
+		}
+		close $infile;
+	}
+	return %includemap;
 }
 
 
