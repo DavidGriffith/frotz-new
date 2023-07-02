@@ -11,7 +11,7 @@
 #ifndef DUMB_DFROTZ_H
 #define DUMB_DFROTZ_H
 
-#include "frotz.h"
+#include "../common/frotz.h"
 
 #ifndef NO_BASENAME
 #include <libgen.h>

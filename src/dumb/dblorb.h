@@ -10,8 +10,8 @@
 
 #ifndef NO_BLORB
 
-#include "blorb.h"
-#include "blorblow.h"
+#include "../blorb/blorb.h"
+#include "../blorb/blorblow.h"
 
 
 typedef struct sampledata_struct {
