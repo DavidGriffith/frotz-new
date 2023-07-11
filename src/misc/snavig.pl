@@ -26,9 +26,6 @@
 # source code for use on a PDP10.  This version is meant to be called
 # from the Unix Frotz's top level Makefile and work on the files present.
 
-# This requires File::Slurp, which is typically not installed by default.
-#   Debian: sudo apt-get install libfile-slurp-perl
-
 # TODO: Save the names of header files that need to be shortened.  Then
 # go through the .c files and shorten them there too.
 
@@ -38,8 +35,6 @@ use warnings;
 
 use Cwd;
 use File::Copy;
-use File::Copy qw(cp);
-use File::Slurp qw(edit_file_lines);
 use File::Basename;
 use File::Temp qw(tempfile);
 use Getopt::Long qw(:config no_ignore_case);
@@ -204,13 +199,18 @@ if ($external_sed) {
 	chdir "$topdir/$target";
 	print "  Processing files in $topdir/$target\n";
 
-	local $^I = '.bak'; 
 	my $oldsymbols = join '|', keys %transformations;
 	my $oldfilenames = join '|', keys %includes; 
-	@ARGV = glob("*.c *h");
+	my @foo;
+	local $^I = '.bak'; 
+	local @ARGV = glob("*.c *.h");
 	while (<>) {
 		s/\b($oldsymbols)\b/$transformations{$1}/g;
-		s/($oldfilenames)/$includes{$1}/g;
+		if (/^\s*#\s*include\s*\"/) {
+			@foo = split(/\"/,$_);
+			print "#include \"" . basename($foo[1]) . "\"\n";
+			next;
+		}
 		print;
 	}
 }
