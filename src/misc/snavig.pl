@@ -49,7 +49,7 @@ GetOptions('usage|?' => \$options{usage},
 	'i|internal' => \$options{internal},
 	);
 
-my $shorten_filenames;
+my $filename_length;
 my $transform_symbols;
 my $dos_end;		# To convert \n line endings to \r\n
 
@@ -97,10 +97,11 @@ if ($options{internal}) {
 
 print "  Preparing files for $type.\n";
 if ($type eq "tops20") {
-	$shorten_filenames = 1;
+	$filename_length = 6;
 	$transform_symbols = 1;
 	$dos_end = 1;
 } elsif ($type eq "dos") {
+	$filename_length = 8;
 	$dos_end = 1;
 } else {
 	print "  Unknown target type $type.\n";
@@ -166,10 +167,10 @@ if ($transform_symbols) {
 
 
 # Shorten the filenames and note shortened headers for rewriting later.
-if ($shorten_filenames) {
+if ($filename_length) {
 	print "  Shortening filenames...\n";
-	shorten_filenames($target, 6);
-	%includesmap = shorten_includes($target, 6);
+	shorten_filenames($target, $filename_length);
+	%includesmap = shorten_includes($target, $filename_length);
 	for my $k (reverse(sort(keys %includesmap))) {
 		my $symbol = $includesmap{$k}{'original'};
 		my $newsym = $includesmap{$k}{'new'};
@@ -202,13 +203,20 @@ if ($external_sed) {
 	my $oldsymbols = join '|', keys %transformations;
 	my $oldfilenames = join '|', keys %includes; 
 	my @foo;
+	my $filename;
 	local $^I = '.bak'; 
 	local @ARGV = glob("*.c *.h");
 	while (<>) {
 		s/\b($oldsymbols)\b/$transformations{$1}/g;
+		# Remove leads from includes
 		if (/^\s*#\s*include\s*\"/) {
 			@foo = split(/\"/,$_);
-			print "#include \"" . basename($foo[1]) . "\"\n";
+			$filename = basename(@foo[1]);
+			@foo = split(/\./,$filename);
+			if ($filename_length) {
+				$filename = substr $foo[0], 0, $filename_length;
+			}
+			print "#include \"$filename.h\"\n";
 			next;
 		}
 		print;
