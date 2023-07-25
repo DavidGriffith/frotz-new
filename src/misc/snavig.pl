@@ -205,18 +205,15 @@ if ($external_sed) {
 	local $^I = '.bak'; 
 	local @ARGV = glob("*.c *.h");
 	while (<>) {
-#		print STDERR "FOO: $_";
-
-#		s/\b($oldsymbols)\b/$transformations{$1}/g;
 		s/\K\b($oldsymbols)\b(?=.)/$transformations{$1}/g;
-#		s/($oldfilenames)/$includes{$1}/g;
+		s/($oldfilenames)/$includes{$1}/g;
 		print;
 	}
 }
 
 
 # Maybe remove later.
-#unlink glob("*.bak");
+unlink glob("*.bak");
 chdir $topdir;
 print "  Done!\n";
 exit;
