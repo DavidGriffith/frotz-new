@@ -205,7 +205,8 @@ if ($external_sed) {
 	local $^I = '.bak'; 
 	local @ARGV = glob("*.c *.h");
 	while (<>) {
-		s/\K\b($oldsymbols)\b(?=.)/$transformations{$1}/g;
+#		s/\K\b($oldsymbols)\b(?=.)/$transformations{$1}/g;
+		s/\b($oldsymbols)\b/$transformations{$1}/g;
 		s/($oldfilenames)/$includes{$1}/g;
 		print;
 	}
