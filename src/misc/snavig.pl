@@ -188,7 +188,6 @@ while (my($symbol, $newsym) = each %transformations) {
 }
 while (my($oldfilename, $newfilename) = each %includes) {
 	print $mapfile "s/" . $oldfilename . "/" . $newfilename . "/g\n";
-#	print "$oldfilename ---> $newfilename\n";
 }
 close $mapfile;
 
@@ -201,92 +200,14 @@ if ($external_sed) {
 	chdir "$topdir/$target";
 	print "  Processing files in $topdir/$target\n";
 
-#	my $oldsymbols = join '|', keys %transformations;
-	my @poop = keys %transformations;
-
-
-	# WTF does this not result in matching the whole damn file?
-#	my $mysymbols = "zoptopt|init_setup|print_string|ostream_record|countdown|z_throw|undo_struct|stream_new_line|enable_wrapping|zscii_to_latin1|z_show_status|script_open|reset_screen|stream_mssg_on|encoded|init_process|os_stop_sample|timeout|dumb_show_screen|z_set_window|z_get_parent|screen_mssg_off|memory_open|hide_lines|mem_diff|stream_word|os_start_sample|load_operand|show_cell_bbcode|z_buffer_mode|os_peek_colour|z_call_n|os_erase_area|default_name|get_window_font|z_set_attr|print_version|erase_window|dumb_init_input|split_window|os_storyfile_seek|z_check_arg_count|hot_key_undo|dumb_output_handle_setting|z_art_shift|init_memory|z_erase_window|script_write_input|get_max_width|os_set_cursor|time_ahead|screen_cells|read_number|z_print_unicode|mouse_y|dumb_discard_old_input|rv_mode|screen_data|myresource|z_rtrue|option_zcode_path|z_get_prop_addr|direct_call|read_long|os_process_arguments|$|os_init_screen|z_get_prop|z_restore|z_insert_obj|build_timestamp|os_finish_with_sample|xgetchar|mark_all_unchanged|prop_addr|z_print_addr|os_set_colour|winarg2|z_log_shift|os_read_line|z_erase_line|free_undo|blorb_err|runtime_usage|error_count|z_split_window|visual_bell|tokenise_line|os_get_text_style|dumb_read_misc_line|enable_scrolling|os_init_sound|show_line_prefix|f_setup_t|show_line_numbers|z_print_char|dumb_display_char|z_window_style|script_erase_input|current_bg|zputchar|font_height|z_inc_chk|os_display_string|object_address|update_cursor|dumb_row|my_strndup|z_print_form|set_window|z_rfalse|utf8_to_zchar|z_new_line|z_put_wind_prop|record_write_key|rv_names|script_char|user_text_height|unlink_object|memory_close|make_cell|z_scan_table|console_read_input|undo_count|format_t|init_err|hot_key_restart|counter|flush_buffer|load_all_operands|script_close|latin1_to_ascii|hot_key_seed|current_fg|story_size|z_restart|os_tick|z_loadw|z_print_ret|decoded|option_sound|z_make_menu|z_print_paddr|z_print_obj|z_header|os_check_unicode|latin1_to_ibm|z_verify|end_of_sound|winarg0|runtime_error|print_num|padding|os_char_width|z_set_colour|init_buffer|z_set_margins|z_encode_text|z_read_mouse|bbcode_colour|enable_scripting|round_div|__illegal__|interval|reset_cursor|z_mouse_window|mouse_x|need_newline_at_exit|stream_mssg_off|dest_row|screen_word|font_width|dumb_getline|init_undo|z_set_text_style|err_messages|dumb_set_picture_cell|z_header_t|amiga_screen_model|screen_new_line|lookup_text|routine|screen_mssg_on|z_input_stream|pad_status_line|z_remove_obj|resize_screen|dumb_read_line|mem_undiff|first_property|dumb_init_output|read_key_buffer|blorb_fp|units_left|z_get_cursor|os_display_char|start_next_sample|frotz_to_dumb|story_fp|start_sample|z_print|replay_read_input|screen_write_input|show_row|blorb_map|auxilary_name|f_setup|compression_names|pict_info|dumb_set_cell|tokenise_text|hot_key_recording|restart_header|read_word|z_storeb|__extended__|alphabet|z_get_prop_len|z_catch|validate_click|replay_read_key|my_strdup|show_cell|os_warn|script_width|script_mssg_off|z_copy_table|check_timeout|z_ret_popped|dumb_display_user_input|show_cell_irc|story_id|dumb_changes_row|input_redraw|z_num_to_index|completion|sampledata_t|ostream_screen|translate_to_zscii|is_terminator|z_picture_table|plain_ascii|os_repaint_window|istream_replay|load_string|z_clear_attr|z_call_s|discarding|z_put_prop|os_from_true_colour|record_close|blorb_res|hot_key_quit|z_get_sibling|specifier|encode_text|z_erase_picture|os_init_setup|more_prompts|uint32_t|replay_code|z_get_next_prop|playing|record_char|erase_screen|mouse_button|uint16_t|read_line_buffer|os_reset_screen|set_more_prompts|stream_char|ostream_memory|compression_mode|story_name|print_char|os_fatal|save_undo|replay_open|os_scroll_area|os_read_file_name|zgetopt|update_attributes|z_restore_undo|os_restart_game|z_read_char|reserve_mem|spurious_getchar|current_style|finished|z_print_table|dumb_dump_screen|show_cell_ansi|reset_window|print_object|os_draw_picture|num_pictures|read_string|truncate_question_mark|z_print_num|stream_read_key|show_line_types|translate_from_zscii|do_more_prompts|user_random_seed|enable_buffering|os_font_data|os_beep|seed_random|zoptarg|dumb_handle_setting|restore_quetzal|new_line|os_read_key|z_get_child|os_storyfile_tell|init_sound|next_sample|decode_text|z_push_stack|screen_char|z_window_size|ostream_script|hot_key_debugging|refresh_text_style|z_save_undo|user_text_width|dumb_copy_cell|os_set_font|stream_read_input|z_scroll_window|z_check_unicode|os_set_text_style|frame_count|restart_screen|z_sound_effect|restore_undo|z_output_stream|z_set_cursor|input_window|screen_erase_input|z_draw_picture|my_memmove|is_blank|z_get_wind_prop|handle_hot_key|z_tokenise|z_picture_data|next_property|z_dec_chk|show_cell_normal|z_test_attr|dumb_show_prompt|interpret|replay_char|record_write_input|translate_special_chars|z_random|script_mssg_on|memory_word|next_volume|script_new_line|object_name|hot_key_playback|replay_close|zoptind|string_type|z_pop_stack|first_undo|os_picture_data|z_set_true_colour|os_more_prompt|record_code|reset_memory|memory_new_line|script_word|cursor_row|z_loadb|z_set_font|z_store|Zwindow|z_storew|print_long|init_header|get_window_colours|unicode_to_zscii|os_quit|message|os_string_width|z_move_window|dumb_elide_more_prompt|show_pictures|get_default_name|z_piracy|read_yes_or_no|dumb_init_pictures|save_quetzal|menu_selected|colour_in_use|redirect|console_read_key|set_header_extension|will_print_blank|quiet_mode|input_type|dumb_blorb_stop|record_open|uint8_t|os_random_seed|prev_zmp|os_prepare_sample|hot_key_help|rv_blank_str|screen_changes";
-#	my @poop = split(/\|/, $mysymbols);
-
-#	$oldsymbols = "zoptopt|init_setup|print_string|ostream_record|countdown|z_throw|undo_struct|stream_new_line|enable_wrapping|zscii_to_latin1|z_show_status|script_open|reset_screen|stream_mssg_on|encoded|init_process|os_stop_sample|timeout|dumb_show_screen|z_set_window|z_get_parent|screen_mssg_off|memory_open|hide_lines|mem_diff|stream_word|os_start_sample|load_operand|show_cell_bbcode|z_buffer_mode|os_peek_colour|z_call_n|os_erase_area|default_name|get_window_font|z_set_attr|print_version|erase_window|dumb_init_input|split_window|os_storyfile_seek|z_check_arg_count|hot_key_undo|dumb_output_handle_setting|z_art_shift|init_memory|z_erase_window|script_write_input|get_max_width|os_set_cursor|time_ahead|screen_cells|read_number|z_print_unicode|mouse_y|dumb_discard_old_input|rv_mode|screen_data|myresource|z_rtrue|option_zcode_path|z_get_prop_addr|direct_call|read_long|os_process_arguments|$|os_init_screen|z_get_prop|z_restore|z_insert_obj|build_timestamp|os_finish_with_sample|xgetchar|mark_all_unchanged|prop_addr|z_print_addr|os_set_colour|winarg2|z_log_shift|os_read_line|z_erase_line|free_undo|blorb_err|runtime_usage|error_count|z_split_window|visual_bell|tokenise_line|os_get_text_style|dumb_read_misc_line|enable_scrolling|os_init_sound|show_line_prefix|f_setup_t|show_line_numbers|z_print_char|dumb_display_char|z_window_style|script_erase_input|current_bg|zputchar|font_height|z_inc_chk|os_display_string|object_address|update_cursor|dumb_row|my_strndup|z_print_form|set_window|z_rfalse|utf8_to_zchar|z_new_line|z_put_wind_prop|record_write_key|rv_names|script_char|user_text_height|unlink_object|memory_close|make_cell|z_scan_table|console_read_input|undo_count|format_t|init_err|hot_key_restart|counter|flush_buffer|load_all_operands|script_close|latin1_to_ascii|hot_key_seed|current_fg|story_size|z_restart|os_tick|z_loadw|z_print_ret|decoded|option_sound|z_make_menu|z_print_paddr|z_print_obj|z_header|os_check_unicode|latin1_to_ibm|z_verify|end_of_sound|winarg0|runtime_error|print_num|padding|os_char_width|z_set_colour|init_buffer|z_set_margins|z_encode_text|z_read_mouse|bbcode_colour|enable_scripting|round_div|__illegal__|interval|reset_cursor|z_mouse_window|mouse_x|need_newline_at_exit|stream_mssg_off|dest_row|screen_word|font_width|dumb_getline|init_undo|z_set_text_style|err_messages|dumb_set_picture_cell|z_header_t|amiga_screen_model|screen_new_line|lookup_text|routine|screen_mssg_on|z_input_stream|pad_status_line|z_remove_obj|resize_screen|dumb_read_line|mem_undiff|first_property|dumb_init_output|read_key_buffer|blorb_fp|units_left|z_get_cursor|os_display_char|start_next_sample|frotz_to_dumb|story_fp|start_sample|z_print|replay_read_input|screen_write_input|show_row|blorb_map|auxilary_name|f_setup|compression_names|pict_info|dumb_set_cell|tokenise_text|hot_key_recording|restart_header|read_word|z_storeb|__extended__|alphabet|z_get_prop_len|z_catch|validate_click|replay_read_key|my_strdup|show_cell|os_warn|script_width|script_mssg_off|z_copy_table|check_timeout|z_ret_popped|dumb_display_user_input|show_cell_irc|story_id|dumb_changes_row|input_redraw|z_num_to_index|completion|sampledata_t|ostream_screen|translate_to_zscii|is_terminator|z_picture_table|plain_ascii|os_repaint_window|istream_replay|load_string|z_clear_attr|z_call_s|discarding|z_put_prop|os_from_true_colour|record_close|blorb_res|hot_key_quit|z_get_sibling|specifier|encode_text|z_erase_picture|os_init_setup|more_prompts|uint32_t|replay_code|z_get_next_prop|playing|record_char|erase_screen|mouse_button|uint16_t|read_line_buffer|os_reset_screen|set_more_prompts|stream_char|ostream_memory|compression_mode|story_name|print_char|os_fatal|save_undo|replay_open|os_scroll_area|os_read_file_name|zgetopt|update_attributes|z_restore_undo|os_restart_game|z_read_char|reserve_mem|spurious_getchar|current_style|finished|z_print_table|dumb_dump_screen|show_cell_ansi|reset_window|print_object|os_draw_picture|num_pictures|read_string|truncate_question_mark|z_print_num|stream_read_key|show_line_types|translate_from_zscii|do_more_prompts|user_random_seed|enable_buffering|os_font_data|os_beep|seed_random|zoptarg|dumb_handle_setting|restore_quetzal|new_line|os_read_key|z_get_child|os_storyfile_tell|init_sound|next_sample|decode_text|z_push_stack|screen_char|z_window_size|ostream_script|hot_key_debugging|refresh_text_style|z_save_undo|user_text_width|dumb_copy_cell|os_set_font|stream_read_input|z_scroll_window|z_check_unicode|os_set_text_style|frame_count|restart_screen|z_sound_effect|restore_undo|z_output_stream|z_set_cursor|input_window|screen_erase_input|z_draw_picture|my_memmove|is_blank|z_get_wind_prop|handle_hot_key|z_tokenise|z_picture_data|next_property|z_dec_chk|show_cell_normal|z_test_attr|dumb_show_prompt|interpret|replay_char|record_write_input|translate_special_chars|z_random|script_mssg_on|memory_word|next_volume|script_new_line|object_name|hot_key_playback|replay_close|zoptind|string_type|z_pop_stack|first_undo|os_picture_data|z_set_true_colour|os_more_prompt|record_code|reset_memory|memory_new_line|script_word|cursor_row|z_loadb|z_set_font|z_store|Zwindow|z_storew|print_long|init_header|get_window_colours|unicode_to_zscii|os_quit|message|os_string_width|z_move_window|dumb_elide_more_prompt|show_pictures|get_default_name|z_piracy|read_yes_or_no|dumb_init_pictures|save_quetzal|menu_selected|colour_in_use|redirect|console_read_key|set_header_extension|will_print_blank|quiet_mode|input_type|dumb_blorb_stop|record_open|uint8_t|os_random_seed|prev_zmp|os_prepare_sample|hot_key_help|rv_blank_str|screen_changes";
-#	my $stuff = scalar keys %transformations;
-
-#	my $thingy = scalar @poop;
-#	my $i;
-#	print "POOP1: $thingy\n";
-#	for ($i = $thingy; $i >= 60; $i--) {
-#		print "$i\n";
-#		shift @poop;
-#	} 
-
-
-my	$oldsymbols = join '|', @poop;
-	chomp $oldsymbols;
-
+	my $oldsymbols = join '|', keys %transformations;
 	my $oldfilenames = join '|', keys %includes; 
-	my @foo;
-	my $filename;
 	local $^I = '.bak'; 
 	local @ARGV = glob("*.c *.h");
-#	local @ARGV = glob("buffer.c");
 	while (<>) {
-		my $burp = $_;
-		my @foo;
-#		s/\b($oldsymbols)\b/$transformations{$1}/g;
-#		s/($oldfilenames)/$1-POOP/g;
-
-#		@foo = grep { $burp =~ m/\b$_\b/ } keys %transformations;
-		@foo = grep { $burp =~ m/^.*$_.*$/ } keys %transformations;
-		
-#		print STDERR "FOO: $first_match\n";
-
-		shift @foo;
-
-		print STDERR "BURP: $burp";
-		print STDERR "FOO: ";
-		foreach my $i (@foo) {
-			print STDERR "|$i| ";
-		}
-		print STDERR "\n--------\n";
-
-# FIXME working here
-		# I want this to execute ONLY IF $burp contains
-		# something in $oldsymbols.  Instead $burp contains
-		# every line in the file being examined.
-
-#		if ($burp =~ /\b($oldsymbols)\b/) {
-#		if ($burp =~ /\binit_buffer\b/) {
-#		if ($burp =~ /\b(buffering|Frotz)\b/) {
-#			chomp $burp;
-#			print STDERR "BURP: $burp\n";
-#			print STDERR "BURP: 1) $burp  2) $includes{$burp}\n";
-#			s/\b($oldsymbols)\b/$transformations{$burp}/g;
-#		}
-
-		# This might work because $doot always contains
-		# the entirety of what we're looking for.
-#		if ($doot =~ /$oldfilenames/) {
-#			chomp $doot;
-#			print STDERR "DOOT: 1) $doot  2) $includes{$doot}\n";
-#			s/$doot/$includes{$doot}/g;
-#		}
-
-		# Remove leads from includes
-#		if (/^\s*#\s*include\s*\"/) {
-#			@foo = split(/\"/,$_);
-#			$filename = basename(@foo[1]);
-#			@foo = split(/\./,$filename);
-#			if ($filename_length) {
-#				$filename = substr $foo[0], 0, $filename_length;
-#			}
-#			print "#include \"$filename.h\"\n";
-#			next;
-#		}
+		s/\b($oldsymbols)\b/$transformations{$1}/g;
 		print;
 	}
-#	print "$oldsymbols\n";
-#	print "$oldfilenames\n";
 }
 
 
