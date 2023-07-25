@@ -333,6 +333,11 @@ TRANS:		while (<$infile>) {
 				next TRANS;
 			}
 
+			# Don't replace these.
+			if (/uint8_t/ or /uint16_t/ or /uint32_t/) {
+				next TRANS;
+			}
+
 			# In headers, we need to fix up declarations too.
 			# Our typedefs, enums, and structs happen to have short
 			#   names, so don't bother.  AT
