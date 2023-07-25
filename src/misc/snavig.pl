@@ -347,7 +347,8 @@ TRANS:		while (<$infile>) {
 				/^char\s/ or /^zbyte\s/ or /^zword\s/  or
 				/^zlong\s/ or /^int\s/ or /^bool\s/ or
 				/^typedef\s/ or /^enum\s/ or /^struct\s/ or
-				/^static\s/ or /^[}]\s/) {
+				/^static\s/ or /^[}]\s/ or
+				/^\#define\s/ or /^\#ifndef\s/) {
 				next TRANS;
 			}
 
