@@ -339,8 +339,8 @@ TRANS:		while (<$infile>) {
 			# For the current Frotz codebase, we need to check
 			# typedefs, enums, and structs too.  DG
 			unless (/^extern\s/ or /^void\s/ or /^zchar\s/ or
-				/^char\s/ or
-				/^zbyte\s/ or /^int\s/ or /^bool\s/ or
+				/^char\s/ or /^zbyte\s/ or /^zword\s/  or
+				/^zlong\s/ or /^int\s/ or /^bool\s/ or
 				/^typedef\s/ or /^enum\s/ or /^struct\s/ or
 				/^static\s/ or /^[}]\s/) {
 				next TRANS;
