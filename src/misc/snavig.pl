@@ -214,7 +214,7 @@ if ($external_sed) {
 
 
 # Maybe remove later.
-unlink glob("*.bak");
+#unlink glob("*.bak");
 chdir $topdir;
 print "  Done!\n";
 exit;
@@ -336,6 +336,13 @@ TRANS:		while (<$infile>) {
 
 			# Don't replace these.
 			if (/uint8_t/ or /uint16_t/ or /uint32_t/) {
+				next TRANS;
+			}
+
+			# Don't replace symbols composed of some combination
+			# of uppercase, numbers, and underscores, as these
+			# are, as a rule, are really macros and defines.
+			if (/_*[A-Z0-9][A-Z0-9_]+/) {
 				next TRANS;
 			}
 
