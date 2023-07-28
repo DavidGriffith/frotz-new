@@ -105,13 +105,12 @@ typedef int bool;
 #define PATH_SEPARATOR '/'
 #endif
 
-#ifdef __TURBOC__
 typedef unsigned char zbyte;
 typedef unsigned short zword;
+
+#if defined(__TURBOC__) || defined(TOPS20)
 typedef unsigned long zlong;
 #else
-typedef uint8_t zbyte;
-typedef uint16_t zword;
 typedef uint32_t zlong;
 #endif
 
