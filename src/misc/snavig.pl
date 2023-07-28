@@ -205,13 +205,41 @@ if ($external_sed) {
 	local $^I = '.bak'; 
 	local @ARGV = glob("*.c *.h");
 	while (<>) {
-#		s/\K\b($oldsymbols)\b(?=.)/$transformations{$1}/g;
-		s/\b($oldsymbols)\b/$transformations{$1}/g;
+		# Some lines could be in comments or an endif.
+		# Don't match these.
+#		if (m/\s+\*\s+.*/ or	# *  foobarbaz
+#		    m/\/\*/ or		# /* foobarbaz
+#		    m/^\s*\#endif/	# #endif
+#		) { print ; next; }
+
+		# Process includes:
+#		if (m/^\s*\#include/) {
+#			s/($oldfilenames)/$includes{$1}/g;
+#			print;
+#			next;
+#		}
+
+
+#		if (m/^\s*\#ifndef\s*[AZ_]*/ or
+#		    m/^\s*\#ifdef\s*[AZ_]*/ or
+#		    m/^\s*\#define\s*[AZ_]*/ ) {
+#			print;
+#			next;
+#		}
+
+		if (m/\b($oldsymbols)\b/g) {
+			if ($1) {
+				my $foo = $1;
+#				s/\b$foo\b/$transformations{$foo}/g;
+				s/\b$foo\b/$transformations{$foo}/;
+			}
+		}
 		s/($oldfilenames)/$includes{$1}/g;
+
+#		s/\b($oldsymbols)\b/$transformations{$1}/g;
 		print;
 	}
 }
-
 
 # Maybe remove later.
 #unlink glob("*.bak");
