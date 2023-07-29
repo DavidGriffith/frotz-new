@@ -81,7 +81,7 @@ if ($argc < 2 || $options{help} || !$type) { usage(); }
 if (!($sed_real = checksed($sed))) {
 	die "  Sed not found.  Either GNU or BSD sed are required.\n";
 }
-print "  Using the $sed_real version of sed...\n";
+print "  Using the ". uc($sed_real) . " version of sed...\n";
 
 print "  Preparing files for $type.\n";
 if ($type eq "tops20") {
@@ -175,7 +175,7 @@ if ($transform_symbols) {
 	}
 }
 
-print "  Running conversion...\n";
+print "  Performing conversions...\n";
 chdir $target;
 if ($external_sed) {
 	open my $mapfile, '>', $sedfilepath;
