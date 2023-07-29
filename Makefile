@@ -143,6 +143,9 @@ endif
 ifeq ($(MAKECMDGOALS),dosdefs)
     EXPORT_TYPE = dos
 endif
+ifeq ($(MAKECMDGOALS),simple)
+    EXPORT_TYPE = simple
+endif
 
 RANLIB ?= ranlib
 PKG_CONFIG ?= pkg-config
@@ -389,11 +392,15 @@ else
 endif
 
 all: $(FROTZ_BIN) $(DFROTZ_BIN) $(SFROTZ_BIN) $(XFROTZ_BIN)
+
+# Snavig-processed targets
+#
 snavig:
 	@echo "Snavig: Change an object's shape..."
 	@echo "Possible snavig-processed targets:"
 	@echo "  dos    (done)"
 	@echo "  tops20 (done)"
+	@echo "  simple (done)"
 	@echo "  its    (not even started)"
 	@echo "  tops10 (not even started)"
 	@echo "  tenex  (not even started)"
@@ -429,6 +436,14 @@ tops20: $(COMMON_DEFINES) $(HASH)
 	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for $(EXPORT_TYPE)."
 	@echo "Supported compilers are:"
 	@echo "  KCC-6.620(c2l3)"
+
+simple:	$(COMMON_DEFINES) $(HASH)
+	@rm -rf $(SNAVIG_DIR)
+	@mkdir $(SNAVIG_DIR)
+	@echo "** Invoking snavig"
+	@$(SNAVIG) -t simple $(COMMON_DIR) $(DUMB_DIR) $(SNAVIG_DIR)
+	@echo "$(SNAVIG_DIR)/ now contains Frotz source code for $(EXPORT_TYPE)."
+	@echo "Compile with \"cc -o dfrotz *.c\""
 
 
 common_lib:	$(COMMON_LIB)

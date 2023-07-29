@@ -90,6 +90,8 @@ if ($type eq "tops20") {
 	$dos_end = 1;
 } elsif ($type eq "dos") {
 	$dos_end = 1;
+} elsif ($type eq "simple") {
+
 } else {
 	print "  Unknown target type $type.\n";
 	usage();
@@ -196,6 +198,7 @@ sub usage {
 	print "Types supported:\n";
 	print "  tops20\n";
 	print "  dos\n";
+	print "  simple\n";
 	exit;
 }
 
