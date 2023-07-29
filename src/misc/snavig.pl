@@ -51,7 +51,7 @@ GetOptions('usage|?' => \$options{usage},
 	't|type=s' => \$options{type},
 	);
 
-my $shorten_filenames;
+my $filename_length;	# Shorten filenames to this many characters
 my $transform_symbols;
 my $dos_end;		# To convert \n line endings to \r\n
 
@@ -85,10 +85,11 @@ print "  Using the $sed_real version of sed...\n";
 
 print "  Preparing files for $type.\n";
 if ($type eq "tops20") {
-	$shorten_filenames = 1;
+	$filename_length = 6;
 	$transform_symbols = 1;
 	$dos_end = 1;
 } elsif ($type eq "dos") {
+	$filename_length = 8;
 	$dos_end = 1;
 } elsif ($type eq "simple") {
 
@@ -136,9 +137,9 @@ for my $inputfile (@inputfiles) {
 }
 
 # Shorten the filenames and note shortened headers for rewriting later.
-if ($shorten_filenames) {
-	print "  Shortening filenames...\n";
-	shorten_filenames($target, 6);
+if ($filename_length) {
+	print "  Shortening filenames to $filename_length characters...\n";
+	shorten_filenames($target, $filename_length);
 }
 
 my $startbound;
