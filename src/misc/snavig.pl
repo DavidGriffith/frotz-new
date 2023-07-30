@@ -52,7 +52,7 @@ GetOptions('usage|?' => \$options{usage},
 	);
 
 my $filename_length;	# Shorten filenames to this many characters
-my $transform_symbols;
+my $symbol_length;	# Shorten symbols to this many characters
 my $dos_end;		# To convert \n line endings to \r\n
 
 my $type = $options{type};
@@ -86,7 +86,7 @@ print "  Using the ". uc($sed_real) . " version of sed...\n";
 print "  Preparing files for $type.\n";
 if ($type eq "tops20") {
 	$filename_length = 6;
-	$transform_symbols = 1;
+	$symbol_length = 6;
 	$dos_end = 1;
 } elsif ($type eq "dos") {
 	$filename_length = 8;
@@ -142,6 +142,10 @@ if ($filename_length) {
 	shorten_filenames($target, $filename_length);
 }
 
+if ($symbol_length) {
+	print "  Shortening symbols to $symbol_length characters...\n";
+}
+
 my $startbound;
 my $endbound;
 
@@ -160,19 +164,17 @@ if ($dos_end) {
 	push @transformations, 's/$/\r/';
 }
 
-if ($transform_symbols) {
-	# Scan source code and build a symbol map.
-	print "  Adding to " . $sedfile . " list of symbols to convert...\n";
-	%symbolmap = build_symbolmap($target, 6, 6);
-	for my $k (reverse(sort(keys %symbolmap))) {
-		my $symbol = $symbolmap{$k}{'original'};
-		my $newsym = $symbolmap{$k}{'new'};
-		if ($newsym =~ /A\d*/) {
-			push @transformations, "s/".$startbound.$symbol.$endbound."/$newsym/g";
-		} else {
-			push @transformations, "s/$symbol/$newsym/g";
-		}		
-	}
+# Scan source code and build a symbol map.
+print "  Adding to " . $sedfile . " list of symbols to convert...\n";
+%symbolmap = build_symbolmap($target, $symbol_length, $filename_length);
+for my $k (reverse(sort(keys %symbolmap))) {
+	my $symbol = $symbolmap{$k}{'original'};
+	my $newsym = $symbolmap{$k}{'new'};
+	if ($newsym =~ /A\d*/) {
+		push @transformations, "s/".$startbound.$symbol.$endbound."/$newsym/g";
+	} else {
+		push @transformations, "s/$symbol/$newsym/g";
+	}		
 }
 
 print "  Performing conversions...\n";
@@ -184,6 +186,8 @@ if ($external_sed) {
 	}
 	close $mapfile;
 	`$sed -r $sedinplace -f $sedfilepath *c *h`;
+} else {
+	die "Internal substitution not supported yet.\n";
 }
 
 
@@ -250,7 +254,7 @@ sub build_symbolmap {
 		open $infile, '<', "$file";
 TRANS:		while (<$infile>) {
 			# Rewrite includes for shortened filenames.
-			if (/^#include/) {
+			if ($flimit && /^#include/) {
 				my $tmpline = $_;
 				chomp $tmpline;
 				$tmpline =~ s/\\/\//g;
@@ -261,6 +265,12 @@ TRANS:		while (<$infile>) {
 				}
 				next TRANS;
 			}
+
+			# Unless symbols need to be shortened, we're done.
+			if (!$slimit) {
+				next TRANS;
+			}
+
 			# Only fix up externs in C source.
 			if (not $header and not /^extern\s/) {
 				next TRANS;
