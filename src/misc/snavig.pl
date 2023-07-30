@@ -26,8 +26,11 @@
 # source code for use on a PDP10.  This version is meant to be called
 # from the Unix Frotz's top level Makefile and work on the files present.
 
-# TODO: Save the names of header files that need to be shortened.  Then
-# go through the .c files and shorten them there too.
+# Note: I tried to convert Adam's original approach of building a set of
+# substitutions and then calling sed to process them.  After about a
+# month of trying various things and conversions still not working
+# properly, I decided that the problem is possibly not worth solving.
+# If you can make it work, I'd love to see what you have.
 
 
 use strict;
@@ -38,10 +41,6 @@ use File::Copy;
 use File::Basename;
 use File::Temp qw(tempfile);
 use Getopt::Long qw(:config no_ignore_case);
-
-
-my $external_sed = 1;
-
 
 my %options;
 GetOptions('usage|?' => \$options{usage},
@@ -179,16 +178,12 @@ for my $k (reverse(sort(keys %symbolmap))) {
 
 print "  Performing conversions...\n";
 chdir $target;
-if ($external_sed) {
-	open my $mapfile, '>', $sedfilepath;
-	foreach my $i (@transformations) {
-		print $mapfile "$i\n";
-	}
-	close $mapfile;
-	`$sed -r $sedinplace -f $sedfilepath *c *h`;
-} else {
-	die "Internal substitution not supported yet.\n";
+open my $mapfile, '>', $sedfilepath;
+foreach my $i (@transformations) {
+	print $mapfile "$i\n";
 }
+close $mapfile;
+`$sed -r $sedinplace -f $sedfilepath *c *h`;
 
 
 unlink glob("*.bak");
