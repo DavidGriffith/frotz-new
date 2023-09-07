@@ -15,6 +15,9 @@ NEW FEATURES
 
 BUG FIXES
 
+- Updated the fix for Beyond Zork's rotating mirror bug by now correctly
+  detecting attempts to address an invalid object.
+
 - Fixed brain-dead handling of undo slots.
 
 - Fixed a segfault when xfrotz detects a fatal error.

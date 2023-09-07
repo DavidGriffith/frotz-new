@@ -23,14 +23,14 @@
 f_setup_t f_setup;
 z_header_t z_header;
 
-#define MAX_OBJECT 2000
-
+#define O1_OBJECTS 255
 #define O1_PARENT 4
 #define O1_SIBLING 5
 #define O1_CHILD 6
 #define O1_PROPERTY_OFFSET 7
 #define O1_SIZE 9
 
+#define O4_OBJECTS 65535
 #define O4_PARENT 6
 #define O4_SIBLING 8
 #define O4_CHILD 10
@@ -43,23 +43,53 @@ z_header_t z_header;
  *
  * Calculate the address of an object.
  *
+ * The maximum possible number of objects for V3 and below is 255.  For
+ * V4 and above, this maximum was raised from an 8-bit value to 16-bits.
+ * But it is not possible to even approach that limit because long
+ * before that point, the object's location in memory would extend past
+ * the maximum allowed for any version of the Z-machine.
+ *
+ * This presents a special challenge for Beyond Zork, which shipped with
+ * a bug wherein the dictionary entry for an object is tested instead of
+ * the object itself.  This worked by accident with the official
+ * interpreter, which returned 0 instead of attempting to dereference
+ * the location of this non-existant object number.
+ *  --DG
  */
 static zword object_address(zword obj)
 {
-	/* Check object number */
-	if (obj > ((z_header.version <= V3) ? 255 : MAX_OBJECT)) {
-		print_string("@Attempt to address illegal object ");
-		print_num(obj);
-		print_string(".  This is normally fatal.");
-		reset_window();
-		runtime_error (ERR_ILL_OBJ);
+	zlong obj_addr;
+	zword obj_size;
+	bool fatal_error_given = FALSE;
+
+	/* Calculate object address */
+	if (z_header.version <= V3) {
+		if (obj > O1_OBJECTS) { /* Max 255 objects for <= V3 */
+illegal_obj_addr:
+			print_string("@Attempt to address illegal object ");
+			print_num(obj);
+			print_string(".  This is normally fatal.");
+			reset_window();
+			runtime_error (ERR_ILL_OBJ);
+			fatal_error_given = TRUE;
+		}
+		obj_addr = z_header.objects + ((obj - 1) * O1_SIZE + 62);
+		obj_size = O1_SIZE;
+	} else {
+		obj_addr = z_header.objects + ((obj - 1) * O4_SIZE + 126);
+		obj_size = O4_SIZE;
 	}
 
-	/* Return object address */
-	if (z_header.version <= V3)
-		return z_header.objects + ((obj - 1) * O1_SIZE + 62);
-	else
-		return z_header.objects + ((obj - 1) * O4_SIZE + 126);
+	/* Catch objects that would exist outside of memory limits. */
+	if ((obj_addr + obj_size) >= z_header.dynamic_size) {
+		if (story_id == BEYOND_ZORK) {
+			return 0;
+		}
+		/* Avoid an infinite loop when ignoring fatal errors. */
+		if (!fatal_error_given)
+			goto illegal_obj_addr;
+	}
+	return obj_addr;
 } /* object_address */
 
 
@@ -544,13 +574,6 @@ void z_get_prop_addr(void)
 		runtime_error(ERR_GET_PROP_ADDR_0);
 		store(0);
 		return;
-	}
-
-	if (story_id == BEYOND_ZORK) {
-		if (zargs[0] > MAX_OBJECT) {
-			store (0);
-			return;
-		}
 	}
 
 	/* Property id is in bottom five (six) bits */
