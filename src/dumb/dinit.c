@@ -350,6 +350,7 @@ void os_warn (const char *s, ...)
  */
 void os_fatal (const char *s, ...)
 {
+	dumb_show_screen(FALSE);
 	fprintf(stderr, "\nFatal error: %s\n", s);
 	if (f_setup.ignore_errors)
 		fprintf(stderr, "Continuing anyway...\n");
